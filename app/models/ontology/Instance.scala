@@ -1,6 +1,6 @@
 package models.ontology
 
-import models.custom_text.Label
+import models.custom_types.{Coordinates, Label}
 
 
 /**
@@ -8,4 +8,7 @@ import models.custom_text.Label
  * @author Thomas GIOVANNINI
  * @param label of the instance
  */
-case class Instance(label: Label)
+case class Instance(label:          Label,
+                    coordinates:    Coordinates,
+                    properties:     List[Property],
+                    concepts:       List[Concept])

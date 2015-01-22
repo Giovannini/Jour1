@@ -1,6 +1,7 @@
 package models.map
 
-import models.custom_text.Label
+import models.custom_types.{Coordinates, Label}
+import models.ontology.Instance
 
 
 /**
@@ -31,7 +32,7 @@ case class WorldMap (label: Label,
     private def initialize(matrix: Array[Array[Tile]]): Array[Array[Tile]] = {
 
         for (i <- 1 to width; j <- 1 to height)
-            matrix(i)(j) = Tile(i, j, List())
+            matrix(i)(j) = Tile(Coordinates(i, j), List())
 
         matrix
     }
@@ -44,4 +45,36 @@ case class WorldMap (label: Label,
      * @return the tile at the given coordinates
      */
     def getTileAt(coordX: Int, coordY: Int): Tile = map(coordX)(coordY)
+
+    /**
+     * Get the tile at the given coordinates
+     * @author Thomas GIOVANNINI
+     * @param coordinates of the wanted tile
+     * @return the tile at the given coordinates
+     */
+    def getTileAt(coordinates: Coordinates): Tile = map(coordinates.x)(coordinates.y)
+
+    /**
+     * Add an instance to a tile at the given coordinates
+     * @author Thomas GIOVANNINI
+     * @param instance to add to the tile
+     * @param coordinates of the tile
+     */
+    def addInstanceAt(instance: Instance, coordinates: Coordinates): Unit = {
+        map(coordinates.x)(coordinates.y) =
+          Tile.addInstanceToTile(instance, getTileAt(coordinates))
+    }
+
+    /**
+     * Remove an instance to a tile at the given coordinates
+     * @author Thomas GIOVANNINI
+     * @param instance to remove to the tile
+     * @param coordinates of the tile
+     */
+    def removeInstanceAt(instance: Instance, coordinates: Coordinates): Unit = {
+        map(coordinates.x)(coordinates.y) =
+          Tile.removeInstanceToTile(instance, getTileAt(coordinates))
+    }
+
 }
+

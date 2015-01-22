@@ -1,4 +1,4 @@
-package models.custom_text
+package models.custom_types
 
 /**
  * @author Thomas GIOVANNINI
@@ -10,6 +10,7 @@ case class Label (content: String) extends AnyVal with Ordered[Label]{
 
     /**
      * Compare with an other label
+     * @author Thomas GIOVANNINI
      * @param other label with which this one is compared
      * @return -1 if this label is lower than the other one
      *         0  if the two labels are the identical
