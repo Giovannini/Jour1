@@ -37,10 +37,14 @@ object Tile{
      * @author Thomas GIOVANNINI
      * @param newInstance to add to the tile
      * @param tile to which the instance has to be added
-     * @return a copy of the old tile with the new instance added to it
+     * @return if coordinates concur, a copy of the old tile with the new instance added to it
+     *         else the old tile
      */
     def addInstanceToTile(newInstance: Instance, tile: Tile): Tile =
-        Tile(tile.coordinates, newInstance :: tile.instances)
+        if (tile.coordinates == newInstance.coordinates)
+            Tile(tile.coordinates, newInstance :: tile.instances)
+        else
+            tile
 
 
     /**

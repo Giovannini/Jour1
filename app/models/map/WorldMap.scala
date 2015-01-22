@@ -17,11 +17,15 @@ case class WorldMap (label: Label,
                     width: Int,
                     height: Int){
 
+    private var time = 0
+
     private val map = {
         //Creation of a matrix with a width equal to "width" and an height equal to "height".
         val matrix = Array.ofDim[Tile](width, height)
         initialize(matrix)
     }
+
+    private def timeFlows(): Unit = time = time + 1
 
     /**
      * Fill a matrix of tile with empty tiles
