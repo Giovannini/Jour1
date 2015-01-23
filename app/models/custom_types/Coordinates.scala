@@ -1,6 +1,8 @@
 package models.custom_types
 
 /**
- * Created by giovannini on 1/22/15.
+ * Model for coordinates
+ * @param x coordinate
+ * @param y coordinate
  */
 case class Coordinates(x: Int, y: Int)

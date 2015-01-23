@@ -31,3 +31,33 @@ case class Concept(label:           Label,
         getConceptsLinkedByRelation(Relation(Label(relationName)))
 
 }
+
+object Concept {
+
+    /**
+     * Method to add a relation to a given concept
+     * @author Thomas GIOVANNINI
+     * @param conceptSrc the source of the relation
+     * @param relation the relation
+     * @param conceptDest the dest of the relation
+     * @return the source concept with the given relation added to it
+     */
+    def addRelationToConcept(conceptSrc: Concept,
+                             relation: Relation,
+                             conceptDest: Concept): Concept = {
+        Concept(conceptSrc.label,
+                (relation, conceptDest) :: conceptSrc.relatedConcepts,
+                conceptSrc.properties)
+    }
+
+    /**
+     * Method to add a property to a given concept
+     * @author Thomas GIOVANNINI
+     * @param concept to which the property has to be added
+     * @param property to be added
+     * @return the concept with the given property added
+     */
+    def addPropertyToConcept(concept: Concept, property: Property): Concept =
+        Concept(concept.label, concept.relatedConcepts, property :: concept.properties)
+
+}

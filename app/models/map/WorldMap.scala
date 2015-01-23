@@ -20,8 +20,7 @@ case class WorldMap (label: Label,
     private var time = 0
 
     private val map = {
-        //Creation of a matrix with a width equal to "width" and an height equal to "height".
-        val matrix = Array.ofDim[Tile](width, height)
+        val matrix = Array.ofDim[Tile](width, height) //Creation of an empty matrix
         initialize(matrix)
     }
 
@@ -34,10 +33,8 @@ case class WorldMap (label: Label,
      * @return the initialized matrix
      */
     private def initialize(matrix: Array[Array[Tile]]): Array[Array[Tile]] = {
-
-        for (i <- 1 to width; j <- 1 to height)
+        for (i <- 0 until width; j <- 0 until height)
             matrix(i)(j) = Tile(Coordinates(i, j), List())
-
         matrix
     }
 
@@ -56,7 +53,7 @@ case class WorldMap (label: Label,
      * @param coordinates of the wanted tile
      * @return the tile at the given coordinates
      */
-    def getTileAt(coordinates: Coordinates): Tile = map(coordinates.x)(coordinates.y)
+    def getTileAt(coordinates: Coordinates): Tile = getTileAt(coordinates.x, coordinates.y)
 
     /**
      * Add an instance to a tile at the given coordinates
@@ -77,7 +74,7 @@ case class WorldMap (label: Label,
      */
     def removeInstanceAt(instance: Instance, coordinates: Coordinates): Unit = {
         map(coordinates.x)(coordinates.y) =
-          Tile.removeInstanceToTile(instance, getTileAt(coordinates))
+          Tile.removeInstanceFromTile(instance, getTileAt(coordinates))
     }
 
 }

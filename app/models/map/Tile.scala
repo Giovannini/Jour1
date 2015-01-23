@@ -30,38 +30,52 @@ case class Tile (coordinates: Coordinates, instances: List[Instance]){
 
 }
 
-object Tile{
+object Tile {
 
     /**
      * Method to add an instance to a tile
      * @author Thomas GIOVANNINI
      * @param newInstance to add to the tile
      * @param tile to which the instance has to be added
-     * @return if coordinates concur, a copy of the old tile with the new instance added to it
-     *         else the old tile
+     * @return a copy of the old tile with the new instance added to it
      */
-    def addInstanceToTile(newInstance: Instance, tile: Tile): Tile =
-        if (tile.coordinates == newInstance.coordinates)
-            Tile(tile.coordinates, newInstance :: tile.instances)
-        else
-            tile
-
+    def addInstanceToTile(newInstance: Instance, tile: Tile): Tile = {
+        val instance = Instance(newInstance.label,
+            tile.coordinates,
+            newInstance.properties,
+            newInstance.concepts)
+        Tile(tile.coordinates, instance :: tile.instances)
+    }
 
     /**
-     * Method to remove an instance to a tile
+     * Method to remove an instance from a tile
      * @author Thomas GIOVANNINI
-     * @param instanceToRemove the instance to remove to the tile
+     * @param instance the instance to remove to the tile
      * @param tile the tile to which the instance has to be removed
      * @return if the instance is in the tile, a copy of the old tile with the new instance removed
      *         from it
      *         else the same old tile
      */
-    def removeInstanceToTile(instanceToRemove: Instance, tile: Tile): Tile = {
-        val indexOfTheInstanceToRemove = tile.instances.indexOf(instanceToRemove)
+    def removeInstanceFromTile(instance: Instance, tile: Tile): Tile = {
+        val instanceToRemove =
+            Instance(instance.label, tile.coordinates, instance.properties, instance.concepts)
+        Tile(tile.coordinates, tile.instances diff List(instanceToRemove))
+    }
 
-        if(indexOfTheInstanceToRemove != -1)
-            Tile(tile.coordinates, tile.instances.drop(indexOfTheInstanceToRemove))
-        else
+    /**
+     * Method to update an instance on a tile
+     * @author Thomas GIOVANNINI
+     * @param oldInstance the instance to modify
+     * @param newInstance the final instance 
+     * @param tile the tile to which the instance has to be updated
+     * @return if oldInstance is on the tile, a tile with the newInstance replacing the old one 
+     *         else the same tile
+     */
+    def updateInstance(oldInstance: Instance, newInstance: Instance, tile: Tile): Tile ={
+        if (tile.hasInstance(oldInstance)) {
+            val partiallyUpdatedTile = Tile.removeInstanceFromTile(oldInstance, tile)
+            Tile.addInstanceToTile(newInstance, partiallyUpdatedTile)
+        } else 
             tile
     }
 
