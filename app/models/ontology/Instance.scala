@@ -1,6 +1,7 @@
 package models.ontology
 
 import models.custom_types.{Coordinates, Label}
+import models.map.WorldMap
 
 
 /**
@@ -12,3 +13,4 @@ case class Instance(label:          Label,
                     coordinates:    Coordinates,
                     properties:     List[Property],
                     concepts:       List[Concept])
+

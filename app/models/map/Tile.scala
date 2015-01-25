@@ -1,7 +1,7 @@
 package models.map
 
 import models.custom_types.Coordinates
-import models.ontology.Instance
+import models.ontology.{Concept, Instance}
 
 /**
  * Model for a tile on the world map
@@ -27,6 +27,18 @@ case class Tile (coordinates: Coordinates, instances: List[Instance]){
      *         false else
      */
     def hasInstance(instance: Instance) = instances.contains(instance)
+
+    /**
+     * Return whether an instance of a particular concept is on it or not
+     * @author Thomas GIOVANNINI
+     * @param concept desired
+     * @return true if the tile contains an instance of the desired concept
+     *         false else
+     */
+    def hasConcept(concept: Concept) = instances
+      .map(_.concepts)
+      .flatten
+      .contains(concept)
 
 }
 

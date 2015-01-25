@@ -5,4 +5,8 @@ package models.custom_types
  * @param x coordinate
  * @param y coordinate
  */
-case class Coordinates(x: Int, y: Int)
+case class Coordinates(x: Int, y: Int){
+
+    def +(other: Coordinates): Coordinates = Coordinates(this.x + other.x, this.y + other.y)
+
+}
