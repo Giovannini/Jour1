@@ -1,0 +1,3 @@
+# routes for the graph vizualization/
+
+GET /                       controllers.graph.GraphVisualisation.index
