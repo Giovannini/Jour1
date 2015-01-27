@@ -18,4 +18,8 @@ libraryDependencies += "org.scalatestplus" %% "play" % "1.2.0" % "test"
 
 libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.1" % "test"
 
+libraryDependencies ++= Seq(
+  "net.debasishg" %% "redisclient" % "2.13"
+)
+
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )
