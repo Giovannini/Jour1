@@ -1,4 +1,4 @@
-package models.custom_types
+package models.graph.custom_types
 
 /**
  * Model for coordinates

@@ -1,7 +1,7 @@
 package models.map
 
-import models.custom_types.Coordinates
-import models.ontology.{Concept, Instance}
+import models.graph.custom_types.Coordinates
+import models.graph.ontology.{Concept, Instance}
 
 /**
  * Model for a tile on the world map
@@ -36,8 +36,7 @@ case class Tile (coordinates: Coordinates, instances: List[Instance]){
      *         false else
      */
     def hasConcept(concept: Concept) = instances
-      .map(_.concepts)
-      .flatten
+      .map(_.concept)
       .contains(concept)
 
 }
@@ -55,7 +54,7 @@ object Tile {
         val instance = Instance(newInstance.label,
             tile.coordinates,
             newInstance.properties,
-            newInstance.concepts)
+            newInstance.concept)
         Tile(tile.coordinates, instance :: tile.instances)
     }
 
@@ -70,7 +69,7 @@ object Tile {
      */
     def removeInstanceFromTile(instance: Instance, tile: Tile): Tile = {
         val instanceToRemove =
-            Instance(instance.label, tile.coordinates, instance.properties, instance.concepts)
+            Instance(instance.label, tile.coordinates, instance.properties, instance.concept)
         Tile(tile.coordinates, tile.instances diff List(instanceToRemove))
     }
 

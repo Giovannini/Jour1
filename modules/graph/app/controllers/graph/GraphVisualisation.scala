@@ -1,4 +1,4 @@
-package controllers.graph;
+package controllers.graph
 
 import play.api._
 import play.api.mvc._

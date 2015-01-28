@@ -1,5 +1,6 @@
 package models.custom_types
 
+import models.graph.custom_types.Label
 import org.scalatest.FunSuite
 
 /**

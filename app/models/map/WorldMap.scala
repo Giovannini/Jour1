@@ -1,7 +1,7 @@
 package models.map
 
-import models.custom_types.{Coordinates, Label}
-import models.ontology.{Concept, Instance}
+import models.graph.custom_types.{Label, Coordinates}
+import models.graph.ontology.{Concept, Instance}
 
 
 /**

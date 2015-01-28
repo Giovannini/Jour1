@@ -1,7 +1,5 @@
-package models.ontology
+package models.graph.ontology
 
-import models.custom_types.{Coordinates, Label}
-import models.map.WorldMap
 import org.scalatest.FunSuite
 
 /**

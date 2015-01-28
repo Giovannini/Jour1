@@ -1,6 +1,7 @@
-package models.ontology
+package models.graph.ontology
 
-import models.custom_types.Label
+import models.graph.custom_types.Label
+import org.anormcypher.CypherResultRow
 
 /**TODO test
  * Model for a relation in an ontology
@@ -16,5 +17,10 @@ object Relation {
      * @return the Scala function associated to the given relation
      */
     def getAssociatedRule(relation: Relation): (Concept, Concept) => Unit = ???
+
+    def parseRow(row: CypherResultRow): Relation = {
+        val label = Label(row[String]("type"))
+        Relation(label)
+    }
 
 }
