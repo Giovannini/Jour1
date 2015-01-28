@@ -1,0 +1,15 @@
+#####
+Si problème d'import:
+Ouvrir une console:
+$ activator
+[project] $ idea
+
+#####
+Pour run le project, ouvrir une console:
+$ activator
+[project] $ ~ run
+
+#####
+Pour lancer les tests, ouvrir une console:
+$ activator
+[project] $ ~ test
