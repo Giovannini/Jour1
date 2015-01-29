@@ -19,7 +19,7 @@ object NeoDAO {
     """
     MATCH n
     WHERE n.type = "CONCEPT"
-    RETURN n.label as label, n.properties as prop
+    RETURN n.label as concept_label, n.properties as concept_prop
     """
   )
 
@@ -56,8 +56,7 @@ object NeoDAO {
     val rel = relation.label
     val id2 = destNodeId
     Cypher( "MATCH (n1 {id: "+ id1 +"}), (n2 {id: "+ id2 +"})\n" +
-      "CREATE (n1)-[r:"+ rel +"]->(n2)" +
-      "RETURN r;")
+      "CREATE (n1)-[r:"+ rel +"]->(n2)")
   }
 
   /**
@@ -85,7 +84,7 @@ object NeoDAO {
     Cypher(
       """
         |MATCH (n1 {id: {id}})-[r]-(n2)
-        |RETURN type(r) as rel_type, n2.label as label, n2.properties as prop, n2.type as node_type
+        |RETURN type(r) as rel_type, n2.label as concept_label, n2.properties as concept_prop, n2.type as node_type
       """.stripMargin)
       .on("id" -> concept.hashCode)
   }
@@ -123,7 +122,16 @@ object NeoDAO {
     Cypher(
       """
         |MATCH (n1 {id: {id}})-[r:INSTANCE_OF]-(n2)
-        |RETURN n2.label as label, n2.properties as prop, n2.coordinate_x as coordx, n2.coordinate_y as coordy
+        |RETURN n2.label as inst_label, n2.properties as inst_prop, n2.coordinate_x as inst_coordx, n2.coordinate_y as inst_coordy
+      """.stripMargin)
+      .on("id" -> concept.hashCode)
+  }
+
+  def getParentConceptsStatement(concept: Concept) = {
+    Cypher(
+      """
+        |MATCH (n1 {id: {id}})-[r:SUBTYPE_OF]->(n2)
+        |RETURN n2.label as concept_label, n2.properties as concept_prop
       """.stripMargin)
       .on("id" -> concept.hashCode)
   }
@@ -196,6 +204,7 @@ object NeoDAO {
   def getRelations(concept: Concept): List[(Relation, Concept)] = {
     getRelationsOf(concept).apply()
       .toList
+      .filter{ row => row[String]("node_type") != "INSTANCE" }
       .map{ row => (Relation.parseRow(row), Concept.parseRow(row))}
   }
 
@@ -205,9 +214,11 @@ object NeoDAO {
    * @param instance to add to the graph
    */
   def addInstance(instance: Instance): Unit = {
-    val statement = createInstanceStatement(instance)
-    statement.execute
-    addRelationToDB(instance.hashCode, Relation("INSTANCE_OF"), instance.concept.hashCode())
+    if(instance.isValid) {
+      val statement = createInstanceStatement(instance)
+      statement.execute
+      addRelationToDB(instance.hashCode, Relation("INSTANCE_OF"), instance.concept.hashCode())
+    }
   }
 
   /**
@@ -230,6 +241,19 @@ object NeoDAO {
     statement.apply()
       .toList
       .map{ row => Instance.parseRowGivenConcept(row, concept)}
+  }
+
+  def getParentsConceptOf(concept: Concept): List[Concept] = {
+    val statement = getParentConceptsStatement(concept)
+    statement.apply().toList.map{ row => Concept.parseRow(row)}
+  }
+
+  def getAllPossibleActions(concept: Concept): List[(Relation, Concept)] = {
+    val relations = getRelations(concept)
+      .filter(t => t._1 != Relation("SUBTYPE_OF"))
+    relations ::: getParentsConceptOf(concept)
+      .map(c => getAllPossibleActions(c))
+      .flatten
   }
 
 }

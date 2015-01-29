@@ -37,7 +37,7 @@ object Concept{
    * @return the concept translated from the given row
    */
   def parseRow(row: CypherResultRow): Concept = {
-    val label = Label(row[String]("label"))
+    val label = Label(row[String]("concept_label"))
     val properties = Property.rowToPropertiesList(row)
     Concept(label, properties)
   }

@@ -32,6 +32,10 @@ case class Instance(label:          Label,
     " concept: " + concept.hashCode() + ","+
     " type: \"INSTANCE\","+
     " id: " + hashCode() + "})"
+
+  def isValid = {
+    concept.properties.toSeq == properties.map(vp => vp.property).toSeq
+  }
 }
 
 object Instance {
@@ -44,8 +48,8 @@ object Instance {
    * @return the concept translated from the given row
    */
   def parseRowGivenConcept(row: CypherResultRow, concept: Concept): Instance = {
-    val label = Label(row[String]("label"))
-    val coordinates = Coordinates(row[Int]("coordx"),row[Int]("coordy"))
+    val label = Label(row[String]("inst_label"))
+    val coordinates = Coordinates(row[Int]("inst_coordx"),row[Int]("inst_coordy"))
     val properties = ValuedProperty.rowToPropertiesList(row)
     Instance(label, coordinates, properties, concept)
   }

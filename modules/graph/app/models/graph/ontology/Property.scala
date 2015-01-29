@@ -25,7 +25,7 @@ object Property {
    * @return the concept translated from the given row
    */
   def rowToPropertiesList(row: CypherResultRow): List[Property] =
-    row[Seq[String]]("prop") // get the properties sequence from the row
+    row[Seq[String]]("concept_prop") // get the properties sequence from the row
     .toList
     .map(p => new Property(p))
 

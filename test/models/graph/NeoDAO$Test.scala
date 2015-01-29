@@ -16,31 +16,52 @@ class NeoDAO$Test extends FunSuite {
   val propName    = Property("Name")
   val propFirstName = Property("FirstName")
   val propAge    = Property("Age")
-  val conceptMan = Concept(Label("Man"), List(propName, propFirstName, propAge))
-  val conceptCat = Concept(Label("Cat"), List(propName, propAge))
-  val conceptCity = Concept(Label("City"), List(propName))
-  val relPossess = Relation("POSSESS")
-  val relLives = Relation("LIVES_IN")
+  val conceptMan = Concept(Label("Man"), List(propName, propFirstName))
+  val conceptWoman = Concept(Label("Woman"), List(propName, propAge))
+  val conceptHuman = Concept(Label("Human"), List(propName))
+  val conceptCat = Concept(Label("Cat"), List(propName))
+  val relPet = Relation("PET")
+  val relLike = Relation("LIKE")
+  val relSubtype = Relation("SUBTYPE_OF")
   val thomas = Instance(Label("Thomas"),
     Coordinates(0,0),
     List(ValuedProperty(propName, "GIOVA"),
-      ValuedProperty(propFirstName, "Thomas"),
-      ValuedProperty(propAge, "21")),
+      ValuedProperty(propFirstName, "Thomas")),
+    conceptMan)
+  val julien = Instance(Label("Julien"),
+    Coordinates(0,0),
+    List(ValuedProperty(propName, "PRADET"),
+      ValuedProperty(propFirstName, "Julien")),
+    conceptMan)
+  val simon = Instance(Label("Simon"),
+    Coordinates(0,0),
+    List(ValuedProperty(propName, "RONCIERE"),
+      ValuedProperty(propFirstName, "Simon")),
+    conceptMan)
+  val aurelie = Instance(Label("Aurelie"),
+    Coordinates(0,0),
+    List(ValuedProperty(propName, "LORGEOUX"),
+      ValuedProperty(propAge, "22")),
+    conceptWoman)
+  val invalidPerson = Instance(Label("Truc"),
+    Coordinates(0,0),
+    List(ValuedProperty(propName, "MACHIN"),
+      ValuedProperty(propAge, "22")),
     conceptMan)
 
 
   test("method addConceptToDB should add a concept in the Neo4J DB"){
     NeoDAO.clearDBStatement.execute()
-    NeoDAO.addConceptToDB(conceptCat)
-    assert(NeoDAO.readConcepts.contains(conceptCat))
+    NeoDAO.addConceptToDB(conceptWoman)
+    assert(NeoDAO.readConcepts.contains(conceptWoman))
     assert(NeoDAO.readConcepts.length == 1)
   }
 
   test("method removeConceptFromDB should remove an existing concept in the Neo4J DB"){
     //NeoDAO.clearDBStatement.execute()
     //NeoDAO.addConceptToDB(conceptCat)
-    NeoDAO.removeConceptFromDB(conceptCat)
-    assert(! NeoDAO.readConcepts.contains(conceptCat))
+    NeoDAO.removeConceptFromDB(conceptWoman)
+    assert(! NeoDAO.readConcepts.contains(conceptWoman))
     assert(NeoDAO.readConcepts.length == 0)
   }
 
@@ -50,53 +71,61 @@ class NeoDAO$Test extends FunSuite {
   }
 
   test("method addRelationsToDB should add a relation between two existing concepts in the Neo4J DB"){
-    //NeoDAO.clearDBStatement.execute()
-    NeoDAO.addConceptToDB(conceptCat)
+    NeoDAO.addConceptToDB(conceptWoman)
     NeoDAO.addConceptToDB(conceptMan)
-    NeoDAO.addRelationToDB(conceptMan.hashCode(), relPossess, conceptCat.hashCode())
-    assert(NeoDAO.getRelations(conceptMan).contains((relPossess, conceptCat)))
+    NeoDAO.addConceptToDB(conceptHuman)
+    NeoDAO.addRelationToDB(conceptMan.hashCode(), relLike, conceptWoman.hashCode())
+    NeoDAO.addRelationToDB(conceptMan.hashCode(), relSubtype, conceptHuman.hashCode())
+    NeoDAO.addRelationToDB(conceptWoman.hashCode(), relSubtype, conceptHuman.hashCode())
+    assert(NeoDAO.getRelations(conceptMan).contains((relLike, conceptWoman)))
+    assert(NeoDAO.getRelations(conceptMan).contains((relSubtype, conceptHuman)))
+    assert(NeoDAO.getRelations(conceptWoman).contains((relSubtype, conceptHuman)))
   }
 
   test("method removeRelationFromDB should remove a relation between two existing concepts in the Neo4J DB"){
-    //NeoDAO.clearDBStatement.execute()
-    //NeoDAO.addConceptToDB(conceptCat)
-    //NeoDAO.addConceptToDB(conceptMan)
-    //NeoDAO.addRelationToDB(conceptMan.hashCode(), relPossess, conceptCat.hashCode())
-    NeoDAO.removeRelationFromDB(conceptMan, relPossess, conceptCat)
-    assert(! NeoDAO.getRelations(conceptMan).contains((relPossess, conceptCat)))
-    assert(NeoDAO.getRelations(conceptMan).isEmpty)
+    NeoDAO.removeRelationFromDB(conceptMan, relLike, conceptWoman)
+    val relationList = NeoDAO.getRelations(conceptMan)
+    assert(! relationList.contains((relLike, conceptWoman)))
+    assert(relationList.contains((relSubtype, conceptHuman)))
   }
 
   test("method getRelations should return all the relations linked to the given concept"){
-    //NeoDAO.clearDBStatement.execute()
-    //NeoDAO.addConceptToDB(conceptCat)
-    //NeoDAO.addConceptToDB(conceptMan)
-    NeoDAO.addConceptToDB(conceptCity)
-    NeoDAO.addRelationToDB(conceptMan.hashCode(), relPossess, conceptCat.hashCode())
-    NeoDAO.addRelationToDB(conceptMan.hashCode(), relLives, conceptCity.hashCode())
+    NeoDAO.addRelationToDB(conceptMan.hashCode(), relLike, conceptWoman.hashCode())
     val relationList = NeoDAO.getRelations(conceptMan)
-    assert(relationList.contains((relPossess, conceptCat)))
-    assert(relationList.contains((relLives, conceptCity)))
-    assert(! relationList.contains((relPossess, conceptCity)))
+    assert(relationList.contains((relLike, conceptWoman)))
+    assert(relationList.contains((relSubtype, conceptHuman)))
+    assert(! relationList.contains((relLike, conceptHuman)))
   }
 
-  test("method addInstance should add instance in the graph"){
-    //NeoDAO.clearDBStatement.execute()
-    //NeoDAO.addConceptToDB(conceptCat)
-    //NeoDAO.addConceptToDB(conceptMan)
-    //NeoDAO.addConceptToDB(conceptCity)
-    //NeoDAO.addRelationToDB(conceptMan.hashCode(), relPossess, conceptCat.hashCode())
-    //NeoDAO.addRelationToDB(conceptMan.hashCode(), relLives, conceptCity.hashCode())
+  test("method addInstance should add instance in the graph if it is valid"){
     NeoDAO.addInstance(thomas)
+    NeoDAO.addInstance(julien)
+    NeoDAO.addInstance(simon)
+    NeoDAO.addInstance(aurelie)
+    NeoDAO.addInstance(invalidPerson)
     assert(NeoDAO.getInstancesOf(conceptMan).contains(thomas))
+    assert(NeoDAO.getInstancesOf(conceptMan).contains(simon))
+    assert(! NeoDAO.getInstancesOf(conceptMan).contains(aurelie))
+    assert(NeoDAO.getInstancesOf(conceptWoman).contains(aurelie))
+    assert(! NeoDAO.getInstancesOf(conceptMan).contains(invalidPerson))
+    assert(! NeoDAO.getInstancesOf(conceptWoman).contains(invalidPerson))
   }
 
   test("method removeInstance should remove an instance from the graph"){
-    assert(NeoDAO.getInstancesOf(conceptMan).contains(thomas))
-    NeoDAO.removeInstance(thomas)
-    println("Instance removed")
-    assert(! NeoDAO.getInstancesOf(conceptMan).contains(thomas))
+    assert(NeoDAO.getInstancesOf(conceptMan).contains(julien))
+    NeoDAO.removeInstance(julien)
+    assert(! NeoDAO.getInstancesOf(conceptMan).contains(julien))
   }
 
+  test("method getParentsConceptOf should return parent concepts of the given one"){
+    assert(NeoDAO.getParentsConceptOf(conceptMan).contains(conceptHuman))
+  }
+
+  test("method getAllPossibleActions should give all the possible actions for a given concept"){
+    NeoDAO.addConceptToDB(conceptCat)
+    NeoDAO.addRelationToDB(conceptHuman.hashCode(), relPet, conceptCat.hashCode())
+    val relationList = NeoDAO.getAllPossibleActions(conceptMan)
+    assert(relationList.contains((relPet, conceptCat)))
+  }
 
 }
