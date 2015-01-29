@@ -26,7 +26,7 @@ case class Concept(label: Label,
 
 }
 
-object Concept {
+object Concept{
 
   /**
    * Read a Neo4J row from the DB and convert it to a concept object

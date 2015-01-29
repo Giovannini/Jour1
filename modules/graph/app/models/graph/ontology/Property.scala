@@ -8,10 +8,11 @@ import play.api.libs.json.{JsValue, Json}
  * Model for properties
  * @author Thomas GIOVANNINI
  */
-case class Property(label: Label) {
-  override def toString = "\"" + label.content + "\""
+case class Property(label: String) {
+  require(label.matches("^[A-Z][A-Za-z]*$"))
+  override def toString = "\"" + label + "\""
 
-  def toJson : JsValue = Json.parse(label.content)
+  def toJson : JsValue = Json.parse(label)
 }
 
 object Property {
@@ -26,7 +27,7 @@ object Property {
   def rowToPropertiesList(row: CypherResultRow): List[Property] =
     row[Seq[String]]("prop") // get the properties sequence from the row
     .toList
-    .map(p => new Property(Label(p)))
+    .map(p => new Property(p))
 
 }
 

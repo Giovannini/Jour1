@@ -1,6 +1,7 @@
 package models.graph.ontology
 
 import models.graph.custom_types.{Coordinates, Label}
+import org.anormcypher.CypherResultRow
 import play.api.libs.json._
 
 
@@ -11,13 +12,43 @@ import play.api.libs.json._
  */
 case class Instance(label:          Label,
                     coordinates:    Coordinates,
-                    properties:     List[(Property, Any)],
-                    concept:       Concept) {
+                    properties:     List[ValuedProperty],
+                    concept:        Concept) {
+
   def toJson: JsValue = Json.obj(
     "label" -> label.content,
     "coordinates" -> Json.obj("x" -> coordinates.x, "y" -> coordinates.y),
-    "properties" -> properties.map(p => p._1.toJson),
+    "properties" -> Json.arr(properties.map(vp => vp.toJson)),
     "concept" -> concept.toJson
   )
+
+  override def hashCode = label.hashCode() + coordinates.hashCode() + properties.hashCode() + concept.hashCode()
+
+  def toNodeString = "(" + label.content.toLowerCase +
+    " { label: \"" + label.content + "\","+
+    " properties: [" + properties.map(vp => "\"" + vp.toString + "\"").mkString(", ") + "],"+
+    " coordinate_x: " + coordinates.x + ","+
+    " coordinate_y: " + coordinates.y + ","+
+    " concept: " + concept.hashCode() + ","+
+    " type: \"INSTANCE\","+
+    " id: " + hashCode() + "})"
+}
+
+object Instance {
+  /**
+   * Read a Neo4J row from the DB and convert it to a concept object
+   * @author Thomas GIOVANNINI
+   * @param row the row read from the db
+   *            it should contains a string name label
+   *            and a sequence of strings name properties
+   * @return the concept translated from the given row
+   */
+  def parseRowGivenConcept(row: CypherResultRow, concept: Concept): Instance = {
+    val label = Label(row[String]("label"))
+    val coordinates = Coordinates(row[Int]("coordx"),row[Int]("coordy"))
+    val properties = ValuedProperty.rowToPropertiesList(row)
+    Instance(label, coordinates, properties, concept)
+  }
+
 }
 

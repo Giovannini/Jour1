@@ -7,7 +7,12 @@ import org.anormcypher.CypherResultRow
  * Model for a relation in an ontology
  * @param label for the relation
  */
-case class Relation(label: Label)
+case class Relation(label: String){
+    require(label.matches("^[A-Z][A-Z_]*$"))
+
+    override def toString = label
+
+}
 
 object Relation {
 
@@ -19,7 +24,7 @@ object Relation {
     def getAssociatedRule(relation: Relation): (Concept, Concept) => Unit = ???
 
     def parseRow(row: CypherResultRow): Relation = {
-        val label = Label(row[String]("type"))
+        val label = row[String]("rel_type")
         Relation(label)
     }
 
