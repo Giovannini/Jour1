@@ -9,9 +9,9 @@ import org.scalatest.FunSuite
  */
 class TileTest extends FunSuite {
 
-    val c1 = Concept(Label("C1"), List())
-    val i1 = Instance(Label("I1"), Coordinates(0, 0), List(), c1)
-    val i2 = Instance(Label("I2"), Coordinates(0, 0), List(), c1)
+    val c1 = Concept("C1", List())
+    val i1 = Instance("I1", Coordinates(0, 0), List(), c1)
+    val i2 = Instance("I2", Coordinates(0, 0), List(), c1)
     val updatedI1 = Instance(i1.label, Coordinates(1, 2), i1.properties, i1.concept)
     val updatedI2 = Instance(i2.label, Coordinates(1, 2), i2.properties, i2.concept)
     val emptyTile = Tile(Coordinates(1, 2), List())

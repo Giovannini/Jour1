@@ -2,7 +2,7 @@ package models.graph.ontology
 
 import models.graph.custom_types.Label
 import org.anormcypher.CypherResultRow
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsString, JsValue, Json}
 
 /**
  * Model for properties
@@ -12,7 +12,7 @@ case class Property(label: String) {
   require(label.matches("^[A-Z][A-Za-z]*$"))
   override def toString = "\"" + label + "\""
 
-  def toJson : JsValue = Json.parse(label)
+  def toJson : JsValue = JsString(label)
 }
 
 object Property {
@@ -27,29 +27,6 @@ object Property {
   def rowToPropertiesList(row: CypherResultRow): List[Property] =
     row[Seq[String]]("concept_prop") // get the properties sequence from the row
     .toList
-    .map(p => new Property(p))
+    .map(p => Property(p))
 
 }
-
-/*/**
- * Model for properties which values are String
- * @author Thomas GIOVANNINI
- * @param value of the property
- */
-case class StringProperty(label: Label, value: String) extends Property(label) {
-  override def toJson: JsValue = Json.obj("label" -> label.content, "value" -> Json.toJson(value))
-
-  def toNodeString = "{label:\"" + label.content + "\", value:\"" + value + "\"}"
-}
-
-/**
- * Model for properties which values are Int
- * @author Thomas GIOVANNINI
- * @param label of the property
- * @param value of the property
- */
-case class IntProperty(label: Label, value: Int) extends Property(label) {
-  override def toJson: JsValue = Json.obj("label" -> label.content, "value" -> Json.toJson(value))
-
-  def toNodeString = "{label:\"" + label.content + "\", value:" + value + "}"
-}*/

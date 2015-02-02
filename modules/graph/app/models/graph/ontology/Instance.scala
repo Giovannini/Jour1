@@ -1,6 +1,6 @@
 package models.graph.ontology
 
-import models.graph.custom_types.{Coordinates, Label}
+import models.graph.custom_types.Coordinates
 import org.anormcypher.CypherResultRow
 import play.api.libs.json._
 
@@ -10,22 +10,23 @@ import play.api.libs.json._
  * @author Thomas GIOVANNINI
  * @param label of the instance
  */
-case class Instance(label:          Label,
+case class Instance(label:          String,
                     coordinates:    Coordinates,
                     properties:     List[ValuedProperty],
                     concept:        Concept) {
+  require(label.matches("^[A-Z][A-Za-z0-9_ ]*$"))
 
   def toJson: JsValue = Json.obj(
-    "label" -> label.content,
+    "label" -> label,
     "coordinates" -> Json.obj("x" -> coordinates.x, "y" -> coordinates.y),
     "properties" -> Json.arr(properties.map(vp => vp.toJson)),
-    "concept" -> concept.toJson
+    "concept" -> JsNumber(concept.hashCode())
   )
 
   override def hashCode = label.hashCode() + coordinates.hashCode() + properties.hashCode() + concept.hashCode()
 
-  def toNodeString = "(" + label.content.toLowerCase +
-    " { label: \"" + label.content + "\","+
+  def toNodeString = "(" + label.toLowerCase +
+    " { label: \"" + label + "\","+
     " properties: [" + properties.map(vp => "\"" + vp.toString + "\"").mkString(", ") + "],"+
     " coordinate_x: " + coordinates.x + ","+
     " coordinate_y: " + coordinates.y + ","+
@@ -47,11 +48,11 @@ object Instance {
    *            and a sequence of strings name properties
    * @return the concept translated from the given row
    */
-  def parseRowGivenConcept(row: CypherResultRow, concept: Concept): Instance = {
-    val label = Label(row[String]("inst_label"))
+  def parseRowGivenConcept(row: CypherResultRow, conceptId: Int): Instance = {
+    val label = row[String]("inst_label")
     val coordinates = Coordinates(row[Int]("inst_coordx"),row[Int]("inst_coordy"))
     val properties = ValuedProperty.rowToPropertiesList(row)
-    Instance(label, coordinates, properties, concept)
+    Instance(label, coordinates, properties, Concept.getById(conceptId))
   }
 
 }
