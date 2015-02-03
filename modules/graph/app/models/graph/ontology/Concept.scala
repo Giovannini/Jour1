@@ -6,33 +6,52 @@ import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
 /**
  * Model for a concept of an ontology
- * @author
+ * @author Thomas GIOVANNINI
  * @param label for the concept
  * @param properties of this concept
  */
 case class Concept(label: String,
                    properties: List[Property]) {
+
   require(label.matches("^[A-Z][A-Za-z0-9_ ]*$"))
 
   val id = hashCode()
 
   override def hashCode() = label.hashCode + properties.hashCode()
 
+  /**
+   * Parse a Concept to Json
+   * @return the Json form of the concept
+   */
   def toJson: JsValue = Json.obj( "label" -> JsString(label), "properties" -> properties.map(_.toJson),
     "type" -> JsString("CONCEPT"), "id" -> JsNumber(hashCode()))
 
-  def toNodeString = "(" + label.toLowerCase +
-    " { label: \"" + label + "\","+
-    " properties: [" + properties.mkString(",") + "],"+
-    " type: \"CONCEPT\","+
-    " id:" + hashCode() + "})"
+  def toNodeString = {
+    println("toJson\n" + toJson)
+    "(" + label.toLowerCase +
+      " { label: \"" + label + "\","+
+      " properties: [" + properties.mkString(",") + "],"+
+      " type: \"CONCEPT\","+
+      " id:" + hashCode() + "})"
+  }
 
 }
 
 object Concept{
 
-  // Setup the Rest Client
   implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
+
+  /**
+   * Parse a Json value to a concept
+   * @author Thomas GIOVANNINI
+   * @param jsonConcept the json to parse
+   * @return the proper concept
+   */
+  def parseJson(jsonConcept: JsValue): Concept = {
+    val label = (jsonConcept \ "label").as[String]
+    val properties = (jsonConcept \\ "properties").toList.map(Property.parseJson)
+    Concept(label, properties)
+  }
 
   /**
    * Read a Neo4J row from the DB and convert it to a concept object
@@ -134,20 +153,30 @@ object Concept{
   }
 
   /**
-   * Method to retrieve all the instances of a given concept and its children concepts
+   * Method to retrieve all the instances of a given concept and its children concepts' instances
    * @author Thomas GIOVANNINI
    * @param conceptId of the desired instances
    * @return a list of the desired instances
    */
   def getInstancesOf(conceptId : Int) : List[Instance] = {
-    val statement = Statement.getInstances(conceptId)
-    val instances = statement.apply()
-      .toList
-      .map{ row => Instance.parseRowGivenConcept(row, conceptId)}
-    val instancesOfChildren = Concept.getChildren(conceptId)
+    val instances = getInstanceOfSelf(conceptId)
+    val instancesOfChildren = getChildren(conceptId)
       .map(_._2.id)
       .map(getInstancesOf)
       .flatten
     instances ::: instancesOfChildren
+  }
+
+  /**
+   * Method to retrieve all the instances of a given concept but not its children concepts' instances
+   * @author Thomas GIOVANNINI
+   * @param conceptId of the desired instances
+   * @return a list of the desired instances
+   */
+  def getInstanceOfSelf(conceptId: Int): List[Instance] = {
+    val statement = Statement.getInstances(conceptId)
+    statement.apply()
+      .toList
+      .map{ row => Instance.parseRowGivenConcept(row, conceptId)}
   }
 }

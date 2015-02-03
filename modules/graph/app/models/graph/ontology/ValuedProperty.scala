@@ -9,12 +9,34 @@ import play.api.libs.json.{Json, JsValue}
  * @param value the value for the property
  */
 case class ValuedProperty(property: Property, value: String){
-  def toJson : JsValue = Json.obj(property.label -> value)
+  /**
+   * Parse a ValuedProperty to Json
+   * @return
+   */
+  def toJson : JsValue = Json.obj("property" -> property.label, "value" -> value)
 
+  /**
+   * The toString method
+   * @author Thomas GIOVANNINI
+   * @return the string value for a ValuedProperty
+   */
   override def toString = property.label + " -> " + value
 }
 
 object ValuedProperty {
+
+  /**
+   * Method to parse a json to a ValuedProperty
+   * @author Thomas GIOVANNINI
+   * @param jsonVP the json value to parse
+   * @return a Valued property
+   */
+  def parseJson(jsonVP: JsValue): ValuedProperty = {
+    val property = (jsonVP \ "property").as[String]
+    val value = (jsonVP \ "value").as[String]
+    ValuedProperty(Property(property), value)
+  }
+
   /**
    * Read a Neo4J row from the DB and convert it to a concept object
    * @param row the row read from the db

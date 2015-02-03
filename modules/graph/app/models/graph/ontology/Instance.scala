@@ -40,6 +40,16 @@ case class Instance(label:          String,
 }
 
 object Instance {
+
+  def parseJson(jsonInstance: JsValue): Instance = {
+    val label = (jsonInstance \ "label").as[String]
+    val x_coordinate = (jsonInstance \ "coordinates" \ "x").as[Int]
+    val y_coordinate = (jsonInstance \ "coordinates" \ "y").as[Int]
+    val coordinates = Coordinates(x_coordinate, y_coordinate)
+    val properties = (jsonInstance \\ "properties").toList.map(ValuedProperty.parseJson)
+    val conceptId = (jsonInstance \ "concept").as[Int]
+    Instance(label, coordinates, properties, Concept.getById(conceptId))
+  }
   /**
    * Read a Neo4J row from the DB and convert it to a concept object
    * @author Thomas GIOVANNINI

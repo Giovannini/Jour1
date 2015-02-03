@@ -17,6 +17,11 @@ case class Property(label: String) {
 
 object Property {
 
+  def parseJson(jsonProperty: JsValue): Property = {
+    val label = jsonProperty.as[String]
+    Property(label)
+  }
+
   /**
    * Read a Neo4J row from the DB and convert it to a concept object
    * @author Thomas GIOVANNINI

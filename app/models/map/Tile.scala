@@ -2,6 +2,7 @@ package models.map
 
 import models.graph.custom_types.Coordinates
 import models.graph.ontology.{Concept, Instance}
+import play.api.libs.json.{JsValue, JsNumber, Json}
 
 /**
  * Model for a tile on the world map
@@ -10,6 +11,15 @@ import models.graph.ontology.{Concept, Instance}
  * @param instances present on the tile
  */
 case class Tile (coordinates: Coordinates, instances: List[Instance]){
+
+    /**
+     * Transform a tile to json format
+     * @author Thomas GIOVANNINI
+     * @return the json format of the Tile
+     */
+    def toJson : JsValue = Json.obj(
+        "instances" -> instances.map(_.toJson)
+    )
 
     /**
      * Return whether the tile has instances on it or not
@@ -42,6 +52,14 @@ case class Tile (coordinates: Coordinates, instances: List[Instance]){
 }
 
 object Tile {
+
+    def parseJson(jsonTile: JsValue): Tile = {
+        val x_coordinate = (jsonTile \ "coordinates" \ "x").as[Int]
+        val y_coordinate = (jsonTile \ "coordinates" \ "y").as[Int]
+        val coordinates = Coordinates(x_coordinate, y_coordinate)
+        val instances = (jsonTile \\ "instances").toList.map(Instance.parseJson)
+        Tile(coordinates, instances)
+    }
 
     /**
      * Method to add an instance to a tile

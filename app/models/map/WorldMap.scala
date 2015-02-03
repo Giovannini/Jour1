@@ -2,6 +2,7 @@ package models.map
 
 import models.graph.custom_types.{Label, Coordinates}
 import models.graph.ontology.{Concept, Instance}
+import play.api.libs.json.{JsValue, Json}
 
 
 /**
@@ -24,7 +25,17 @@ case class WorldMap (label: Label,
         fillWithEmptyTiles(matrix)
     }
 
-    /*private def timeFlows(): Unit = time = time + 1*/
+    /**
+     * Retourne la carte sous la forme Json
+     * @author Thomas GIOVANNINI
+     * @return la carte sous la forme Json
+     */
+    def toJson : JsValue = {
+        val tileList = map.toList
+          .map(_.toList)
+          .flatten
+        Json.obj("map" -> tileList.map(_.instances).flatten.map(_.toJson))
+    }
 
     /**
      * Fill a matrix of tile with empty tiles
@@ -38,7 +49,11 @@ case class WorldMap (label: Label,
         matrix
     }
 
+
+
+    /*#################*/
     /* Basic functions */
+    /*#################*/
     /**
      * Get the tile at the given coordinates
      * @author Thomas GIOVANNINI
