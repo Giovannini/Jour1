@@ -23,6 +23,12 @@ object Relation {
      */
     def getAssociatedRule(relation: Relation): (Concept, Concept) => Unit = ???
 
+    /**
+     * Method to get a Relation from a Neo4J row
+     * @author Thomas GIOVANNINI
+     * @param row the Neo4J row
+     * @return the appropriate relation
+     */
     def parseRow(row: CypherResultRow): Relation = {
         val label = row[String]("rel_type")
         Relation(label)

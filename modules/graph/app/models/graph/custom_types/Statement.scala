@@ -44,6 +44,12 @@ object Statement {
       .on("id1" -> conceptId)
   }
 
+  /**
+   * Create a cypher statement returning a concept from its id.
+   * @author Thomas GIOVANNINI
+   * @param conceptId the id of the concept to get
+   * @return a cypher statement to execute
+   */
   def getConceptById(conceptId: Int): CypherStatement = {
     Cypher("MATCH (n {id: {id1} }) " +
       "RETURN n.label as concept_label, n.properties as concept_prop;")
@@ -137,7 +143,8 @@ object Statement {
   }
 
   /**
-   * Create a cypher statement to get all th parents concepts of a given concept
+   * Create a cypher statement to get all the parents concepts of a given concept
+   * @author Thomas GIOVANNINI
    * @param conceptId of which the parents are desired
    * @return a cypher statement
    */
@@ -150,6 +157,12 @@ object Statement {
       .on("id" -> conceptId)
   }
 
+  /**
+   * Create a cypher statement to get all the children concepts of a given one
+   * @author Thomas GIOVANNINI
+   * @param conceptId of which the children are desired
+   * @return a cypher statement
+   */
   def getChildrenConcepts(conceptId: Int): CypherStatement = {
     Cypher(
       """

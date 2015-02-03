@@ -38,9 +38,16 @@ class WorldMapTest extends FunSuite with BeforeAndAfter{
         }
     }
 
+    test("method getTileAt"){
+        val worldMap = emptyWorldMap
+        worldMap.addInstanceAt(instance1, coord_2_3)
+        val tile2_3 = Tile(coord_2_3, List(updatedInstance1))
+        assert(worldMap.getTileAt(coord_2_3) == tile2_3)
+    }
+
     test("method addInstanceAt should correctly add an instance on the desired tile only") {
         val worldMap = emptyWorldMap
-        worldMap.addInstanceAt(instance1, Coordinates(2, 3))
+        worldMap.addInstanceAt(instance1, coord_2_3)
         for(i <- 0 until dimension; j <- 0 until dimension){
             if (i == 2 && j == 3)
                 assert(worldMap.getTileAt(2, 3).hasInstance(updatedInstance1))
@@ -51,11 +58,11 @@ class WorldMapTest extends FunSuite with BeforeAndAfter{
 
     test("method removeInstanceAt should remove an existing instance on the desired tile") {
         val worldMap = emptyWorldMap
-        worldMap.addInstanceAt(instance1, Coordinates(2, 3))
-        worldMap.removeInstanceAt(instance2, Coordinates(2, 3))
+        worldMap.addInstanceAt(instance1, coord_2_3)
+        worldMap.removeInstanceAt(instance2, coord_2_3)
         assert(worldMap == emptyWorldMap) //No change
 
-        worldMap.removeInstanceAt(updatedInstance1, Coordinates(2, 3))
+        worldMap.removeInstanceAt(updatedInstance1, coord_2_3)
         for(i <- 0 until dimension; j <- 0 until dimension){
             assert(! worldMap.getTileAt(i, j).hasInstances)
         }

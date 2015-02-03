@@ -32,25 +32,7 @@ object NeoDAO {
    */
   def removeConceptFromDB(concept: Concept) = {
     val statement = Statement.deleteConcept(concept.hashCode())
-    //println(statement)
     statement.execute
-  }
-
-  /**
-   * Read all the concepts of the ontology
-   * @author Thomas GIOVANNINI
-   * @return a list of all the concepts read.
-   */
-  def readConcepts : List[Concept]= {
-    Statement.getAllConcepts.apply()
-      .toList
-      .map{ row => Concept.parseRow(row) }
-  }
-
-  def getConceptById(conceptId: Int): Concept = {
-    val statement = Statement.getConceptById(conceptId)
-    val row: CypherResultRow = statement.apply().head
-    Concept.parseRow(row)
   }
 
   /**
@@ -77,19 +59,6 @@ object NeoDAO {
   }
 
   /**
-   * Get all the relations from or to a given concept
-   * @author Thomas GIOVANNINI
-   * @param conceptId id of the source concept
-   * @return a list of tuple containing the relation and destination concept.
-   */
-  def getRelations(conceptId: Int): List[(Relation, Concept)] = {
-    Statement.getRelationsOf(conceptId).apply()
-      .toList
-      .filter{ row => row[String]("node_type") != "INSTANCE" }
-      .map{ row => (Relation.parseRow(row), Concept.parseRow(row))}
-  }
-
-  /**
    * Method to add an instance of a given concept (doing the relation) to the Neo4J Graph
    * @author Thomas GIOVANNINI
    * @param instance to add to the graph
@@ -110,39 +79,6 @@ object NeoDAO {
   def removeInstance(instance: Instance): Unit = {
     val statement = Statement.deleteInstances(instance)
     statement.execute
-  }
-
-  /**
-   * Method to retrieve all the instances of a given concept
-   * @param conceptId of the desired instances
-   * @return a liste of the desired instances
-   */
-  def getInstancesOf(conceptId : Int) : List[Instance] = {
-    val statement = Statement.getInstances(conceptId)
-    statement.apply()
-      .toList
-      .map{ row => Instance.parseRowGivenConcept(row, conceptId)}
-  }
-
-  def getParentsConceptsOf(conceptId: Int): List[(Relation, Concept)] = {
-    val statement = Statement.getParentConcepts(conceptId)
-    val subtypeRelation = Relation("SUBTYPE_OF")
-    statement.apply().toList.map{ row => (subtypeRelation, Concept.parseRow(row))}
-  }
-
-  def getChildrenConceptsOf(conceptId: Int): List[(Relation, Concept)] = {
-    val statement = Statement.getChildrenConcepts(conceptId)
-    val parentRelation = Relation("PARENT_OF")
-    statement.apply().toList.map{ row => (parentRelation, Concept.parseRow(row))}
-  }
-
-  def getAllPossibleActions(conceptId: Int): List[(Relation, Concept)] = {
-    val relations = getRelations(conceptId)
-      .filter(t => t._1 != Relation("SUBTYPE_OF"))
-    val parentsRelation = getParentsConceptsOf(conceptId)
-      .map(tuple => getAllPossibleActions(tuple._2.hashCode()))
-      .flatten
-    relations ::: parentsRelation
   }
 
 }

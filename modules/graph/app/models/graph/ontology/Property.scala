@@ -19,6 +19,7 @@ object Property {
 
   /**
    * Read a Neo4J row from the DB and convert it to a concept object
+   * @author Thomas GIOVANNINI
    * @param row the row read from the db
    *            it should contains a string name label
    *            and a sequence of strings name properties

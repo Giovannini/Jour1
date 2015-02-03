@@ -11,7 +11,7 @@ import play.api.libs.json.{Json, JsValue}
 case class ValuedProperty(property: Property, value: String){
   def toJson : JsValue = Json.obj(property.label -> value)
 
-  override def toString = property.label + "%" + value
+  override def toString = property.label + " -> " + value
 }
 
 object ValuedProperty {
@@ -22,13 +22,20 @@ object ValuedProperty {
    *            and a sequence of strings name properties
    * @return the concept translated from the given row
    */
-  def rowToPropertiesList(row: CypherResultRow): List[ValuedProperty] =
+  def rowToPropertiesList(row: CypherResultRow): List[ValuedProperty] = {
     row[Seq[String]]("inst_prop") // get the properties sequence from the row
       .toList
-      .map(string =>extractValuedPropertyFromString(string))
+      .map(string => parse(string))
+  }
 
-  def extractValuedPropertyFromString(vp: String): ValuedProperty = {
-    val vpArray = vp.split("%")
+  /**
+   * Method to parse a string ("string1 -> string2") to a ValuedProperty
+   * @author Thomas GIOVANNINI
+   * @param string to parse
+   * @return the proper ValuedProperty
+   */
+  def parse(string: String): ValuedProperty = {
+    val vpArray = string.split(" -> ")
     val prop = Property(vpArray(0))
     val value = vpArray(1)
     ValuedProperty(prop, value)
