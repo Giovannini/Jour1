@@ -43,15 +43,10 @@ class NeoDAO$Test extends FunSuite {
     List(ValuedProperty(propName, "LORGEOUX"),
       ValuedProperty(propAge, "22")),
     conceptWoman)
-  val invalidPerson = Instance("Truc",
-    Coordinates(0, 0),
-    List(ValuedProperty(propName, "MACHIN"),
-      ValuedProperty(propAge, "22")),
-    conceptMan)
+  Statement.clearDB.execute
 
   /* Concept */
   test("method addConceptToDB should add a concept in the Neo4J DB") {
-    Statement.clearDB.execute()
     NeoDAO.addConceptToDB(conceptWoman)
     assert(Concept.findAll.contains(conceptWoman))
     assert(Concept.findAll.length == 1)
@@ -94,13 +89,10 @@ class NeoDAO$Test extends FunSuite {
     NeoDAO.addInstance(julien)
     NeoDAO.addInstance(simon)
     NeoDAO.addInstance(aurelie)
-    NeoDAO.addInstance(invalidPerson)
     assert(Concept.getInstancesOf(conceptMan.hashCode()).contains(thomas))
     assert(Concept.getInstancesOf(conceptMan.hashCode()).contains(simon))
     assert(!Concept.getInstancesOf(conceptMan.hashCode()).contains(aurelie))
     assert(Concept.getInstancesOf(conceptWoman.hashCode()).contains(aurelie))
-    assert(!Concept.getInstancesOf(conceptMan.hashCode()).contains(invalidPerson))
-    assert(!Concept.getInstancesOf(conceptWoman.hashCode()).contains(invalidPerson))
   }
 
   test("method removeInstance should remove an instance from the graph"){

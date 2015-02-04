@@ -14,23 +14,25 @@ object NeoDAO {
   implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
 
   /**
-   * Execute a cypher query to write a list of concepts into the DB.
+   * Add a concept into the DB.
    * @author Thomas GIOVANNINI
    * @param concept concept to write into the DB
-   * @return the cypher query
+   * @return true if the concept was correctly added
+   *         false else
    */
-  def addConceptToDB(concept: Concept) =
-  {
+  def addConceptToDB(concept: Concept): Boolean = {
     val statement = Statement.createConcept(concept)
     statement.execute
   }
 
   /**
-   * Execute a cypher query to remove a concept from the DB.
+   * Remove a concept from the DB.
    * @author Thomas GIOVANNINI
    * @param concept to remove
+   * @return true if the concept was correctly removed
+   *         false else
    */
-  def removeConceptFromDB(concept: Concept) = {
+  def removeConceptFromDB(concept: Concept): Boolean = {
     val statement = Statement.deleteConcept(concept.hashCode())
     statement.execute
   }
@@ -39,44 +41,49 @@ object NeoDAO {
    * Create a relation into two existing concepts in the Neo4J DB.
    * @author Thomas GIOVANNINI
    * @param relation the relation to add, containing the source concept, the relation name and the destination concept
+   * @return true if the relation was correctly added
+   *         false else
    */
-  def addRelationToDB(sourceId: Int, relation: Relation, destId: Int) = {
+  def addRelationToDB(sourceId: Int, relation: Relation, destId: Int): Boolean = {
     val statement = Statement.createRelation(sourceId, relation, destId)
-    statement.execute()
+    statement.execute
   }
 
   /**
    * Remove a relation into two existing concepts in the Neo4J DB.
-   * @author Thomas GIOVANNINI
-   * @param relation the relation to remove, containing the source concept, the relation name and the destination concept
+   * @param sourceId the source of the link
+   * @param relation the name of the relation
+   * @param destId the destination of the link
+   * @return true if the relation was correctly removed
+   *         false else
    */
-  def removeRelationFromDB(sourceId: Int, relation: Relation, destId: Int) = {
+  def removeRelationFromDB(sourceId: Int, relation: Relation, destId: Int): Boolean = {
     val statement = Statement.deleteRelation(sourceId, relation, destId)
-    statement.apply()
-      .toList
-      .foreach(println)
-    //if (result) println("Relation deleted") else println("Uh oh...relation not deleted.")
+    statement.execute
   }
 
   /**
    * Method to add an instance of a given concept (doing the relation) to the Neo4J Graph
    * @author Thomas GIOVANNINI
    * @param instance to add to the graph
+   * @return true if the instance was correctly added
+   *         false else
    */
-  def addInstance(instance: Instance): Unit = {
-    if(instance.isValid) {
-      val statement = Statement.createInstance(instance)
-      statement.execute
-      addRelationToDB(instance.hashCode, Relation("INSTANCE_OF"), instance.concept.hashCode())
-    }
+  def addInstance(instance: Instance): Boolean = {
+    val statement = Statement.createInstance(instance)
+    val result = statement.execute
+    if (result) addRelationToDB(instance.hashCode, Relation("INSTANCE_OF"), instance.concept.hashCode())
+    else result
   }
 
   /**
    * Method to remove an instance from the graph
    * @author Thomas GIOVANNINI
    * @param instance to remove
+   * @return true if the instance was correctly removed
+   *         false else
    */
-  def removeInstance(instance: Instance): Unit = {
+  def removeInstance(instance: Instance): Boolean = {
     val statement = Statement.deleteInstances(instance)
     statement.execute
   }
