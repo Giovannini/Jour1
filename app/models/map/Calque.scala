@@ -11,16 +11,17 @@ case class Calque(taille: Int, persist: Float) {
     matrix.toList
       .map(_.toList
             .map(prettify)
-            .mkString("|"))
+            .mkString(""))
       .mkString("\n")
   }
 
   private def prettify(number: Int): String = {
-    "" + {if(number<100) "0" else ""} + {if(number<10) "0" else ""} + number.toString
+    "<span style=\"width=5px;height=5px;"+{if(number<100) "background-color:blue" else "background-color:rgb("+(255-number)+","+(255-number)+","+(255-number)+")"}+"\">"+"" + "0" +"</span>"
   }
 
   override def toString: String = {
-    "Calque: size -> " + taille + "; persist = " + persist + "\n" + printMatrix
+    //"Calque: size -> " + taille + "; persist = " + persist + "\n" +
+    printMatrix
   }
 }
 
@@ -74,7 +75,7 @@ object Calque {
       .zipWithIndex
       .map{ indexedCalque => smooth(taille, indexedCalque._1, indexedCalque._2)}
 
-    val res = calquesTravail.mkString("\n")
+    //var res = calquesTravail.mkString("\n")
 
     val sum_persistances = calquesTravail.map(_.persist).sum
 
@@ -104,6 +105,7 @@ object Calque {
         lissage.matrix(x)(y) = a / n
       }
     }
+    val res=calque.toString
     res
   }
 
