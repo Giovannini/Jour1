@@ -4,7 +4,7 @@ import models.map.Calque
 import play.api.mvc.{Action, Controller}
 
 /**
- * Created by eisti on 2/2/15.
+ * Test controller for the map generation
  */
 
 object mapGene extends Controller{
@@ -19,18 +19,13 @@ object mapGene extends Controller{
     val octave = 3
     val frequence = 4
     val persistance=1/2 : Float
-    val taille_sortie = 200
+    val taille_sortie = 50
     val lissage = 3
 
-    val calque = Calque(taille_sortie,1)
-
-
+    val calque = Calque.filledWith0(taille_sortie,1)
     val matrice = Array.ofDim[Int](taille_sortie, taille_sortie)
 
-
-    calque.init_calque()
-
-    calque.generer_calque(frequence,octave,persistance,lissage,calque)
+    Calque.generer_calque(frequence,octave,persistance,lissage,calque)
 
     //calque.toString()
 
