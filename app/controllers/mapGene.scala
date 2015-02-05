@@ -17,11 +17,11 @@ object mapGene extends Controller{
 
   private def  main( ): String = {
     /* déterminations des bornes */
-    val octave = 100
-    val frequence = 30
+    val octave = 60
+    val frequence = 45
     val persistance= 0.5f
-    val taille_sortie = 200
-    val lissage = 3
+    val taille_sortie = 400
+    val lissage = 4
 
     val calque = Layer.filledWith0(taille_sortie,1)
     val matrice = Array.ofDim[Int](taille_sortie, taille_sortie)
