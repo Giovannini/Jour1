@@ -3,16 +3,16 @@ package models.map
 /**
  * Model class for layer
  */
-case class Layer(size: Int, persist: Float) {
+case class Layer(matrix: Array[Array[Int]], persist: Float) {
 
-  private val matrix = Array.ofDim[Int](size, size)
+  private val size = matrix.length
 
   /**
    * Display a matrix
    * @author Thomas Giovannini, Simon Ronciere
    * @return The matrix in a string
    */
-  private def printMatrix(): String = {
+  private def printMatrix: String = {
     matrix.toList
       .map(_.toList
       .map(prettify)
@@ -35,86 +35,77 @@ case class Layer(size: Int, persist: Float) {
    * @author Thomas Giovannini
    * @return The square in html
    */
-  override def toString: String = {
-    //"Calque: size -> " + taille + "; persist = " + persist + "\n" +
-    printMatrix
+  override def toString: String = printMatrix
+
+  /**
+   * Method to add two layer (BE CAREFUL, not a real matrix sum).
+   * @author Thomas GIOVANNINI
+   * @param other the layer to add
+   * @return a layer, sum of these two
+   */
+  def +(other: Layer): Layer = {
+    val matrix = (this.matrix, other.matrix).zipped
+      .map { (line1, line2) =>
+        (line1, line2).zipped.map{(value1, value2) =>
+          (value1 + value2 * other.persist).toInt}
+    }
+    Layer(matrix, this.persist)
+  }
+
+  /**
+   * Method to divise a Layer by a number
+   * @author Thomas GIOVANNINI
+   * @param value with which the layer is divided
+   * @return a layer with the matrix' values divided by the value in parameter
+   */
+  def /(value: Double): Layer = {
+    val matrix = this.matrix.map(_.map(v => (v.toFloat / value).toInt))
+    Layer(matrix, this.persist)
   }
 }
 
 object Layer {
-  //last boy scoot Thomas GIOVANNINI
   /**
-   * Fill the matrix with 0
-   * @author Simon Ronciere
-   * @param size size of the matrix to fill
-   * @param persistence value necessary to create a layer
-   * @return the filled matrix
+   * Create a layer with a matrix filled with 0
+   * @author Thomas GIOVANNINI
+   * @param size size of the layer to create
+   * @param persistence of the layer to create
+   * @return a new layer
    */
   def filledWith0(size: Int, persistence: Float): Layer = {
-    val layer = Layer(size, persistence)
-    for (i <- 0 until layer.size; j <- 0 until layer.size)
-      layer.matrix(i)(j) = 0
-    layer
+    val matrix = Array.fill[Int](size, size)(0)
+    Layer(matrix, persistence)
   }
 
-  //last boy scoot Thomas GIOVANNINI
   /**
-   * Fill the matrix of Int with random number
-   * @author Simon Ronciere
-   * @param size size of the matrix to fill
-   * @param persistence value necessary to create a layer
-   * @return the filled matrix
+   * Create a layer with a matrix filled with random values between 0 and 256
+   * @author Thomas GIOVANNINI
+   * @param size size of the layer to create
+   * @param persistence of the layer to create
+   * @return a new layer
    */
   def filledWithRandom(size: Int, persistence: Float): Layer = {
     val random = scala.util.Random
-    val layer = Layer(size, persistence)
-    for (i <- 0 until size; j <- 0 until size)
-      layer.matrix(i)(j) = random.nextInt(256)
-    layer
+    val matrix = Array.fill[Int](size, size)(random.nextInt(256))
+    Layer(matrix, persistence)
   }
 
   /**
-   * Build the matrix of a working layer
-   * @author Thomas Giovannini
-   * @param size size of the matrix to smooth
-   * @param layer to smooth
-   * @param strength intensity of the layer
-   * @param frequency frequency of the regular point
-   * @param randomLayer Layer interpolated
-   * @return the matrix of a working layer
-   */
-
-  def fillWorkingLayers(size: Int, layer: Layer, strength: Int, frequency: Int, randomLayer: Layer): Layer = {
-    for (coordX <- 0 until size; coordY <- 0 until size) {
-      layer.matrix(coordX)(coordY) =
-        interpolateLayer(coordX, coordY, math.pow(frequency, strength).toInt, randomLayer)
-    }
-    layer
-  }
-
-  /**
-   * Sum works layers according to the persitence of each layer
-   * @author Simon Roncière
-   * @param size Size of layers
-   * @param octaves Number of layers
-   * @param persistencesSum sum of persistences
-   * @param layer layer completed by the function
-   * @param workinglayers list of working layer
+   * Sum the working layers according to the Perlin algorithm
+   * @author Simon RONCIERE
+   * @param workingLayers list of working layer
    * @return a layer build with working layers
    */
-  def sumLayers(size: Int, octaves : Int, persistencesSum:Float, layer:Layer, workinglayers:List[Layer]):Layer={
-    for (i <- 0 until size;j <- 0 until size;n <- 0 until octaves) {
-      // somme en fonction du paramètre persist qui sert à pondérer les calques
-      layer.matrix(i)(j) += (workinglayers(n).matrix(i)(j) * workinglayers(n).persist).toInt
-      //normalisation
-      layer.matrix(i)(j) = (layer.matrix(i)(j).toFloat / persistencesSum).toInt
-    }
-    layer
+  def sumLayers(workingLayers:List[Layer]):Layer={
+    val octaves = workingLayers.length
+    val size = workingLayers.head.size
+    val persistenceSum = workingLayers.map(_.persist).sum
+    workingLayers.foldLeft(Layer.filledWith0(size, 1))(_+_) / math.pow(persistenceSum, octaves)
   }
 
   /**
    * Smooth the final matrix
-   * @author Simon Roncière
+   * @author Simon RONCIERE
    * @param size size of the matrix
    * @param smoothParam intensity of the smoothing
    * @param layerSum Layer built with the sum of working layers
@@ -138,49 +129,54 @@ object Layer {
   }
 
   /**
-   * Build a layer with a Perlin noise
-   * @author Simon Roncière
+   * Build a layer with Perlin noise
+   * @author Simon RONCIERE
    * @param frequency frequency of the regular point
    * @param octaves Number of layers
    * @param persistence value necessary to create a layer
    * @param smoothParam intensity of the smoothing
-   * @param layer initial Layer 
-   * @return A generated matrix in a string
+   * @param size initial size
+   * @return the generated layer
    */
-  def generateLayer(frequency: Int, octaves: Int, persistence: Float, smoothParam: Int, layer: Layer): String = {
-    val size = layer.size
-    // Generate a random layer
-    val randomCalque = Layer.filledWithRandom(size, 1)
-    // Generate workingLayer, they have different weighting
-    val calquesTravail = generateWorkingLayer(octaves, persistence, size)
-      .zipWithIndex
-      .map{ indexedCalque => fillWorkingLayers(size, indexedCalque._1, indexedCalque._2,frequency,randomCalque)}
-    val sum_persistence = calquesTravail.map(_.persist).sum
-    val sum_layer = sumLayers(size,octaves,sum_persistence,layer, calquesTravail)
-    //smoothing of the final matrix
-    val smoothedMatrix = smooth(size,smoothParam,sum_layer)
-    smoothedMatrix.toString
+  def generateLayer(frequency: Int, octaves: Int, persistence: Float, smoothParam: Int, size: Int): Layer = {
+    val workingLayers = generateWorkingLayer(octaves, persistence, size, frequency)
+    val sum_layer = sumLayers(workingLayers)
+    smooth(size,smoothParam,sum_layer)
   }
 
   /**
    * Generate an array of working layer
    * @author Thomas GIOVANNINI
    * @param octaves the size of the array
-   * @param persistance the layer persistance
-   * @return the array of working layer filled with 0s
+   * @param persistence the layer persistance
+   * @return the list of working layer filled with 0s
    */
-  def generateWorkingLayer(octaves: Int, persistance: Float, taille: Int): List[Layer] = {
-    val calquesTravail = new Array[Layer](octaves)
-    for (i <- 0 until octaves) {
-      val filledWith0Layer = Layer.filledWith0(taille, math.pow(persistance, i+1).toFloat)
-      calquesTravail(i) = filledWith0Layer
-    }
-    calquesTravail.toList
+  def generateWorkingLayer(octaves: Int, persistence: Float, size: Int, frequency: Int): List[Layer] = {
+    val randomCalque = Layer.filledWithRandom(size, 1)
+    (1 to octaves).map { index =>
+      fillWorkingLayers(size, math.pow(persistence, index).toFloat, math.pow(frequency, index).toInt, randomCalque)
+    }.toList
+  }
+
+  /**
+   * Build the matrix of a working layer
+   * @author Thomas GIOVANNINI
+   * @param size size of the matrix to smooth
+   * @param persistence of the layer
+   * @param frequency frequency of the regular point
+   * @param randomLayer Layer interpolated
+   * @return the matrix of a working layer
+   */
+  def fillWorkingLayers(size: Int, persistence: Float, frequency: Int, randomLayer: Layer): Layer = {
+    val matrix = Array.ofDim[Int](size, size)
+    for (coordX <- 0 until size; coordY <- 0 until size)/*Keeping for loop for a better understanding*/
+      matrix(coordX)(coordY) = interpolateLayer(coordX, coordY, frequency.toInt, randomLayer)
+    Layer(matrix, persistence)
   }
 
   /**
    * Build the bounds of values so interpolate
-   * @author Simon Roncière
+   * @author Simon RONCIERE
    * @param ratio Coordinate / step
    * @param step size / frequency
    * @param size size of the matrix where function is use
@@ -194,7 +190,7 @@ object Layer {
 
   /**
    * Interpolate a point in a layer
-   * @author Simon Roncière
+   * @author Simon RONCIERE
    * @param xCoordinate coordinate x of the considered point
    * @param yCoordinate coordinate x of the considered point
    * @param frequency frequency of the regular point
@@ -221,7 +217,8 @@ object Layer {
   }
 
   /**
-   * polynomiale interpolation of values
+   * Polynomial interpolation of values
+   * @author Simon RONCIERE
    * @param val1 first value
    * @param val2 second value
    * @param intervalWidth width of the interval beetween the values
@@ -230,12 +227,14 @@ object Layer {
    */
   private def interpolate(val1: Int, val2: Int, intervalWidth: Int, delta: Int): Int = {
     if (intervalWidth == 0)
-      return val1
-    if (intervalWidth == 1)
-      return val2
-    val a = delta / intervalWidth
-    val fac1 = 3 * math.pow(1 - a, 2) - 2 * math.pow(1 - a, 3)
-    val fac2 = 3 * math.pow(a, 2) - 2 * math.pow(a, 3)
-    (val1 * fac1 + val2 * fac2).toInt
+      val1
+    else if (intervalWidth == 1)
+      val2
+    else {
+      val a = delta / intervalWidth
+      val fac1 = 3 * math.pow(1 - a, 2) - 2 * math.pow(1 - a, 3)
+      val fac2 = 3 * math.pow(a, 2) - 2 * math.pow(a, 3)
+      (val1 * fac1 + val2 * fac2).toInt
+    }
   }
 }
