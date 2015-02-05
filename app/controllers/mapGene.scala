@@ -1,6 +1,6 @@
 package controllers
 
-import models.map.Calque
+import models.map.Layer
 import play.api.mvc.{Action, Controller}
 import play.twirl.api.Html
 
@@ -23,25 +23,9 @@ object mapGene extends Controller{
     val taille_sortie = 400
     val lissage = 4
 
-    val calque = Calque.filledWith0(taille_sortie,1)
+    val calque = Layer.filledWith0(taille_sortie,1)
     val matrice = Array.ofDim[Int](taille_sortie, taille_sortie)
 
-    Calque.generer_calque(frequence,octave,persistance,lissage,calque)
-
-    //calque.toString()
-
-/*    val r = scala.util.Random
-    for (i <- 0 until taille_sortie; j <- 0 until taille_sortie)
-      matrice(i)(j) =r.nextInt(256)
-
-
-    var res=""
-    for (x <- 0 until taille_sortie){
-      for (y <- 0 until taille_sortie){
-        res=res + matrice(x)(y).toString +" | "
-      }
-      res=res + "\n"
-    }
-    res*/
+    Layer.generateLayer(frequence,octave,persistance,lissage,calque)
   }
 }

@@ -1,8 +1,7 @@
 package models.graph.ontology
 
-import models.graph.custom_types.Label
 import org.anormcypher.CypherResultRow
-import play.api.libs.json.{JsString, JsValue, Json}
+import play.api.libs.json.{JsString, JsValue}
 
 /**
  * Model for properties

@@ -10,7 +10,7 @@ lazy val root = (project in file("."))
   .dependsOn(graph)
   .aggregate(graph)
 
-scalaVersion := "2.11.1"
+scalaVersion := "2.10.4"
 
 libraryDependencies ++= Seq( jdbc , anorm , cache , ws)
 

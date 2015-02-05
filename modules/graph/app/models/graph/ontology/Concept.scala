@@ -17,27 +17,35 @@ case class Concept(label: String,
 
   val id = hashCode()
 
-  override def hashCode() = label.hashCode + properties.hashCode()
+  override def hashCode() = label.hashCode + "CONCEPT".hashCode()
 
   /**
    * Parse a Concept to Json
+   * @author Thomas GIOVANNINI
    * @return the Json form of the concept
    */
-  def toJson: JsValue = Json.obj( "label" -> JsString(label), "properties" -> properties.map(_.toJson),
-    "type" -> JsString("CONCEPT"), "id" -> JsNumber(hashCode()))
+  def toJson: JsValue =
+    Json.obj( "label" -> JsString(label),
+              "properties" -> properties.map(_.toJson),
+              "type" -> JsString("CONCEPT"),
+              "id" -> JsNumber(hashCode()))
 
+  /**
+   * Parse a Concept for it to be used in a Cypher statement
+   * @author Thomas GIOVANNINI
+   * @return a cypher statement compatible string representing the concept
+   */
   def toNodeString = {
-    println("toJson\n" + toJson)
     "(" + label.toLowerCase +
       " { label: \"" + label + "\","+
       " properties: [" + properties.mkString(",") + "],"+
       " type: \"CONCEPT\","+
-      " id:" + hashCode() + "})"
+      " id:" + id + "})"
   }
 
 }
 
-object Concept{
+object Concept {
 
   implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
 

@@ -11,36 +11,36 @@ import play.api.libs.json.{JsNumber, JsString, Json}
  */
 class ConceptTest extends FunSuite {
 
-    val propName = Property("Name")
-    val propFirstName = Property("FirstName")
-    val propAge = Property("Age")
-    val conceptMan = Concept("Man", List(propName, propFirstName))
-    val conceptWoman = Concept("Woman", List(propName, propAge))
-    val conceptHuman = Concept("Human", List(propName))
-    val conceptCat = Concept("Cat", List(propName))
-    val relPet = Relation("PET")
-    val relLike = Relation("LIKE")
-    val relSubtype = Relation("SUBTYPE_OF")
-    val thomas = Instance("Thomas",
-        Coordinates(0, 0),
-        List(ValuedProperty(propName, "GIOVA"),
-            ValuedProperty(propFirstName, "Thomas")),
-        conceptMan)
-    val julien = Instance("Julien",
-        Coordinates(0, 0),
-        List(ValuedProperty(propName, "PRADET"),
-            ValuedProperty(propFirstName, "Julien")),
-        conceptMan)
-    val simon = Instance("Simon",
-        Coordinates(0, 0),
-        List(ValuedProperty(propName, "RONCIERE"),
-            ValuedProperty(propFirstName, "Simon")),
-        conceptMan)
-    val aurelie = Instance("Aurelie",
-        Coordinates(0, 0),
-        List(ValuedProperty(propName, "LORGEOUX"),
-            ValuedProperty(propAge, "22")),
-        conceptWoman)
+        val propName = Property("Name")
+        val propFirstName = Property("FirstName")
+        val propAge = Property("Age")
+        val conceptMan = Concept("Man", List(propName, propFirstName))
+        val conceptWoman = Concept("Woman", List(propName, propAge))
+        val conceptHuman = Concept("Human", List(propName))
+        val conceptCat = Concept("Cat", List(propName))
+        val relPet = Relation("PET")
+        val relLike = Relation("LIKE")
+        val relSubtype = Relation("SUBTYPE_OF")
+        val thomas = Instance("Thomas",
+            Coordinates(0, 0),
+            List(ValuedProperty(propName, "GIOVA"),
+                ValuedProperty(propFirstName, "Thomas")),
+            conceptMan)
+        val julien = Instance("Julien",
+            Coordinates(0, 0),
+            List(ValuedProperty(propName, "PRADET"),
+                ValuedProperty(propFirstName, "Julien")),
+            conceptMan)
+        val simon = Instance("Simon",
+            Coordinates(0, 0),
+            List(ValuedProperty(propName, "RONCIERE"),
+                ValuedProperty(propFirstName, "Simon")),
+            conceptMan)
+        val aurelie = Instance("Aurelie",
+            Coordinates(0, 0),
+            List(ValuedProperty(propName, "LORGEOUX"),
+                ValuedProperty(propAge, "22")),
+            conceptWoman)
 
     implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
 
@@ -58,7 +58,7 @@ class ConceptTest extends FunSuite {
     }
 
     test("toNodeString should return the desired string"){
-        val desiredString = "(man { label: \"Man\", properties: [\"Name\",\"FirstName\"], type: \"CONCEPT\", id:266986376})"
+        val desiredString = "(man { label: \"Man\", properties: [\"Name\",\"FirstName\"], type: \"CONCEPT\", id:1669084034})"
         assert(conceptMan.toNodeString == desiredString)
     }
 
@@ -103,7 +103,7 @@ class ConceptTest extends FunSuite {
         assert(Concept.getParents(conceptMan.hashCode()).contains((relSubtype,conceptHuman)))
     }
 
-    test("method getAllPossibleActions should give all the possible actions for a given concept"){
+    test("method getPossibleActions should give all the possible actions for a given concept"){
         NeoDAO.addConceptToDB(conceptCat)
         NeoDAO.addRelationToDB(conceptHuman.hashCode(), relPet, conceptCat.hashCode())
         val relationList = Concept.getPossibleActions(conceptMan.hashCode())
@@ -118,7 +118,15 @@ class ConceptTest extends FunSuite {
         assert(! relations.contains((Relation("INSTANCE_OF"), thomas)))
     }
 
+    test("method getInstancesOfSelf"){
+        val instancesOfMan = Concept.getInstanceOfSelf(conceptMan.id)
+        val instancesOfHuman = Concept.getInstanceOfSelf(conceptHuman.id)
+        assert(instancesOfMan.contains(thomas))
+        assert(! instancesOfHuman.contains(thomas))
+    }
+
     test("method getInstancesOf should return the instances of a given concept and also its children"){
+        println("gogogo")
         val instancesOfHuman = Concept.getInstancesOf(conceptHuman.id)
         assert(instancesOfHuman.contains(thomas))
         assert(instancesOfHuman.contains(aurelie))
