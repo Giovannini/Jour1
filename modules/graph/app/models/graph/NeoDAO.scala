@@ -33,7 +33,7 @@ object NeoDAO {
    *         false else
    */
   def removeConceptFromDB(concept: Concept): Boolean = {
-    val statement = Statement.deleteConcept(concept.hashCode())
+    val statement = Statement.deleteConcept(concept.id)
     statement.execute
   }
 
@@ -71,8 +71,8 @@ object NeoDAO {
    */
   def addInstance(instance: Instance): Boolean = {
     val statement = Statement.createInstance(instance)
-    val result = statement.execute
-    if (result) addRelationToDB(instance.hashCode, Relation("INSTANCE_OF"), instance.concept.hashCode())
+    val result = Concept.getById(instance.concept.id).isDefined && statement.execute
+    if (result) addRelationToDB(instance.hashCode, Relation("INSTANCE_OF"), instance.concept.id)
     else result
   }
 

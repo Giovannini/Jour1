@@ -1,6 +1,6 @@
 package models.graph.custom_types
 
-import models.graph.ontology.{Instance, Concept, Relation}
+import models.graph.ontology.{Relation, Instance, Concept}
 import org.anormcypher.{Cypher, CypherStatement}
 
 /**
@@ -40,8 +40,9 @@ object Statement {
   def deleteConcept(conceptId: Int): CypherStatement = {
     Cypher("MATCH (n {id: {id1} }) " +
       "OPTIONAL MATCH (n)-[r]-() " +
-      "DELETE n, r;")
-      .on("id1" -> conceptId)
+      "OPTIONAL MATCH (n)-[r2]-(n2 {type: {type}}) " +
+      "DELETE n, r, r2, n2;")
+      .on("id1" -> conceptId, "type" -> "INSTANCE")
   }
 
   /**
@@ -66,11 +67,9 @@ object Statement {
    * @return a cypher statement to execute
    */
   def createRelation(sourceNodeId: Int, relation: Relation, destNodeId: Int) : CypherStatement = {
-    val id1 = sourceNodeId
-    val rel = relation.label
-    val id2 = destNodeId
-    Cypher( "MATCH (n1 {id: "+ id1 +"}), (n2 {id: "+ id2 +"})\n" +
-      "CREATE (n1)-[r:"+ rel +"]->(n2)")
+    Cypher("MATCH (n1 {id: {id1}}), (n2 {id: {id2}})\nCREATE (n1)-[r:"+relation.label+"]->(n2)")
+      .on("id1" -> sourceNodeId,
+          "id2" -> destNodeId)
   }
 
   /**
@@ -82,10 +81,9 @@ object Statement {
    * @return a cypher statement deleting the desired relation
    */
   def deleteRelation(sourceNodeId: Int, relation: Relation, destNodeId: Int) : CypherStatement = {
-    val id1 = sourceNodeId
-    val rel = relation.label
-    val id2 = destNodeId
-    Cypher( "MATCH (n1 {id: "+ id1 +"})-[r:"+rel+"]-(n2 {id: "+ id2 +"}) DELETE r")
+    Cypher( "MATCH (n1 {id: {id1}})-[r:"+relation.label+"]-(n2 {id:{id2}}) DELETE r")
+      .on("id1" -> sourceNodeId,
+      "id2" -> destNodeId)
   }
 
   /**
@@ -95,8 +93,7 @@ object Statement {
    * @return a cypher statement returning the relation types and concepts labels and properties
    */
   def getRelationsOf(conceptId: Int): CypherStatement = {
-    Cypher(
-      """
+    Cypher("""
         |MATCH (n1 {id: {id}})-[r]-(n2)
         |RETURN type(r) as rel_type, n2.label as concept_label, n2.properties as concept_prop, n2.type as node_type
       """.stripMargin)
@@ -134,8 +131,7 @@ object Statement {
    * @return a cypher statement
    */
   def getInstances(conceptId: Int): CypherStatement = {
-    Cypher(
-      """
+    Cypher("""
         |MATCH (n1 {id: {id}})-[r:INSTANCE_OF]-(n2)
         |RETURN n2.label as inst_label, n2.properties as inst_prop, n2.coordinate_x as inst_coordx, n2.coordinate_y as inst_coordy
       """.stripMargin)
@@ -149,8 +145,7 @@ object Statement {
    * @return a cypher statement
    */
   def getParentConcepts(conceptId: Int): CypherStatement = {
-    Cypher(
-      """
+    Cypher("""
         |MATCH (n1 {id: {id}})-[r:SUBTYPE_OF]->(n2)
         |RETURN n2.label as concept_label, n2.properties as concept_prop
       """.stripMargin)
@@ -164,8 +159,7 @@ object Statement {
    * @return a cypher statement
    */
   def getChildrenConcepts(conceptId: Int): CypherStatement = {
-    Cypher(
-      """
+    Cypher("""
         |MATCH (n1 {id: {id}})<-[r:SUBTYPE_OF]-(n2)
         |RETURN n2.label as concept_label, n2.properties as concept_prop
       """.stripMargin)

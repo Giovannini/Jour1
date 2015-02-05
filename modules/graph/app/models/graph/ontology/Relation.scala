@@ -8,7 +8,7 @@ import org.anormcypher.CypherResultRow
  * @param label for the relation
  */
 case class Relation(label: String){
-    require(label.matches("^[A-Z][A-Z_]*$"))
+    require(label.matches("^[A-Z][A-Z0-9_]*$"))
 
     override def toString = label
 

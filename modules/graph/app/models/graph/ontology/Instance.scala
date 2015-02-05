@@ -38,8 +38,7 @@ case class Instance(label:          String,
   def toNodeString = "(" + label.toLowerCase +
     " { label: \"" + label + "\","+
     " properties: [" + properties.map(vp => "\"" + vp.toString + "\"").mkString(", ") + "],"+
-    " coordinate_x: " + coordinates.x + ","+
-    " coordinate_y: " + coordinates.y + ","+
+    " coordinate_x: " + coordinates.x + ", coordinate_y: " + coordinates.y + ","+
     " concept: " + concept.hashCode() + ","+
     " type: \"INSTANCE\","+
     " id: " + hashCode() + "})"
@@ -70,7 +69,10 @@ object Instance {
     val coordinates = Coordinates(x_coordinate, y_coordinate)
     val properties = (jsonInstance \ "properties").as[List[JsValue]].map(ValuedProperty.parseJson)
     val conceptId = (jsonInstance \ "concept").as[Int]
-    Instance(label, coordinates, properties, Concept.getById(conceptId))
+    Concept.getById(conceptId) match {
+      case Some(concept) => Instance(label, coordinates, properties, concept)
+      case _ => Instance("XXX", coordinates, List(), Concept("XXX", List()))
+    }
   }
 
   /**
@@ -85,7 +87,10 @@ object Instance {
     val label = row[String]("inst_label")
     val coordinates = Coordinates(row[Int]("inst_coordx"),row[Int]("inst_coordy"))
     val properties = ValuedProperty.rowToPropertiesList(row)
-    Instance(label, coordinates, properties, Concept.getById(conceptId))
+    Concept.getById(conceptId) match {
+      case Some(concept) => Instance(label, coordinates, properties, concept)
+      case _ => Instance("XXX", coordinates, List(), Concept("XXX", List()))
+    }
   }
 
 }

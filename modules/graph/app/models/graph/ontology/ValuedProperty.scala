@@ -11,7 +11,8 @@ import play.api.libs.json.{Json, JsValue}
 case class ValuedProperty(property: Property, value: String){
   /**
    * Parse a ValuedProperty to Json
-   * @return
+   * @author Thomas GIOVANNINI
+   * @return the parsed valued property to json format
    */
   def toJson : JsValue = Json.obj("property" -> property.label, "value" -> value)
 

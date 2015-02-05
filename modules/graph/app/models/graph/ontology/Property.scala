@@ -8,7 +8,7 @@ import play.api.libs.json.{JsString, JsValue}
  * @author Thomas GIOVANNINI
  */
 case class Property(label: String) {
-  require(label.matches("^[A-Z][A-Za-z]*$"))
+  require(label.matches("^[A-Z][A-Za-z0-9]*$"))
   override def toString = "\"" + label + "\""
 
   def toJson : JsValue = JsString(label)
@@ -16,6 +16,12 @@ case class Property(label: String) {
 
 object Property {
 
+  /**
+   * Transform a json representing a property into the Property it represents
+   * @author Thomas GIOVANNINI
+   * @param jsonProperty the property in json format to parse
+   * @return the represented property
+   */
   def parseJson(jsonProperty: JsValue): Property = {
     val label = jsonProperty.as[String]
     Property(label)

@@ -10,14 +10,12 @@ lazy val root = (project in file("."))
   .dependsOn(graph)
   .aggregate(graph)
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.1"
 
-libraryDependencies ++= Seq( jdbc , anorm , cache , ws)
+libraryDependencies ++= Seq( anorm , cache)
 
 libraryDependencies += "org.scalatestplus" %% "play" % "1.2.0" % "test"
 
 libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.1" % "test"
-
-libraryDependencies += "net.debasishg" %% "redisclient" % "2.13"
 
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )

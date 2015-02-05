@@ -1,5 +1,6 @@
 package models.graph.ontology
 
+import models.graph.NeoDAO
 import models.graph.custom_types.Statement
 import org.anormcypher.{Neo4jREST, CypherResultRow}
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
@@ -82,8 +83,13 @@ object Concept {
    * @param property to be added
    * @return the concept with the given property added
    */
-  def addPropertyToConcept(concept: Concept, property: Property): Concept =
-    Concept(concept.label, property :: concept.properties)
+  def addPropertyToConcept(concept: Concept, property: Property): Concept ={
+    NeoDAO.removeConceptFromDB(concept)
+    val newConcept = Concept(concept.label, property :: concept.properties)
+    NeoDAO.addConceptToDB(newConcept)
+    newConcept
+  }
+
 
   /**
    * Method to get a concept from its ID
@@ -91,10 +97,13 @@ object Concept {
    * @param conceptId the ID of the desired concept
    * @return the desired concept
    */
-  def getById(conceptId: Int): Concept = {
+  def getById(conceptId: Int): Option[Concept] = {
     val statement = Statement.getConceptById(conceptId)
-    val row: CypherResultRow = statement.apply().head
-    parseRow(row)
+    val cypherResultRowStream = statement.apply
+    if(cypherResultRowStream.length == 1) {
+      val row: CypherResultRow = statement.apply.head
+      Some(parseRow(row))
+    }else None
   }
 
   /**
@@ -152,13 +161,14 @@ object Concept {
    * @return a list of relations and concepts
    */
   def getPossibleActions(conceptId: Int): List[(Relation, Concept)] = {
-    val relations = getRelations(conceptId)
-      .filter(t => t._1 != Relation("SUBTYPE_OF"))
+    val relations = getRelations(conceptId).filter(notASubtype)
     val parentsRelation = getParents(conceptId)
       .map(tuple => getPossibleActions(tuple._2.id))
       .flatten
     relations ::: parentsRelation
   }
+  
+  def notASubtype(tuple: (Relation, Concept)): Boolean = tuple._1 != Relation("SUBTYPE_OF")
 
   /**
    * Method to retrieve all the instances of a given concept and its children concepts' instances
@@ -169,8 +179,7 @@ object Concept {
   def getInstancesOf(conceptId : Int) : List[Instance] = {
     val instances = getInstanceOfSelf(conceptId)
     val instancesOfChildren = getChildren(conceptId)
-      .map(_._2.id)
-      .map(getInstancesOf)
+      .map(tuple => getInstancesOf(tuple._2.id))
       .flatten
     instances ::: instancesOfChildren
   }
