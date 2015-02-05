@@ -7,6 +7,11 @@ case class Calque(taille: Int, persist: Float) {
 
   private val matrix = Array.ofDim[Int](taille, taille)
 
+  /**
+   * Display a matrix
+   * @author Thomas Giovannini, Simon Ronciere
+   * @return The matrix in a string
+   */
   private def printMatrix(): String = {
     matrix.toList
       .map(_.toList
@@ -15,10 +20,20 @@ case class Calque(taille: Int, persist: Float) {
       .mkString("\n")
   }
 
+  /**
+   * Format matrix square
+   * @author Simon Ronciere
+   * @return The square in html
+   */
   private def prettify(number: Int): String = {
     "<span style=\"width=5px;height=5px;"+{if(number<100) "background-color:blue" else "background-color:rgb("+(255-number)+","+(255-number)+","+(255-number)+")"}+"\">"+"" + "0" +"</span>"
   }
 
+  /**
+   * Format matrix square
+   * @author Thomas
+   * @return The square in html
+   */
   override def toString: String = {
     //"Calque: size -> " + taille + "; persist = " + persist + "\n" +
     printMatrix
@@ -80,32 +95,31 @@ object Calque {
     val sum_persistances = calquesTravail.map(_.persist).sum
 
     //ajout des calques successifs
-    for (i <- 0 until taille) {
-      for (j <- 0 until taille) {
+    for (i <- 0 until taille;j <- 0 until taille) {
         for (n <- 0 until octaves) {
           // ! claque param
           calque.matrix(i)(j) += (calquesTravail(n).matrix(i)(j) * calquesTravail(n).persist).toInt
           //normalisation
           calque.matrix(i)(j) = (calque.matrix(i)(j).toFloat / sum_persistances).toInt
         }
-      }
 
+    }
       //lissage
       val lissage = Calque.filledWith0(taille, 0)
 
-      for (x <- 0 until taille; y <- 0 until taille) {
-        var a = 0
-        var n = 0
-        for (k <- (x - liss) to (x + liss); l <- (y - liss) to (y + liss)) {
+      for (coordonne_x <- 0 until taille; coordonne_y <- 0 until taille) {
+        var somme_tuile_calques = 0
+        var nb_calque = 0
+        for (k <- (coordonne_x - liss) to (coordonne_x + liss); l <- (coordonne_y - liss) to (coordonne_y + liss)) {
           if ((k >= 0) && (k < taille) && (l >= 0) && (l < taille)) {
-            n = n + 1
-            a = a + calque.matrix(k)(l)
+            nb_calque = nb_calque + 1
+            somme_tuile_calques = somme_tuile_calques + calque.matrix(k)(l)
           }
         }
-        lissage.matrix(x)(y) = a / n
+        lissage.matrix(coordonne_x)(coordonne_y) = somme_tuile_calques / nb_calque
       }
-    }
-    val res=calque.toString
+
+    val res=lissage.toString
     res
   }
 
