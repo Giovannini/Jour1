@@ -1,6 +1,6 @@
 package models.graph
 
-import models.graph.custom_types.{Statement, Coordinates}
+import models.graph.custom_types.Coordinates
 import models.graph.ontology._
 import org.anormcypher.Neo4jREST
 import org.scalatest.FunSuite
