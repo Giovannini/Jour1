@@ -28,7 +28,7 @@ case class Instance(label:          String,
     "concept" -> JsNumber(concept.hashCode())
   )
 
-  override def hashCode = label.hashCode() + coordinates.hashCode() + properties.hashCode() + concept.hashCode()
+  override def hashCode = label.hashCode + concept.hashCode()
 
   /**
    * Parse an Instance for it to be used in a Cypher statement
@@ -93,5 +93,31 @@ object Instance {
     }
   }
 
+  /**
+   * Create an instance of a certain concept with random attributes
+   * @author Thomas GIOVANNINI
+   * @param concept the concept of which the instance is desired
+   * @return a new instance
+   */
+  def createRandomInstanceOf(concept: Concept): Instance = {
+    Instance(concept.label + (math.random*(1000000)).toInt,
+              Coordinates(0,0),
+              concept.properties.map(prop => ValuedProperty(prop, (math.random*(1000000)).toInt.toString)),
+              concept)
+  }
+
+  /**
+   * Update the property of an instance
+   * @author Thomas GIOVANNINI
+   * @param instance to update
+   * @param newValuedProperty the property to update
+   * @return an instance similar to the input one with updated value
+   */
+  def update(instance: Instance, newValuedProperty: ValuedProperty): Instance = {
+    Instance(instance.label,
+              instance.coordinates,
+              ValuedProperty.updateList(instance.properties, newValuedProperty),
+              instance.concept)
+  }
 }
 

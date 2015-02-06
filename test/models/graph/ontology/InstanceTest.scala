@@ -32,8 +32,6 @@ class InstanceTest extends FunSuite {
       ValuedProperty(prop3, "22")),
     concept2)
 
-  Statement.clearDB.execute
-
   implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
 
   test("method toJson"){
@@ -80,5 +78,17 @@ class InstanceTest extends FunSuite {
     val row = statement.apply().head
     assert(Instance.parseRowGivenConcept(row, concept2.id) == aurelie)
     NeoDAO.removeConceptFromDB(concept2)
+  }
+
+  test("method createRandomInstance must create valid instances"){
+    assert(Instance.createRandomInstanceOf(concept1).isValid)
+  }
+
+  test("method update"){
+    val randomInstance = Instance.createRandomInstanceOf(concept1)
+    val newValuedProperty = ValuedProperty(prop1, "Thomas")
+    val updatedInstance = Instance.update(randomInstance, newValuedProperty)
+    assert(updatedInstance.hashCode == randomInstance.hashCode)
+    assert(updatedInstance.properties.contains(newValuedProperty))
   }
 }

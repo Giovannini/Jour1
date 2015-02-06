@@ -63,4 +63,12 @@ object ValuedProperty {
     val value = vpArray(1)
     ValuedProperty(prop, value)
   }
+
+  def updateList(vpList: List[ValuedProperty], vp: ValuedProperty): List[ValuedProperty] = {
+    vpList match{
+      case h::t if h.property == vp.property => vp :: t
+      case h::t => h :: updateList(t, vp)
+      case _ => List()
+    }
+  }
 }

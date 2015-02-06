@@ -88,4 +88,15 @@ object NeoDAO {
     statement.execute
   }
 
+  /**
+   * Method to update an instance from the graph
+   * @author Thomas GIOVANNINI
+   * @param instance the updated instance to change in the graph.
+   * @return true if the instance was correctly updated
+   *         false else
+   */
+  def updateInstance(instance: Instance): Boolean = {
+    removeInstance(instance) && addInstance(instance)
+  }
+
 }
