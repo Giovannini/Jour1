@@ -6,32 +6,40 @@ import models.graph.ontology._
 import models.map.WorldMap
 import org.anormcypher.Neo4jREST
 import play.api.mvc._
+import play.api.Play.current
 
 object Application extends Controller {
 
   implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
 
+  /**
+   * Send an example of the json representing the world map that will be sent to the client
+   * @author Thomas GIOVANNINI
+   */
   def index = Action {
-    putInitialConceptsInDB
-    val applicationMap = initialization
-    Ok(applicationMap.toJson)
+    putInitialConceptsInDB()
+    val exampleMap = fakeWorldMapGeneration
+    Ok(exampleMap.toJson)
   }
 
-  def initialization = {
+  /**
+   * Generate a fake world map
+   * @author Thomas GIOVANNINI
+   * @return a fake world map
+   */
+  def fakeWorldMapGeneration = {
     val map = WorldMap(Label("MapOfTheWorld"), "Test map", 15, 20)
-    val conceptHerbe = Concept("Herbe", List())
-    val conceptArbre = Concept("Herbe", List(Property("Size")))
+    val conceptGrass = Concept("Grass", List())
+    val conceptTree = Concept("Tree", List(Property("Size")))
     for(i <- 0 until 15; j <- 0 until 20){
-      val herbe = Instance("Herbe"+i+"_"+j, Coordinates(0, 0), List(), conceptHerbe)
+      val grass = Instance("Grass"+i+"_"+j, Coordinates(0, 0), List(), conceptGrass)
       val coordinates = Coordinates(i, j)
-      map.addInstanceAt(herbe, coordinates)
+      map.addInstanceAt(grass, coordinates)
       if(math.random > 0.98){
-        val arbre = Instance(
-          "Arbre"+i+"_"+j,
-          Coordinates(0,0),
+        val tree = Instance("Tree"+i+"_"+j, Coordinates(0,0),
           List(ValuedProperty(Property("Size"), (math.random * 10).toInt.toString)),
-          conceptArbre)
-        map.addInstanceAt(arbre, coordinates)
+          conceptTree)
+        map.addInstanceAt(tree, coordinates)
       }
     }
     map
@@ -39,8 +47,10 @@ object Application extends Controller {
 
   /**
    * Put the concepts of the initial graph and theirs connections in the DB, reset all the rest.
+   * @author Thomas GIOVANNINI
    */
-  def putInitialConceptsInDB: Unit = {
+  def putInitialConceptsInDB(): Unit = {
+    /*Property declaration*/
     val propertyInstanciable      = Property("Instanciable")
     val propertyDuplicationSpeed  = Property("DuplicationSpeed")
 
@@ -58,7 +68,6 @@ object Application extends Controller {
     val conceptTree       = Concept("Tree", List(propertyInstanciable))
     val conceptFir        = Concept("Fir", List(propertyInstanciable))
     val conceptVegetable  = Concept("Vegetable", List())
-    /* Ground used for map generation only. */
     val conceptGround     = Concept("Ground", List())
     val conceptLiquid     = Concept("Liquid", List())
     val conceptSolid      = Concept("Solid", List())
@@ -70,10 +79,9 @@ object Application extends Controller {
     val relationMove        = Relation("MOVE")
     val relationFlee        = Relation("FLEE")
     val relationGrowOn      = Relation("GROW_ON")
-    val relationReproduce   = Relation("REPRODUCES_ITSELF")
 
     Statement.clearDB.execute
-    /*Storage of the concepts*/
+    /*Storage of the concepts in DB*/
     NeoDAO.addConceptToDB(conceptMan)
     NeoDAO.addConceptToDB(conceptPredator)
     NeoDAO.addConceptToDB(conceptAnimal)
@@ -111,7 +119,6 @@ object Application extends Controller {
     NeoDAO.addRelationToDB(conceptGrass.id, relationSubtypeOf, conceptEdible.id)
     NeoDAO.addRelationToDB(conceptGrass.id, relationSubtypeOf, conceptVegetable.id)
     NeoDAO.addRelationToDB(conceptTree.id, relationSubtypeOf, conceptVegetable.id)
-
     NeoDAO.addRelationToDB(conceptLiquid.id, relationSubtypeOf, conceptGround.id)
     NeoDAO.addRelationToDB(conceptSolid.id, relationSubtypeOf, conceptGround.id)
   }
