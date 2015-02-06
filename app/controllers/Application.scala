@@ -37,7 +37,10 @@ object Application extends Controller {
     map
   }
 
-  def putInitialConceptsInDB = {
+  /**
+   * Put the concepts of the initial graph and theirs connections in the DB, reset all the rest.
+   */
+  def putInitialConceptsInDB: Unit = {
     val propertyInstanciable      = Property("Instanciable")
     val propertyDuplicationSpeed  = Property("DuplicationSpeed")
 
@@ -48,7 +51,7 @@ object Application extends Controller {
     val conceptSheep      = Concept("Sheep", List(propertyInstanciable))
     val conceptAnimal     = Concept("Animal", List(propertyInstanciable))
     val conceptGrass      = Concept("Grass", List(propertyInstanciable, propertyDuplicationSpeed))
-    val conceptEdible     = Concept("Grass", List())
+    val conceptEdible     = Concept("Edible", List())
     val conceptApple      = Concept("Apple", List(propertyInstanciable))
     val conceptBush       = Concept("Bush", List(propertyInstanciable))
     val conceptAppleTree  = Concept("AppleTree", List(propertyInstanciable))
@@ -107,6 +110,7 @@ object Application extends Controller {
     NeoDAO.addRelationToDB(conceptBush.id, relationSubtypeOf, conceptEdible.id)
     NeoDAO.addRelationToDB(conceptGrass.id, relationSubtypeOf, conceptEdible.id)
     NeoDAO.addRelationToDB(conceptGrass.id, relationSubtypeOf, conceptVegetable.id)
+    NeoDAO.addRelationToDB(conceptTree.id, relationSubtypeOf, conceptVegetable.id)
 
     NeoDAO.addRelationToDB(conceptLiquid.id, relationSubtypeOf, conceptGround.id)
     NeoDAO.addRelationToDB(conceptSolid.id, relationSubtypeOf, conceptGround.id)
