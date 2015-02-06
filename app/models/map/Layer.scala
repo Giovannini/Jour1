@@ -13,11 +13,18 @@ case class Layer(matrix: Array[Array[Int]], persist: Float) {
    * @return The matrix in a string
    */
   private def printMatrix: String = {
-    matrix.toList
-      .map(_.toList
-      .map(prettify)
-      .mkString(""))
+    matrix.map(printLine)
       .mkString("\n")
+  }
+
+  /**
+   * Display a pretty line
+   * @author Thomas GIOVANNINI
+   * @param line to display
+   * @return a string representing the line ready to be displayed
+   */
+  private def printLine(line: Array[Int]): String = {
+    line.map(prettify).mkString("")
   }
 
   /**
@@ -32,7 +39,7 @@ case class Layer(matrix: Array[Array[Int]], persist: Float) {
 
   /**
    * Format matrix square
-   * @author Thomas Giovannini
+   * @author Thomas GIOVANNINI
    * @return The square in html
    */
   override def toString: String = printMatrix
@@ -44,12 +51,11 @@ case class Layer(matrix: Array[Array[Int]], persist: Float) {
    * @return a layer, sum of these two
    */
   def +(other: Layer): Layer = {
-    val matrix = (this.matrix, other.matrix).zipped
-      .map { (line1, line2) =>
-        (line1, line2).zipped.map{(value1, value2) =>
-          (value1 + value2 * other.persist).toInt}
+    val sumMatrix = Array.ofDim[Int](size, size)
+    for(i <- 0 until size; j <- 0 until size){
+      sumMatrix(i)(j) = (this.matrix(i)(j) + other.matrix(i)(j) * other.persist).toInt
     }
-    Layer(matrix, this.persist)
+    Layer(sumMatrix, this.persist)
   }
 
   /**
