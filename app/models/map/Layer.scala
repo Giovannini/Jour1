@@ -68,6 +68,23 @@ case class Layer(matrix: Array[Array[Int]], persist: Float) {
     val matrix = this.matrix.map(_.map(v => (v.toFloat / value).toInt))
     Layer(matrix, this.persist)
   }
+
+  /**
+   * Get statistics on matrix
+   * @param matrix matrix to analysis
+   * @return
+   */
+  def statMatrix():(Int,Int,Int)={
+    var moy,max=0
+    var min =300
+    for (i <- 0 until matrix.length; j <- 0 until matrix.length) {
+      moy += matrix(i)(j)
+      if(matrix(i)(j)>max)max=matrix(i)(j)
+      if(matrix(i)(j)<min)min=matrix(i)(j)
+    }
+    moy=moy/math.pow(matrix.length,2).toInt
+    (min,moy,max)
+  }
 }
 
 object Layer {
@@ -119,17 +136,16 @@ object Layer {
    */
   def smooth (size: Int, smoothParam:Int,layerSum:Layer):Layer={
     val smoothedMatrix = Layer.filledWith0(size, 0)
-    for (coordonne_x <- 0 until size; coordonne_y <- 0 until size) {
+    for (coordonneX <- 0 until size; coordonneY <- 0 until size) {
       var SumTiles,NbLayers = 0
       val sizeList = (0 until size).toList
-      //for (k <- (math.max(coordonne_x - smoothParam,0)) to (math.min(coordonne_x + smoothParam,size)); l <- (math.max(coordonne_y - smoothParam,0)) to math.min(coordonne_y + smoothParam,0)) {
-      for (k <- (coordonne_x - smoothParam) to (coordonne_x + smoothParam); l <- (coordonne_y - smoothParam) to (coordonne_y + smoothParam)) {
+      for (k <- (coordonneX - smoothParam) to (coordonneX + smoothParam); l <- (coordonneY - smoothParam) to (coordonneY + smoothParam)) {
         if (sizeList.contains(k) && sizeList.contains(l)) {
           NbLayers = NbLayers + 1
           SumTiles = SumTiles + layerSum.matrix(k)(l)
         }
       }
-      smoothedMatrix.matrix(coordonne_x)(coordonne_y) = SumTiles / NbLayers
+      smoothedMatrix.matrix(coordonneX)(coordonneY) = SumTiles / NbLayers
     }
     smoothedMatrix
   }
@@ -146,8 +162,8 @@ object Layer {
    */
   def generateLayer(frequency: Int, octaves: Int, persistence: Float, smoothParam: Int, size: Int): Layer = {
     val workingLayers = generateWorkingLayer(octaves, persistence, size, frequency)
-    val sum_layer = sumLayers(workingLayers)
-    smooth(size,smoothParam,sum_layer)
+    val sumLayer = sumLayers(workingLayers)
+    smooth(size,smoothParam,sumLayer)
   }
 
   /**
@@ -243,4 +259,5 @@ object Layer {
       (val1 * fac1 + val2 * fac2).toInt
     }
   }
+
 }
