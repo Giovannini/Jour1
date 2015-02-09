@@ -17,7 +17,7 @@ object InitWorld extends Controller {
    * @author Thomas GIOVANNINI
    */
   def getFakeInstances = Action {
-    val exampleMap = fakeWorldMapGeneration(5,5)
+    val exampleMap = fakeWorldMapGeneration(50,30)
     Ok(exampleMap.toJson)
   }
 
@@ -35,7 +35,7 @@ object InitWorld extends Controller {
       val grass = Instance(id, "Grass"+i+"_"+j, Coordinates(0, 0), List(), conceptGrass)
       val coordinates = Coordinates(i, j)
       map.addInstanceAt(grass, coordinates)
-      if(math.random > 0.7){
+      if(math.random > 0.9){
         val tree = Instance(id+1, "Tree"+i+"_"+j, Coordinates(0,0),
           List(ValuedProperty(Property("Size", "Int", 5), (math.random * 10).toInt.toString)),
           conceptTree)
@@ -46,6 +46,7 @@ object InitWorld extends Controller {
   }
   
   def initGraph = Action {
+    Statement.clearDB.execute
     putInitialConceptsInDB()
     Ok("Le graph a été correctement initialisé")
   }
@@ -65,12 +66,12 @@ object InitWorld extends Controller {
     val conceptWolf       = Concept("Wolf", List(propertyInstanciable))
     val conceptSheep      = Concept("Sheep", List(propertyInstanciable))
     val conceptAnimal     = Concept("Animal", List(propertyInstanciable))
-    val conceptGrass      = Concept("Grass", List(propertyInstanciable, propertyDuplicationSpeed), "#00ff00")
+    val conceptGrass      = Concept("Grass", List(propertyInstanciable, propertyDuplicationSpeed), "#63B160")
     val conceptEdible     = Concept("Edible", List())
     val conceptApple      = Concept("Apple", List(propertyInstanciable))
     val conceptBush       = Concept("Bush", List(propertyInstanciable))
     val conceptAppleTree  = Concept("AppleTree", List(propertyInstanciable))
-    val conceptTree       = Concept("Tree", List(propertyInstanciable), "#55ff55")
+    val conceptTree       = Concept("Tree", List(propertyInstanciable), "#113524")
     val conceptFir        = Concept("Fir", List(propertyInstanciable))
     val conceptVegetable  = Concept("Vegetable", List())
     val conceptGround     = Concept("Ground", List())

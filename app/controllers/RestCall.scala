@@ -30,7 +30,9 @@ object RestCall extends Controller{
     val children = Concept.getChildren(conceptId).map((Relation("PARENT_OF"), _))
     val relations = (actions ::: parents ::: children)
       .map(relationnedConceptToJson)
-    Ok(Json.toJson(relations))
+    
+    Ok(Json.toJson(actions.map(relationnedConceptToJson)))
+//    Ok(Json.toJson(relations))
   }
 
   /**
