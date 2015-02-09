@@ -1,0 +1,20 @@
+{
+  "name": "VieSemantique",
+  "directory": "public/components",
+  "dependencies": {
+    "angular": "latest",
+    "requirejs": "~2.1.15",
+    "pixi.js": "https://github.com/GoodBoyDigital/pixi.js.git#~2.2.5"
+  },
+  "version": "0.1.0",
+  "authors": [
+    "Julien Pradet <julien.pradet@gmail.com>"
+  ],
+  "description": "Vie sémantique",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ]
+}
