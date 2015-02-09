@@ -18,7 +18,7 @@ case class Concept(label: String,
   require(label.matches("^[A-Z][A-Za-z0-9_ ]*$") && color.matches("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$") )
 
   /**
-   * Constructor giving automatically the color #AAAAAA to the context.
+   * Constructor giving automatically the color #AAAAAA to the concept.
    * @author Thomas GIOVANNINI
    * @param label of the concept
    * @param properties of the concept
@@ -63,6 +63,8 @@ case class Concept(label: String,
 }
 
 object Concept {
+
+  val error = Concept("XXX", List(), List())
 
   /**
    * Apply method for the second constructor

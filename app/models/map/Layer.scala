@@ -71,18 +71,14 @@ case class Layer(matrix: Array[Array[Int]], persist: Float) {
 
   /**
    * Get statistics on matrix
-   * @param matrix matrix to analysis
-   * @return
+   * @author Thomas GIOVANNINI
+   * @return a triplet containing the min and max elements of the matrix with the average value
    */
-  def statMatrix():(Int,Int,Int)={
-    var moy,max=0
-    var min =300
-    for (i <- 0 until matrix.length; j <- 0 until matrix.length) {
-      moy += matrix(i)(j)
-      if(matrix(i)(j)>max)max=matrix(i)(j)
-      if(matrix(i)(j)<min)min=matrix(i)(j)
-    }
-    moy=moy/math.pow(matrix.length,2).toInt
+  def statMatrix:(Int,Int,Int)={
+    val valueList = this.matrix.flatten
+    val min = valueList.min
+    val max = valueList.max
+    val moy = valueList.sum / valueList.length
     (min,moy,max)
   }
 }

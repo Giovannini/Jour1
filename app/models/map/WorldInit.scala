@@ -1,34 +1,89 @@
 package models.map
 
-import models.graph.custom_types.{Coordinates, Label}
+import models.graph.custom_types.Coordinates
 import models.graph.ontology.{ValuedProperty, Instance, Property, Concept}
 
 /**
- * Created by eisti on 2/5/15.
+ * Class with method to initialize the world
  */
 case class WorldInit (layer: Layer) {
 
-  def sumForce(listGrounds:List[Int]): Int = {
-    Concept.getById(listGrounds.head) match{
+  /**
+   * Get the sum of the strength of all the ground concepts.
+   * @author Thomas GIOVANNINI
+   * @param groundIdsList the list of the ground strength
+   * @return the sum of the strength of all the ground concepts
+   */
+  def getStrengthSum(groundIdsList:List[Int]): Int = {
+    groundIdsList.map(Concept.getById)
+      .map {
+        case Some(concept) => getStrengthOf(concept)
+        case _ => 0
+      }.sum
+
+    /*Concept.getById(listGrounds.head) match{
       //properties => rules
-      case Some(c)=> val l=c.rules.filter(p=>p.property.label=="Force")
-        // TODO value : Int
-        l.head.value + sumForce(listGrounds.tail)
+      case Some(concept)=> {
+        val strengthRule = concept.rules.filter(_.property.label=="Force").head
+        strengthRule.value + sumForce(listGrounds.tail)
+      }
       case _ => 0
-    }
+    }*/
   }
-  
-  def repartition(min : Int, max :Int, minReel : Int, listGrounds:List[Int] ): List[(Int,Concept)] ={
-    var sumStr=sumForce(listGrounds)
-    Concept.getById(listGrounds.head) match {
+
+  /**
+   * Get the strength of a given concept
+   * @author Thomas GIOVANNINI
+   * @param concept from which the strength is needed
+   * @return the strength og the concept if it has one
+   *         0 else
+   */
+  def getStrengthOf(concept: Concept): Int = {
+    val propertyStrength = Property("Strength", "Int", 0)
+    concept.rules
+      .find(_.property == propertyStrength)
+      .getOrElse(ValuedProperty(propertyStrength, 0))
+      .value.asInstanceOf[Int]
+  }
+
+  /**
+   * Get what Simon calls the repartition list.
+   * @author Thomas GIOVANNINI
+   * @param lowestStrength the lowest ground strength
+   * @param biggestStrength the biggest ground strength
+   * @param listGrounds the ground list
+   * @return a list of tuple containing whatever is "maxOccupe" and its associated concept
+   */
+  def repartition(lowestStrength : Int, biggestStrength :Int, listGrounds:List[Int] ): List[(Int,Concept)] ={
+    listGrounds.map(Concept.getById)
+      .map{
+        case Some(concept) => (getMaxOccupe(listGrounds, concept), concept)
+        case _ => (0, Concept.error)
+      }.filter(notARepartitionError)
+    
+    /*Concept.getById(listGrounds.head) match {
       case Some(c) => val l=c.rules.filter(p=>p.property.label=="Force")
         val maxOccupe = (min+ (l.head.value * (max-minReel) / sumStr)).toInt
         (maxOccupe,c)::repartition(maxOccupe,max,minReel,listGrounds.tail)
       case _ => repartition(min,max,minReel,listGrounds.tail)
-    }
+    }*/
     //minOccupe est la valeur telle que [min;maxOccupe]=typeGround head
   }
 
+  /**
+   * Get what Simon calls the maxOccupe
+   * @author Thomas GIOVANNINI
+   * @param listGrounds the ground list
+   * @param concept
+   * @return whatever maxOccupe is, it returns it
+   */
+  def getMaxOccupe(listGrounds:List[Int], concept: Concept): Int = {
+    listGrounds.min + (getStrengthOf(concept) * (listGrounds.max - listGrounds.min) / listGrounds.sum)
+  }
+
+  def notARepartitionError(tuple: (Int, Concept)): Boolean = {
+    tuple._2 != Concept.error
+  }
 
   def WorldMapGeneration(): Unit ={
     //val map = WorldMap
@@ -39,15 +94,15 @@ case class WorldInit (layer: Layer) {
     val outputSize = 150
 
     val layer = Layer.generateLayer(frequency,octave,persistence,lissage,outputSize)
-    val listInstanciable = getInstanciable(Concept.findAll)
+    val instanciableConceptsList = getInstanciable(Concept.findAll)
 
     val idGround=getGround(Concept.findAll)
     val listGrounds=getGrounds(idGround::Nil)
-    val (min,moy,max)=layer.statMatrix()
-    val listRepartition=repartition(min,max,min,listGrounds)
+    val (min,moy,max)=layer.statMatrix
+    val repartitionList = repartition(min,max,listGrounds)
 
     for(i<-0 until outputSize;j<-0 until outputSize){
-      //TODO remplire la liste d'instance en fonction de la liste des concepts "listRepartition" et des valeurs de la matrice
+      //TODO remplire la liste d'instance en fonction de la liste des concepts "repartitionList" et des valeurs de la matrice
     }
 
   }
@@ -76,12 +131,14 @@ case class WorldInit (layer: Layer) {
 
   }
   def instConcept(coordinates:Coordinates,concept:Concept):Instance={
-    val prop=List(ValuedProperty(Property("Nom"), concept.label),ValuedProperty(Property("Id"), (math.random * 10).toInt.toString))
-    new Instance(concept.label,coordinates,prop,concept)
+    val prop=List(
+      ValuedProperty(Property("Nom", "String", "GIOVA"), concept.label),
+      ValuedProperty(Property("Id", "Int", 0), (math.random * 10).toInt.toString))
+    Instance(0, concept.label,coordinates,prop,concept)
   }
 
-  def getInstanciable(listConcepts:List[Concept]): List ={
-    listConcepts.filter(_.properties.contains(Property("Instanciable")))
+  def getInstanciable(listConcepts:List[Concept]): List[Concept] ={
+    listConcepts.filter(_.properties.map(_.label).contains("Instanciable"))
   }
 
 }

@@ -59,7 +59,7 @@ case class Instance(id:             Int,
 
 object Instance {
 
-  val error = Instance(0, "XXX", Coordinates(0,0), List(), Concept("XXX", List(), List()))
+  val error = Instance(0, "XXX", Coordinates(0,0), List(), Concept.error)
 
   /**
    * Transform a json representing an instance into the Instance it represents
