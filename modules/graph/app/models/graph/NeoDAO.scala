@@ -46,16 +46,14 @@ object NeoDAO {
    *         false else
    */
   def addPropertyToConcept(concept: Concept, property: Property, defaultValue: Any): Boolean = {
-    val statement = Statement.addPropertyToConcept(concept, property.label)
-    val result = statement.execute
-    if(result) {
+    val statement = Statement.addPropertyToConcept(concept, property)
+    statement.execute
+    /*if(result) {
       val cypher = Statement.updateInstancesOf(concept.id, property, defaultValue)
-      println(cypher)
       val res = cypher.execute
-      println("statement is " + res)
       res
     }
-    else result
+    else result*/
   }
 
   /**

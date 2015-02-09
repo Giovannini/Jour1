@@ -125,10 +125,11 @@
             height = 0,
             instances = [];
 
-        var Instance = function(label, x, y, conceptId, properties) {
+        var Instance = function(id, label, x, y, conceptId, properties) {
             var _this = this;
 
             (function() {
+                _this.id = id;
                 _this.label = label;
                 _this.coordinates = {x: x, y: y};
                 _this.conceptId = conceptId;
@@ -147,6 +148,7 @@
             } else {
                 if (!(instance instanceof Instance)) {
                     instance = new Instance(
+                        instance.id,
                         instance.label,
                         instance.coordinates.x,
                         instance.coordinates.y,
@@ -154,7 +156,7 @@
                         instance.properties
                     )
                 }
-                instances.push(instance);
+                instances[instance.id] = instance;
             }
         };
 
@@ -182,12 +184,20 @@
         var renderer = null,
             stage = null,
             textures = [],
-            sprites = [];
+            sprites = [],
+            map = [];
 
         // Init the drawer
         var initDrawer = function(width, height, backgroundColor) {
             if(typeof backgroundColor === "undefined")
                 backgroundColor = 0xcccccc;
+            
+            for(var i = 0; i < width; i++) {
+                map[i] = [];
+                for(var j = 0; j < height; j++) {
+                    map[i][j] = [];
+                }
+            }
             
             renderer = new PIXI.autoDetectRenderer(width * tileWidth, height * tileHeight);
             stage = new PIXI.Stage(backgroundColor, true);
@@ -198,6 +208,7 @@
         };
         
         var render = function() {
+            console.log(stage);
             // Render the frame
             renderer.render(stage);
         };
@@ -222,7 +233,7 @@
                 // Draw the pixel
                 context.fillStyle = concept.color;
                 context.fillRect(0,0,tileWidth,tileHeight);
-
+                
                 // Create a new texture from the canvas
                 textures[id] = PIXI.Texture.fromCanvas(canvas);
             }
@@ -239,14 +250,25 @@
 
         // Draw an instance
         var drawInstance = function(stage, textures, instance) {
-            var sprite = new PIXI.Sprite(textures[instance.concept]);
+            var sprite = new PIXI.Sprite(textures[instance.conceptId]);
 
             // move the sprite to its position
-            sprite.position.x = instance.x;
-            sprite.position.y = instance.y;
+            sprite.position.x = instance.coordinates.x * tileWidth;
+            sprite.position.y = instance.coordinates.y * tileHeight;
 
+            sprite.interactive = true;
+            sprite.click = function(data) {
+                var coord = data.target.position.clone();
+                coord.x = parseInt(coord.x / tileWidth);
+                coord.y = parseInt(coord.y / tileHeight);
+                document.dispatchEvent(new CustomEvent(TAG+"selectTile", {'detail': {instances: map[coord.x][coord.y]}}));
+            };
+            
             // add it to the stage
             stage.addChild(sprite);
+            
+            // add it to the map
+            map[instance.coordinates.x][instance.coordinates.y].push(instance.id);
             
             return sprite;
         };
@@ -289,6 +311,14 @@
             if(concepts.length > 0 && instances.length > 0)
                 initMap();
         });
+        
+        document.addEventListener(TAG+"selectTile", function(event) {
+            var selectedInstances = event.detail.instances;
+            selectedInstances.map(function(id) {
+                return instances[id];
+            });
+            console.log(selectedInstances);
+        })
     };
 
     // Init the objects needed in the controller

@@ -1,4 +1,52 @@
+$lightColor: #eeeeee;
+$darkColor: #222222;
+
+body {
+  background-color: $lightColor;
+  color: $darkColor;
+  margin: 0;
+  padding: 0;
+}
+
+.game-container {
+  display: table;
+  width: 100%;
+  height: 100%;
+}
+
+.game-row {
+  display: table-row;
+}
+
+.right-panel, .left-panel {
+  display: table-cell;
+  vertical-align: top;
+}
+
+.left-panel {
+  width: 80%;
+}
+
+.right-panel {
+  background-color: $darkColor;
+  color: $lightColor;
+  width: 20%;
+}
+
+.tile-info {
+  background-color: #444444;
+}
+
+.tile-info li {
+  line-height: 30px;
+  
+}
+
+.instance-info, .tile-info {
+  padding: 30px;
+}
+
 .map-container {
-  width: 500px;
+  width: 100%;
   height: 500px;
 }

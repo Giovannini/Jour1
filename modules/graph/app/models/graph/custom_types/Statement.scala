@@ -18,7 +18,7 @@ object Statement {
     """
     MATCH n
     WHERE n.type = "CONCEPT"
-    RETURN n.label as concept_label, n.properties as concept_prop
+    RETURN n.label as concept_label, n.properties as concept_prop, n.color as concept_color
     """
   )
 
@@ -57,8 +57,8 @@ object Statement {
    * @param property to add to the concept
    * @return a cypher statement
    */
-  def addPropertyToConcept(concept: Concept, property: String): CypherStatement = {
-    val newPropertiesList = Property(property) :: concept.properties
+  def addPropertyToConcept(concept: Concept, property: Property): CypherStatement = {
+    val newPropertiesList = property :: concept.properties
     Cypher("MATCH (n {id: {id1} }) " +
       "SET n.properties = ["+newPropertiesList.mkString(",")+"]")
       .on("id1" -> concept.id)
@@ -72,7 +72,7 @@ object Statement {
    */
   def getConceptById(conceptId: Int): CypherStatement = {
     Cypher("MATCH (n {id: {id1} }) " +
-      "RETURN n.label as concept_label, n.properties as concept_prop;")
+      "RETURN n.label as concept_label, n.properties as concept_prop, n.color as concept_color")
       .on("id1" -> conceptId)
   }
 
@@ -114,7 +114,11 @@ object Statement {
   def getRelationsOf(conceptId: Int): CypherStatement = {
     Cypher("""
         |MATCH (n1 {id: {id}})-[r]-(n2)
-        |RETURN type(r) as rel_type, n2.label as concept_label, n2.properties as concept_prop, n2.type as node_type
+        |RETURN type(r) as rel_type,
+        |       n2.label as concept_label,
+        |       n2.properties as concept_prop,
+        |       n2.type as node_type,
+        |       n2.color as concept_color
       """.stripMargin)
       .on("id" -> conceptId)
   }
@@ -152,7 +156,10 @@ object Statement {
   def getInstances(conceptId: Int): CypherStatement = {
     Cypher("""
         |MATCH (n1 {id: {id}})-[r:INSTANCE_OF]-(n2)
-        |RETURN n2.label as inst_label, n2.properties as inst_prop, n2.coordinate_x as inst_coordx, n2.coordinate_y as inst_coordy
+        |RETURN n2.label as inst_label,
+        |       n2.properties as inst_prop,
+        |       n2.coordinate_x as inst_coordx,
+        |       n2.coordinate_y as inst_coordy
       """.stripMargin)
       .on("id" -> conceptId)
   }
@@ -166,7 +173,9 @@ object Statement {
   def getParentConcepts(conceptId: Int): CypherStatement = {
     Cypher("""
         |MATCH (n1 {id: {id}})-[r:SUBTYPE_OF]->(n2)
-        |RETURN n2.label as concept_label, n2.properties as concept_prop
+        |RETURN n2.label as concept_label,
+        |       n2.properties as concept_prop,
+        |       n2.color as concept_color
       """.stripMargin)
       .on("id" -> conceptId)
   }
@@ -180,7 +189,9 @@ object Statement {
   def getChildrenConcepts(conceptId: Int): CypherStatement = {
     Cypher("""
         |MATCH (n1 {id: {id}})<-[r:SUBTYPE_OF]-(n2)
-        |RETURN n2.label as concept_label, n2.properties as concept_prop
+        |RETURN n2.label as concept_label,
+        |       n2.properties as concept_prop,
+        |       n2.color as concept_color
       """.stripMargin)
       .on("id" -> conceptId)
   }

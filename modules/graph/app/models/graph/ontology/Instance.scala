@@ -10,7 +10,8 @@ import play.api.libs.json._
  * @author Thomas GIOVANNINI
  * @param label of the instance
  */
-case class Instance(label:          String,
+case class Instance(id:             Int,
+                    label:          String,
                     coordinates:    Coordinates,
                     properties:     List[ValuedProperty],
                     concept:        Concept) {
@@ -22,6 +23,7 @@ case class Instance(label:          String,
    * @return the Json form of the instance
    */
   def toJson: JsValue = Json.obj(
+    "id" -> id,
     "label" -> label,
     "coordinates" -> Json.obj("x" -> JsNumber(coordinates.x), "y" -> JsNumber(coordinates.y)),
     "properties" -> properties.map(vp => vp.toJson),
@@ -36,12 +38,13 @@ case class Instance(label:          String,
    * @return a cypher statement compatible string representing the instance
    */
   def toNodeString = "(" + label.toLowerCase +
-    " { label: \"" + label + "\","+
+    " { id: \"" + id + "\","+
+    " label: \"" + label + "\","+
     " coordinate_x: " + coordinates.x + ", coordinate_y: " + coordinates.y + ","+
     " concept: " + concept.hashCode() + ","+
     " type: \"INSTANCE\","+
     " id: " + hashCode() + "," +
-    " properties: ["+properties.mkString(", ") + "]})"
+    " properties: ["+properties.map("\"" + _ + "\"").mkString(",") + "]})"
 
   /**
    * Method to see if the instance matches its concept properties
@@ -56,7 +59,7 @@ case class Instance(label:          String,
 
 object Instance {
 
-  val error = Instance("XXX", Coordinates(0,0), List(), Concept("XXX", List()))
+  val error = Instance(0, "XXX", Coordinates(0,0), List(), Concept("XXX", List()))
 
   /**
    * Transform a json representing an instance into the Instance it represents
@@ -65,6 +68,7 @@ object Instance {
    * @return the represented instance
    */
   def parseJson(jsonInstance: JsValue): Instance = {
+    val id = (jsonInstance \ "id").as[Int]
     val label = (jsonInstance \ "label").as[String]
     val x_coordinate = (jsonInstance \ "coordinates" \ "x").as[Int]
     val y_coordinate = (jsonInstance \ "coordinates" \ "y").as[Int]
@@ -72,8 +76,8 @@ object Instance {
     val properties = (jsonInstance \ "properties").as[List[JsValue]].map(ValuedProperty.parseJson)
     val conceptId = (jsonInstance \ "concept").as[Int]
     Concept.getById(conceptId) match {
-      case Some(concept) => Instance(label, coordinates, properties, concept)
-      case _ => Instance("XXX", coordinates, List(), Concept("XXX", List()))
+      case Some(concept) => Instance(id, label, coordinates, properties, concept)
+      case _ => Instance(0, "XXX", coordinates, List(), Concept("XXX", List()))
     }
   }
 
@@ -87,13 +91,14 @@ object Instance {
    */
   def parseRowGivenConcept(row: CypherResultRow, conceptId: Int): Instance = {
     println(row)
+    val id = row[Int]("inst_id")
     val label = row[String]("inst_label")
     val coordinates = Coordinates(row[Int]("inst_coordx"),row[Int]("inst_coordy"))
     val properties = ValuedProperty.rowToPropertiesList(row)
     println(Concept.getById(conceptId))
     Concept.getById(conceptId) match {
-      case Some(concept) => Instance(label, coordinates, properties, concept)
-      case _ => Instance("XXX", coordinates, List(), Concept("XXX", List()))
+      case Some(concept) => Instance(id, label, coordinates, properties, concept)
+      case _ => Instance(0, "XXX", coordinates, List(), Concept("XXX", List()))
     }
   }
 
@@ -104,7 +109,9 @@ object Instance {
    * @return a new instance
    */
   def createRandomInstanceOf(concept: Concept): Instance = {
-    Instance(concept.label + (math.random * 1000000).toInt,
+    val id = (math.random * 1000000).toInt
+    Instance(id,
+              concept.label + id,
               Coordinates(0,0),
               concept.properties.map(prop => ValuedProperty(prop, (math.random * 1000000).toInt.toString)),
               concept)
@@ -118,7 +125,8 @@ object Instance {
    * @return an instance similar to the input one with updated value
    */
   def update(instance: Instance, newValuedProperty: ValuedProperty): Instance = {
-    Instance(instance.label,
+    Instance(instance.id,
+              instance.label,
               instance.coordinates,
               ValuedProperty.updateList(instance.properties, newValuedProperty),
               instance.concept)

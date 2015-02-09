@@ -70,11 +70,13 @@ object Tile {
    * @return a copy of the old tile with the new instance added to it
    */
   def addInstanceToTile(newInstance: Instance, tile: Tile): Tile = {
-    val instance = Instance(newInstance.label,
+    val instance = Instance(newInstance.id,
+      newInstance.label,
       tile.coordinates,
       newInstance.properties,
       newInstance.concept)
-    NeoDAO.addInstance(instance)
+    /*Une instance n'est jamais ajouté au graphe mais à une map.*/
+    //NeoDAO.addInstance(instance)
     Tile(tile.coordinates, instance :: tile.instances)
   }
 

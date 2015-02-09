@@ -14,7 +14,7 @@ case class ValuedProperty(property: Property, value: Any){
    * @author Thomas GIOVANNINI
    * @return the parsed valued property to json format
    */
-  def toJson : JsValue = Json.obj("property" -> property.label, "value" -> toJson(value))
+  def toJson : JsValue = Json.obj("property" -> property.toJson, "value" -> toJson(value))
 
   /**
    * Convert a value with an unknown type to the correct JsValue
@@ -38,7 +38,7 @@ case class ValuedProperty(property: Property, value: Any){
    * @author Thomas GIOVANNINI
    * @return the string value for a ValuedProperty
    */
-  override def toString = "\"" + property.label + ": " + value + "\""
+  override def toString = property.toString + "%%" + value
 }
 
 object ValuedProperty {
@@ -50,9 +50,9 @@ object ValuedProperty {
    * @return a Valued property
    */
   def parseJson(jsonVP: JsValue): ValuedProperty = {
-    val property = (jsonVP \ "property").as[String]
-    val value = parseValue(jsonVP \ "value")
-    ValuedProperty(Property(property), value)
+    val property = Property.parseJson(jsonVP \ "property")
+    val value = parseValue(jsonVP \ "value", property.valueType)
+    ValuedProperty(property, value)
   }
 
   /**
@@ -60,12 +60,12 @@ object ValuedProperty {
    * @param jsonValue to convert
    * @return the value in its correct type
    */
-  private def parseValue(jsonValue: JsValue): Any = {
-    jsonValue match {
-      case jsonNumber: JsNumber => jsonValue.as[Double]
-      case jsonString: JsString => jsonValue.as[String]
-      case jsonBoolean: JsBoolean => jsonValue.as[Boolean]
-      case jsonArray: JsArray => jsonValue.as[List[JsValue]].map(parseValue)
+  private def parseValue(jsonValue: JsValue, valueType: String): Any = {
+    valueType match {
+      case "Double" => jsonValue.as[Double]
+      case "String" => jsonValue.as[String]
+      case "Boolean" => jsonValue.as[Boolean]
+      //case "Array" => jsonValue.as[List[JsValue]].map(parseValue(_))
       case _ => jsonValue.as[String]
     }
   }
@@ -78,21 +78,29 @@ object ValuedProperty {
    * @return the concept translated from the given row
    */
   def rowToPropertiesList(row: CypherResultRow): List[ValuedProperty] = {
+    println(row)
     row[Seq[String]]("inst_prop") // get the properties sequence from the row
       .toList
       .map(string => parse(string))
   }
 
   /**
-   * Method to parse a string ("string1 -> string2") to a ValuedProperty
+   * Method to parse a string ("property%value") to a ValuedProperty
    * @author Thomas GIOVANNINI
    * @param string to parse
    * @return the proper ValuedProperty
    */
   def parse(string: String): ValuedProperty = {
-    val vpArray = string.split(": ")
-    val prop = Property(vpArray(0))
-    val value = vpArray(1)
+    val vpArray = string.split("%%")
+    val prop = Property.parseString(vpArray(0))
+    val value = prop.valueType match{
+      case "Int" => vpArray(1).toInt
+      case "Double" => vpArray(1).toDouble
+      case "String" => vpArray(1)
+      case "Boolean" => vpArray(1).toBoolean
+      //case "List" => (jsonProperty \ "defaultValue").as[String]/**TODO deal with lists correctly*/
+      case _ => vpArray(1)
+    }
     ValuedProperty(prop, value)
   }
 

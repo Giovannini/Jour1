@@ -14,6 +14,18 @@ utils.filter('timer', [
             }
         };
     }
+]).filter('actions', [
+    'action', function(concept) {
+        return function(input) {
+            var hours, minutes, seconds;
+            if (input) {
+                action = getActions(input);
+                return "" + input;
+            } else {
+                return "Press Start";
+            }
+        };
+    }
 ]).service('time', function() {
     this.toHours = function(timeMillis) {
         return addZero(timeMillis / (1000 * 60 * 60));
@@ -24,8 +36,8 @@ utils.filter('timer', [
     this.toSeconds = function(timeMillis) {
         return addZero((timeMillis / 1000) % 60);
     };
-    this.toTime = function(hours, minutes, seconds) {
-        return ((hours * 60 * 60) + (minutes * 60) + seconds) * 1000;
+    this.getActions = function(concept) {
+        return $http.get(jsRoutes.controllers.SocketTestController.getActions(concept).url).success(function() {});
     };
     return this.addZero = function(value) {
         value = Math.floor(value);
@@ -35,7 +47,31 @@ utils.filter('timer', [
             return value;
         }
     };
+}).service('time', function() {
+    return this.getActions = function(concept) {
+        return $http.get(jsRoutes.controllers.SocketTestController.getActions(concept).url).success(function() {});
+    };
 }).controller('TimerController', function($scope, $http) {
+    var startWS;
+    startWS = function() {
+        var wsUrl;
+        wsUrl = jsRoutes.controllers.SocketTestController.indexWS().webSocketURL();
+        $scope.socket = new WebSocket(wsUrl);
+        return $scope.socket.onmessage = function(msg) {
+            return $scope.$apply(function() {
+                console.log("received : " + msg);
+                return $scope.time = JSON.parse(msg.data).data;
+            });
+        };
+    };
+    $scope.start = function() {
+        return $http.get(jsRoutes.controllers.SocketTestController.start().url).success(function() {});
+    };
+    $scope.stop = function() {
+        return $http.get(jsRoutes.controllers.SocketTestController.stop().url).success(function() {});
+    };
+    return startWS();
+}).controller('ActionController', function($scope, $http) {
     var startWS;
     startWS = function() {
         var wsUrl;

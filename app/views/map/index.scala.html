@@ -1,11 +1,28 @@
 <link rel="stylesheet" href="@routes.Assets.at("stylesheets/map.css")" />
 
-<div ng-app="mapApp">
-    <div ng-controller="MapController">
-        <div id="pixi" class="map-container"></div>
+<div class="game-container">
+    <div class="game-row">
+        <div class="left-panel">
+            <div id="pixi" class="map-container"></div>
+        </div>
+        <div class="right-panel" ng-app="mapApp">
+            <div class="tile-info">
+                <ul>
+                    <li>Grass</li>
+                    <li>Grass</li>
+                    <li>Tree</li>
+                </ul>
+            </div>
+            
+            <div class="instance-info">
+                <ul>
+                    <li>Action1</li>
+                    <li>Action2</li>
+                    <li>Action3</li>
+                </ul>
+            </div>
+        </div>
     </div>
-
-    <div id="devTest"></div>
 </div>
 <script src="@routes.Assets.at("components/pixi.js/bin/pixi.js")"></script>
-<script src="@routes.Assets.at("../../../public/javascripts/mapScript.js")"></script>
+<script src="@routes.Assets.at("javascripts/mapScript.js")"></script>

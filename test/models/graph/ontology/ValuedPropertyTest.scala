@@ -13,8 +13,8 @@ class ValuedPropertyTest extends FunSuite {
 
   implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
 
-  val prop1 = Property("P1")
-  val prop2 = Property("P2")
+  val prop1 = Property("P1", "Int", 0)
+  val prop2 = Property("P2", "String", "thomas")
   val concept1 = Concept("C1", List(prop1, prop2))
   val aurelie = Instance(
     "Aurelie",
@@ -23,7 +23,7 @@ class ValuedPropertyTest extends FunSuite {
     concept1)
 
   test("method toJson"){
-    val jsonVP = Json.obj("property" -> prop2.label, "value" -> "22")
+    val jsonVP = Json.parse("{\"property\":{\"label\":\"P2\",\"valueType\":\"String\",\"defaultValue\":\"thomas\"},\"value\":\"22\"}")
     assert(ValuedProperty(prop2, "22").toJson == jsonVP)
   }
 
@@ -32,7 +32,7 @@ class ValuedPropertyTest extends FunSuite {
     assert(ValuedProperty.parseJson(jsonVP) == ValuedProperty(prop2, "22"))
   }
 
-  test("method rowToPropertiesList"){
+  ignore("method rowToPropertiesList"){
     NeoDAO.addConceptToDB(concept1)
     NeoDAO.addInstance(aurelie)
     val statement = Statement.getInstances(concept1.id)
@@ -43,9 +43,13 @@ class ValuedPropertyTest extends FunSuite {
   }
 
   test("method parse"){
-    val prop = Property("Property")
-    val value = "value"
-    val stringToParse = "Property: value"
-    assert(ValuedProperty.parse(stringToParse) == ValuedProperty(prop, value))
+    val prop = Property("Property", "Int", 0)
+    val value = 5
+    val stringToParse = prop +"%%5"
+    val parsedVP = ValuedProperty.parse(stringToParse)
+    assert(parsedVP.property.label == prop.label)
+    assert(parsedVP.property.valueType == prop.valueType)
+    assert(parsedVP.property.defaultValue == prop.defaultValue)
+    assert(parsedVP.value == value)
   }
 }
