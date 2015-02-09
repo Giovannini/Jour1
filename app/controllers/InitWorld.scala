@@ -17,7 +17,7 @@ object InitWorld extends Controller {
    * @author Thomas GIOVANNINI
    */
   def getFakeInstances = Action {
-    val exampleMap = fakeWorldMapGeneration(2,2)
+    val exampleMap = fakeWorldMapGeneration(5,5)
     Ok(exampleMap.toJson)
   }
 
@@ -31,11 +31,12 @@ object InitWorld extends Controller {
     val conceptGrass = Concept("Grass", List())
     val conceptTree = Concept("Tree", List(Property("Size", "Int", 5)))
     for(i <- 0 until width; j <- 0 until height){
-      val grass = Instance("Grass"+i+"_"+j, Coordinates(0, 0), List(), conceptGrass)
+      val id = (i * width + j) * 2
+      val grass = Instance(id, "Grass"+i+"_"+j, Coordinates(0, 0), List(), conceptGrass)
       val coordinates = Coordinates(i, j)
       map.addInstanceAt(grass, coordinates)
-      if(math.random > 0.98){
-        val tree = Instance("Tree"+i+"_"+j, Coordinates(0,0),
+      if(math.random > 0.7){
+        val tree = Instance(id+1, "Tree"+i+"_"+j, Coordinates(0,0),
           List(ValuedProperty(Property("Size", "Int", 5), (math.random * 10).toInt.toString)),
           conceptTree)
         map.addInstanceAt(tree, coordinates)
@@ -69,7 +70,7 @@ object InitWorld extends Controller {
     val conceptApple      = Concept("Apple", List(propertyInstanciable))
     val conceptBush       = Concept("Bush", List(propertyInstanciable))
     val conceptAppleTree  = Concept("AppleTree", List(propertyInstanciable))
-    val conceptTree       = Concept("Tree", List(propertyInstanciable))
+    val conceptTree       = Concept("Tree", List(propertyInstanciable), "#55ff55")
     val conceptFir        = Concept("Fir", List(propertyInstanciable))
     val conceptVegetable  = Concept("Vegetable", List())
     val conceptGround     = Concept("Ground", List())

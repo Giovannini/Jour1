@@ -13,3 +13,7 @@ $ activator
 Pour lancer les tests, ouvrir une console:
 $ activator
 [project] $ ~ test
+
+
+#####
+Utilisation de bower pour les gestions de dépendances
