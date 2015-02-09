@@ -122,5 +122,4 @@ object Application extends Controller {
     NeoDAO.addRelationToDB(conceptLiquid.id, relationSubtypeOf, conceptGround.id)
     NeoDAO.addRelationToDB(conceptSolid.id, relationSubtypeOf, conceptGround.id)
   }
-
 }
