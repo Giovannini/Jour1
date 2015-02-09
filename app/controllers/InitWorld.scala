@@ -17,7 +17,7 @@ object InitWorld extends Controller {
    * @author Thomas GIOVANNINI
    */
   def getFakeInstances = Action {
-    val exampleMap = fakeWorldMapGeneration(5,5)
+    val exampleMap = fakeWorldMapGeneration(50,30)
     Ok(exampleMap.toJson)
   }
 
@@ -28,14 +28,14 @@ object InitWorld extends Controller {
    */
   def fakeWorldMapGeneration(width: Int, height: Int) = {
     val map = WorldMap(Label("MapOfTheWorld"), "Test map", width, height)
-    val conceptGrass = Concept("Grass", List())
-    val conceptTree = Concept("Tree", List(Property("Size", "Int", 5)))
+    val conceptGrass = Concept("Grass", List(), List())
+    val conceptTree = Concept("Tree", List(Property("Size", "Int", 5)), List())
     for(i <- 0 until width; j <- 0 until height){
       val id = (i * width + j) * 2
       val grass = Instance(id, "Grass"+i+"_"+j, Coordinates(0, 0), List(), conceptGrass)
       val coordinates = Coordinates(i, j)
       map.addInstanceAt(grass, coordinates)
-      if(math.random > 0.7){
+      if(math.random > 0.9){
         val tree = Instance(id+1, "Tree"+i+"_"+j, Coordinates(0,0),
           List(ValuedProperty(Property("Size", "Int", 5), (math.random * 10).toInt.toString)),
           conceptTree)
@@ -46,6 +46,7 @@ object InitWorld extends Controller {
   }
   
   def initGraph = Action {
+    Statement.clearDB.execute
     putInitialConceptsInDB()
     Ok("Le graph a été correctement initialisé")
   }
@@ -60,22 +61,22 @@ object InitWorld extends Controller {
     val propertyDuplicationSpeed  = Property("DuplicationSpeed", "Int", 5)
 
     /*Concepts declaration*/
-    val conceptMan        = Concept("Man", List(propertyInstanciable))
-    val conceptPredator   = Concept("Predator", List())
-    val conceptWolf       = Concept("Wolf", List(propertyInstanciable))
-    val conceptSheep      = Concept("Sheep", List(propertyInstanciable))
-    val conceptAnimal     = Concept("Animal", List(propertyInstanciable))
-    val conceptGrass      = Concept("Grass", List(propertyInstanciable, propertyDuplicationSpeed), "#00ff00")
-    val conceptEdible     = Concept("Edible", List())
-    val conceptApple      = Concept("Apple", List(propertyInstanciable))
-    val conceptBush       = Concept("Bush", List(propertyInstanciable))
-    val conceptAppleTree  = Concept("AppleTree", List(propertyInstanciable))
-    val conceptTree       = Concept("Tree", List(propertyInstanciable), "#55ff55")
-    val conceptFir        = Concept("Fir", List(propertyInstanciable))
-    val conceptVegetable  = Concept("Vegetable", List())
-    val conceptGround     = Concept("Ground", List())
-    val conceptLiquid     = Concept("Liquid", List(), "#0000ff")
-    val conceptSolid      = Concept("Solid", List(), "#ffff00")
+    val conceptMan        = Concept("Man", List(propertyInstanciable), List())
+    val conceptPredator   = Concept("Predator", List(), List())
+    val conceptWolf       = Concept("Wolf", List(propertyInstanciable), List())
+    val conceptSheep      = Concept("Sheep", List(propertyInstanciable), List())
+    val conceptAnimal     = Concept("Animal", List(propertyInstanciable), List())
+    val conceptGrass      = Concept("Grass", List(propertyInstanciable, propertyDuplicationSpeed), List(), "#00ff00")
+    val conceptEdible     = Concept("Edible", List(), List())
+    val conceptApple      = Concept("Apple", List(propertyInstanciable), List())
+    val conceptBush       = Concept("Bush", List(propertyInstanciable), List())
+    val conceptAppleTree  = Concept("AppleTree", List(propertyInstanciable), List())
+    val conceptTree       = Concept("Tree", List(propertyInstanciable), List(), "#55ff55")
+    val conceptFir        = Concept("Fir", List(propertyInstanciable), List())
+    val conceptVegetable  = Concept("Vegetable", List(), List())
+    val conceptGround     = Concept("Ground", List(), List())
+    val conceptLiquid     = Concept("Liquid", List(), List(), "#0000ff")
+    val conceptSolid      = Concept("Solid", List(), List(), "#ffff00")
 
     /*Relations declaration*/
     val relationSubtypeOf   = Relation("SUBTYPE_OF")

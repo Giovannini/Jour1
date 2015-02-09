@@ -16,18 +16,18 @@ class ConceptTest extends FunSuite {
     val prop1 = Property("P1", "Int", 0)
     val prop2 = Property("P2", "String", "Hello")
     val prop3 = Property("P3", "Boolean", false)
-    val concept1 = Concept("C1", List(prop1, prop2))
-    val concept2 = Concept("C2", List(prop1, prop3))
-    val concept3 = Concept("C3", List(prop1))
+    val concept1 = Concept("C1", List(prop1, prop2), List())
+    val concept2 = Concept("C2", List(prop1, prop3), List())
+    val concept3 = Concept("C3", List(prop1), List())
     val relation1 = Relation("R1")
     val relation2 = Relation("R2")
     val relSubtype = Relation("SUBTYPE_OF")
-    val thomas = Instance("Thomas",
+    val thomas = Instance(1, "Thomas",
         Coordinates(0, 0),
         List(ValuedProperty(prop1, "GIOVA"),
             ValuedProperty(prop2, "Thomas")),
         concept1)
-    val aurelie = Instance("Aurelie",
+    val aurelie = Instance(2, "Aurelie",
         Coordinates(0, 0),
         List(ValuedProperty(prop1, "LORGEOUX"),
             ValuedProperty(prop3, "22")),
@@ -43,6 +43,7 @@ class ConceptTest extends FunSuite {
                 prop1.toJson,
                 prop2.toJson
             ),
+            "rules" -> Json.arr(),
             "type" -> JsString("CONCEPT"),
             "id" -> JsNumber(concept1.id),
             "color" -> JsString(concept1.color)
@@ -51,7 +52,7 @@ class ConceptTest extends FunSuite {
     }
 
     test("method toNodeString"){
-        val desiredString = "(c1 { label: \"C1\", properties: [\"P1%Int%0\",\"P2%String%Hello\"], color: \"#AAAAAA\", type: \"CONCEPT\", id:"+concept1.id+"})"
+        val desiredString = "(c1 { label: \"C1\", properties: [\"P1%Int%0\",\"P2%String%Hello\"], rules: [], color: \"#AAAAAA\", type: \"CONCEPT\", id:"+concept1.id+"})"
         assert(concept1.toNodeString == desiredString)
     }
 
@@ -104,7 +105,7 @@ class ConceptTest extends FunSuite {
         NeoDAO.addConceptToDB(concept2)
         NeoDAO.addRelationToDB(concept1.id, relation1, concept2.id)
         NeoDAO.addInstance(thomas)
-        val relationsList = Concept.getRelations(concept1.id)
+        val relationsList = Concept.getRelationsFrom(concept1.id)
         assert(relationsList.contains((relation1, concept2)))
         assert(! relationsList.contains((Relation("INSTANCE_OF"), thomas)))
         NeoDAO.removeConceptFromDB(concept1)

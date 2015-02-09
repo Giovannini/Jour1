@@ -77,9 +77,8 @@ object ValuedProperty {
    *            and a sequence of strings name properties
    * @return the concept translated from the given row
    */
-  def rowToPropertiesList(row: CypherResultRow): List[ValuedProperty] = {
-    println(row)
-    row[Seq[String]]("inst_prop") // get the properties sequence from the row
+  def rowToPropertiesList(row: CypherResultRow, string: String): List[ValuedProperty] = {
+    row[Seq[String]](string) // get the properties sequence from the row
       .toList
       .map(string => parse(string))
   }

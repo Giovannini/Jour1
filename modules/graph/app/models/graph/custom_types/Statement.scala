@@ -18,7 +18,7 @@ object Statement {
     """
     MATCH n
     WHERE n.type = "CONCEPT"
-    RETURN n.label as concept_label, n.properties as concept_prop, n.color as concept_color
+    RETURN n.label as concept_label, n.properties as concept_prop, n.rules as concept_rules, n.color as concept_color
     """
   )
 
@@ -72,7 +72,7 @@ object Statement {
    */
   def getConceptById(conceptId: Int): CypherStatement = {
     Cypher("MATCH (n {id: {id1} }) " +
-      "RETURN n.label as concept_label, n.properties as concept_prop, n.color as concept_color")
+      "RETURN n.label as concept_label, n.properties as concept_prop, n.rules as concept_rules, n.color as concept_color")
       .on("id1" -> conceptId)
   }
 
@@ -111,13 +111,14 @@ object Statement {
    * @param conceptId the source concept
    * @return a cypher statement returning the relation types and concepts labels and properties
    */
-  def getRelationsOf(conceptId: Int): CypherStatement = {
+  def getRelationsFrom(conceptId: Int): CypherStatement = {
     Cypher("""
-        |MATCH (n1 {id: {id}})-[r]-(n2)
+        |MATCH (n1 {id: {id}})-[r]->(n2)
         |RETURN type(r) as rel_type,
         |       n2.label as concept_label,
         |       n2.properties as concept_prop,
         |       n2.type as node_type,
+        |       n2.rules as concept_rules,
         |       n2.color as concept_color
       """.stripMargin)
       .on("id" -> conceptId)
@@ -175,6 +176,7 @@ object Statement {
         |MATCH (n1 {id: {id}})-[r:SUBTYPE_OF]->(n2)
         |RETURN n2.label as concept_label,
         |       n2.properties as concept_prop,
+        |       n2.rules as concept_rules,
         |       n2.color as concept_color
       """.stripMargin)
       .on("id" -> conceptId)
@@ -191,6 +193,7 @@ object Statement {
         |MATCH (n1 {id: {id}})<-[r:SUBTYPE_OF]-(n2)
         |RETURN n2.label as concept_label,
         |       n2.properties as concept_prop,
+        |       n2.rules as concept_rules,
         |       n2.color as concept_color
       """.stripMargin)
       .on("id" -> conceptId)

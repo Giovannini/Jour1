@@ -13,6 +13,7 @@ import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
  */
 case class Concept(label: String,
                properties: List[Property],
+               rules: List[ValuedProperty],
                color: String) {
   require(label.matches("^[A-Z][A-Za-z0-9_ ]*$") && color.matches("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$") )
 
@@ -22,8 +23,8 @@ case class Concept(label: String,
    * @param label of the concept
    * @param properties of the concept
    */
-  def this(label: String, properties: List[Property]) = {
-    this(label, properties, "#AAAAAA")
+  def this(label: String, properties: List[Property], rules: List[ValuedProperty]) = {
+    this(label, properties, rules, "#AAAAAA")
   }
 
   val id = hashCode
@@ -38,6 +39,7 @@ case class Concept(label: String,
   def toJson: JsValue = {
     Json.obj("label" -> JsString(label),
       "properties" -> properties.map(_.toJson),
+      "rules" -> rules.map(_.toJson),
       "type" -> JsString("CONCEPT"),
       "id" -> JsNumber(hashCode()),
       "color" -> JsString(color))
@@ -52,6 +54,7 @@ case class Concept(label: String,
     "(" + label.toLowerCase +
       " { label: \"" + label + "\","+
       " properties: [" + properties.map(p => "\""+p+"\"").mkString(",") + "],"+
+      " rules: [" + rules.map(p => "\""+p+"\"").mkString(",") + "],"+
       " color: \""+color+"\","+
       " type: \"CONCEPT\","+
       " id:" + id + "})"
@@ -68,7 +71,7 @@ object Concept {
    * @param properties of the concept
    * @return a new Concept
    */
-  def apply(label: String, properties: List[Property]) = new Concept(label, properties)
+  def apply(label: String, properties: List[Property], rules: List[ValuedProperty]) = new Concept(label, properties, rules)
 
   implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
 
@@ -81,8 +84,9 @@ object Concept {
   def parseJson(jsonConcept: JsValue): Concept = {
     val label = (jsonConcept \ "label").as[String]
     val properties = (jsonConcept \ "properties").as[List[JsValue]].map(Property.parseJson)
+    val rulesProperties = (jsonConcept \ "rules").as[List[JsValue]].map(ValuedProperty.parseJson)
     val color = (jsonConcept \ "color").as[String]
-    Concept(label, properties, color)
+    Concept(label, properties, rulesProperties, color)
   }
 
   /**
@@ -96,8 +100,9 @@ object Concept {
   def parseRow(row: CypherResultRow): Concept = {
     val label = row[String]("concept_label")
     val properties = Property.rowToPropertiesList(row)
+    val rulesProperty = ValuedProperty.rowToPropertiesList(row, "concept_rules")
     val color = row[String]("concept_color")
-    Concept(label, properties, color)
+    Concept(label, properties, rulesProperty, color)
   }
 
   /**
@@ -109,8 +114,10 @@ object Concept {
    */
   def addPropertyToConcept(concept: Concept, property: Property, defaultValue: Any): Concept ={
     NeoDAO.addPropertyToConcept(concept, property, defaultValue)
-    this(concept.label, property :: concept.properties)
+    this(concept.label, property :: concept.properties, concept.rules)
   }
+  
+  /**TODO add rulesProperty method*/
 
   /**
    * Method to get a concept from its ID
@@ -170,8 +177,8 @@ object Concept {
    * @param conceptId id of the source concept
    * @return a list of tuple containing the relation and destination concept.
    */
-  def getRelations(conceptId: Int): List[(Relation, Concept)] = {
-    Statement.getRelationsOf(conceptId)
+  def getRelationsFrom(conceptId: Int): List[(Relation, Concept)] = {
+    Statement.getRelationsFrom(conceptId)
       .apply
       .toList
       .filter(noInstance)
@@ -196,7 +203,7 @@ object Concept {
    * @return a list of relations and concepts
    */
   def getReachableRelations(conceptId: Int): List[(Relation, Concept)] = {
-    val conceptRelations = getRelations(conceptId).filter(notASubtype)
+    val conceptRelations = getRelationsFrom(conceptId).filter(notASubtype)
     val parentsRelations = getParentsRelations(conceptId)
     conceptRelations ::: parentsRelations
   }

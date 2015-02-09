@@ -18,12 +18,9 @@ case class WorldMap (label: Label,
                     width: Int,
                     height: Int){
 
-    /*private var time = 0*/
+    val instances: collection.mutable.Map[Int, List[Instance]] = collection.mutable.Map.empty[Int, List[Instance]]
 
-    private val map = {
-        val matrix = Array.ofDim[Tile](width, height) //Creation of an empty matrix
-        fillWithEmptyTiles(matrix)
-    }
+    def getInstances: List[Instance] = instances.map(_._2).flatten.toList
 
     /**
      * Retourne la carte sous la forme Json
@@ -31,29 +28,12 @@ case class WorldMap (label: Label,
      * @return la carte sous la forme Json
      */
     def toJson : JsValue = {
-        val tileList = map.toList
-          .map(_.toList)
-          .flatten
         Json.obj(
           "width" -> width,
           "height" -> height,
-          "instances" -> tileList.map(_.instances).flatten.map(_.toJson)
+          "instances" -> instances.map(_._2).flatten.map(_.toJson)
         )
     }
-
-    /**
-     * Fill a matrix of tile with empty tiles
-     * @author Thomas GIOVANNINI
-     * @param matrix Tile matrix to initialize
-     * @return the initialized matrix
-     */
-    private def fillWithEmptyTiles(matrix: Array[Array[Tile]]): Array[Array[Tile]] = {
-        for (i <- 0 until width; j <- 0 until height)
-            matrix(i)(j) = Tile(Coordinates(i, j), List())
-        matrix
-    }
-
-
 
     /*#################*/
     /* Basic functions */
@@ -65,7 +45,9 @@ case class WorldMap (label: Label,
      * @param coordY of the wanted tile
      * @return the tile at the given coordinates
      */
-    def getTileAt(coordX: Int, coordY: Int): Tile = map(coordX)(coordY)
+    def getInstancesAt(coordX: Int, coordY: Int): List[Instance] = {
+        getInstances.filter(instance => instance.coordinates == Coordinates(coordX, coordY))
+    }
 
     /**
      * Get the tile at the given coordinates
@@ -73,7 +55,9 @@ case class WorldMap (label: Label,
      * @param coordinates of the wanted tile
      * @return the tile at the given coordinates
      */
-    def getTileAt(coordinates: Coordinates): Tile = getTileAt(coordinates.x, coordinates.y)
+    def getInstancesAt(coordinates: Coordinates): List[Instance] = {
+        getInstances.filter(instance => instance.coordinates == coordinates)
+    }
 
     /**
      * Add an instance to a tile at the given coordinates
@@ -82,8 +66,9 @@ case class WorldMap (label: Label,
      * @param coordinates of the tile
      */
     def addInstanceAt(instance: Instance, coordinates: Coordinates): Unit = {
-        map(coordinates.x)(coordinates.y) =
-          Tile.addInstanceToTile(instance, getTileAt(coordinates))
+        val key = instance.concept.id
+        val updatedInstance = Instance(instance.id, instance.label, coordinates, instance.properties, instance.concept)
+        instances(key) = updatedInstance :: instances.getOrElse(key, List())
     }
 
     /**
@@ -93,8 +78,9 @@ case class WorldMap (label: Label,
      * @param coordinates of the tile
      */
     def removeInstanceAt(instance: Instance, coordinates: Coordinates): Unit = {
-        map(coordinates.x)(coordinates.y) =
-          Tile.removeInstanceFromTile(instance, getTileAt(coordinates))
+        val key = instance.concept.id
+        if(instances.contains(key))
+            instances(key) = instances(key) diff List(instance)
     }
 
     /**
@@ -119,7 +105,7 @@ case class WorldMap (label: Label,
      * @return true if the tile contains an instance of the desired concept
      *         false else
      */
-    def search(concept: Concept, on: Tile) = on.hasConcept(concept)
+    def search(concept: Concept, on: Coordinates) = getInstancesAt(on).map(_.concept).contains(concept)
 
     /**
      * Return whether the tile has instances on it or not
@@ -129,5 +115,5 @@ case class WorldMap (label: Label,
      * @return true if the tile contains the desired instance
      *         false else
      */
-    def search(instance: Instance, on: Tile) = on.hasInstance(instance)
+    def search(instance: Instance, on: Coordinates) = getInstancesAt(on).contains(instance)
 }

@@ -14,19 +14,19 @@ class InstanceTest extends FunSuite {
   val prop1 = Property("P1", "Int", 0)
   val prop2 = Property("P2", "String", "Hello")
   val prop3 = Property("P3", "Boolean", false)
-  val concept1 = Concept("C1", List(prop1, prop2))
-  val concept2 = Concept("C2", List(prop1, prop3))
-  val concept3 = Concept("C3", List(prop1))
-  val concept4 = Concept("C4", List(prop1))
+  val concept1 = Concept("C1", List(prop1, prop2), List())
+  val concept2 = Concept("C2", List(prop1, prop3), List())
+  val concept3 = Concept("C3", List(prop1), List())
+  val concept4 = Concept("C4", List(prop1), List())
   val rel1 = Relation("R1")
   val rel2 = Relation("R2")
   val relSubtype = Relation("SUBTYPE_OF")
-  val thomas = Instance("Thomas",
+  val thomas = Instance(1, "Thomas",
     Coordinates(0, 0),
     List(ValuedProperty(prop1, 5),
       ValuedProperty(prop2, "Thomas")),
     concept1)
-  val aurelie = Instance("Aurelie",
+  val aurelie = Instance(2, "Aurelie",
     Coordinates(0, 0),
     List(ValuedProperty(prop1, "LORGEOUX"),
       ValuedProperty(prop3, "22")),
@@ -36,6 +36,7 @@ class InstanceTest extends FunSuite {
 
   test("method toJson"){
     val jsonInstance: JsValue = Json.obj(
+      "id" -> JsNumber(1),
       "label" -> "Thomas",
       "coordinates" -> Json.obj("x" -> JsNumber(0), "y" -> JsNumber(0)),
       "properties" -> Json.arr(
@@ -56,18 +57,18 @@ class InstanceTest extends FunSuite {
   }
 
   test("method toNodeString"){
-    val nodeStringInstance = "(thomas { label: \"Thomas\", coordinate_x: 0, coordinate_y: 0, concept: "+concept1.id+", type: \"INSTANCE\", id: "+thomas.hashCode+", properties: ["+thomas.properties.map(vp => "\"" + vp + "\"").mkString(",")+"]})"
+    val nodeStringInstance = "(thomas { id: \"1\", label: \"Thomas\", coordinate_x: 0, coordinate_y: 0, concept: "+concept1.id+", type: \"INSTANCE\", id: "+thomas.hashCode+", properties: ["+thomas.properties.map(vp => "\"" + vp + "\"").mkString(",")+"]})"
     assert(thomas.toNodeString == nodeStringInstance)
   }
 
   test("an instance is valid if its properties match its concept properties else it cannot exists"){
     intercept[Exception] {
-      Instance("Thomas", Coordinates(0, 0),
+      Instance(1, "Thomas", Coordinates(0, 0),
         List(ValuedProperty(prop1, 5),
           ValuedProperty(prop3, "22")),
         concept1)
     }
-    Instance("Thomas", Coordinates(0, 0),
+    Instance(1, "Thomas", Coordinates(0, 0),
       List(ValuedProperty(prop1, 5),
         ValuedProperty(prop2, true)),
       concept1)

@@ -16,14 +16,14 @@ class NeoDAO$Test extends FunSuite {
   val prop1 = Property("P1", "Int", 0)
   val prop2 = Property("P2", "String", "Hello")
   val prop3 = Property("P3", "Boolean", false)
-  val concept1 = Concept("C1", List(prop1, prop2))
-  val concept2 = Concept("C2", List(prop1, prop3))
-  val concept3 = Concept("C3", List(prop1))
-  val concept4 = Concept("C4", List(prop1))
+  val concept1 = Concept("C1", List(prop1, prop2), List())
+  val concept2 = Concept("C2", List(prop1, prop3), List())
+  val concept3 = Concept("C3", List(prop1), List())
+  val concept4 = Concept("C4", List(prop1), List())
   val relation1 = Relation("R1")
   val relation2 = Relation("R2")
   val relSubtype = Relation("SUBTYPE_OF")
-  val thomas = Instance("Thomas",
+  val thomas = Instance(1, "Thomas",
     Coordinates(0, 0),
     List(ValuedProperty(prop1, "GIOVA"),
       ValuedProperty(prop2, "Thomas")),
@@ -54,9 +54,9 @@ class NeoDAO$Test extends FunSuite {
     assert(NeoDAO.addRelationToDB(concept1.id, relation1, concept2.id))
     assert(NeoDAO.addRelationToDB(concept1.id, relSubtype, concept3.id))
     assert(NeoDAO.addRelationToDB(concept2.id, relSubtype, concept3.id))
-    assert(Concept.getRelations(concept1.id).contains((relation1, concept2)))
-    assert(Concept.getRelations(concept1.id).contains((relSubtype, concept3)))
-    assert(Concept.getRelations(concept2.id).contains((relSubtype, concept3)))
+    assert(Concept.getRelationsFrom(concept1.id).contains((relation1, concept2)))
+    assert(Concept.getRelationsFrom(concept1.id).contains((relSubtype, concept3)))
+    assert(Concept.getRelationsFrom(concept2.id).contains((relSubtype, concept3)))
     assert(NeoDAO.removeConceptFromDB(concept1))
     assert(NeoDAO.removeConceptFromDB(concept2))
     assert(NeoDAO.removeConceptFromDB(concept3))
@@ -68,7 +68,7 @@ class NeoDAO$Test extends FunSuite {
     NeoDAO.addRelationToDB(concept1.id, relation1, concept2.id)
     NeoDAO.addRelationToDB(concept1.id, relation2, concept2.id)
     NeoDAO.removeRelationFromDB(concept1.id, relation2, concept2.id)
-    val relationList = Concept.getRelations(concept1.id)
+    val relationList = Concept.getRelationsFrom(concept1.id)
     assert(relationList.contains((relation1, concept2)))
     assert(! relationList.contains((relation2, concept2)))
     NeoDAO.removeConceptFromDB(concept1)

@@ -25,12 +25,11 @@ object RestCall extends Controller{
    * @param conceptId of the concept the relations are desired
    */
   def getAllRelationsOf(conceptId: Int) = Action {
-    val actions = Concept.getReachableRelations(conceptId)
-    val parents = Concept.getParents(conceptId).map((Relation("SUBTYPE_OF"), _))
-    val children = Concept.getChildren(conceptId).map((Relation("PARENT_OF"), _))
-    val relations = (actions ::: parents ::: children)
+    val relations = Concept.getReachableRelations(conceptId)
       .map(relationnedConceptToJson)
+    
     Ok(Json.toJson(relations))
+//    Ok(Json.toJson(relations))
   }
 
   /**

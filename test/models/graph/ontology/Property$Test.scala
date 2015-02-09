@@ -15,7 +15,7 @@ class Property$Test extends FunSuite {
 
   val prop1 = Property("P1", "Int", 0)
   val prop2 = Property("P2", "String", "Hello")
-  val concept1 = Concept("Woman", List(prop1, prop2))
+  val concept1 = Concept("Woman", List(prop1, prop2), List())
 
   test("method toJson"){
     val json = Json.parse("{\"label\":\"P1\",\"valueType\":\"Int\",\"defaultValue\":0}")
