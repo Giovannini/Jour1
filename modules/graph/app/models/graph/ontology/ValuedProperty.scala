@@ -1,27 +1,44 @@
 package models.graph.ontology
 
 import org.anormcypher.CypherResultRow
-import play.api.libs.json.{Json, JsValue}
+import play.api.libs.json._
 
 /**
  * Model class to represent a valued property
  * @param property the property which is valued
  * @param value the value for the property
  */
-case class ValuedProperty(property: Property, value: String){
+case class ValuedProperty(property: Property, value: Any){
   /**
    * Parse a ValuedProperty to Json
    * @author Thomas GIOVANNINI
    * @return the parsed valued property to json format
    */
-  def toJson : JsValue = Json.obj("property" -> property.label, "value" -> value)
+  def toJson : JsValue = Json.obj("property" -> property.label, "value" -> toJson(value))
+
+  /**
+   * Convert a value with an unknown type to the correct JsValue
+   * @author Thomas GIOVANNINI
+   * @param value the value to convert
+   * @return a Json value representing the input one
+   */
+  private def toJson(value: Any): JsValue = {
+    value match {
+      case number: Int => JsNumber(number)
+      case number: Double => JsNumber(number)
+      case string: String => JsString(string)
+      case boolean: Boolean => JsBoolean(boolean)
+      case list: List[Any] => JsArray(list.map(toJson(_)))
+      case _ => JsString(value.toString)
+    }
+  }
 
   /**
    * The toString method
    * @author Thomas GIOVANNINI
    * @return the string value for a ValuedProperty
    */
-  override def toString = property.label + " -> " + value
+  override def toString = "\"" + property.label + ": " + value + "\""
 }
 
 object ValuedProperty {
@@ -34,8 +51,23 @@ object ValuedProperty {
    */
   def parseJson(jsonVP: JsValue): ValuedProperty = {
     val property = (jsonVP \ "property").as[String]
-    val value = (jsonVP \ "value").as[String]
+    val value = parseValue(jsonVP \ "value")
     ValuedProperty(Property(property), value)
+  }
+
+  /**
+   * Method to convert a json value of an unknown type to its real type
+   * @param jsonValue to convert
+   * @return the value in its correct type
+   */
+  private def parseValue(jsonValue: JsValue): Any = {
+    jsonValue match {
+      case jsonNumber: JsNumber => jsonValue.as[Double]
+      case jsonString: JsString => jsonValue.as[String]
+      case jsonBoolean: JsBoolean => jsonValue.as[Boolean]
+      case jsonArray: JsArray => jsonValue.as[List[JsValue]].map(parseValue)
+      case _ => jsonValue.as[String]
+    }
   }
 
   /**
@@ -58,7 +90,7 @@ object ValuedProperty {
    * @return the proper ValuedProperty
    */
   def parse(string: String): ValuedProperty = {
-    val vpArray = string.split(" -> ")
+    val vpArray = string.split(": ")
     val prop = Property(vpArray(0))
     val value = vpArray(1)
     ValuedProperty(prop, value)

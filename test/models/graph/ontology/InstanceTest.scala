@@ -45,7 +45,7 @@ class InstanceTest extends FunSuite {
   }
 
   test("method toNodeString"){
-    val nodeStringInstance = "(thomas { label: \"Thomas\", properties: [\"P1 -> GIOVA\", \"P2 -> Thomas\"], coordinate_x: 0, coordinate_y: 0, concept: "+concept1.id+", type: \"INSTANCE\", id: "+thomas.hashCode+"})"
+    val nodeStringInstance = "(thomas { label: \"Thomas\", coordinate_x: 0, coordinate_y: 0, concept: "+concept1.id+", type: \"INSTANCE\", id: "+thomas.hashCode+", properties: [\"P1: GIOVA\", \"P2: Thomas\"]})"
     assert(thomas.toNodeString == nodeStringInstance)
   }
 
@@ -64,7 +64,7 @@ class InstanceTest extends FunSuite {
 
   test("parseJson should return the correct concept if in DB"){
     val jsonInstance = thomas.toJson
-    assert(Instance.parseJson(jsonInstance) == Instance("XXX", Coordinates(0,0), List(), Concept("XXX", List())))
+    assert(Instance.parseJson(jsonInstance) == Instance.error)
     NeoDAO.addConceptToDB(concept1)
     NeoDAO.addInstance(thomas)
     assert(Instance.parseJson(jsonInstance) == thomas)

@@ -6,7 +6,7 @@ import models.graph.ontology._
 import models.map.WorldMap
 import org.anormcypher.Neo4jREST
 import play.api.mvc._
-import play.api.Play.current
+
 
 object Application extends Controller {
 
@@ -17,7 +17,7 @@ object Application extends Controller {
    * @author Thomas GIOVANNINI
    */
   def index = Action {
-    putInitialConceptsInDB()
+    //putInitialConceptsInDB()
     val exampleMap = fakeWorldMapGeneration
     Ok(exampleMap.toJson)
   }
@@ -69,8 +69,8 @@ object Application extends Controller {
     val conceptFir        = Concept("Fir", List(propertyInstanciable))
     val conceptVegetable  = Concept("Vegetable", List())
     val conceptGround     = Concept("Ground", List())
-    val conceptLiquid     = Concept("Liquid", List())
-    val conceptSolid      = Concept("Solid", List())
+    val conceptLiquid     = Concept("Liquid", List(), "#0000ff")
+    val conceptSolid      = Concept("Solid", List(), "#ffff00")
 
     /*Relations declaration*/
     val relationSubtypeOf   = Relation("SUBTYPE_OF")
@@ -122,6 +122,5 @@ object Application extends Controller {
     NeoDAO.addRelationToDB(conceptLiquid.id, relationSubtypeOf, conceptGround.id)
     NeoDAO.addRelationToDB(conceptSolid.id, relationSubtypeOf, conceptGround.id)
   }
-
 
 }

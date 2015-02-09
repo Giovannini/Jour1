@@ -37,11 +37,11 @@ case class Instance(label:          String,
    */
   def toNodeString = "(" + label.toLowerCase +
     " { label: \"" + label + "\","+
-    " properties: [" + properties.map(vp => "\"" + vp.toString + "\"").mkString(", ") + "],"+
     " coordinate_x: " + coordinates.x + ", coordinate_y: " + coordinates.y + ","+
     " concept: " + concept.hashCode() + ","+
     " type: \"INSTANCE\","+
-    " id: " + hashCode() + "})"
+    " id: " + hashCode() + "," +
+    " properties: ["+properties.mkString(", ") + "]})"
 
   /**
    * Method to see if the instance matches its concept properties
@@ -55,6 +55,8 @@ case class Instance(label:          String,
 }
 
 object Instance {
+
+  val error = Instance("XXX", Coordinates(0,0), List(), Concept("XXX", List()))
 
   /**
    * Transform a json representing an instance into the Instance it represents
@@ -84,9 +86,11 @@ object Instance {
    * @return the concept translated from the given row
    */
   def parseRowGivenConcept(row: CypherResultRow, conceptId: Int): Instance = {
+    println(row)
     val label = row[String]("inst_label")
     val coordinates = Coordinates(row[Int]("inst_coordx"),row[Int]("inst_coordy"))
     val properties = ValuedProperty.rowToPropertiesList(row)
+    println(Concept.getById(conceptId))
     Concept.getById(conceptId) match {
       case Some(concept) => Instance(label, coordinates, properties, concept)
       case _ => Instance("XXX", coordinates, List(), Concept("XXX", List()))
@@ -100,9 +104,9 @@ object Instance {
    * @return a new instance
    */
   def createRandomInstanceOf(concept: Concept): Instance = {
-    Instance(concept.label + (math.random*(1000000)).toInt,
+    Instance(concept.label + (math.random * 1000000).toInt,
               Coordinates(0,0),
-              concept.properties.map(prop => ValuedProperty(prop, (math.random*(1000000)).toInt.toString)),
+              concept.properties.map(prop => ValuedProperty(prop, (math.random * 1000000).toInt.toString)),
               concept)
   }
 

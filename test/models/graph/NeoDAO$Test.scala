@@ -28,52 +28,38 @@ class NeoDAO$Test extends FunSuite {
     List(ValuedProperty(prop1, "GIOVA"),
       ValuedProperty(prop2, "Thomas")),
     concept1)
-  val julien = Instance("Julien",
-    Coordinates(0, 0),
-    List(ValuedProperty(prop1, "PRADET"),
-      ValuedProperty(prop2, "Julien")),
-    concept1)
-  val simon = Instance("Simon",
-    Coordinates(0, 0),
-    List(ValuedProperty(prop1, "RONCIERE"),
-      ValuedProperty(prop2, "Simon")),
-    concept1)
-  val aurelie = Instance("Aurelie",
-    Coordinates(0, 0),
-    List(ValuedProperty(prop1, "LORGEOUX"),
-      ValuedProperty(prop3, "22")),
-    concept2)
 
   /* Concept */
   test("method addConceptToDB should add a concept in the Neo4J DB") {
-    NeoDAO.addConceptToDB(concept1)
+    assert(NeoDAO.addConceptToDB(concept1))
     assert(Concept.findAll.contains(concept1))
     NeoDAO.removeConceptFromDB(concept1)
   }
 
   test("method removeConceptFromDB should remove an existing concept in the Neo4J DB") {
-    NeoDAO.removeConceptFromDB(concept1)
+    assert(NeoDAO.addConceptToDB(concept1))
+    assert(NeoDAO.removeConceptFromDB(concept1))
     assert(!Concept.findAll.contains(concept1))
   }
 
   test("no exception should be thrown if a not existing concept is deleted") {
-    NeoDAO.removeConceptFromDB(concept1) //No error if deleting a not existing concept
+    assert(NeoDAO.removeConceptFromDB(concept1))
   }
 
   /* Relation */
   test("method addRelationsToDB should add a relation between two existing concepts in the Neo4J DB") {
-    NeoDAO.addConceptToDB(concept1)
-    NeoDAO.addConceptToDB(concept2)
-    NeoDAO.addConceptToDB(concept3)
-    NeoDAO.addRelationToDB(concept1.id, relation1, concept2.id)
-    NeoDAO.addRelationToDB(concept1.id, relSubtype, concept3.id)
-    NeoDAO.addRelationToDB(concept2.id, relSubtype, concept3.id)
+    assert(NeoDAO.addConceptToDB(concept1))
+    assert(NeoDAO.addConceptToDB(concept2))
+    assert(NeoDAO.addConceptToDB(concept3))
+    assert(NeoDAO.addRelationToDB(concept1.id, relation1, concept2.id))
+    assert(NeoDAO.addRelationToDB(concept1.id, relSubtype, concept3.id))
+    assert(NeoDAO.addRelationToDB(concept2.id, relSubtype, concept3.id))
     assert(Concept.getRelations(concept1.id).contains((relation1, concept2)))
     assert(Concept.getRelations(concept1.id).contains((relSubtype, concept3)))
     assert(Concept.getRelations(concept2.id).contains((relSubtype, concept3)))
-    NeoDAO.removeConceptFromDB(concept1)
-    NeoDAO.removeConceptFromDB(concept2)
-    NeoDAO.removeConceptFromDB(concept3)
+    assert(NeoDAO.removeConceptFromDB(concept1))
+    assert(NeoDAO.removeConceptFromDB(concept2))
+    assert(NeoDAO.removeConceptFromDB(concept3))
   }
 
   test("method removeRelationFromDB should remove a relation between two existing concepts in the Neo4J DB") {
@@ -91,13 +77,11 @@ class NeoDAO$Test extends FunSuite {
 
   /* Instance */
   test("method addInstance should add instance in the graph if it is valid") {
-    NeoDAO.addInstance(thomas)
+    assert(! NeoDAO.addInstance(thomas))
     assert(! Concept.getInstancesOf(concept1.id).contains(thomas))
-    NeoDAO.addConceptToDB(concept1)
-    NeoDAO.addInstance(thomas)
-    NeoDAO.addInstance(aurelie)
-    assert(! Concept.getInstancesOf(concept1.hashCode()).contains(aurelie))
-    assert(! Concept.getInstancesOf(concept2.hashCode()).contains(aurelie))
+    assert(NeoDAO.addConceptToDB(concept1))
+    assert(NeoDAO.addInstance(thomas))
+    assert(Concept.getInstancesOf(concept1.hashCode()).contains(thomas))
     NeoDAO.removeConceptFromDB(concept1)
   }
 

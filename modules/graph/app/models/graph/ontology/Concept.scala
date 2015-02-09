@@ -12,24 +12,36 @@ import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
  * @param properties of this concept
  */
 case class Concept(label: String,
-                   properties: List[Property]) {
+               properties: List[Property],
+               color: String) {
+  require(label.matches("^[A-Z][A-Za-z0-9_ ]*$") && color.matches("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$") )
 
-  require(label.matches("^[A-Z][A-Za-z0-9_ ]*$"))
+  /**
+   * Constructor giving automatically the color #AAAAAA to the context.
+   * @author Thomas GIOVANNINI
+   * @param label of the concept
+   * @param properties of the concept
+   */
+  def this(label: String, properties: List[Property]) = {
+    this(label, properties, "#AAAAAA")
+  }
 
-  val id = hashCode()
+  val id = hashCode
 
-  override def hashCode() = label.hashCode + "CONCEPT".hashCode()
+  override def hashCode = label.hashCode + "CONCEPT".hashCode()
 
   /**
    * Parse a Concept to Json
    * @author Thomas GIOVANNINI
    * @return the Json form of the concept
    */
-  def toJson: JsValue =
-    Json.obj( "label" -> JsString(label),
-              "properties" -> properties.map(_.toJson),
-              "type" -> JsString("CONCEPT"),
-              "id" -> JsNumber(hashCode()))
+  def toJson: JsValue = {
+    Json.obj("label" -> JsString(label),
+      "properties" -> properties.map(_.toJson),
+      "type" -> JsString("CONCEPT"),
+      "id" -> JsNumber(hashCode()),
+      "color" -> JsString(color))
+  }
 
   /**
    * Parse a Concept for it to be used in a Cypher statement
@@ -48,6 +60,15 @@ case class Concept(label: String,
 
 object Concept {
 
+  /**
+   * Apply method for the second constructor
+   * @author Thomas GIOVANNINI
+   * @param label of the concept
+   * @param properties of the concept
+   * @return a new Concept
+   */
+  def apply(label: String, properties: List[Property]) = new Concept(label, properties)
+
   implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
 
   /**
@@ -58,8 +79,9 @@ object Concept {
    */
   def parseJson(jsonConcept: JsValue): Concept = {
     val label = (jsonConcept \ "label").as[String]
-    val properties = (jsonConcept \\ "properties").toList.map(Property.parseJson)
-    Concept(label, properties)
+    val properties = (jsonConcept \ "properties").as[List[JsValue]].map(Property.parseJson)
+    val color = (jsonConcept \ "color").as[String]
+    Concept(label, properties, color)
   }
 
   /**
@@ -83,13 +105,10 @@ object Concept {
    * @param property to be added
    * @return the concept with the given property added
    */
-  def addPropertyToConcept(concept: Concept, property: Property): Concept ={
-    NeoDAO.removeConceptFromDB(concept)
-    val newConcept = Concept(concept.label, property :: concept.properties)
-    NeoDAO.addConceptToDB(newConcept)
-    newConcept
+  def addPropertyToConcept(concept: Concept, property: Property, defaultValue: Any): Concept ={
+    NeoDAO.addPropertyToConcept(concept, property, defaultValue)
+    this(concept.label, property :: concept.properties)
   }
-
 
   /**
    * Method to get a concept from its ID
@@ -100,7 +119,7 @@ object Concept {
   def getById(conceptId: Int): Option[Concept] = {
     val statement = Statement.getConceptById(conceptId)
     val cypherResultRowStream = statement.apply
-    if(cypherResultRowStream.length == 1) {
+    if(cypherResultRowStream.nonEmpty) {
       val row: CypherResultRow = statement.apply.head
       Some(parseRow(row))
     }else None
@@ -111,10 +130,11 @@ object Concept {
    * @author Thomas GIOVANNINI
    * @return a list of concepts
    */
-  def findAll: List[Concept] =
+  def findAll: List[Concept] = {
     Statement.getAllConcepts.apply()
       .toList
-      .map(row => parseRow(row))
+      .map(parseRow)
+  }
 
   /**
    * Method to retrieve all the parents of a given concept
@@ -122,10 +142,11 @@ object Concept {
    * @param conceptId the ID of the concept
    * @return a list of relations and concepts
    */
-  def getParents(conceptId: Int): List[(Relation, Concept)] = {
+  def getParents(conceptId: Int): List[Concept] = {
     val statement = Statement.getParentConcepts(conceptId)
-    val subtypeRelation = Relation("SUBTYPE_OF")
-    statement.apply().toList.map{ row => (subtypeRelation, Concept.parseRow(row))}
+    statement.apply
+      .toList
+      .map(Concept.parseRow)
   }
 
   /**
@@ -134,10 +155,11 @@ object Concept {
    * @param conceptId the ID of the concept
    * @return a list of relations and concepts
    */
-  def getChildren(conceptId: Int): List[(Relation, Concept)] = {
+  def getChildren(conceptId: Int): List[Concept] = {
     val statement = Statement.getChildrenConcepts(conceptId)
-    val parentRelation = Relation("PARENT_OF")
-    statement.apply().toList.map{ row => (parentRelation, Concept.parseRow(row))}
+    statement.apply
+      .map(Concept.parseRow)
+      .toList
   }
 
   /**
@@ -148,10 +170,21 @@ object Concept {
    */
   def getRelations(conceptId: Int): List[(Relation, Concept)] = {
     Statement.getRelationsOf(conceptId)
-      .apply()
+      .apply
       .toList
-      .filter(row => row[String]("node_type") != "INSTANCE")
+      .filter(noInstance)
       .map{ row => (Relation.parseRow(row), Concept.parseRow(row))}
+  }
+
+  /**
+   * Method to know if a row represents an instance or not
+   * @author Thomas GIOVANNINI
+   * @param row to test
+   * @return true if the row doesn't represent an instance
+   *         false else
+   */
+  private def noInstance(row: CypherResultRow): Boolean = {
+    row[String]("node_type") != "INSTANCE"
   }
 
   /**
@@ -160,15 +193,25 @@ object Concept {
    * @param conceptId the ID of the concept
    * @return a list of relations and concepts
    */
-  def getPossibleActions(conceptId: Int): List[(Relation, Concept)] = {
-    val relations = getRelations(conceptId).filter(notASubtype)
-    val parentsRelation = getParents(conceptId)
-      .map(tuple => getPossibleActions(tuple._2.id))
-      .flatten
-    relations ::: parentsRelation
+  def getReachableRelations(conceptId: Int): List[(Relation, Concept)] = {
+    val conceptRelations = getRelations(conceptId).filter(notASubtype)
+    val parentsRelations = getParentsRelations(conceptId)
+    conceptRelations ::: parentsRelations
+  }
+
+  /**
+   * Get the relations of parents of a given concept
+   * @author Thomas GIOVANNINI
+   * @param conceptId the concept from which the parent relations are desired
+   * @return a list of relations and concepts
+   */
+  def getParentsRelations(conceptId: Int): List[(Relation, Concept)] = {
+    getParents(conceptId).map {
+      parent => getReachableRelations(parent.id)
+    }.flatten
   }
   
-  def notASubtype(tuple: (Relation, Concept)): Boolean = tuple._1 != Relation("SUBTYPE_OF")
+  private def notASubtype(tuple: (Relation, Concept)): Boolean = tuple._1 != Relation("SUBTYPE_OF")
 
   /**
    * Method to retrieve all the instances of a given concept and its children concepts' instances
@@ -178,8 +221,9 @@ object Concept {
    */
   def getInstancesOf(conceptId : Int) : List[Instance] = {
     val instances = getInstanceOfSelf(conceptId)
+    //println(instances)
     val instancesOfChildren = getChildren(conceptId)
-      .map(tuple => getInstancesOf(tuple._2.id))
+      .map(children => getInstancesOf(children.id))
       .flatten
     instances ::: instancesOfChildren
   }
@@ -192,7 +236,7 @@ object Concept {
    */
   def getInstanceOfSelf(conceptId: Int): List[Instance] = {
     val statement = Statement.getInstances(conceptId)
-    statement.apply()
+    statement.apply
       .toList
       .map{ row => Instance.parseRowGivenConcept(row, conceptId)}
   }
