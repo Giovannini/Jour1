@@ -41,7 +41,7 @@ case class Instance(label:          String,
     " concept: " + concept.hashCode() + ","+
     " type: \"INSTANCE\","+
     " id: " + hashCode() + "," +
-    " properties: ["+properties.mkString(", ") + "]})"
+    " properties: ["+properties.map("\"" + _ + "\"").mkString(",") + "]})"
 
   /**
    * Method to see if the instance matches its concept properties

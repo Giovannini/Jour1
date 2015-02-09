@@ -29,14 +29,14 @@ object InitWorld extends Controller {
   def fakeWorldMapGeneration(width: Int, height: Int) = {
     val map = WorldMap(Label("MapOfTheWorld"), "Test map", width, height)
     val conceptGrass = Concept("Grass", List())
-    val conceptTree = Concept("Tree", List(Property("Size")))
+    val conceptTree = Concept("Tree", List(Property("Size", "Int", 5)))
     for(i <- 0 until width; j <- 0 until height){
       val grass = Instance("Grass"+i+"_"+j, Coordinates(0, 0), List(), conceptGrass)
       val coordinates = Coordinates(i, j)
       map.addInstanceAt(grass, coordinates)
       if(math.random > 0.98){
         val tree = Instance("Tree"+i+"_"+j, Coordinates(0,0),
-          List(ValuedProperty(Property("Size"), (math.random * 10).toInt.toString)),
+          List(ValuedProperty(Property("Size", "Int", 5), (math.random * 10).toInt.toString)),
           conceptTree)
         map.addInstanceAt(tree, coordinates)
       }
@@ -55,8 +55,8 @@ object InitWorld extends Controller {
    */
   def putInitialConceptsInDB(): Unit = {
     /*Property declaration*/
-    val propertyInstanciable      = Property("Instanciable")
-    val propertyDuplicationSpeed  = Property("DuplicationSpeed")
+    val propertyInstanciable      = Property("Instanciable", "Boolean", false)
+    val propertyDuplicationSpeed  = Property("DuplicationSpeed", "Int", 5)
 
     /*Concepts declaration*/
     val conceptMan        = Concept("Man", List(propertyInstanciable))

@@ -74,7 +74,8 @@ object Tile {
       tile.coordinates,
       newInstance.properties,
       newInstance.concept)
-    NeoDAO.addInstance(instance)
+    /*Une instance n'est jamais ajouté au graphe mais à une map.*/
+    //NeoDAO.addInstance(instance)
     Tile(tile.coordinates, instance :: tile.instances)
   }
 

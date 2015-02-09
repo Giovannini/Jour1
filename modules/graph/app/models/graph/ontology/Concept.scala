@@ -51,7 +51,8 @@ case class Concept(label: String,
   def toNodeString = {
     "(" + label.toLowerCase +
       " { label: \"" + label + "\","+
-      " properties: [" + properties.mkString(",") + "],"+
+      " properties: [" + properties.map(p => "\""+p+"\"").mkString(",") + "],"+
+      " color: \""+color+"\","+
       " type: \"CONCEPT\","+
       " id:" + id + "})"
   }
@@ -95,7 +96,8 @@ object Concept {
   def parseRow(row: CypherResultRow): Concept = {
     val label = row[String]("concept_label")
     val properties = Property.rowToPropertiesList(row)
-    Concept(label, properties)
+    val color = row[String]("concept_color")
+    Concept(label, properties, color)
   }
 
   /**
