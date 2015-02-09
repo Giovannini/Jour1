@@ -3,7 +3,7 @@ package controllers
 import models.graph.NeoDAO
 import models.graph.custom_types.{Statement, Coordinates, Label}
 import models.graph.ontology._
-import models.map.WorldMap
+import models.map.{Layer, WorldMap}
 import org.anormcypher.Neo4jREST
 import play.api.mvc._
 
@@ -17,7 +17,7 @@ object Application extends Controller {
    * @author Thomas GIOVANNINI
    */
   def index = Action {
-    //putInitialConceptsInDB()
+    putInitialConceptsInDB()
     val exampleMap = fakeWorldMapGeneration
     Ok(exampleMap.toJson)
   }
