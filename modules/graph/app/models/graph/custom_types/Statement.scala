@@ -1,12 +1,18 @@
 package models.graph.custom_types
 
-import models.graph.ontology.{Relation, Instance, Concept}
+import models.graph.ontology._
 import org.anormcypher.{Cypher, CypherStatement}
 
 /**
  * All values from this objects are CypherStatements
  */
 object Statement {
+  def updateInstancesOf(conceptId: Int, property: Property, defaultValue: Any): CypherStatement = {
+    Cypher("MATCH (n1 {id: {id}})-[r:INSTANCE_OF]-(n2) "+
+           " SET n2.properties = n2.properties + "+ ValuedProperty(property, defaultValue).toString +"")
+      .on("id" -> conceptId)
+  }
+
 
   val getAllConcepts: CypherStatement = Cypher(
     """
@@ -43,6 +49,19 @@ object Statement {
       "OPTIONAL MATCH (n)-[r2]-(n2 {type: {type}}) " +
       "DELETE n, r, r2, n2;")
       .on("id1" -> conceptId, "type" -> "INSTANCE")
+  }
+
+  /**
+   * Create a cypher statement to add a new property to a concept
+   * @param concept to which the property should be added
+   * @param property to add to the concept
+   * @return a cypher statement
+   */
+  def addPropertyToConcept(concept: Concept, property: String): CypherStatement = {
+    val newPropertiesList = Property(property) :: concept.properties
+    Cypher("MATCH (n {id: {id1} }) " +
+      "SET n.properties = ["+newPropertiesList.mkString(",")+"]")
+      .on("id1" -> concept.id)
   }
 
   /**

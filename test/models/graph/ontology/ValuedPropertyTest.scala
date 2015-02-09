@@ -36,7 +36,7 @@ class ValuedPropertyTest extends FunSuite {
     NeoDAO.addConceptToDB(concept1)
     NeoDAO.addInstance(aurelie)
     val statement = Statement.getInstances(concept1.id)
-    val row = statement.apply().head
+    val row = statement.apply.head
     assert(ValuedProperty.rowToPropertiesList(row) ==
       List(ValuedProperty(prop1, "LORGEOUX"), ValuedProperty(prop2, "22")))
     NeoDAO.removeConceptFromDB(concept1)
@@ -45,7 +45,7 @@ class ValuedPropertyTest extends FunSuite {
   test("method parse"){
     val prop = Property("Property")
     val value = "value"
-    val stringToParse = "Property -> value"
+    val stringToParse = "Property: value"
     assert(ValuedProperty.parse(stringToParse) == ValuedProperty(prop, value))
   }
 }

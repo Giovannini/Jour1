@@ -1,6 +1,6 @@
 package models.map
 
-import models.graph.custom_types.{Label, Coordinates}
+import models.graph.custom_types.Coordinates
 import models.graph.ontology.{Concept, Instance}
 import org.scalatest.FunSuite
 

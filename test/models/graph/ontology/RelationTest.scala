@@ -16,6 +16,7 @@ class RelationTest extends FunSuite {
   val relation1 = Relation("R1")
 
   implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
+  Statement.clearDB.execute
 
   test("method parseRow"){
     NeoDAO.addConceptToDB(concept1)

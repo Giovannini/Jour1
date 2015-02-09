@@ -1,7 +1,7 @@
 package models.graph
 
 import models.graph.custom_types.Statement
-import models.graph.ontology.{Instance, Relation, Concept}
+import models.graph.ontology.{Property, Instance, Relation, Concept}
 import org.anormcypher._
 
 
@@ -38,6 +38,27 @@ object NeoDAO {
   }
 
   /**
+   * Add a new property to a concept and update its instances
+   * @author Thomas GIOVANNINI
+   * @param concept to update
+   * @param property to add to the concept
+   * @return true if the property was correctly added
+   *         false else
+   */
+  def addPropertyToConcept(concept: Concept, property: Property, defaultValue: Any): Boolean = {
+    val statement = Statement.addPropertyToConcept(concept, property.label)
+    val result = statement.execute
+    if(result) {
+      val cypher = Statement.updateInstancesOf(concept.id, property, defaultValue)
+      println(cypher)
+      val res = cypher.execute
+      println("statement is " + res)
+      res
+    }
+    else result
+  }
+
+  /**
    * Create a relation into two existing concepts in the Neo4J DB.
    * @author Thomas GIOVANNINI
    * @param relation the relation to add, containing the source concept, the relation name and the destination concept
@@ -70,10 +91,12 @@ object NeoDAO {
    *         false else
    */
   def addInstance(instance: Instance): Boolean = {
-    val statement = Statement.createInstance(instance)
-    val result = Concept.getById(instance.concept.id).isDefined && statement.execute
-    if (result) addRelationToDB(instance.hashCode, Relation("INSTANCE_OF"), instance.concept.id)
-    else result
+    if(instance != Instance.error) {
+      val statement = Statement.createInstance(instance)
+      val result = Concept.getById(instance.concept.id).nonEmpty && statement.execute
+      if (result) addRelationToDB(instance.hashCode, Relation("INSTANCE_OF"), instance.concept.id)
+      else result
+    }else false
   }
 
   /**
