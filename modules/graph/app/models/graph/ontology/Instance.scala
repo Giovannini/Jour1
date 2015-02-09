@@ -59,7 +59,7 @@ case class Instance(id:             Int,
 
 object Instance {
 
-  val error = Instance(0, "XXX", Coordinates(0,0), List(), Concept("XXX", List()))
+  val error = Instance(0, "XXX", Coordinates(0,0), List(), Concept("XXX", List(), List()))
 
   /**
    * Transform a json representing an instance into the Instance it represents
@@ -77,7 +77,7 @@ object Instance {
     val conceptId = (jsonInstance \ "concept").as[Int]
     Concept.getById(conceptId) match {
       case Some(concept) => Instance(id, label, coordinates, properties, concept)
-      case _ => Instance(0, "XXX", coordinates, List(), Concept("XXX", List()))
+      case _ => error
     }
   }
 
@@ -94,11 +94,11 @@ object Instance {
     val id = row[Int]("inst_id")
     val label = row[String]("inst_label")
     val coordinates = Coordinates(row[Int]("inst_coordx"),row[Int]("inst_coordy"))
-    val properties = ValuedProperty.rowToPropertiesList(row)
+    val properties = ValuedProperty.rowToPropertiesList(row, "inst_prop")
     println(Concept.getById(conceptId))
     Concept.getById(conceptId) match {
       case Some(concept) => Instance(id, label, coordinates, properties, concept)
-      case _ => Instance(0, "XXX", coordinates, List(), Concept("XXX", List()))
+      case _ => error
     }
   }
 

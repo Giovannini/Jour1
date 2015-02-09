@@ -13,12 +13,12 @@ class WorldMapTest extends FunSuite with BeforeAndAfter{
     val label = Label("Map")
     val description = "The map of the world"
     val dimension = 5
-    val concept1 = Concept("C1", List())
-    val concept2 = Concept("C2", List())
-    val concept3 = Concept("C3", List())
+    val concept1 = Concept("C1", List(), List())
+    val concept2 = Concept("C2", List(), List())
+    val concept3 = Concept("C3", List(), List())
     def emptyWorldMap = WorldMap(label, description, dimension, dimension)
-    val instance1 = Instance("I1", Coordinates(0, 0), List(), concept1)
-    val instance2 = Instance("I2", Coordinates(0, 0), List(), concept3)
+    val instance1 = Instance(1, "I1", Coordinates(0, 0), List(), concept1)
+    val instance2 = Instance(2, "I2", Coordinates(0, 0), List(), concept3)
     val coord_2_3 = Coordinates(2, 3)
     /**
      * An instance has a coordinates property. That means that two instances totally similar
@@ -28,74 +28,65 @@ class WorldMapTest extends FunSuite with BeforeAndAfter{
      * instance with its new position.
      * This is why we need the variable "updatedInstance2".
      */
-    val updatedInstance1 = Instance("I1", coord_2_3, List(), concept1)
-    val updatedInstance2 = Instance("I2", coord_2_3, List(), concept3)
+    val updatedInstance1 = Instance(1, "I1", coord_2_3, List(), concept1)
+    val updatedInstance2 = Instance(2, "I2", coord_2_3, List(), concept3)
 
     test("At its creation, a map is filled with empty tiles"){
         val worldMap = emptyWorldMap
-        for(i <- 0 until dimension; j <- 0 until dimension){
-            assert(! worldMap.getTileAt(i, j).hasInstances)
-        }
+        assert(worldMap.getInstances.isEmpty)
+
     }
 
-    test("method getTileAt"){
+    test("method getInstancesAt"){
         val worldMap = emptyWorldMap
         worldMap.addInstanceAt(instance1, coord_2_3)
-        val tile2_3 = Tile(coord_2_3, List(updatedInstance1))
-        assert(worldMap.getTileAt(coord_2_3) == tile2_3)
+        assert(worldMap.getInstancesAt(coord_2_3) == List(updatedInstance1))
     }
 
     test("method addInstanceAt should correctly add an instance on the desired tile only") {
         val worldMap = emptyWorldMap
         worldMap.addInstanceAt(instance1, coord_2_3)
-        for(i <- 0 until dimension; j <- 0 until dimension){
-            if (i == 2 && j == 3)
-                assert(worldMap.getTileAt(2, 3).hasInstance(updatedInstance1))
-            else
-                assert(! worldMap.getTileAt(i, j).hasInstances)
-        }
+        assert(worldMap.getInstances.contains(updatedInstance1))
+        assert(worldMap.getInstances.length == 1)
     }
 
     test("method removeInstanceAt should remove an existing instance on the desired tile") {
         val worldMap = emptyWorldMap
         worldMap.addInstanceAt(instance1, coord_2_3)
         worldMap.removeInstanceAt(instance2, coord_2_3)
-        assert(worldMap == emptyWorldMap) //No change
-
+        assert(worldMap.getInstances.nonEmpty) //No change
         worldMap.removeInstanceAt(updatedInstance1, coord_2_3)
-        for(i <- 0 until dimension; j <- 0 until dimension){
-            assert(! worldMap.getTileAt(i, j).hasInstances)
-        }
+        assert(worldMap.getInstances.isEmpty)
     }
 
     test("the move method should correctly move the instance from a tile to an other"){
         val world = emptyWorldMap
         world.addInstanceAt(instance1, coord_2_3)
-        assert(world.getTileAt(coord_2_3).hasInstance(updatedInstance1))
+        assert(world.getInstancesAt(coord_2_3).contains(updatedInstance1))
         world.move(updatedInstance1, 1, 1)
-        val reUpdatedInstance = Instance(updatedInstance1.label,
+        val reUpdatedInstance = Instance(1, updatedInstance1.label,
             updatedInstance1.coordinates + Coordinates(1, 1),
             updatedInstance1.properties,
             updatedInstance1.concept)
-        assert(world.getTileAt(coord_2_3 + Coordinates(1, 1)).hasInstance(reUpdatedInstance))
-        assert( ! world.getTileAt(coord_2_3).hasInstance(updatedInstance1))
+        assert(world.getInstancesAt(coord_2_3 + Coordinates(1, 1)).contains(reUpdatedInstance))
+        assert( ! world.getInstancesAt(coord_2_3).contains(updatedInstance1))
     }
 
     test("the search method used on a concept should tell if the concept is on a tile or not"){
         val world = emptyWorldMap
         world.addInstanceAt(instance2, coord_2_3)
-        assert(world.search(concept3, world.getTileAt(coord_2_3)))
-        assert(! world.search(concept2, world.getTileAt(coord_2_3)))
-        assert(! world.search(concept2, world.getTileAt(0,0)))
+        assert(world.search(concept3, coord_2_3))
+        assert(! world.search(concept2, coord_2_3))
+        assert(! world.search(concept2, Coordinates(0,0)))
     }
 
     test("the search method used on an instance should tell if the instance is on a tile or not"){
         val world = emptyWorldMap
         world.addInstanceAt(instance2, coord_2_3)
-        assert(world.getTileAt(coord_2_3).hasInstances)
-        assert(world.search(updatedInstance2, world.getTileAt(coord_2_3)))
-        assert(! world.search(updatedInstance2, world.getTileAt(0,0)))
-        assert(! world.search(updatedInstance1, world.getTileAt(coord_2_3)))
+        assert(world.getInstancesAt(coord_2_3).nonEmpty)
+        assert(world.search(updatedInstance2, coord_2_3))
+        assert(! world.search(updatedInstance2, Coordinates(0,0)))
+        assert(! world.search(updatedInstance1, coord_2_3))
     }
 
 }
