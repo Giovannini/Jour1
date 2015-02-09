@@ -34,7 +34,11 @@ case class WorldMap (label: Label,
         val tileList = map.toList
           .map(_.toList)
           .flatten
-        Json.obj("map" -> tileList.map(_.instances).flatten.map(_.toJson))
+        Json.obj(
+          "width" -> width,
+          "height" -> height,
+          "instances" -> tileList.map(_.instances).flatten.map(_.toJson)
+        )
     }
 
     /**
