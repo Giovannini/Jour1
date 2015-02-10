@@ -3,22 +3,32 @@
 <div class="game-container" ng-app="actionManagerApp">
     <div class="game-row">
         <div class="left-panel">
-            <div id="pixi" class="map-container"></div>
+            <div id="pixi" class="map-container">
+                <div class="loading">Loading...</div>
+            </div>
         </div>
         <div class="right-panel" ng-controller="ActionController">
             <div class="tile-info" ng-show="!isTileSelected">
-                No tile selected
+                <h2>No tile selected</h2>
+            </div>
+            <div class="tile-info loading" ng-show="loadingTile">
+                Loading...
             </div>
             <div class="tile-info" ng-show="isTileSelected">
-                <div>Selected Tile : {{ tile.x }}, {{ tile.y }}</div>
+                <h2>Selected Tile : {{ tile.x }}, {{ tile.y }}</h2>
                 <ul>
-                    <li ng-repeat="(id, instance) in instances"><a ng-click="selectInstance(id)">{{ instance.label }}</a></li>
-                </ul>
-            </div>
-            
-            <div class="instance-info" ng-show="isInstanceSelected">
-                <ul>
-                    <li ng-repeat="action in actions">{{ action.label }}</li>
+                    <li ng-repeat="(id, instance) in instances">
+                        <a ng-click="selectInstance(id)" class="item">{{ instance.label }}</a>
+                        <div class="instance-info" ng-show="selectedInstance == id">
+                            <div class="loading" ng-show="loadingActions == id">
+                                Loading...
+                            </div>
+                            <ul ng-show="loadingActions != id" class="instance-info">
+                                <li ng-show="actions[id].length == 0" class="no-item">No actions</li>
+                                <li ng-repeat="action in actions[id]" class="item">{{ action.label }}</li>
+                            </ul>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </div>

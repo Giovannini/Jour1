@@ -3,22 +3,29 @@
  */
 const TAG = "GAMEMAP_";
 
+/*
+ * Factory that provides the logic to communicate with the server
+ * has methods for instances and concepts
+ * and a general method if it's needed elsewhere 
+ */
 var RestFactory = function() {
     var getUrl = function(url) {
         return function (success, error) {
-            var concepts = [];
-
+            // Init the AJAX object
             var req = new XMLHttpRequest();
             req.open("GET", url, true);
-            req.onreadystatechange = function (e) {
+            req.onreadystatechange = function () {
                 if (req.readyState === 4) {
                     if (req.status === 200) {
+                        // if succeeded
                         success(req.responseText);
                     } else {
+                        // if error
                         error(req.status, req.responseText);
                     }
                 }
             };
+            // Launch request
             req.send(null);
         };
     };
@@ -36,24 +43,29 @@ var RestFactory = function() {
     };
 };
 
+/*
+ * Factory for graph related items
+ * has concepts and relations and functions to manipulate the arrays containing them
+ */
 var GraphFactory = function(Rest) {
     var concepts = [];
 
+    // Object mapping the relation between concepts
     var Relation = function(relation) {
         var _this = this;
 
+        // Object constructor
         (function() {
             _this.label = relation.relation;
             _this.relatedConcept = relation.conceptId;
         })();
     };
 
+    // Object mapping a concept
     var Concept = function(concept, relations) {
         var _this = this;
 
-        /**
-         * Constructeur d'un concept - en javascript
-         */
+        // Object constructor
         (function() {
             _this.id = concept.id;
             _this.label = concept.label;
@@ -72,6 +84,7 @@ var GraphFactory = function(Rest) {
         })();
     };
 
+    // add a single relation or an array of relations to the concept
     Concept.prototype.addRelation = function(relation) {
         if(relation instanceof Array) {
             for(var id in relation) {
@@ -85,11 +98,16 @@ var GraphFactory = function(Rest) {
         }
     };
     
+    // Get the relation of the concept (from the server if needed)
+    // the callback is a function with the relations as an argument
+    // return true if it needs to fetch the relations from the server and false if not
     Concept.prototype.getRelations = function(callback) {
         if(this.relations.length > 0) {
+            // The relations are already there
             callback(this.relations);
             return false;
         } else {
+            // We need to fetch the relations
             var _this = this;
             Rest.all.get("/relations/" + this.id)(
                 function (response) {
@@ -100,11 +118,12 @@ var GraphFactory = function(Rest) {
                 function (status, response) {
                     console.log("ERROR"+status+": "+response);
                 }
-            )
+            );
             return true;
         }
     };
 
+    // Add a concept (or an array of concepts) to the array of concepts
     var addConcept = function(concept) {
         if(typeof concept === "undefined")
             return;
@@ -121,6 +140,7 @@ var GraphFactory = function(Rest) {
         }
     };
 
+    // Initialize the concepts from the server
     var initConcepts = function() {
         Rest.concepts.get(
             function(resConcepts) {
@@ -134,6 +154,9 @@ var GraphFactory = function(Rest) {
         );
     };
     
+    // Return concepts from the array of concept
+    // if the idArray is defined, it only returns the concerned concepts
+    // if not, it returns the whole array
     var getConcepts = function(idArray) {
         if(typeof idArray === "undefined") {
             return concepts;
@@ -144,9 +167,9 @@ var GraphFactory = function(Rest) {
             }
             return res;
         }
-
     };
 
+    // The public methods of the factory
     return {
         getConcepts: getConcepts,
         addConcept: addConcept,
@@ -154,6 +177,10 @@ var GraphFactory = function(Rest) {
     }
 };
 
+/*
+ * Factory for map related items
+ * has the Instance object and stores the array of instances
+ */
 var MapFactory = function(Rest) {
     var width = 0,
         height = 0,
@@ -226,12 +253,15 @@ var MapFactory = function(Rest) {
     };
 };
 
-var DrawerFactory = function(tileWidth, tileHeight) {
+var DrawerFactory = function() {
     var renderer = null,
         stage = null,
         textures = [],
+        conceptContainers = [],
         sprites = [],
-        map = [];
+        map = [],
+        tileWidth,
+        tileHeight;
 
     // Init the drawer
     var initDrawer = function(width, height, backgroundColor) {
@@ -244,46 +274,111 @@ var DrawerFactory = function(tileWidth, tileHeight) {
                 map[i][j] = [];
             }
         }
+        
+//        tileWidth = Math.max(parseInt(document.getElementById('pixi').offsetWidth / width));
+//        tileHeight = Math.max(1, parseInt(window.innerHeight / height));
 
+        tileWidth = 8;
+        tileHeight = 8;
+        
         renderer = new PIXI.autoDetectRenderer(width * tileWidth, height * tileHeight);
         stage = new PIXI.Stage(backgroundColor, true);
 
         // Add the drawing to the page
         var element = document.getElementById("pixi");
+        // Remove all the content of pixi
+        while (element.firstChild) {
+            element.removeChild(element.firstChild);
+        }
+        // Append the view
         element.appendChild(renderer.view);
+        
+        // Set the overlay
+        initOverlay(stage);
+        
+        // Listen to click events
+        listenClicks(stage);
+    };
+    
+    var initOverlay = function(stage) {
+        var overlaySprite = new PIXI.Sprite(canvasTexture(tileWidth, tileHeight, "#ffffff", 0.3));
+        overlaySprite.alpha = 0.3;
+
+        stage.mousemove = function(data) {
+            var coord = data.global.clone();
+            coord.x = parseInt(coord.x / tileWidth);
+            coord.y = parseInt(coord.y / tileHeight);
+            overlaySprite.position.x = coord.x * tileWidth;
+            overlaySprite.position.y = coord.y * tileHeight;
+            stage.removeChild(overlaySprite);
+            stage.addChild(overlaySprite);
+        };
+        
+        stage.mouseout = function() {
+            stage.removeChild(overlaySprite);
+        }
+    };
+    
+    var listenClicks = function(stage) {
+        stage.click = function(data) {
+            var coord = data.global.clone();
+            coord.x = parseInt(coord.x / tileWidth);
+            coord.y = parseInt(coord.y / tileHeight);
+            document.dispatchEvent(new CustomEvent(TAG+"selectTile", {'detail': {
+                x: coord.x,
+                y: coord.y,
+                instances: map[coord.x][coord.y]
+            }}));
+        };
     };
 
+    // init render cycle
     var render = function() {
-        console.log(stage);
         // Render the frame
         renderer.render(stage);
+        
+        requestAnimationFrame(render);
+    };
+    
+    var canvasTexture = function(width, height, color) {
+        var canvas, context;
+
+        // Init a new canvas
+        canvas = document.createElement('canvas');
+        context = canvas.getContext('2d');
+        
+        canvas.width  = width;
+        canvas.height = height;
+
+        // Draw the pixel
+        context.fillStyle = color;
+        context.fillRect(0,0,width,height);
+        
+        return PIXI.Texture.fromCanvas(canvas);
     };
 
     // Create a base texture for each concepts
     var createPixelTextures = function(concepts) {
         textures = [];
-        var id,
-            concept,
-            canvas,
-            context;
-
+        var id;
         for(id in concepts) {
-            concept = concepts[id];
-
-            // Init a new canvas
-            canvas = document.createElement('canvas');
-            context = canvas.getContext('2d');
-            canvas.width  = tileWidth;
-            canvas.height = tileHeight;
-
-            // Draw the pixel
-            context.fillStyle = concept.color;
-            context.fillRect(0,0,tileWidth,tileHeight);
-
             // Create a new texture from the canvas
-            textures[id] = PIXI.Texture.fromCanvas(canvas);
+            textures[id] = canvasTexture(tileWidth, tileHeight, concepts[id].color);
         }
         return textures;
+    };
+    
+    var createSpriteBatches = function(concepts) {
+        conceptContainers = [];
+        var id;
+        for(id in concepts) {
+            // create a new sprite batch which will contain all the instances of this concept
+            var spriteBatch = new PIXI.SpriteBatch();
+            conceptContainers[id] = spriteBatch
+            stage.addChild(spriteBatch);
+        }
+        
+        return conceptContainers;
     };
 
     // Draw multiple instances
@@ -291,6 +386,7 @@ var DrawerFactory = function(tileWidth, tileHeight) {
         for(var id in instances) {
             sprites.push(drawInstance(stage, textures, instances[id]));
         }
+        console.log(sprites.length);
         return sprites;
     };
 
@@ -302,20 +398,12 @@ var DrawerFactory = function(tileWidth, tileHeight) {
         sprite.position.x = instance.coordinates.x * tileWidth;
         sprite.position.y = instance.coordinates.y * tileHeight;
 
-        sprite.interactive = true;
-        sprite.click = function(data) {
-            var coord = data.target.position.clone();
-            coord.x = parseInt(coord.x / tileWidth);
-            coord.y = parseInt(coord.y / tileHeight);
-            document.dispatchEvent(new CustomEvent(TAG+"selectTile", {'detail': {
-                x: coord.x,
-                y: coord.y,
-                instances: map[coord.x][coord.y]
-            }}));
-        };
-
         // add it to the stage
-        stage.addChild(sprite);
+        if(typeof conceptContainers[instance.conceptId] !== "undefined") {
+            conceptContainers[instance.conceptId].addChild(sprite);
+        } else {
+            stage.addChild(sprite);
+        }
 
         // add it to the map
         map[instance.coordinates.x][instance.coordinates.y].push(instance.id);
@@ -327,6 +415,7 @@ var DrawerFactory = function(tileWidth, tileHeight) {
         initDrawer: initDrawer,
         render: render,
         createTextures: createPixelTextures,
+        createSpriteBatches: createSpriteBatches,
         drawInstances: drawInstances,
         drawInstance: drawInstance
     }
@@ -343,6 +432,9 @@ var MapController = function(Graph, Map, Drawer) {
 
         // Create textures
         Drawer.createTextures(concepts);
+        
+        // Create the batches
+        Drawer.createSpriteBatches(concepts);
 
         // Add each instances
         Drawer.drawInstances(instances);

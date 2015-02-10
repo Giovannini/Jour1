@@ -1,6 +1,7 @@
 package models.graph.ontology
 
 import models.graph.custom_types.Coordinates
+import org.anormcypher.CypherResultRow
 import play.api.libs.json._
 
 
@@ -42,7 +43,6 @@ case class Instance(id:             Int,
     " coordinate_x: " + coordinates.x + ", coordinate_y: " + coordinates.y + ","+
     " concept: " + concept.id + ","+
     " type: \"INSTANCE\","+
-    " id: " + hashCode + "," +
     " properties: ["+properties.map("\"" + _ + "\"").mkString(",") + "]})"
 
   /**

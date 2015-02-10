@@ -1,6 +1,11 @@
+/**
+ * Gestion du DOM pour l'affichage des actions
+ * Created by vlynn on 27/01/15.
+ */
 var ActionController = ['$scope', function($scope) {
     $scope.isTileSelected = false;
-    $scope.isInstanceSelected = false;
+    $scope.selectedInstance = -1;
+    $scope.actions = [];
     var needToApply;
     
     // Selected tile
@@ -11,6 +16,8 @@ var ActionController = ['$scope', function($scope) {
 
     // Event listener that says a tile has been clicked
     document.addEventListener(TAG+'selectTile', function(event) {
+        $scope.loadingTile = true;
+        $scope.$apply();
         selectTile(
             event.detail.x,
             event.detail.y,
@@ -25,25 +32,29 @@ var ActionController = ['$scope', function($scope) {
         $scope.instances = Map.getInstances(instances);
 
         $scope.isTileSelected = true;
-        $scope.isInstanceSelected = false;
+        $scope.selectedInstance = -1;
+        $scope.loadingTile = false;
         $scope.$apply();
     }
     
     // Show the actions of the selected instance 
     function applyActions(relations) {
-        $scope.actions = [];
+        var actions = [];
         for(var id in relations) {
-            $scope.actions.push({
+            actions.push({
                 label: relations[id].label + "(" + Graph.getConcepts([relations[id].relatedConcept])[0].label + ")"
             });
         }
-        $scope.isInstanceSelected = true;
+        $scope.actions[$scope.selectedInstance] = actions;
+        $scope.loadingActions = -1;
         if(needToApply)
             $scope.$apply();
     }
     
     // Select an instance and get its relations
     $scope.selectInstance = function(id) {
+        $scope.loadingActions = id;
+        $scope.selectedInstance = id;
         var concept = Graph.getConcepts([$scope.instances[id].conceptId])[0];
         needToApply = false;
         needToApply = concept.getRelations(applyActions);
