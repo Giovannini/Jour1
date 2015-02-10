@@ -17,3 +17,22 @@ $ activator
 
 #####
 Utilisation de bower pour les gestions de dépendances
+
+Installation de nodejs
+    télécharger les sources en targz
+    tar -xzvf node-v0.12.0
+    cd node-v0.12.0
+    ./configure
+    make
+    sudo make install
+    node -v (doit vous donner la version de node)
+    
+Installation de bower
+    npm install bower
+    // on va trouver l'executable dans ~/node_modules/bower/bin/bower
+    
+Première install de bower dans le projet
+    ~/node_modules/bower/bin/bower install
+
+maj régulières
+    ~/node_modules/bower/bin/bower update

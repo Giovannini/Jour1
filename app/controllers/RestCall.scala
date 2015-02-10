@@ -29,7 +29,6 @@ object RestCall extends Controller{
       .map(relationnedConceptToJson)
     
     Ok(Json.toJson(relations))
-//    Ok(Json.toJson(relations))
   }
 
   /**

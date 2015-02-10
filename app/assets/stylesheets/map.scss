@@ -26,29 +26,63 @@ body {
 
 .left-panel {
   width: 80%;
+  min-height: 500px;
 }
 
 .right-panel {
-  background-color: $darkColor;
+  background-color: lighten($darkColor, 5);
   color: $lightColor;
   width: 20%;
+  border-left: 1px solid lighten($darkColor, 15);
+}
+
+.right-panel ul {
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid #222222;
+}
+
+.right-panel li {
+  border-bottom: 1px solid #222222;
+  list-style: none;
+  line-height: 30px;
+  padding: 0;
+}
+
+.loading {
+  display: block;
+  text-align: center;
+  line-height: 100%;
 }
 
 .tile-info {
-  background-color: #444444;
+  background-color: lighten($darkColor, 15);
 }
 
-.tile-info li {
+.tile-info h2 {
+  margin: 0;
+  padding: 20px 30px;
+  font-size: 1.2em;
+  font-style: normal;
+  background-color: lighten($darkColor, 25);
+
+}
+
+.tile-info .item, .tile-info .no-item, .loading {
+  display: block;
+  color: #f0f0f0;
+  cursor: pointer;
+  padding: 10px 30px;
   line-height: 30px;
 }
 
-.tile-info a {
-  color: #f0f0f0;
-  cursor: pointer;
+.instance-info {
+  background: $darkColor;
 }
 
-.instance-info, .tile-info {
-  padding: 30px;
+.instance-info .item, .instance-info .no-item {
+  color: darken($lightColor, 15);
+  border-bottom: 1px solid darken($darkColor, 20);
 }
 
 .map-container {

@@ -17,7 +17,7 @@ object InitWorld extends Controller {
    * @author Thomas GIOVANNINI
    */
   def getFakeInstances = Action {
-    val exampleMap = fakeWorldMapGeneration(10,10)
+    val exampleMap = fakeWorldMapGeneration(30,20)
     Ok(exampleMap.toJson)
   }
 
@@ -29,16 +29,14 @@ object InitWorld extends Controller {
   def fakeWorldMapGeneration(width: Int, height: Int): WorldMap = {
     val map = WorldMap(Label("MapOfTheWorld"), "Test map", width, height)
     val conceptGrass = Concept("Grass", List(), List())
-    val conceptTree = Concept("Tree", List(Property("Size", "Int", 5)), List())
+    val conceptSheep = Concept("Sheep", List(), List())
     for(i <- 0 until width; j <- 0 until height){
       val id = (i * width + j) * 2
       val grass = Instance(id, "Grass"+i+"_"+j, Coordinates(0, 0), List(), conceptGrass)
       val coordinates = Coordinates(i, j)
       map.addInstanceAt(grass, coordinates)
-      if(math.random > 0.9){
-        val tree = Instance(id+1, "Tree"+i+"_"+j, Coordinates(0,0),
-          List(ValuedProperty(Property("Size", "Int", 5), (math.random * 10).toInt.toString)),
-          conceptTree)
+      if(math.random > 0.95){
+        val tree = Instance(id+1, "Sheep"+i+"_"+j, Coordinates(0,0), List(), conceptSheep)
         map.addInstanceAt(tree, coordinates)
       }
     }
@@ -64,14 +62,14 @@ object InitWorld extends Controller {
     val conceptMan        = Concept("Man", List(propertyInstanciable), List())
     val conceptPredator   = Concept("Predator", List(), List())
     val conceptWolf       = Concept("Wolf", List(propertyInstanciable), List())
-    val conceptSheep      = Concept("Sheep", List(propertyInstanciable), List())
+    val conceptSheep      = Concept("Sheep", List(propertyInstanciable), List(), "#EEE9D6")
     val conceptAnimal     = Concept("Animal", List(propertyInstanciable), List())
-    val conceptGrass      = Concept("Grass", List(propertyInstanciable, propertyDuplicationSpeed), List(), "#00ff00")
+    val conceptGrass      = Concept("Grass", List(propertyInstanciable, propertyDuplicationSpeed), List(), "#62A663")
     val conceptEdible     = Concept("Edible", List(), List())
     val conceptApple      = Concept("Apple", List(propertyInstanciable), List())
     val conceptBush       = Concept("Bush", List(propertyInstanciable), List())
     val conceptAppleTree  = Concept("AppleTree", List(propertyInstanciable), List())
-    val conceptTree       = Concept("Tree", List(propertyInstanciable), List(), "#55ff55")
+    val conceptTree       = Concept("Tree", List(propertyInstanciable), List(), "#1B5521")
     val conceptFir        = Concept("Fir", List(propertyInstanciable), List())
     val conceptVegetable  = Concept("Vegetable", List(), List())
     val conceptGround     = Concept("Ground", List(), List())
