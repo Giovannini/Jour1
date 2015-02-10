@@ -54,12 +54,16 @@ case class WorldInit (layer: Layer) {
    * @param listGrounds the ground list
    * @return a list of tuple containing whatever is "maxOccupe" and its associated concept
    */
-  def repartition(lowestStrength : Int, biggestStrength :Int, listGrounds:List[Int] ): List[(Int,Concept)] ={
-    listGrounds.map(Concept.getById)
-      .map{
-        case Some(concept) => (getMaxOccupe(listGrounds, concept), concept)
-        case _ => (0, Concept.error)
-      }.filter(notARepartitionError)
+  def repartition(lastBorn: Int, lowestStrength : Int, biggestStrength :Int, listGrounds:List[Int] ): List[(Int,Concept)] ={
+    listGrounds match {
+      case head::tail => Concept.getById(head) match {
+          case Some(concept) =>
+            val maxOccupe = getMaxOccupe(lastBorn, listGrounds, concept)
+            (maxOccupe, concept) :: repartition(maxOccupe, lowestStrength, biggestStrength, tail)
+          case _ => repartition(lastBorn, lowestStrength, biggestStrength, tail)
+        }
+      case _ => List()
+    }
     
     /*Concept.getById(listGrounds.head) match {
       case Some(c) => val l=c.rules.filter(p=>p.property.label=="Force")
@@ -73,12 +77,13 @@ case class WorldInit (layer: Layer) {
   /**
    * Get what Simon calls the maxOccupe
    * @author Thomas GIOVANNINI
+   * @param lastBorn
    * @param listGrounds the ground list
    * @param concept
    * @return whatever maxOccupe is, it returns it
    */
-  def getMaxOccupe(listGrounds:List[Int], concept: Concept): Int = {
-    listGrounds.min + (getStrengthOf(concept) * (listGrounds.max - listGrounds.min) / listGrounds.sum)
+  def getMaxOccupe(lastBorn: Int, listGrounds:List[Int], concept: Concept): Int = {
+    lastBorn + (getStrengthOf(concept) * (listGrounds.max - listGrounds.min) / listGrounds.sum)
   }
 
   def notARepartitionError(tuple: (Int, Concept)): Boolean = {
@@ -99,7 +104,7 @@ case class WorldInit (layer: Layer) {
     val idGround=getGround(Concept.findAll)
     val listGrounds=getGrounds(idGround::Nil)
     val (min,moy,max)=layer.statMatrix
-    val repartitionList = repartition(min,max,listGrounds)
+    val repartitionList = repartition(min, min,max,listGrounds)
 
     for(i<-0 until outputSize;j<-0 until outputSize){
       //TODO remplire la liste d'instance en fonction de la liste des concepts "repartitionList" et des valeurs de la matrice
@@ -109,7 +114,7 @@ case class WorldInit (layer: Layer) {
 
     /**
      *
-      * @param concepts
+     * @param concepts
      * @return -1 if concept "Ground" not found, else id of the concept
      */
     def getGround(concepts:List[Concept]): Int ={
