@@ -13,11 +13,11 @@ object InitWorld extends Controller {
   implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
 
   /**
-   * Send an example of the json representing the world map that will be sent to the client
+   * Send an example of the json list of instances in the world map that will be sent to the client
    * @author Thomas GIOVANNINI
    */
   def getFakeInstances = Action {
-    val exampleMap = fakeWorldMapGeneration(50,30)
+    val exampleMap = fakeWorldMapGeneration(10,10)
     Ok(exampleMap.toJson)
   }
 
@@ -26,7 +26,7 @@ object InitWorld extends Controller {
    * @author Thomas GIOVANNINI
    * @return a fake world map
    */
-  def fakeWorldMapGeneration(width: Int, height: Int) = {
+  def fakeWorldMapGeneration(width: Int, height: Int): WorldMap = {
     val map = WorldMap(Label("MapOfTheWorld"), "Test map", width, height)
     val conceptGrass = Concept("Grass", List(), List())
     val conceptTree = Concept("Tree", List(Property("Size", "Int", 5)), List())

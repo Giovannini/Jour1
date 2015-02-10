@@ -62,6 +62,7 @@ object ValuedProperty {
    */
   private def parseValue(jsonValue: JsValue, valueType: String): Any = {
     valueType match {
+      case "Int" => jsonValue.as[Int]
       case "Double" => jsonValue.as[Double]
       case "String" => jsonValue.as[String]
       case "Boolean" => jsonValue.as[Boolean]

@@ -1,7 +1,6 @@
 package models.graph.ontology
 
 import models.graph.custom_types.Coordinates
-import org.anormcypher.CypherResultRow
 import play.api.libs.json._
 
 
@@ -26,11 +25,11 @@ case class Instance(id:             Int,
     "id" -> id,
     "label" -> label,
     "coordinates" -> Json.obj("x" -> JsNumber(coordinates.x), "y" -> JsNumber(coordinates.y)),
-    "properties" -> properties.map(vp => vp.toJson),
-    "concept" -> JsNumber(concept.hashCode())
+    "properties" -> properties.map(_.toJson),
+    "concept" -> JsNumber(concept.id)
   )
 
-  override def hashCode = label.hashCode + concept.hashCode()
+  override def hashCode = label.hashCode + concept.hashCode
 
   /**
    * Parse an Instance for it to be used in a Cypher statement
@@ -41,9 +40,9 @@ case class Instance(id:             Int,
     " { id: \"" + id + "\","+
     " label: \"" + label + "\","+
     " coordinate_x: " + coordinates.x + ", coordinate_y: " + coordinates.y + ","+
-    " concept: " + concept.hashCode() + ","+
+    " concept: " + concept.id + ","+
     " type: \"INSTANCE\","+
-    " id: " + hashCode() + "," +
+    " id: " + hashCode + "," +
     " properties: ["+properties.map("\"" + _ + "\"").mkString(",") + "]})"
 
   /**
@@ -53,7 +52,35 @@ case class Instance(id:             Int,
    *         false else
    */
   def isValid = {
-    concept.properties.toSeq == properties.map(vp => vp.property).toSeq
+    concept.properties.toSeq == properties.map(_.property).toSeq
+  }
+
+  /**
+   * Method to add a property to the instance
+   * @author Thomas GIOVANNINI
+   * @param property to add
+   * @return the same instance with the new property added
+   */
+  def withProperty(property: Property): Instance = {
+    Instance(id, label, coordinates, property.defaultValuedProperty :: properties, concept)
+  }
+
+  /**
+   * Method to give coordinates to the instance
+   * @param newCoordinates to give to the instance
+   * @return the same instance with updated coordinates
+   */
+  def at(newCoordinates: Coordinates): Instance = {
+    Instance(id, label, newCoordinates, properties, concept)
+  }
+
+  /**
+   * Method to give id to the instance
+   * @param newId to give to the instance
+   * @return the same instance with updated id
+   */
+  def withId(newId: Int): Instance = {
+    Instance(newId, label, coordinates, properties, concept)
   }
 }
 
@@ -82,54 +109,17 @@ object Instance {
   }
 
   /**
-   * Read a Neo4J row from the DB and convert it to a concept object
-   * @author Thomas GIOVANNINI
-   * @param row the row read from the db
-   *            it should contains a string name label
-   *            and a sequence of strings name properties
-   * @return the concept translated from the given row
-   */
-  def parseRowGivenConcept(row: CypherResultRow, conceptId: Int): Instance = {
-    println(row)
-    val id = row[Int]("inst_id")
-    val label = row[String]("inst_label")
-    val coordinates = Coordinates(row[Int]("inst_coordx"),row[Int]("inst_coordy"))
-    val properties = ValuedProperty.rowToPropertiesList(row, "inst_prop")
-    println(Concept.getById(conceptId))
-    Concept.getById(conceptId) match {
-      case Some(concept) => Instance(id, label, coordinates, properties, concept)
-      case _ => error
-    }
-  }
-
-  /**
    * Create an instance of a certain concept with random attributes
    * @author Thomas GIOVANNINI
    * @param concept the concept of which the instance is desired
    * @return a new instance
    */
   def createRandomInstanceOf(concept: Concept): Instance = {
-    val id = (math.random * 1000000).toInt
-    Instance(id,
-              concept.label + id,
-              Coordinates(0,0),
-              concept.properties.map(prop => ValuedProperty(prop, (math.random * 1000000).toInt.toString)),
-              concept)
-  }
-
-  /**
-   * Update the property of an instance
-   * @author Thomas GIOVANNINI
-   * @param instance to update
-   * @param newValuedProperty the property to update
-   * @return an instance similar to the input one with updated value
-   */
-  def update(instance: Instance, newValuedProperty: ValuedProperty): Instance = {
-    Instance(instance.id,
-              instance.label,
-              instance.coordinates,
-              ValuedProperty.updateList(instance.properties, newValuedProperty),
-              instance.concept)
+    Instance(0,
+      concept.label,
+      Coordinates(0,0),
+      concept.properties.map(_.defaultValuedProperty),
+      concept)
   }
 }
 

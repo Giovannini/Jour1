@@ -1,7 +1,7 @@
 package models.graph
 
 import models.graph.custom_types.Statement
-import models.graph.ontology.{Property, Instance, Relation, Concept}
+import models.graph.ontology._
 import org.anormcypher._
 
 
@@ -38,22 +38,29 @@ object NeoDAO {
   }
 
   /**
-   * Add a new property to a concept and update its instances
+   * Add a new property to a concept
    * @author Thomas GIOVANNINI
    * @param concept to update
    * @param property to add to the concept
    * @return true if the property was correctly added
    *         false else
    */
-  def addPropertyToConcept(concept: Concept, property: Property, defaultValue: Any): Boolean = {
+  def addPropertyToConcept(concept: Concept, property: Property): Boolean = {
     val statement = Statement.addPropertyToConcept(concept, property)
     statement.execute
-    /*if(result) {
-      val cypher = Statement.updateInstancesOf(concept.id, property, defaultValue)
-      val res = cypher.execute
-      res
-    }
-    else result*/
+  }
+
+  /**
+   * Add a new rule to a concept
+   * @author Thomas GIOVANNINI
+   * @param concept to update
+   * @param rule to add to the concept
+   * @return true if the rule was correctly added
+   *         false else
+   */
+  def addRuleToConcept(concept: Concept, rule: ValuedProperty) = {
+    val statement = Statement.addRuleToConcept(concept, rule)
+    statement.execute
   }
 
   /**
@@ -79,45 +86,6 @@ object NeoDAO {
   def removeRelationFromDB(sourceId: Int, relation: Relation, destId: Int): Boolean = {
     val statement = Statement.deleteRelation(sourceId, relation, destId)
     statement.execute
-  }
-
-  /**
-   * Method to add an instance of a given concept (doing the relation) to the Neo4J Graph
-   * @author Thomas GIOVANNINI
-   * @param instance to add to the graph
-   * @return true if the instance was correctly added
-   *         false else
-   */
-  def addInstance(instance: Instance): Boolean = {
-    if(instance != Instance.error) {
-      val statement = Statement.createInstance(instance)
-      val result = Concept.getById(instance.concept.id).nonEmpty && statement.execute
-      if (result) addRelationToDB(instance.hashCode, Relation("INSTANCE_OF"), instance.concept.id)
-      else result
-    }else false
-  }
-
-  /**
-   * Method to remove an instance from the graph
-   * @author Thomas GIOVANNINI
-   * @param instance to remove
-   * @return true if the instance was correctly removed
-   *         false else
-   */
-  def removeInstance(instance: Instance): Boolean = {
-    val statement = Statement.deleteInstances(instance)
-    statement.execute
-  }
-
-  /**
-   * Method to update an instance from the graph
-   * @author Thomas GIOVANNINI
-   * @param instance the updated instance to change in the graph.
-   * @return true if the instance was correctly updated
-   *         false else
-   */
-  def updateInstance(instance: Instance): Boolean = {
-    removeInstance(instance) && addInstance(instance)
   }
 
 }

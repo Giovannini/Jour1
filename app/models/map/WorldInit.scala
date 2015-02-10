@@ -20,15 +20,6 @@ case class WorldInit (layer: Layer) {
         case Some(concept) => getStrengthOf(concept)
         case _ => 0
       }.sum
-
-    /*Concept.getById(listGrounds.head) match{
-      //properties => rules
-      case Some(concept)=> {
-        val strengthRule = concept.rules.filter(_.property.label=="Force").head
-        strengthRule.value + sumForce(listGrounds.tail)
-      }
-      case _ => 0
-    }*/
   }
 
   /**

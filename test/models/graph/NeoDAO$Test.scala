@@ -75,36 +75,4 @@ class NeoDAO$Test extends FunSuite {
     NeoDAO.removeConceptFromDB(concept2)
   }
 
-  /* Instance */
-  ignore("method addInstance should add instance in the graph if it is valid") {
-    assert(! NeoDAO.addInstance(thomas))
-    assert(! Concept.getInstancesOf(concept1.id).contains(thomas))
-    assert(NeoDAO.addConceptToDB(concept1))
-    assert(NeoDAO.addInstance(thomas))
-    assert(Concept.getInstancesOf(concept1.hashCode()).contains(thomas))
-    NeoDAO.removeConceptFromDB(concept1)
-  }
-
-  ignore("method removeInstance should remove an instance from the graph"){
-    NeoDAO.addConceptToDB(concept1)
-    NeoDAO.addInstance(thomas)
-    assert(Concept.getInstancesOf(concept1.id).contains(thomas))
-    NeoDAO.removeInstance(thomas)
-    assert(! Concept.getInstancesOf(concept1.id).contains(thomas))
-    NeoDAO.removeConceptFromDB(concept1)
-  }
-
-  ignore("method updateInstance should update an existing instance from the graph"){
-    NeoDAO.addConceptToDB(concept1)
-    NeoDAO.addInstance(thomas)
-    val newValuedProperty = ValuedProperty(prop1, "BOURGUIGNON")
-    val updatedThomas = Instance.update(thomas, newValuedProperty)
-    NeoDAO.updateInstance(updatedThomas)
-    assert(Concept.getInstancesOf(concept1.id).head.hashCode == thomas.hashCode)
-    assert(! Concept.getInstancesOf(concept1.id).contains(thomas))
-    assert(Concept.getInstancesOf(concept1.id).contains(updatedThomas))
-    assert(Concept.getInstancesOf(concept1.id).head.properties.contains(newValuedProperty))
-    NeoDAO.removeConceptFromDB(concept1)
-  }
-
 }

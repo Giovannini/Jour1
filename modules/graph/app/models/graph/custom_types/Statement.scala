@@ -7,6 +7,7 @@ import org.anormcypher.{Cypher, CypherStatement}
  * All values from this objects are CypherStatements
  */
 object Statement {
+
   def updateInstancesOf(conceptId: Int, property: Property, defaultValue: Any): CypherStatement = {
     Cypher("MATCH (n1 {id: {id}})-[r:INSTANCE_OF]-(n2) "+
            " SET n2.properties = n2.properties + "+ ValuedProperty(property, defaultValue).toString +"")
@@ -61,6 +62,19 @@ object Statement {
     val newPropertiesList = property :: concept.properties
     Cypher("MATCH (n {id: {id1} }) " +
       "SET n.properties = ["+newPropertiesList.mkString(",")+"]")
+      .on("id1" -> concept.id)
+  }
+
+  /**
+   * Create a cypher statement to add a new property to a concept
+   * @param concept to which the property should be added
+   * @param rule to add to the concept
+   * @return a cypher statement
+   */
+  def addRuleToConcept(concept: Concept, rule: ValuedProperty): CypherStatement =   {
+    val newRulesList = rule :: concept.properties
+    Cypher("MATCH (n {id: {id1}}) " +
+      "SET n.rules = ["+newRulesList.mkString(",")+"]")
       .on("id1" -> concept.id)
   }
 

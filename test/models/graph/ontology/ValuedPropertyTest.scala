@@ -15,7 +15,8 @@ class ValuedPropertyTest extends FunSuite {
 
   val prop1 = Property("P1", "Int", 0)
   val prop2 = Property("P2", "String", "thomas")
-  val concept1 = Concept("C1", List(prop1, prop2), List())
+  val prop3 = Property("P3", "Boolean", false)
+  val concept1 = Concept("C1", List(prop1, prop2), List(prop3.defaultValuedProperty))
   val aurelie = Instance(0,
     "Aurelie",
     Coordinates(0, 0),
@@ -32,13 +33,12 @@ class ValuedPropertyTest extends FunSuite {
     assert(ValuedProperty.parseJson(jsonVP) == ValuedProperty(prop2, "22"))
   }
 
-  ignore("method rowToPropertiesList"){
+  test("method rowToPropertiesList"){
     NeoDAO.addConceptToDB(concept1)
-    NeoDAO.addInstance(aurelie)
-    val statement = Statement.getInstances(concept1.id)
+    val statement = Statement.getConceptById(concept1.id)
     val row = statement.apply.head
-    assert(ValuedProperty.rowToPropertiesList(row, "ignored") ==
-      List(ValuedProperty(prop1, "LORGEOUX"), ValuedProperty(prop2, "22")))
+    assert(ValuedProperty.rowToPropertiesList(row, "concept_rules") ==
+      List(prop3.defaultValuedProperty))
     NeoDAO.removeConceptFromDB(concept1)
   }
 

@@ -31,45 +31,39 @@ class WorldMapTest extends FunSuite with BeforeAndAfter{
     val updatedInstance1 = Instance(1, "I1", coord_2_3, List(), concept1)
     val updatedInstance2 = Instance(2, "I2", coord_2_3, List(), concept3)
 
-    test("At its creation, a map is filled with empty tiles"){
+    test("At its creation, a map has no instance"){
         val worldMap = emptyWorldMap
         assert(worldMap.getInstances.isEmpty)
-
     }
 
     test("method getInstancesAt"){
         val worldMap = emptyWorldMap
-        worldMap.addInstanceAt(instance1, coord_2_3)
-        assert(worldMap.getInstancesAt(coord_2_3) == List(updatedInstance1))
+        val updatedInstance = worldMap.addInstanceAt(instance1, coord_2_3)
+        assert(worldMap.getInstancesAt(coord_2_3) == List(updatedInstance))
     }
 
     test("method addInstanceAt should correctly add an instance on the desired tile only") {
         val worldMap = emptyWorldMap
-        worldMap.addInstanceAt(instance1, coord_2_3)
-        assert(worldMap.getInstances.contains(updatedInstance1))
+        val updatedInstance = worldMap.addInstanceAt(instance1, coord_2_3)
+        assert(worldMap.getInstances.contains(updatedInstance))
         assert(worldMap.getInstances.length == 1)
     }
 
     test("method removeInstanceAt should remove an existing instance on the desired tile") {
         val worldMap = emptyWorldMap
-        worldMap.addInstanceAt(instance1, coord_2_3)
+        val updatedInstance = worldMap.addInstanceAt(instance1, coord_2_3)
         worldMap.removeInstanceAt(instance2, coord_2_3)
         assert(worldMap.getInstances.nonEmpty) //No change
-        worldMap.removeInstanceAt(updatedInstance1, coord_2_3)
+        worldMap.removeInstanceAt(updatedInstance, coord_2_3)
         assert(worldMap.getInstances.isEmpty)
     }
 
     test("the move method should correctly move the instance from a tile to an other"){
         val world = emptyWorldMap
-        world.addInstanceAt(instance1, coord_2_3)
-        assert(world.getInstancesAt(coord_2_3).contains(updatedInstance1))
-        world.move(updatedInstance1, 1, 1)
-        val reUpdatedInstance = Instance(1, updatedInstance1.label,
-            updatedInstance1.coordinates + Coordinates(1, 1),
-            updatedInstance1.properties,
-            updatedInstance1.concept)
+        val updatedInstance = world.addInstanceAt(instance1, coord_2_3)
+        val reUpdatedInstance = world.move(updatedInstance, 1, 1)
         assert(world.getInstancesAt(coord_2_3 + Coordinates(1, 1)).contains(reUpdatedInstance))
-        assert( ! world.getInstancesAt(coord_2_3).contains(updatedInstance1))
+        assert(! world.getInstancesAt(coord_2_3).contains(updatedInstance1))
     }
 
     test("the search method used on a concept should tell if the concept is on a tile or not"){
@@ -82,11 +76,11 @@ class WorldMapTest extends FunSuite with BeforeAndAfter{
 
     test("the search method used on an instance should tell if the instance is on a tile or not"){
         val world = emptyWorldMap
-        world.addInstanceAt(instance2, coord_2_3)
+        val updatedInstance = world.addInstanceAt(instance2, coord_2_3)
         assert(world.getInstancesAt(coord_2_3).nonEmpty)
-        assert(world.search(updatedInstance2, coord_2_3))
-        assert(! world.search(updatedInstance2, Coordinates(0,0)))
-        assert(! world.search(updatedInstance1, coord_2_3))
+        assert(world.search(updatedInstance, coord_2_3))
+        assert(! world.search(updatedInstance, Coordinates(0,0)))
+        assert(! world.search(instance2, coord_2_3))
     }
 
 }

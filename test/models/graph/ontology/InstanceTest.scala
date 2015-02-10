@@ -1,7 +1,7 @@
 package models.graph.ontology
 
 import models.graph.NeoDAO
-import models.graph.custom_types.{Statement, Coordinates}
+import models.graph.custom_types.Coordinates
 import org.anormcypher.Neo4jREST
 import org.scalatest.FunSuite
 import play.api.libs.json.{JsString, JsNumber, Json, JsValue}
@@ -16,8 +16,6 @@ class InstanceTest extends FunSuite {
   val prop3 = Property("P3", "Boolean", false)
   val concept1 = Concept("C1", List(prop1, prop2), List())
   val concept2 = Concept("C2", List(prop1, prop3), List())
-  val concept3 = Concept("C3", List(prop1), List())
-  val concept4 = Concept("C4", List(prop1), List())
   val rel1 = Relation("R1")
   val rel2 = Relation("R2")
   val relSubtype = Relation("SUBTYPE_OF")
@@ -68,27 +66,19 @@ class InstanceTest extends FunSuite {
           ValuedProperty(prop3, "22")),
         concept1)
     }
-    Instance(1, "Thomas", Coordinates(0, 0),
+    assert(Instance(1, "Thomas", Coordinates(0, 0),
       List(ValuedProperty(prop1, 5),
         ValuedProperty(prop2, true)),
-      concept1)
+      concept1).isValid)
   }
 
-  ignore("parseJson should return the correct concept if in DB"){
-    val jsonInstance = thomas.toJson
-    assert(Instance.parseJson(jsonInstance) == Instance.error)
+  test("parseJson should return the correct instance"){
     NeoDAO.addConceptToDB(concept1)
-    NeoDAO.addInstance(thomas)
+    NeoDAO.addConceptToDB(concept2)
+    NeoDAO.addRelationToDB(concept1.id, relSubtype, concept2.id)
+    val jsonInstance = thomas.toJson
     assert(Instance.parseJson(jsonInstance) == thomas)
     NeoDAO.removeConceptFromDB(concept1)
-  }
-
-  ignore("method parseRowGivenConcept"){
-    NeoDAO.addConceptToDB(concept2)
-    NeoDAO.addInstance(aurelie)
-    val statement = Statement.getInstances(concept2.id)
-    val row = statement.apply().head
-    assert(Instance.parseRowGivenConcept(row, concept2.id) == aurelie)
     NeoDAO.removeConceptFromDB(concept2)
   }
 
@@ -96,11 +86,4 @@ class InstanceTest extends FunSuite {
     assert(Instance.createRandomInstanceOf(concept1).isValid)
   }
 
-  test("method update"){
-    val randomInstance = Instance.createRandomInstanceOf(concept1)
-    val newValuedProperty = ValuedProperty(prop1, "Thomas")
-    val updatedInstance = Instance.update(randomInstance, newValuedProperty)
-    assert(updatedInstance.hashCode == randomInstance.hashCode)
-    assert(updatedInstance.properties.contains(newValuedProperty))
-  }
 }

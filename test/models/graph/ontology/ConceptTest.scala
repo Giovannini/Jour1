@@ -69,16 +69,12 @@ class ConceptTest extends FunSuite {
         NeoDAO.removeConceptFromDB(concept1)
     }
 
-    ignore("method addPropertyToConcept"){
+    test("method addPropertyToConcept"){
         assert(NeoDAO.addConceptToDB(concept1))
-        assert(NeoDAO.addInstance(thomas))
         assert(! thomas.properties.contains(prop3))
         assert(! concept1.properties.contains(prop3))
-        val conceptWithProperty = Concept.addPropertyToConcept(concept1, prop3, 17)
-        //Problem: The instances are not correctly updated
-        val updatedInstanceList = Concept.getInstancesOf(concept1.id)
+        val conceptWithProperty = Concept.addPropertyToConcept(concept1, prop3)
         assert(conceptWithProperty.properties.contains(prop3))
-        assert(updatedInstanceList.forall(_.properties.map(_.property).contains(prop3)))
         assert(NeoDAO.removeConceptFromDB(concept1))
     }
 
@@ -104,7 +100,6 @@ class ConceptTest extends FunSuite {
         NeoDAO.addConceptToDB(concept1)
         NeoDAO.addConceptToDB(concept2)
         NeoDAO.addRelationToDB(concept1.id, relation1, concept2.id)
-        NeoDAO.addInstance(thomas)
         val relationsList = Concept.getRelationsFrom(concept1.id)
         assert(relationsList.contains((relation1, concept2)))
         assert(! relationsList.contains((Relation("INSTANCE_OF"), thomas)))
@@ -129,38 +124,5 @@ class ConceptTest extends FunSuite {
 
     /*method getParentsRelations*/
     /*method notASubtype*/
-
-    ignore("method getInstancesOf should return the instances of a given concept and also its children"){
-        NeoDAO.addConceptToDB(concept1)
-        NeoDAO.addConceptToDB(concept2)
-        NeoDAO.addConceptToDB(concept3)
-        NeoDAO.addRelationToDB(concept1.id, relSubtype, concept3.id)
-        NeoDAO.addRelationToDB(concept2.id, relSubtype, concept3.id)
-        NeoDAO.addInstance(thomas)
-        NeoDAO.addInstance(aurelie)
-        val instancesOfFather = Concept.getInstancesOf(concept3.id)
-        assert(instancesOfFather.contains(thomas))
-        assert(instancesOfFather.contains(aurelie))
-        val instancesOfSon = Concept.getInstancesOf(concept1.id)
-        assert(instancesOfSon.contains(thomas))
-        assert(! instancesOfSon.contains(aurelie))
-        NeoDAO.removeConceptFromDB(concept1)
-        NeoDAO.removeConceptFromDB(concept2)
-        NeoDAO.removeConceptFromDB(concept3)
-    }
-
-    ignore("method getInstancesOfSelf"){
-        NeoDAO.addConceptToDB(concept1)
-        NeoDAO.addConceptToDB(concept2)
-        NeoDAO.addRelationToDB(concept1.id, relSubtype, concept2.id)
-        NeoDAO.addInstance(thomas)
-        NeoDAO.addInstance(aurelie)
-        val instancesOf1 = Concept.getInstanceOfSelf(concept1.id)
-        val instancesOf2 = Concept.getInstanceOfSelf(concept2.id)
-        assert(instancesOf1.contains(thomas))
-        assert(! instancesOf2.contains(thomas))
-        NeoDAO.removeConceptFromDB(concept1)
-        NeoDAO.removeConceptFromDB(concept2)
-    }
 
 }

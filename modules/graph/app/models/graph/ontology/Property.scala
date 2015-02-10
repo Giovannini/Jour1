@@ -24,6 +24,10 @@ case class Property(label: String, valueType: String, defaultValue: Any) {
     //case "List" => (jsonProperty \ "defaultValue").as[String]/**TODO deal with lists correctly*/
     case _ => JsString(defaultValue.toString)
   }
+
+  def defaultValuedProperty: ValuedProperty = {
+    ValuedProperty(this, defaultValue)
+  }
 }
 
 object Property {

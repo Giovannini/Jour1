@@ -1,6 +1,5 @@
 package models.graph.ontology
 
-import models.graph.custom_types.Label
 import org.anormcypher.CypherResultRow
 
 /**TODO test

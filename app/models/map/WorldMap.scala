@@ -1,7 +1,7 @@
 package models.map
 
 import models.graph.custom_types.{Label, Coordinates}
-import models.graph.ontology.{Concept, Instance}
+import models.graph.ontology.{Property, Concept, Instance}
 import play.api.libs.json.{JsValue, Json}
 
 
@@ -18,14 +18,36 @@ case class WorldMap (label: Label,
                     width: Int,
                     height: Int){
 
+    private var idCounter = 0
+
+    private def autoIncrementIdCounter() = idCounter = idCounter + 1
+
     val instances: collection.mutable.Map[Int, List[Instance]] = collection.mutable.Map.empty[Int, List[Instance]]
 
+    /**
+     * Get all the instances existing on the world map
+     * @author Thomas GIOVANNINI
+     * @return a list of all the instances existing on the world map
+     */
     def getInstances: List[Instance] = instances.map(_._2).flatten.toList
 
     /**
-     * Retourne la carte sous la forme Json
+     * Get all the instances on a world map of a desired concept
      * @author Thomas GIOVANNINI
-     * @return la carte sous la forme Json
+     * @param conceptId from which the instances are desired
+     * @return a list of instances
+     */
+    def getInstancesOf(conceptId: Int): List[Instance] = instances.getOrElse(conceptId, List())
+
+    def getInstanceById(instanceId: Int): Instance = {
+        getInstances.find(_.id == instanceId)
+          .getOrElse(Instance.error)
+    }
+
+    /**
+     * Method to get the world map under a Json format
+     * @author Thomas GIOVANNINI
+     * @return the world map under a Json format
      */
     def toJson : JsValue = {
         Json.obj(
@@ -33,6 +55,18 @@ case class WorldMap (label: Label,
           "height" -> height,
           "instances" -> instances.map(_._2).flatten.map(_.toJson)
         )
+    }
+
+    /**
+     * Update all instances of a given concept if a new property is added to it.
+     * @author Thomas GIOVANNINI
+     * @param concept to which the property is added
+     * @param property added to the concept
+     */
+    def updateInstancesOf(concept: Concept, property: Property) = {
+        val updatedInstancesList = instances.getOrElse(concept.id, List())
+          .map(instance => instance.withProperty(property))
+        instances(concept.id) = updatedInstancesList
     }
 
     /*#################*/
@@ -60,27 +94,31 @@ case class WorldMap (label: Label,
     }
 
     /**
-     * Add an instance to a tile at the given coordinates
+     * Add an instance to the map at the given coordinates
      * @author Thomas GIOVANNINI
-     * @param instance to add to the tile
-     * @param coordinates of the tile
+     * @param instance to add to the map
+     * @param coordinates where to add the instance
      */
-    def addInstanceAt(instance: Instance, coordinates: Coordinates): Unit = {
+    def addInstanceAt(instance: Instance, coordinates: Coordinates): Instance = {
         val key = instance.concept.id
-        val updatedInstance = Instance(instance.id, instance.label, coordinates, instance.properties, instance.concept)
-        instances(key) = updatedInstance :: instances.getOrElse(key, List())
+        val newInstance = instance.at(coordinates).withId(idCounter)
+        autoIncrementIdCounter()
+        instances(key) = newInstance :: instances.getOrElse(key, List())
+        newInstance
     }
 
     /**
-     * Remove an instance to a tile at the given coordinates
+     * Remove an instance at the given coordinates from the map
      * @author Thomas GIOVANNINI
      * @param instance to remove to the tile
      * @param coordinates of the tile
      */
-    def removeInstanceAt(instance: Instance, coordinates: Coordinates): Unit = {
+    def removeInstanceAt(instance: Instance, coordinates: Coordinates): Instance = {
         val key = instance.concept.id
-        if(instances.contains(key))
+        if(instances.contains(key)){
             instances(key) = instances(key) diff List(instance)
+            instance
+        }else Instance.error
     }
 
     /**
@@ -90,7 +128,7 @@ case class WorldMap (label: Label,
      * @param xMove horizontal move
      * @param yMove vertical move
      */
-    def move(instance: Instance, xMove: Int, yMove: Int): Unit = {
+    def move(instance: Instance, xMove: Int, yMove: Int): Instance = {
         val instanceCoordinates = instance.coordinates
         val newCoordinates = instanceCoordinates + Coordinates(xMove, yMove)
         this.removeInstanceAt(instance, instanceCoordinates)

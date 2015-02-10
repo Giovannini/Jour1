@@ -114,12 +114,22 @@ object Concept {
    * @param property to be added
    * @return the concept with the given property added
    */
-  def addPropertyToConcept(concept: Concept, property: Property, defaultValue: Any): Concept ={
-    NeoDAO.addPropertyToConcept(concept, property, defaultValue)
+  def addPropertyToConcept(concept: Concept, property: Property): Concept ={
+    NeoDAO.addPropertyToConcept(concept, property)
     this(concept.label, property :: concept.properties, concept.rules)
   }
-  
-  /**TODO add rulesProperty method*/
+
+  /**
+   * Method to add a rule to a given concept
+   * @author Thomas GIOVANNINI
+   * @param concept to which the property has to be added
+   * @param rule to be added
+   * @return the concept with the given property added
+   */
+  def addPropertyToConcept(concept: Concept, rule: ValuedProperty): Concept ={
+    NeoDAO.addRuleToConcept(concept, rule)
+    this(concept.label, concept.properties, rule :: concept.rules)
+  }
 
   /**
    * Method to get a concept from its ID
@@ -223,32 +233,4 @@ object Concept {
   }
   
   private def notASubtype(tuple: (Relation, Concept)): Boolean = tuple._1 != Relation("SUBTYPE_OF")
-
-  /**
-   * Method to retrieve all the instances of a given concept and its children concepts' instances
-   * @author Thomas GIOVANNINI
-   * @param conceptId of the desired instances
-   * @return a list of the desired instances
-   */
-  def getInstancesOf(conceptId : Int) : List[Instance] = {
-    val instances = getInstanceOfSelf(conceptId)
-    //println(instances)
-    val instancesOfChildren = getChildren(conceptId)
-      .map(children => getInstancesOf(children.id))
-      .flatten
-    instances ::: instancesOfChildren
-  }
-
-  /**
-   * Method to retrieve all the instances of a given concept but not its children concepts' instances
-   * @author Thomas GIOVANNINI
-   * @param conceptId of the desired instances
-   * @return a list of the desired instances
-   */
-  def getInstanceOfSelf(conceptId: Int): List[Instance] = {
-    val statement = Statement.getInstances(conceptId)
-    statement.apply
-      .toList
-      .map{ row => Instance.parseRowGivenConcept(row, conceptId)}
-  }
 }
