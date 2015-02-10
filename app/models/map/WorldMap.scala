@@ -107,6 +107,20 @@ case class WorldMap (label: Label,
         newInstance
     }
 
+
+    /**
+     * Add an instance to the map at the given coordinates
+     * @author Simon Roncière
+     * @param instance to add to the map
+     */
+    def addInstance(instance: Instance): Instance = {
+        val key = instance.concept.id
+        val newInstance = instance.withId(idCounter)
+        autoIncrementIdCounter()
+        instances(key) = newInstance :: instances.getOrElse(key, List())
+        newInstance
+    }
+
     /**
      * Remove an instance at the given coordinates from the map
      * @author Thomas GIOVANNINI

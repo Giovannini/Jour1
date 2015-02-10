@@ -3,7 +3,7 @@ package controllers
 import models.graph.NeoDAO
 import models.graph.custom_types.{Statement, Coordinates, Label}
 import models.graph.ontology._
-import models.map.WorldMap
+import models.map.{WorldInit, WorldMap}
 import org.anormcypher.Neo4jREST
 import play.api.mvc._
 
@@ -17,7 +17,7 @@ object InitWorld extends Controller {
    * @author Thomas GIOVANNINI
    */
   def getFakeInstances = Action {
-    val exampleMap = fakeWorldMapGeneration(10,10)
+    val exampleMap = fakeWorldMapGeneration(100,100)
     Ok(exampleMap.toJson)
   }
 
@@ -28,20 +28,7 @@ object InitWorld extends Controller {
    */
   def fakeWorldMapGeneration(width: Int, height: Int): WorldMap = {
     val map = WorldMap(Label("MapOfTheWorld"), "Test map", width, height)
-    val conceptGrass = Concept("Grass", List(), List())
-    val conceptTree = Concept("Tree", List(Property("Size", "Int", 5)), List())
-    for(i <- 0 until width; j <- 0 until height){
-      val id = (i * width + j) * 2
-      val grass = Instance(id, "Grass"+i+"_"+j, Coordinates(0, 0), List(), conceptGrass)
-      val coordinates = Coordinates(i, j)
-      map.addInstanceAt(grass, coordinates)
-      if(math.random > 0.9){
-        val tree = Instance(id+1, "Tree"+i+"_"+j, Coordinates(0,0),
-          List(ValuedProperty(Property("Size", "Int", 5), (math.random * 10).toInt.toString)),
-          conceptTree)
-        map.addInstanceAt(tree, coordinates)
-      }
-    }
+    WorldInit.worldMapGeneration(width,height).foreach(map.addInstance)
     map
   }
   
@@ -59,6 +46,7 @@ object InitWorld extends Controller {
     /*Property declaration*/
     val propertyInstanciable      = Property("Instanciable", "Boolean", false)
     val propertyDuplicationSpeed  = Property("DuplicationSpeed", "Int", 5)
+    val propertyStrength          = Property("Strength", "Int", 0)
 
     /*Concepts declaration*/
     val conceptMan        = Concept("Man", List(propertyInstanciable), List())
@@ -75,8 +63,8 @@ object InitWorld extends Controller {
     val conceptFir        = Concept("Fir", List(propertyInstanciable), List())
     val conceptVegetable  = Concept("Vegetable", List(), List())
     val conceptGround     = Concept("Ground", List(), List())
-    val conceptLiquid     = Concept("Liquid", List(), List(), "#0000ff")
-    val conceptSolid      = Concept("Solid", List(), List(), "#ffff00")
+    val conceptLiquid     = Concept("Liquid", List(), List(ValuedProperty(propertyStrength,2)), "#0000ff")
+    val conceptSolid      = Concept("Solid", List(), List(ValuedProperty(propertyStrength,4)), "#ffff00")
 
     /*Relations declaration*/
     val relationSubtypeOf   = Relation("SUBTYPE_OF")
