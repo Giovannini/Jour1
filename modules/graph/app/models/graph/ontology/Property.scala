@@ -55,7 +55,6 @@ object Property {
   def parseString(stringProperty: String): Property = {
     val propAttributes = stringProperty.split("%")
     val valueType = propAttributes(1)
-    println(valueType)
     val defaultValue = valueType match{
       case "Int" => propAttributes(2).toInt
       case "Double" => propAttributes(2).toDouble

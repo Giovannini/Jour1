@@ -110,18 +110,12 @@ object WorldInit {
 
     val (min,moy,max)=layer.statMatrix
 
-    //println("min = "+min+" , moy = "+moy+" , max = "+max)
-
     val repartitionList = repartition(min, min,max,listGrounds,sumStr).sortBy(_._1)
 
-    //println("repartition = "+repartitionList)
-
-
-    val toto =matrixToList(layer.matrix)
+    matrixToList(layer.matrix)
       .map{createInstance(_,repartitionList)
     }
-    println(toto)
-    toto
+
   }
 
   def sumStrength(list : List[Int]):Int={

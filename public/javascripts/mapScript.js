@@ -78,7 +78,7 @@ var GraphFactory = function(Rest) {
                 _this.color = concept.color;
             }
 
-            _this.relations = [];
+            _this.relations = null;
             if(typeof relations !== "undefined")
                 _this.addRelation(relations);
         })();
@@ -86,6 +86,8 @@ var GraphFactory = function(Rest) {
 
     // add a single relation or an array of relations to the concept
     Concept.prototype.addRelation = function(relation) {
+        if(!this.relations)
+            this.relations = [];
         if(relation instanceof Array) {
             for(var id in relation) {
                 this.addRelation(relation[id]);
@@ -102,7 +104,7 @@ var GraphFactory = function(Rest) {
     // the callback is a function with the relations as an argument
     // return true if it needs to fetch the relations from the server and false if not
     Concept.prototype.getRelations = function(callback) {
-        if(this.relations.length > 0) {
+        if(this.relations) {
             // The relations are already there
             callback(this.relations);
             return false;
@@ -256,12 +258,165 @@ var MapFactory = function(Rest) {
 var DrawerFactory = function() {
     var renderer = null,
         stage = null,
+        tiledMap = null,
         textures = [],
         conceptContainers = [],
         sprites = [],
         map = [],
         tileWidth,
         tileHeight;
+    
+    TiledMap.prototype = new PIXI.DisplayObjectContainer();
+    TiledMap.prototype.constructor = TiledMap;
+
+    function TiledMap(tileWidth, tileHeight, nbTileX, nbTileY, width, height) {
+        var _this = this;
+        (function() {
+            PIXI.DisplayObjectContainer.call(_this);
+            
+            // Define properties
+            _this.tileWidth = tileWidth;
+            _this.tileHeight = tileHeight;
+            _this.nbTileX = nbTileX;
+            _this.nbTileY = nbTileY;
+            _this.maxWidth = width;
+            _this.maxHeight = height;
+            console.log(
+                tileWidth,
+                tileHeight,
+                nbTileX,
+                nbTileY,
+                width,
+                height
+            );
+            
+            // Actual display size of the object
+            _this.width = width;
+            _this.height = height;
+
+            // Drag & drop vars
+            _this.dragging = false;
+            _this.initPosition = null;
+            
+            // Overlay vars
+            _this.overlaySprite = new PIXI.Sprite(canvasTexture(tileWidth, tileHeight, "#ffffff", 0.3));
+            _this.overlaySprite.alpha = 0.3;
+            
+            // Define interactivity
+            initInteractive();
+        })();
+        
+        function initInteractive() {
+            _this.interactive = true;
+
+            _this.click = selectTile;
+
+            if (_this.tileWidth * _this.nbTileX > _this.width ||
+                    _this.tileHeight * _this.nbTileY > _this.height) {
+                _this.mousedown = dragStart;
+                _this.mouseup = _this.mouseupoutside = dragStop;
+                _this.mousemove = function(data) {
+                    dragMove(data);
+                    overlayMove(data);
+                }
+            } else {
+                _this.mousemove = overlayMove;
+            }
+            _this.mouseout = overlayStop;
+        }
+
+        function setInitPosition(x, y) {
+            _this.initPosition = {
+                x: x,
+                y: y
+            };
+        }
+        
+        function move(transition) {
+            var newPositionX = _this.position.x + transition.x;
+            var newPositionY = _this.position.y + transition.y;
+            
+            if((newPositionX > 0 || newPositionX + _this.nbTileX * _this.tileWidth < _this.maxWidth)) {
+                newPositionX = _this.position.x;
+            }
+            if((newPositionY > 0 || newPositionY + _this.nbTileY * _this.tileHeight < _this.maxHeight)) {
+                newPositionY = _this.position.y;
+            }
+
+            _this.position.set(
+                    newPositionX,
+                    newPositionY
+            );
+        }
+
+        function selectTile(data) {
+            var coord = data.global.clone();
+            coord.x = parseInt((coord.x - _this.position.x) / _this.tileWidth);
+            coord.y = parseInt((coord.y - _this.position.y) / _this.tileHeight);
+            console.log(_this.tileWidth, coord);
+            document.dispatchEvent(new CustomEvent(TAG+"selectTile", {'detail': {
+                x: coord.x,
+                y: coord.y,
+                instances: map[coord.x][coord.y]
+            }}));
+        }
+
+        function dragStart(data) {
+            console.log("dragStart");
+            _this.dragging = true;
+            setInitPosition(data.global.x, data.global.y);
+        }
+
+        function dragMove(data) {
+            if(_this.dragging) {
+                var transition = {
+                    x: data.global.x - _this.initPosition.x,
+                    y: data.global.y - _this.initPosition.y
+                };
+                move(transition);
+                setInitPosition(data.global.x, data.global.y);
+            }
+        }
+
+        function dragStop(data) {
+            console.log("dragStop");
+            _this.dragging = false;
+            
+            // Set all the instances not in the frame to invisibile
+//            var i, j, id, visibility;
+//            for(i = 0; i < map.length; i++) {
+//                for(j = 0; j < map[0].length; j++) {
+//                    visibility = isVisible(i, j)
+//                    for(id in map[i][j]) {
+//                        _this.removeChild(map[i][j][id]);
+//                        map[i][j][id].visible = visibility;
+//                        _this.addChild(map[i][j][id]);
+//                    }
+//                }
+//            }
+        }
+            
+        function isVisible(tileX, tileY) {
+            return tileX * _this.tileWidth + _this.position.x < 0 ||
+                    tileX * _this.tileWidth + _this.position.x > _this.maxWidth ||
+                    tileY * _this.tileHeight + _this.position.y < 0 ||
+                    tileY * _this.tileHeight + _this.position.y > _this.maxHeight
+        }
+
+        function overlayMove (data) {
+            var coord = data.global.clone();
+            coord.x = parseInt((coord.x - _this.position.x) / _this.tileWidth);
+            coord.y = parseInt((coord.y - _this.position.y) / _this.tileHeight);
+            _this.overlaySprite.position.x = coord.x * _this.tileWidth;
+            _this.overlaySprite.position.y = coord.y * _this.tileHeight;
+            _this.removeChild(_this.overlaySprite);
+            _this.addChild(_this.overlaySprite);
+        }
+
+        function overlayStop() {
+            _this.removeChild(_this.overlaySprite);
+        }
+    }
 
     // Init the drawer
     var initDrawer = function(width, height, backgroundColor) {
@@ -274,15 +429,20 @@ var DrawerFactory = function() {
                 map[i][j] = [];
             }
         }
-        
-//        tileWidth = Math.max(parseInt(document.getElementById('pixi').offsetWidth / width));
-//        tileHeight = Math.max(1, parseInt(window.innerHeight / height));
 
         tileWidth = 8;
         tileHeight = 8;
         
-        renderer = new PIXI.autoDetectRenderer(width * tileWidth, height * tileHeight);
+        var nbTileX = width;
+        var nbTileY = height;
+
+        width = Math.min(document.getElementById('pixi').offsetWidth, tileWidth * width);
+        height = Math.min(window.innerHeight, tileHeight * height);
+        
+        renderer = new PIXI.autoDetectRenderer(width, height);
         stage = new PIXI.Stage(backgroundColor, true);
+        tiledMap = new TiledMap(tileWidth, tileHeight, nbTileX, nbTileY, width, height);
+        stage.addChild(tiledMap);
 
         // Add the drawing to the page
         var element = document.getElementById("pixi");
@@ -292,44 +452,6 @@ var DrawerFactory = function() {
         }
         // Append the view
         element.appendChild(renderer.view);
-        
-        // Set the overlay
-        initOverlay(stage);
-        
-        // Listen to click events
-        listenClicks(stage);
-    };
-    
-    var initOverlay = function(stage) {
-        var overlaySprite = new PIXI.Sprite(canvasTexture(tileWidth, tileHeight, "#ffffff", 0.3));
-        overlaySprite.alpha = 0.3;
-
-        stage.mousemove = function(data) {
-            var coord = data.global.clone();
-            coord.x = parseInt(coord.x / tileWidth);
-            coord.y = parseInt(coord.y / tileHeight);
-            overlaySprite.position.x = coord.x * tileWidth;
-            overlaySprite.position.y = coord.y * tileHeight;
-            stage.removeChild(overlaySprite);
-            stage.addChild(overlaySprite);
-        };
-        
-        stage.mouseout = function() {
-            stage.removeChild(overlaySprite);
-        }
-    };
-    
-    var listenClicks = function(stage) {
-        stage.click = function(data) {
-            var coord = data.global.clone();
-            coord.x = parseInt(coord.x / tileWidth);
-            coord.y = parseInt(coord.y / tileHeight);
-            document.dispatchEvent(new CustomEvent(TAG+"selectTile", {'detail': {
-                x: coord.x,
-                y: coord.y,
-                instances: map[coord.x][coord.y]
-            }}));
-        };
     };
 
     // init render cycle
@@ -367,42 +489,28 @@ var DrawerFactory = function() {
         }
         return textures;
     };
-    
-    var createSpriteBatches = function(concepts) {
-        conceptContainers = [];
-        var id;
-        for(id in concepts) {
-            // create a new sprite batch which will contain all the instances of this concept
-            var spriteBatch = new PIXI.SpriteBatch();
-            conceptContainers[id] = spriteBatch
-            stage.addChild(spriteBatch);
-        }
-        
-        return conceptContainers;
-    };
 
     // Draw multiple instances
     var drawInstances = function(instances) {
         for(var id in instances) {
-            sprites.push(drawInstance(stage, textures, instances[id]));
+            sprites.push(drawInstance(tiledMap, textures, instances[id]));
         }
-        console.log(sprites.length);
         return sprites;
     };
 
     // Draw an instance
-    var drawInstance = function(stage, textures, instance) {
+    var drawInstance = function(tiledMap, textures, instance) {
         var sprite = new PIXI.Sprite(textures[instance.conceptId]);
 
         // move the sprite to its position
         sprite.position.x = instance.coordinates.x * tileWidth;
         sprite.position.y = instance.coordinates.y * tileHeight;
 
-        // add it to the stage
+        // add it to the tiledMap
         if(typeof conceptContainers[instance.conceptId] !== "undefined") {
             conceptContainers[instance.conceptId].addChild(sprite);
         } else {
-            stage.addChild(sprite);
+            tiledMap.addChild(sprite);
         }
 
         // add it to the map
@@ -415,7 +523,6 @@ var DrawerFactory = function() {
         initDrawer: initDrawer,
         render: render,
         createTextures: createPixelTextures,
-        createSpriteBatches: createSpriteBatches,
         drawInstances: drawInstances,
         drawInstance: drawInstance
     }
@@ -434,7 +541,7 @@ var MapController = function(Graph, Map, Drawer) {
         Drawer.createTextures(concepts);
         
         // Create the batches
-        Drawer.createSpriteBatches(concepts);
+//        Drawer.createSpriteBatches(concepts);
 
         // Add each instances
         Drawer.drawInstances(instances);
@@ -459,7 +566,6 @@ var MapController = function(Graph, Map, Drawer) {
         selectedInstances.map(function(id) {
             return instances[id];
         });
-        console.log(selectedInstances);
     })
 };
 
@@ -467,6 +573,6 @@ var MapController = function(Graph, Map, Drawer) {
 window.Rest = RestFactory();
 window.Graph = GraphFactory(Rest);
 window.Map = MapFactory(Rest);
-window.Drawer = DrawerFactory(10, 10);
+window.Drawer = DrawerFactory();
 
 MapController(Graph, Map, Drawer);

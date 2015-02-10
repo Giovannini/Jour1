@@ -17,7 +17,7 @@ object InitWorld extends Controller {
    * @author Thomas GIOVANNINI
    */
   def getFakeInstances = Action {
-    val exampleMap = fakeWorldMapGeneration(100,100)
+    val exampleMap = fakeWorldMapGeneration(150,150)
     Ok(exampleMap.toJson)
   }
 
@@ -46,24 +46,26 @@ object InitWorld extends Controller {
     /*Property declaration*/
     val propertyInstanciable      = Property("Instanciable", "Boolean", false)
     val propertyDuplicationSpeed  = Property("DuplicationSpeed", "Int", 5)
-
+    val propertyStrength = Property("Strength", "Int", 0)
+    val propertyZIndex = Property("ZIndex", "Int", 0)
+    
     /*Concepts declaration*/
-    val conceptMan        = Concept("Man", List(propertyInstanciable), List())
+    val conceptMan        = Concept("Man", List(propertyInstanciable), List(ValuedProperty(propertyZIndex, 20)), "#E3B494")
     val conceptPredator   = Concept("Predator", List(), List())
-    val conceptWolf       = Concept("Wolf", List(propertyInstanciable), List())
-    val conceptSheep      = Concept("Sheep", List(propertyInstanciable), List(), "#EEE9D6")
-    val conceptAnimal     = Concept("Animal", List(propertyInstanciable), List())
-    val conceptGrass      = Concept("Grass", List(propertyInstanciable, propertyDuplicationSpeed), List(), "#62A663")
+    val conceptWolf       = Concept("Wolf", List(propertyInstanciable), List(ValuedProperty(propertyZIndex, 18)), "#1A1A22")
+    val conceptSheep      = Concept("Sheep", List(propertyInstanciable), List(ValuedProperty(propertyZIndex, 16)), "#EEE9D6")
+    val conceptAnimal     = Concept("Animal", List(), List())
+    val conceptGrass      = Concept("Grass", List(propertyInstanciable, propertyDuplicationSpeed), List(ValuedProperty(propertyZIndex, 2)), "#62A663")
     val conceptEdible     = Concept("Edible", List(), List())
-    val conceptApple      = Concept("Apple", List(propertyInstanciable), List())
-    val conceptBush       = Concept("Bush", List(propertyInstanciable), List())
-    val conceptAppleTree  = Concept("AppleTree", List(propertyInstanciable), List())
-    val conceptTree       = Concept("Tree", List(propertyInstanciable), List(), "#1B5521")
-    val conceptFir        = Concept("Fir", List(propertyInstanciable), List())
+    val conceptApple      = Concept("Apple", List(propertyInstanciable), List(ValuedProperty(propertyZIndex, 6)), "#A83B36")
+    val conceptBush       = Concept("Bush", List(propertyInstanciable), List(ValuedProperty(propertyZIndex, 4)), "#2A6E37")
+    val conceptAppleTree  = Concept("AppleTree", List(propertyInstanciable), List(ValuedProperty(propertyZIndex, 9)), "#2F1C13")
+    val conceptTree       = Concept("Tree", List(propertyInstanciable), List(ValuedProperty(propertyZIndex, 7)), "#483431")
+    val conceptFir        = Concept("Fir", List(propertyInstanciable), List(ValuedProperty(propertyZIndex, 8)), "#221D1D")
     val conceptVegetable  = Concept("Vegetable", List(), List())
     val conceptGround     = Concept("Ground", List(), List())
-    val conceptLiquid     = Concept("Liquid", List(), List(ValuedProperty(propertyStrength,2)), "#0000ff")
-    val conceptSolid      = Concept("Solid", List(), List(ValuedProperty(propertyStrength,4)), "#ffff00")
+    val conceptLiquid     = Concept("Liquid", List(), List(ValuedProperty(propertyStrength,2)), "#86B6B6")
+    val conceptSolid      = Concept("Solid", List(), List(ValuedProperty(propertyStrength,4)), "#878377")
 
     /*Relations declaration*/
     val relationSubtypeOf   = Relation("SUBTYPE_OF")
