@@ -16,4 +16,11 @@ case class Coordinates(x: Int, y: Int){
      */
     def +(other: Coordinates): Coordinates = Coordinates(this.x + other.x, this.y + other.y)
 
+    def isNextTo(other: Coordinates): Boolean ={
+        val xDistance = this.x - other.x
+        val yDistance = this.y - other.y
+        val distance  = math.sqrt(math.pow(xDistance, 2) + math.pow(yDistance, 2))
+        distance <= math.sqrt(2)
+    }
+
 }

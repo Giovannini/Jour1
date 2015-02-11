@@ -63,14 +63,6 @@ object WorldInit {
       }
       case _ => List()
     }
-
-    /*Concept.getById(listGrounds.head) match {
-      case Some(c) => val l=c.rules.filter(p=>p.property.label=="Force")
-        val maxOccupe = (min+ (l.head.value * (max-minReel) / sumStr)).toInt
-        (maxOccupe,c)::repartition(maxOccupe,max,minReel,listGrounds.tail)
-      case _ => repartition(min,max,minReel,listGrounds.tail)
-    }*/
-    //minOccupe est la valeur telle que [min;maxOccupe]=typeGround head
   }
 
   def shortIncreasing (list:List[(Int,Concept)]):List[(Int,Concept)]={

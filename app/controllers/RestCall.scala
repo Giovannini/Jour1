@@ -1,6 +1,7 @@
 package controllers
 
 import models.graph.ontology.{Relation, Concept}
+import models.utils.ActionParser
 import play.api.libs.json.{JsValue, JsNumber, JsString, Json}
 import play.api.mvc.{Controller, Action}
 
@@ -41,4 +42,7 @@ object RestCall extends Controller{
     Json.obj( "relation" -> JsString(tuple._1.toString),
               "conceptId" -> JsNumber(tuple._2.hashCode()))
   }
+
+  /*def executeAction(string: String, ids: Int*) = Action {
+  }*/
 }

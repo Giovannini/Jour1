@@ -1,7 +1,7 @@
 package models.graph.ontology
 
 import models.graph.NeoDAO
-import models.graph.custom_types.Statement
+import models.graph.custom_types.{Coordinates, Statement}
 import org.anormcypher.{Neo4jREST, CypherResultRow}
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
@@ -58,6 +58,10 @@ case class Concept(label: String,
       " color: \""+color+"\","+
       " type: \"CONCEPT\","+
       " id:" + id + "})"
+  }
+
+  def createInstanceAt(coordinates: Coordinates): Instance = {
+    Instance(0, label, coordinates, properties.map(_.defaultValuedProperty), this)
   }
 
 }

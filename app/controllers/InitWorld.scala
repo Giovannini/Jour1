@@ -7,17 +7,28 @@ import models.map.{WorldInit, WorldMap}
 import org.anormcypher.Neo4jREST
 import play.api.mvc._
 
+import scala.util.Random
+
 
 object InitWorld extends Controller {
 
   implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
+
+  private var isInitialized = false
 
   /**
    * Send an example of the json list of instances in the world map that will be sent to the client
    * @author Thomas GIOVANNINI
    */
   def getFakeInstances = Action {
-    val exampleMap = fakeWorldMapGeneration(150,150)
+    val exampleMap = {
+      if (isInitialized)
+        Application.map
+      else{
+        isInitialized = true
+        fakeWorldMapGeneration
+      }
+    }
     Ok(exampleMap.toJson)
   }
 
@@ -26,16 +37,28 @@ object InitWorld extends Controller {
    * @author Thomas GIOVANNINI
    * @return a fake world map
    */
-  def fakeWorldMapGeneration(width: Int, height: Int): WorldMap = {
-    val map = WorldMap(Label("MapOfTheWorld"), "Test map", width, height)
+  def fakeWorldMapGeneration: WorldMap = {
+    val map = Application.map
+    val width = map.width
+    val height = map.height
     WorldInit.worldMapGeneration(width,height).foreach(map.addInstance)
+    val conceptSheep = Concept.findAll.find(concept => concept.label == "Sheep").getOrElse(Concept.error)
+    Seq.fill(20)(Random.nextInt(width))
+      .zip(Seq.fill(20)(Random.nextInt(height)))
+      .map(coordsTuple => Coordinates(coordsTuple._1, coordsTuple._2))
+      .map(coordinates => conceptSheep.createInstanceAt(coordinates))
+      .foreach(map.addInstance)
     map
   }
   
   def initGraph = Action {
-    Statement.clearDB.execute
-    putInitialConceptsInDB()
-    Ok("Le graph a été correctement initialisé")
+    val result = Statement.clearDB.execute
+    if (result) {
+      putInitialConceptsInDB()
+      Ok("Le graph a été correctement initialisé")
+    }else{
+      Ok("Error")
+    }
   }
 
   /**
