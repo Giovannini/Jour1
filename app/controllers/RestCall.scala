@@ -2,7 +2,7 @@ package controllers
 
 import models.graph.ontology.{Relation, Concept}
 import models.utils.ActionParser
-import play.api.libs.json.{JsValue, JsNumber, JsString, Json}
+import play.api.libs.json._
 import play.api.mvc.{Controller, Action}
 
 /**
@@ -43,6 +43,16 @@ object RestCall extends Controller{
               "conceptId" -> JsNumber(tuple._2.hashCode()))
   }
 
-  /*def executeAction(string: String, ids: Int*) = Action {
-  }*/
+  /**
+   * Receive a json action and execute it server side, then actualize the client-side.
+   * json model: {action: "action", instances: [instance, instance, ...]}
+   */
+  def executeAction = Action(parse.json) { request =>
+    val jsonRequest = request.body
+    val actionReference = (jsonRequest \ "action").as[String]
+    val actionArguments = (jsonRequest \ "instances").as[List[Int]]
+    val result = Application.actionParser.parseAction(actionReference, actionArguments)
+    if(result) Ok(views.html.map.index)
+    else Ok("Error while executing this action")
+  }
 }

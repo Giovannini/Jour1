@@ -3,29 +3,30 @@
 # ~~~~
 
 # Home page
-GET        /                     controllers.Application.index
+GET        /                                 controllers.Application.index
 
-GET        /init                 controllers.InitWorld.initGraph
+GET        /init                             controllers.InitWorld.initGraph
 
-GET        /concepts             controllers.RestCall.getAllConcepts
-GET        /relations/:id        controllers.RestCall.getAllRelationsOf(id: Int)
-GET        /instances            controllers.InitWorld.getFakeInstances
+GET        /concepts                         controllers.RestCall.getAllConcepts
+GET        /relations/:id                    controllers.RestCall.getAllRelationsOf(id: Int)
+GET        /instances                        controllers.InitWorld.getFakeInstances
 
-GET        /simon                controllers.mapGene.index
+GET        /simon                            controllers.mapGene.index
 
-GET       /socket                controllers.SocketTestController.index
-GET       /start                 controllers.SocketTestController.start
-GET       /stop                  controllers.SocketTestController.stop
-GET       /websocket/            controllers.SocketTestController.indexWS
+GET        /socket                           controllers.SocketTestController.index
+GET        /start                            controllers.SocketTestController.start
+GET        /stop                             controllers.SocketTestController.stop
+GET        /websocket/                       controllers.SocketTestController.indexWS
 
 # Graph visualisation
-->         /graph                graph.Routes
+->         /graph                            graph.Routes
 
 # Map routes
-GET        /map                  controllers.MapController.show
+GET        /map                              controllers.MapController.show
+POST       /action                           controllers.RestCall.executeAction
 
 # Map static resources from the /public folder to the /assets URL path
-GET        /assets/javascripts/routes  controllers.SocketTestController.javascriptRoutes
-GET        /assets/*file         controllers.Assets.at(path="/public", file)
+GET        /assets/javascripts/routes        controllers.SocketTestController.javascriptRoutes
+GET        /assets/*file                     controllers.Assets.at(path="/public", file)
 
     
