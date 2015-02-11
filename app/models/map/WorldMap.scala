@@ -37,7 +37,13 @@ case class WorldMap (label: Label,
      * @param conceptId from which the instances are desired
      * @return a list of instances
      */
-    def getInstancesOf(conceptId: Int): List[Instance] = instances.getOrElse(conceptId, List())
+    def getInstancesOf(conceptId: Int): List[Instance] = {
+      val conceptInstances = instances.getOrElse(conceptId, List())
+      val childrenInstances = Concept.getChildren(conceptId).flatMap(
+        concept => instances.getOrElse(concept.id, List())
+      )
+      conceptInstances ::: childrenInstances
+    }
 
     def getInstanceById(instanceId: Int): Instance = {
         getInstances.find(_.id == instanceId)

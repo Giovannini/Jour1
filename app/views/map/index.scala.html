@@ -17,15 +17,31 @@
             <div class="tile-info" ng-show="isTileSelected">
                 <h2>Selected Tile : {{ tile.x }}, {{ tile.y }}</h2>
                 <ul>
-                    <li ng-repeat="(id, instance) in instances">
-                        <a ng-click="selectInstance(id)" class="item">{{ instance.label }}</a>
-                        <div class="instance-info" ng-show="selectedInstance == id">
-                            <div class="loading" ng-show="loadingActions == id">
+                    <li ng-repeat="(instanceId, instance) in instances">
+                        <a ng-click="selectInstance(instanceId)" class="item">{{ instance.label }}</a>
+                        <div class="instance-info" ng-show="selectedInstance == instanceId">
+                            <div class="loading" ng-show="loadingActions == instanceId">
                                 Loading...
                             </div>
-                            <ul ng-show="loadingActions != id" class="instance-info">
-                                <li ng-show="actions[id].length == 0" class="no-item">No actions</li>
-                                <li ng-repeat="action in actions[id]" class="item">{{ action.label }}</li>
+                            <ul ng-show="loadingActions != instanceId" class="instance-info">
+                                <li ng-show="actions[instanceId].length == 0" class="no-item">No actions</li>
+                                <li ng-repeat="(actionId, action) in actions[instanceId]" class="item">
+                                    <a ng-click="selectAction(actionId)">{{ action.label }}</a>
+                                    <div class="choose-instance" ng-show="selectedAction == actionId">
+                                        <div class="loading" ng-show="loadingChoice">
+                                            Loading...
+                                        </div>
+                                        <div class="" ng-show="showChoice">
+                                            <ul>
+                                                <li ng-repeat="choice in choices">
+                                                    <a ng-click="sendAction(instanceId, actionId, choice.id)">{{ choice.label }}</a>
+                                                </li>
+                                                <li ng-show="choices.length == 0">No instance</li>
+                                            </ul>
+                                            
+                                        </div>
+                                    </div>
+                                </li>
                             </ul>
                         </div>
                     </li>

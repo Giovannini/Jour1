@@ -33,6 +33,7 @@ body {
   color: $lightColor;
   width: 20%;
   border-left: 1px solid lighten($darkColor, 15);
+  overflow: scroll;
 }
 
 .right-panel ul {

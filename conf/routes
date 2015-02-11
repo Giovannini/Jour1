@@ -8,8 +8,9 @@ GET        /                                 controllers.Application.index
 GET        /init                             controllers.InitWorld.initGraph
 
 GET        /concepts                         controllers.RestCall.getAllConcepts
-GET        /relations/:id                    controllers.RestCall.getAllRelationsOf(id: Int)
+GET        /relations/:conceptId             controllers.RestCall.getAllRelationsOf(conceptId: Int)
 GET        /instances                        controllers.InitWorld.getFakeInstances
+GET        /instances/:conceptId             controllers.Application.getAllInstancesOf(conceptId: Int)
 
 GET        /simon                            controllers.mapGene.index
 
