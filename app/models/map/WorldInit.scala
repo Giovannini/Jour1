@@ -46,7 +46,6 @@ object WorldInit {
    * @return a list of tuple containing whatever is "maxOccupe" and its associated concept
    */
 
-
   def repartition(lastBounds: Int, lowestMatrixValue : Int, biggestMatrixValue :Int, listGrounds:List[Int] , sumStr:Int): List[(Int,Concept)] ={
     listGrounds match {
       case head::Nil => Concept.getById(head) match {
@@ -63,6 +62,7 @@ object WorldInit {
       }
       case _ => List()
     }
+
   }
 
   def shortIncreasing (list:List[(Int,Concept)]):List[(Int,Concept)]={
@@ -79,12 +79,24 @@ object WorldInit {
     lastBounds + (getStrengthOf(concept) * (biggestMatrixValue - lowestMatrixValue) / sumStr)
   }
 
+  /**
+   *
+   * @author Simon Roncière
+   * @param tuple
+   * @return
+   */
   def notARepartitionError(tuple: (Int, Concept)): Boolean = {
     tuple._2 != Concept.error
   }
 
+  /**
+   *
+   * @author Simon Roncière
+   * @param width
+   * @param heigth
+   * @return
+   */
   def worldMapGeneration(width:Int,heigth:Int): List[Instance] ={
-    //val map = WorldMap
     val frequency = 20
     val octave = 35
     val persistence= 0.5f
@@ -92,26 +104,31 @@ object WorldInit {
     val outputSize = width
 
     val layer = Layer.generateLayer(frequency,octave,persistence,smoothed,outputSize)
-    val instanciableConceptsList = getInstanciable(Concept.findAll)
 
     val idGround=getGround(Concept.findAll)
     val listGrounds=getGrounds(idGround::Nil)
-
     val sumStr= sumStrength(listGrounds)
-
-
+    println("SumStr grounds = "+sumStr)
     val (min,moy,max)=layer.statMatrix
-
     val repartitionList = repartition(min, min,max,listGrounds,sumStr).sortBy(_._1)
+    //
 
-    matrixToList(layer.matrix)
+    val terrain = matrixToList(layer.matrix)
       .map{createInstance(_,repartitionList)
     }
 
+    terrain:::randomObjectInstanciation(listGrounds,outputSize,outputSize)
   }
 
-  def sumStrength(list : List[Int]):Int={
-    list match{
+  /**
+   * get sum of strength of concept
+   * @author Simon Roncière
+   * @param listConcept list of concept's id whose we want the sum
+   * @return
+   */
+
+  def sumStrength(listConcept : List[Int]):Int={
+    listConcept match{
       case Nil => 0
       case head::tail => Concept.getById(head) match {
         case Some(c) => getStrengthOf(c)+sumStrength(tail)
@@ -121,6 +138,11 @@ object WorldInit {
     }
   }
 
+  /**
+   * @author Simon Roncière
+   * @param matrix
+   * @return
+   */
   def matrixToList(matrix: Array[Array[Int]]):List[(Int,Int,Int)]={
     matrix.map(_.toList.zipWithIndex).toList.zipWithIndex
       .map{
@@ -128,10 +150,22 @@ object WorldInit {
     }.flatten
   }
 
+  /**
+   * @author Simon Ronciere
+   * @param triplet
+   * @param repartitionList
+   * @return
+   */
   def createInstance(triplet:(Int,Int,Int),repartitionList: List[(Int,Concept)]):Instance={
     Instance.createRandomInstanceOf(instanciationTile(triplet._1,repartitionList)).at(Coordinates(triplet._2,triplet._3))
   }
 
+  /**
+   * @author Simon Roncière
+   * @param valeur
+   * @param list
+   * @return
+   */
   def instanciationTile(valeur:Int,list:List[(Int,Concept)]):Concept={
     list match{
       case Nil => Concept.error
@@ -156,7 +190,11 @@ object WorldInit {
     }
   }
 
-
+  /**
+   * @author Simon Roncière
+   * @param listID
+   * @return
+   */
   def getGrounds(listID:List[Int]):List[Int]={
     listID match {
       case Nil => Nil
@@ -168,7 +206,10 @@ object WorldInit {
 
   }
 
-
+  /**
+   * @author Thomas Giovannini
+   * @param listConcepts
+   */
   def compTile(listConcepts: List[Concept]):Unit={
 
   }
@@ -178,9 +219,84 @@ object WorldInit {
       ValuedProperty(Property("Id", "Int", 0), (math.random * 10).toInt.toString))
     Instance(0, concept.label,coordinates,prop,concept)
   }
+
+
+
+
+  ///////////////////////////::OBJECT:://///////////////////////////////
+
+
+
+
+  /**
+   * Get id list of concept instanciable
+   * @author Simon Roncière
+   * @param listConcepts list concept where we get instanciables
+   * @return
+   */
   def getInstanciable(listConcepts:List[Concept]): List[Concept] ={
-    listConcepts.filter(_.properties.map(_.label).contains("Instanciable"))
+    val propertyInstanciable      = Property("Instanciable", "Boolean", false)
+    listConcepts.filter(concept=>concept.rules.contains(ValuedProperty(propertyInstanciable,true)))
   }
+
+  /**
+   * Get id list of concept to instanciate
+   * @author Simon Roncière
+   * @param grounds
+   * @param concepts
+   * @return
+   */
+  def getInstance(grounds:List[Int], concepts:List[Concept]):List[Int]={
+     val allInst:List[Concept] = getInstanciable(concepts)
+      allInst match {
+      case Nil => Nil
+      case head::Nil => 
+        if(!grounds.contains(head.id))head.id::Nil
+        else Nil
+      case head::tail => 
+        if(grounds.contains(head.id))getInstance(grounds,tail) 
+        else head.id::getInstance(grounds,tail)
+    }
+  }
+
+  def getNbTileByInstance(listInstanciable:List[Int],sumStrO:Int,nbTile:Int,vide:Int): List[(Int,Concept)] ={
+    if(sumStrO==0 || vide==0){
+      println("erreur")
+      Nil
+    }else {
+      listInstanciable match {
+        case Nil => Nil
+        case head :: tail =>
+          Concept.getById(head) match {
+            case Some(concept) =>
+              val str = getStrengthOf(concept)
+              (str * nbTile / (sumStrO * vide), concept) :: getNbTileByInstance(tail, sumStrO, nbTile, vide)
+            case _ => getNbTileByInstance(tail, sumStrO, nbTile, vide)
+          }
+      }
+    }
+  }
+
+  def randomObjectInstanciation(grounds:List[Int],heigth:Int,width:Int): List[Instance] ={
+    val nbTile = heigth*width
+    val listInstance= getInstance(grounds,Concept.findAll)
+    val sumStr = sumStrength(listInstance)
+    println("NbTile = "+nbTile)
+    println("SumStr objets = "+sumStr)
+    val listNumberEachInstance = getNbTileByInstance(listInstance,sumStr,nbTile,2)
+    listNumberEachInstance.map(tuple=>println("concept "+tuple._2.label+" = "+tuple._1))
+    listNumberEachInstance.map(tuple=>putInstanciesOfOneConcept(tuple._1,tuple._2,heigth,width)).flatten
+  }
+
+
+
+
+  def putInstanciesOfOneConcept(nbTile:Int,concept:Concept,heigth:Int,width:Int): List[Instance] ={
+    val r = scala.util.Random
+    Seq.fill(nbTile)(Instance.createRandomInstanceOf(concept).at(Coordinates(r.nextInt(heigth),r.nextInt(width)))).toList
+  }
+
+
 }
 
 
