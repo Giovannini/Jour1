@@ -34,6 +34,7 @@ var RestFactory = function() {
         return function(success, error) {
             var req = new XMLHttpRequest();
             req.open("POST", url, true);
+            req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
             req.onreadystatechange = function() {
                 if (req.readyState === 4) {
                     if (req.status === 200) {
