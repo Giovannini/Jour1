@@ -4,6 +4,8 @@
  */
 var ActionController = ['$scope', function($scope) {
     $scope.isTileSelected = false;
+    $scope.showChoice = true;
+    $scope.choices = [];
     $scope.selectedInstance = -1;
     $scope.actions = [];
     var needToApply;
@@ -39,10 +41,15 @@ var ActionController = ['$scope', function($scope) {
     
     // Show the actions of the selected instance 
     function applyActions(relations) {
-        var actions = [];
+        var actions = [],
+            relatedConcept;
         for(var id in relations) {
+            relatedConcept = Graph.getConcepts([relations[id].relatedConcept])[0];
             actions.push({
-                label: relations[id].label + "(" + Graph.getConcepts([relations[id].relatedConcept])[0].label + ")"
+                id: id,
+                relationId: relations[id].label,
+                label: relations[id].label + "(" + relatedConcept.label + ")",
+                conceptId: relatedConcept.id
             });
         }
         $scope.actions[$scope.selectedInstance] = actions;
@@ -56,8 +63,38 @@ var ActionController = ['$scope', function($scope) {
         $scope.loadingActions = id;
         $scope.selectedInstance = id;
         var concept = Graph.getConcepts([$scope.instances[id].conceptId])[0];
+
+        // Cette ligne est nécessaire car elle permet de savoir correctement si on a besoin d'utiliser $apply dans le callback ou non
         needToApply = false;
+        
         needToApply = concept.getRelations(applyActions);
+    };
+    
+    function applyChoices(instances) {
+        $scope.choices = instances;
+        $scope.loadingChoice = false;
+        $scope.showChoice = true;
+        $scope.$apply();
+    }
+    
+    $scope.selectAction = function(id) {
+        $scope.loadingChoice = true;
+        $scope.showChoice = false;
+        $scope.selectedAction = id;
+        var action = $scope.actions[$scope.selectedInstance][id];
+        Map.getInstancesByConcept(action.conceptId, applyChoices);
+    };
+    
+    $scope.sendAction = function(initInstanceId, actionId, destInstanceId) {
+        var action = $scope.actions[$scope.selectedInstance][actionId];
+        Rest.action.sendAction(initInstanceId, action.relationId, destInstanceId)(
+            function(responseText) {
+                $scope.actionDone = true;
+            },
+            function(status, responseText) {
+
+            }
+        );
     }
 }];
 

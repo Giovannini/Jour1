@@ -5,10 +5,14 @@ version := "0.1-SNAPSHOT"
 lazy val graph = (project in file("modules/graph"))
   .enablePlugins(PlayScala)
 
+lazy val rules = (project in file("modules/rules"))
+  .enablePlugins(PlayScala)
+
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
   .dependsOn(graph)
-  .aggregate(graph)
+  .dependsOn(rules)
+  .aggregate(graph, rules)
 
 scalaVersion := "2.11.1"
 
