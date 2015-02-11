@@ -47,6 +47,7 @@ var ActionController = ['$scope', function($scope) {
             relatedConcept = Graph.getConcepts([relations[id].relatedConcept])[0];
             actions.push({
                 id: id,
+                relationId: relations[id].label,
                 label: relations[id].label + "(" + relatedConcept.label + ")",
                 conceptId: relatedConcept.id
             });
@@ -85,8 +86,8 @@ var ActionController = ['$scope', function($scope) {
     };
     
     $scope.sendAction = function(initInstanceId, actionId, destInstanceId) {
-        console.log("test");
-        Rest.action.sendAction(initInstanceId, actionId, destInstanceId)(
+        var action = $scope.actions[$scope.selectedInstance][actionId];
+        Rest.action.sendAction(initInstanceId, action.relationId, destInstanceId)(
             function(responseText) {
                 $scope.actionDone = true;
             },
