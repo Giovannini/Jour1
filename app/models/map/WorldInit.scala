@@ -8,6 +8,7 @@ import models.graph.ontology.{ValuedProperty, Instance, Property, Concept}
  */
 
 object WorldInit {
+
   /**
    * Get the sum of the strength of all the ground concepts.
    * @author Thomas GIOVANNINI
@@ -50,6 +51,7 @@ object WorldInit {
       case head :: tail => Concept.getById(head) match {
         case Some(concept) =>
           val maxOccupe = getMaxOccupe(lastBound, lowestMatrixValue, biggestMatrixValue, sumStr, concept, tail.length)
+          println("max = "+biggestMatrixValue+" ; min = "+lowestMatrixValue+" ; maxOcc = "+maxOccupe)
           (maxOccupe, concept) :: repartition(maxOccupe, lowestMatrixValue, biggestMatrixValue, tail, sumStr)
         case _ => repartition(lastBound, lowestMatrixValue, biggestMatrixValue, tail, sumStr)
       }
@@ -58,18 +60,19 @@ object WorldInit {
 
   }
 
-  def shortIncreasing(list: List[(Int, Concept)]): List[(Int, Concept)] = {
-    list.sortBy(_._1)
-  }
-
   /**
-   * Get what Simon calls the maxOccupe
-   * @author Thomas GIOVANNINI
-   * @param lastBound
-   * @param concept
-   * @return whatever maxOccupe is, it returns it
+   * Get highter bound of a concept
+   * @author Thomas Giovannini, Simon Roncière
+   * @param lastBound lower bound free
+   * @param lowestMatrixValue lowest value in the layer matrix
+   * @param biggestMatrixValue bigest value in layer matrix
+   * @param sumStr Sum of grounds strength
+   * @param concept concept to put in the world
+   * @param remainingElements number of remaining element
+   * @return max value take up by concept
    */
   def getMaxOccupe(lastBound: Int, lowestMatrixValue: Int, biggestMatrixValue: Int, sumStr: Int, concept: Concept, remainingElements: Int): Int = {
+    println("je répartie "+concept.label+" et il me reste "+remainingElements+" à placer après cette opération")
     if (remainingElements > 0)
       lastBound + (getStrengthOf(concept) * (biggestMatrixValue - lowestMatrixValue) / sumStr)
     else biggestMatrixValue
@@ -77,7 +80,7 @@ object WorldInit {
 
   /**
    *
-   * @author Simon Roncière
+   * @author Thomas Giovannini
    * @param tuple
    * @return
    */
@@ -104,10 +107,8 @@ object WorldInit {
     val idGround = getGround(Concept.findAll)
     val listGrounds = getGrounds(idGround :: Nil)
     val sumStr = sumStrength(listGrounds)
-    println("SumStr grounds = " + sumStr)
     val (min, moy, max) = layer.statMatrix
     val repartitionList = repartition(min, min, max, listGrounds, sumStr).sortBy(_._1)
-    //
 
     val terrain = matrixToList(layer.matrix)
       .map {
@@ -154,7 +155,8 @@ object WorldInit {
    * @return
    */
   def createInstance(triplet: (Int, Int, Int), repartitionList: List[(Int, Concept)]): Instance = {
-    Instance.createRandomInstanceOf(instanciationTile(triplet._1, repartitionList)).at(Coordinates(triplet._2, triplet._3))
+    val instance = Instance.createRandomInstanceOf(instanciationTile(triplet._1, repartitionList)).at(Coordinates(triplet._2, triplet._3))
+    instance
   }
 
   /**
@@ -166,7 +168,7 @@ object WorldInit {
   def instanciationTile(valeur: Int, list: List[(Int, Concept)]): Concept = {
     list match {
       case Nil => Concept.error
-      case _ => if (valeur < list.head._1)
+      case _ => if (valeur <= list.head._1)
         list.head._2
       else
         instanciationTile(valeur, list.tail)
@@ -255,7 +257,7 @@ object WorldInit {
 
   def getNbTileByInstance(listInstanciable: List[Int], sumStrO: Int, nbTile: Int, vide: Int): List[(Int, Concept)] = {
     if (sumStrO == 0 || vide == 0) {
-      println("erreur")
+      println("erreur, mauvais paramètre : vide doit valoir au moins 1. Et la somme des force doit être non nul")
       Nil
     } else {
       listInstanciable match {
@@ -275,10 +277,7 @@ object WorldInit {
     val nbTile = heigth * width
     val listInstance = getInstance(grounds, Concept.findAll)
     val sumStr = sumStrength(listInstance)
-    println("NbTile = " + nbTile)
-    println("SumStr objets = " + sumStr)
     val listNumberEachInstance = getNbTileByInstance(listInstance, sumStr, nbTile, 2)
-    listNumberEachInstance.map(tuple => println("concept " + tuple._2.label + " = " + tuple._1))
     listNumberEachInstance.map(tuple => putInstanciesOfOneConcept(tuple._1, tuple._2, heigth, width)).flatten
   }
 
