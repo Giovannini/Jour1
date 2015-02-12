@@ -72,7 +72,6 @@ object WorldInit {
    * @return max value take up by concept
    */
   def getMaxOccupe(lastBound: Int, lowestMatrixValue: Int, biggestMatrixValue: Int, sumStr: Int, concept: Concept, remainingElements: Int): Int = {
-    println("je répartie "+concept.label+" et il me reste "+remainingElements+" à placer après cette opération")
     if (remainingElements > 0)
       lastBound + (getStrengthOf(concept) * (biggestMatrixValue - lowestMatrixValue) / sumStr)
     else biggestMatrixValue
