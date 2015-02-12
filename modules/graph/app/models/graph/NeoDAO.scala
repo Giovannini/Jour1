@@ -51,6 +51,19 @@ object NeoDAO {
   }
 
   /**
+   * Remove a given property from a concept
+   * @author Thomas GIOVANNINI
+   * @param concept to update
+   * @param property to remove from the concept
+   * @return true if the property was correctly removed
+   *         false else
+   */
+  def removePropertyFromConcept(concept: Concept, property: Property):Boolean = {
+    val statement = Statement.removePropertyFromConcept(concept, property)
+    statement.execute
+  }
+
+  /**
    * Add a new rule to a concept
    * @author Thomas GIOVANNINI
    * @param concept to update
@@ -60,6 +73,19 @@ object NeoDAO {
    */
   def addRuleToConcept(concept: Concept, rule: ValuedProperty) = {
     val statement = Statement.addRuleToConcept(concept, rule)
+    statement.execute
+  }
+
+  /**
+   * Remove a rule from a concept
+   * @author Thomas GIOVANNINI
+   * @param concept to update
+   * @param rule to remove from the concept
+   * @return true if the rule was correctly removed
+   *         false else
+   */
+  def removeRuleFromConcept(concept: Concept, rule: ValuedProperty) = {
+    val statement = Statement.removeRuleFromConcept(concept, rule)
     statement.execute
   }
 

@@ -19,14 +19,21 @@ case class ActionManager(actions: List[Action], map: WorldMap){
     val args = arguments.map(_._2).toArray
     action.referenceId match {
       case "addInstanceAt0" =>
-        HardCodedMapActions.addInstanceAt(args, map)
+        HardCodedActions.addInstanceAt(args, map)
         true
       case "removeInstanceAt0" =>
-        map.removeInstanceAt(args(0).asInstanceOf[Instance], Coordinates(args(1).asInstanceOf[Int], args(2).asInstanceOf[Int]))
+        HardCodedActions.removeInstanceAt(args, map)
         true
-      case _ => action.subActions
+      case "searchInstance0" =>
+        HardCodedActions.searchInstance(args, map)
+        true
+      case "searchConcept0" =>
+        HardCodedActions.searchConcept(args, map)
+        true
+      case _ => { println("toto"); true }
+      /*case _ => action.subActions
         .map(action => execute(action, takeGoodArguments(action, arguments)))
-        .foldRight(true)(_ & _)
+        .foldRight(true)(_ & _)*/
     }
   }
 

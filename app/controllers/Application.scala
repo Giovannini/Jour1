@@ -9,7 +9,7 @@ import play.api.libs.json.{JsValue, Json}
 
 object Application extends Controller {
 
-  val map = WorldMap(Label("MapOfTheWorld"), "description", 150, 150)
+  val map = WorldMap(Label("MapOfTheWorld"), "description", 50, 50)
   val actionManager = ActionManager(List(), map)
   val actionParser = ActionParser(actionManager)
 

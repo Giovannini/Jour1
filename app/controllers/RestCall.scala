@@ -48,11 +48,13 @@ object RestCall extends Controller{
    * json model: {action: "action", instances: [instance, instance, ...]}
    */
   def executeAction = Action(parse.json) { request =>
-    val jsonRequest = request.body
+    println(request.body)
+    val jsonRequest = Json.toJson(request.body)
     val actionReference = (jsonRequest \ "action").as[String]
     val actionArguments = (jsonRequest \ "instances").as[List[Int]]
     val result = Application.actionParser.parseAction(actionReference, actionArguments)
-    if(result) Ok(views.html.map.index())
+    println("okok")
+    if(result) Ok("Ok")
     else Ok("Error while executing this action")
   }
 }

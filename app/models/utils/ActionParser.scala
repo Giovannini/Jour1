@@ -15,6 +15,8 @@ case class ActionParser(actionManager: ActionManager) {
    *         false else
    */
   def parseAction(actionReference: String, instancesId: List[Int]): Boolean = {
+    println("Action Reference :" + actionReference)
+    println("Instances ids: " + instancesId.mkString(", "))
     val action = getAction(actionReference)
     val arguments = getArgumentsList(action, instancesId)
     actionManager.execute(action, arguments)
@@ -28,13 +30,14 @@ case class ActionParser(actionManager: ActionManager) {
    */
   def getAction(actionReference: String): Action = {
     //Just for test
-    Action("addInstanceAt", "addInstanceAt0", List(), List(),
-      List(Argument("instanceId", "Int"), Argument("coordinateX", "Int"), Argument("coordinateY", "Int")))
+    actionManager._actionRemoveInstanceAt
     /*TODO
      * val fromDBResultAction = database.get(actionReference)
      * parse(fromDBResultAction)
      */
   }
+
+  def badParsing(action)
 
   /**
    * Get the argument list needed to execute an action

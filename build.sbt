@@ -11,8 +11,7 @@ lazy val rules = (project in file("modules/rules"))
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
   .dependsOn(graph)
-  .dependsOn(rules)
-  .aggregate(graph, rules)
+  .aggregate(graph)
 
 scalaVersion := "2.11.1"
 
