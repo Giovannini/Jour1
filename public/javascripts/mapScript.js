@@ -29,13 +29,43 @@ var RestFactory = function() {
             req.send(null);
         };
     };
+    
+    var postUrl = function(url, data) {
+        return function(success, error) {
+            var req = new XMLHttpRequest();
+            req.open("POST", url, true);
+            req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            req.onreadystatechange = function() {
+                if (req.readyState === 4) {
+                    if (req.status === 200) {
+                        // if succeeded
+                        success(req.responseText);
+                    } else {
+                        // if error
+                        error(req.status, req.responseText);
+                    }
+                }
+            };
+            // Launch request
+            req.send(JSON.stringify(data));
+        }
+    };
 
     return {
         concepts: {
             get: getUrl("/concepts")
         },
         instances: {
-            get: getUrl("/instances")
+            get: getUrl("/instances"),
+            getByConcept: function(conceptId) { return getUrl("/instances/"+conceptId); }
+        },
+        action: {
+            sendAction: function(initInstance, action, destInstance) {
+                return postUrl("/action", {
+                    action: action,
+                    instances: [initInstance, destInstance]
+                });
+            }
         },
         all: {
             get: getUrl
@@ -245,9 +275,22 @@ var MapFactory = function(Rest) {
             return res;
         }
     };
+    
+    var getInstancesByConcept = function(idConcept, callback) {
+        Rest.instances.getByConcept(idConcept)(
+            function(responseText) {
+                callback(JSON.parse(responseText));
+            },
+            function(status, responseText) {
+                console.log(status, responseText);
+            }
+        );
+        
+    };
 
     return {
         getInstances: getInstances,
+        getInstancesByConcept: getInstancesByConcept,
         initInstances: initInstances,
         addInstance: addInstance,
         getWidth: function() { return width; },

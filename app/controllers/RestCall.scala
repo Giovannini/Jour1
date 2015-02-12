@@ -52,7 +52,7 @@ object RestCall extends Controller{
     val actionReference = (jsonRequest \ "action").as[String]
     val actionArguments = (jsonRequest \ "instances").as[List[Int]]
     val result = Application.actionParser.parseAction(actionReference, actionArguments)
-    if(result) Ok(views.html.map.index)
+    if(result) Ok(views.html.map.index())
     else Ok("Error while executing this action")
   }
 }
