@@ -43,8 +43,10 @@ var ActionController = ['$scope', function($scope) {
     function applyActions(relations) {
         var actions = [],
             relatedConcept;
+        
         for(var id in relations) {
-            relatedConcept = Graph.getConcepts([relations[id].relatedConcept])[0];
+            var conceptId = relations[id].relatedConcept;
+            relatedConcept = Graph.getConcepts([conceptId])[conceptId];
             actions.push({
                 id: id,
                 relationId: relations[id].label,
@@ -60,14 +62,26 @@ var ActionController = ['$scope', function($scope) {
     
     // Select an instance and get its relations
     $scope.selectInstance = function(id) {
-        $scope.loadingActions = id;
-        $scope.selectedInstance = id;
-        var concept = Graph.getConcepts([$scope.instances[id].conceptId])[0];
+        console.log(id);
+        if($scope.selectedInstance == id) {
+            $scope.selectedAction = -1;
+            $scope.loadingActions = -1;
 
-        // Cette ligne est nécessaire car elle permet de savoir correctement si on a besoin d'utiliser $apply dans le callback ou non
-        needToApply = false;
-        
-        needToApply = concept.getRelations(applyActions);
+        } else {
+            $scope.loadingActions = id;
+            $scope.selectedInstance = id;
+            var conceptId = $scope.instances[id].conceptId;
+            var concept = Graph.getConcepts([conceptId])[conceptId];
+
+            // Cette ligne est nécessaire car elle permet de savoir correctement si on a besoin d'utiliser $apply dans le callback ou non
+            needToApply = false;
+
+            if (typeof concept !== "undefined") {
+                needToApply = concept.getRelations(applyActions);
+            } else {
+                $scope.loadingActions = -1;
+            }
+        }
     };
     
     function applyChoices(instances) {
@@ -78,21 +92,28 @@ var ActionController = ['$scope', function($scope) {
     }
     
     $scope.selectAction = function(id) {
-        $scope.loadingChoice = true;
+        $scope.choices = [];
         $scope.showChoice = false;
-        $scope.selectedAction = id;
-        var action = $scope.actions[$scope.selectedInstance][id];
-        Map.getInstancesByConcept(action.conceptId, applyChoices);
+
+        if($scope.selectedAction == id) {
+            $scope.selectedAction = -1;
+        } else {
+            $scope.loadingChoice = true;
+            $scope.selectedAction = id;
+            var action = $scope.actions[$scope.selectedInstance][id];
+            Map.getInstancesByConcept(action.conceptId, applyChoices);
+        }
     };
     
     $scope.sendAction = function(initInstanceId, actionId, destInstanceId) {
         var action = $scope.actions[$scope.selectedInstance][actionId];
+        $scope.actionDone = false;
         Rest.action.sendAction(initInstanceId, action.relationId, destInstanceId)(
             function(responseText) {
                 $scope.actionDone = true;
             },
             function(status, responseText) {
-
+                $scope.actionDone = true;
             }
         );
     }

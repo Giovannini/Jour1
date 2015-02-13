@@ -78,7 +78,7 @@ var RestFactory = function() {
  * has concepts and relations and functions to manipulate the arrays containing them
  */
 var GraphFactory = function(Rest) {
-    var concepts = [];
+    var concepts = {};
 
     // Object mapping the relation between concepts
     var Relation = function(relation) {
@@ -99,8 +99,13 @@ var GraphFactory = function(Rest) {
         (function() {
             _this.id = concept.id;
             _this.label = concept.label;
+            
             if(typeof concept.properties !== "undefined")
                 _this.properties = concept.properties;
+            
+            if(typeof concept.rules !== "undefined") {
+                _this.defineRules(concept.rules);
+            }
 
             if(typeof concept.color === "undefined") {
                 _this.color = "#aaaaaa";
@@ -112,6 +117,13 @@ var GraphFactory = function(Rest) {
             if(typeof relations !== "undefined")
                 _this.addRelation(relations);
         })();
+    };
+    
+    Concept.prototype.defineRules = function(rules) {
+        this.rules = {};
+        for(var id in rules) {
+            this.rules[rules[id].property.label] = rules[id].value;
+        }
     };
 
     // add a single relation or an array of relations to the concept
@@ -180,8 +192,7 @@ var GraphFactory = function(Rest) {
                 document.dispatchEvent(new Event(TAG+"initialized"));
             },
             function(status, responseText) {
-                console.log("status"+status);
-                console.log(responseText);
+                console.log(status, responseText);
             }
         );
     };
@@ -193,9 +204,9 @@ var GraphFactory = function(Rest) {
         if(typeof idArray === "undefined") {
             return concepts;
         } else {
-            var res = [];
+            var res = {};
             for(var id in idArray) {
-                res.push(concepts[idArray[id]]);
+                res[idArray[id]] = concepts[idArray[id]];
             }
             return res;
         }
@@ -249,6 +260,8 @@ var MapFactory = function(Rest) {
                     instance.properties
                 )
             }
+            if(instance.label === "XXX")
+                console.log(instance);
             instances[instance.id] = instance;
         }
     };
@@ -298,16 +311,50 @@ var MapFactory = function(Rest) {
     };
 };
 
+/*
+ * Factory for the drawer
+ * Abstracts the layer of pixijs to adapt it to the map problem 
+ */
 var DrawerFactory = function() {
     var renderer = null,
         stage = null,
         tiledMap = null,
-        textures = [],
-        conceptContainers = [],
-        sprites = [],
+        conceptContainers = {},
         map = [],
-        tileWidth,
-        tileHeight;
+        tileWidth = 8,
+        tileHeight = 8;
+    
+    ConceptContainer.prototype = new PIXI.DisplayObjectContainer();
+    ConceptContainer.prototype.constructor = ConceptContainer;
+    
+    function ConceptContainer(concept, _tileWidth, _tileHeight) {
+        var _this = this;
+        (function() {
+            PIXI.DisplayObjectContainer.call(_this);
+            
+            // Set the information needed to create a new sprite
+            _this.concept = concept;
+            _this.texture = canvasTexture(tileWidth, tileHeight, concept.color);
+            _this.tileWidth = (typeof _tileWidth === "undefined") ? tileWidth : _tileWidth;
+            _this.tileHeight = (typeof _tileHeight === "undefined") ? tileHeight : _tileHeight;
+        })();
+    }
+    
+    ConceptContainer.prototype.addInstance = function(instance) {
+        // Check that the instance is part of the concept
+        if(instance.conceptId !== this.concept.id)
+            return false;
+        
+        // Create a sprite for the instance
+        var sprite = new PIXI.Sprite(this.texture);
+
+        // move the sprite to its position
+        sprite.position.x = instance.coordinates.x * this.tileWidth;
+        sprite.position.y = instance.coordinates.y * this.tileHeight;
+
+        // add the sprite to the container
+        this.addChild(sprite);
+    };
     
     TiledMap.prototype = new PIXI.DisplayObjectContainer();
     TiledMap.prototype.constructor = TiledMap;
@@ -324,14 +371,6 @@ var DrawerFactory = function() {
             _this.nbTileY = nbTileY;
             _this.maxWidth = width;
             _this.maxHeight = height;
-            console.log(
-                tileWidth,
-                tileHeight,
-                nbTileX,
-                nbTileY,
-                width,
-                height
-            );
             
             // Actual display size of the object
             _this.width = width;
@@ -396,7 +435,6 @@ var DrawerFactory = function() {
             var coord = data.global.clone();
             coord.x = parseInt((coord.x - _this.position.x) / _this.tileWidth);
             coord.y = parseInt((coord.y - _this.position.y) / _this.tileHeight);
-            console.log(_this.tileWidth, coord);
             document.dispatchEvent(new CustomEvent(TAG+"selectTile", {'detail': {
                 x: coord.x,
                 y: coord.y,
@@ -405,7 +443,6 @@ var DrawerFactory = function() {
         }
 
         function dragStart(data) {
-            console.log("dragStart");
             _this.dragging = true;
             setInitPosition(data.global.x, data.global.y);
         }
@@ -422,7 +459,6 @@ var DrawerFactory = function() {
         }
 
         function dragStop(data) {
-            console.log("dragStop");
             _this.dragging = false;
             
             // Set all the instances not in the frame to invisibile
@@ -466,30 +502,33 @@ var DrawerFactory = function() {
         if(typeof backgroundColor === "undefined")
             backgroundColor = 0xcccccc;
 
+        // Initialize the map
+        map = [];
         for(var i = 0; i < width; i++) {
             map[i] = [];
             for(var j = 0; j < height; j++) {
                 map[i][j] = [];
             }
         }
-
-        tileWidth = 8;
-        tileHeight = 8;
         
+        // Store the number of tiles needed
         var nbTileX = width;
         var nbTileY = height;
 
+        // Actual size of the drawing window
         width = Math.min(document.getElementById('pixi').offsetWidth, tileWidth * width);
         height = Math.min(window.innerHeight, tileHeight * height);
         
+        // Init main objects of pixi
         renderer = new PIXI.autoDetectRenderer(width, height);
         stage = new PIXI.Stage(backgroundColor, true);
+        // The tiledMap allows to show different tiles and drag&drop
         tiledMap = new TiledMap(tileWidth, tileHeight, nbTileX, nbTileY, width, height);
         stage.addChild(tiledMap);
 
         // Add the drawing to the page
         var element = document.getElementById("pixi");
-        // Remove all the content of pixi
+        // Remove all the content of the pixi div
         while (element.firstChild) {
             element.removeChild(element.firstChild);
         }
@@ -501,10 +540,11 @@ var DrawerFactory = function() {
     var render = function() {
         // Render the frame
         renderer.render(stage);
-        
+
         requestAnimationFrame(render);
     };
     
+    // Create a pixi texture for a tile given a color
     var canvasTexture = function(width, height, color) {
         var canvas, context;
 
@@ -522,50 +562,56 @@ var DrawerFactory = function() {
         return PIXI.Texture.fromCanvas(canvas);
     };
 
-    // Create a base texture for each concepts
-    var createPixelTextures = function(concepts) {
-        textures = [];
+    // Create a container for each concept
+    var createConceptContainers = function(concepts) {
         var id;
+        conceptContainers = {};
+
+        var sortedConcepts = [];
         for(id in concepts) {
-            // Create a new texture from the canvas
-            textures[id] = canvasTexture(tileWidth, tileHeight, concepts[id].color);
+            if(typeof concepts[id].rules.ZIndex !== "undefined")
+                sortedConcepts.push({id: concepts[id].id, zindex: concepts[id].rules.ZIndex});
         }
-        return textures;
+        sortedConcepts = sortedConcepts.sort(function(conceptA, conceptB) {
+            if (conceptA.zindex < conceptB.zindex)
+                return -1;
+            if (conceptA.zindex > conceptB.zindex)
+                return 1;
+            return 0;
+        });
+
+        for(id in sortedConcepts) {
+            // create a new ConceptContainer which will contain all the instances of this concept
+            var conceptContainer = new ConceptContainer(concepts[sortedConcepts[id].id]);
+            conceptContainers[sortedConcepts[id].id] = conceptContainer;
+            tiledMap.addChild(conceptContainer);
+        }
+        
+        return conceptContainers;
     };
 
     // Draw multiple instances
     var drawInstances = function(instances) {
         for(var id in instances) {
-            sprites.push(drawInstance(tiledMap, textures, instances[id]));
+            drawInstance(instances[id]);
         }
-        return sprites;
     };
 
     // Draw an instance
-    var drawInstance = function(tiledMap, textures, instance) {
-        var sprite = new PIXI.Sprite(textures[instance.conceptId]);
-
-        // move the sprite to its position
-        sprite.position.x = instance.coordinates.x * tileWidth;
-        sprite.position.y = instance.coordinates.y * tileHeight;
-
-        // add it to the tiledMap
+    var drawInstance = function(instance) {
         if(typeof conceptContainers[instance.conceptId] !== "undefined") {
-            conceptContainers[instance.conceptId].addChild(sprite);
-        } else {
-            tiledMap.addChild(sprite);
+            // add the instance to the container
+            conceptContainers[instance.conceptId].addInstance(instance);
+
+            // add it to the map
+            map[instance.coordinates.x][instance.coordinates.y].push(instance.id);
         }
-
-        // add it to the map
-        map[instance.coordinates.x][instance.coordinates.y].push(instance.id);
-
-        return sprite;
     };
 
     return {
         initDrawer: initDrawer,
         render: render,
-        createTextures: createPixelTextures,
+        createConceptContainers: createConceptContainers,
         drawInstances: drawInstances,
         drawInstance: drawInstance
     }
@@ -580,11 +626,8 @@ var MapController = function(Graph, Map, Drawer) {
         // init main objects
         Drawer.initDrawer(width, height);
 
-        // Create textures
-        Drawer.createTextures(concepts);
-        
-        // Create the batches
-//        Drawer.createSpriteBatches(concepts);
+        // Create the containers for each concept
+        Drawer.createConceptContainers(concepts);
 
         // Add each instances
         Drawer.drawInstances(instances);
@@ -600,7 +643,7 @@ var MapController = function(Graph, Map, Drawer) {
         width = Map.getWidth();
         height = Map.getHeight();
 
-        if(concepts.length > 0 && instances.length > 0)
+        if(Object.keys(concepts).length > 0 && instances.length > 0)
             initMap();
     });
 

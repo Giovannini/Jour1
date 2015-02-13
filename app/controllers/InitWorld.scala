@@ -87,8 +87,8 @@ object InitWorld extends Controller {
     val conceptFir        = Concept("Fir", List(), List(ValuedProperty(propertyZIndex, 8),ValuedProperty(propertyStrength,4),ValuedProperty(propertyInstanciable,true)), "#221D1D")
     val conceptVegetable  = Concept("Vegetable", List(), List())
     val conceptGround     = Concept("Ground", List(), List())
-    val conceptLiquid     = Concept("Liquid", List(), List(ValuedProperty(propertyStrength,2),ValuedProperty(propertyInstanciable,true)), "#86B6B6")
-    val conceptSolid      = Concept("Solid", List(), List(ValuedProperty(propertyStrength,2),ValuedProperty(propertyInstanciable,true)), "#878377")
+    val conceptLiquid     = Concept("Liquid", List(), List(ValuedProperty(propertyZIndex, 0), ValuedProperty(propertyStrength,2),ValuedProperty(propertyInstanciable,true)), "#86B6B6")
+    val conceptSolid      = Concept("Solid", List(), List(ValuedProperty(propertyZIndex, 1), ValuedProperty(propertyStrength,2),ValuedProperty(propertyInstanciable,true)), "#878377")
 
     /*Relations declaration*/
     val relationSubtypeOf   = Relation("SUBTYPE_OF")
