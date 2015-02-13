@@ -77,7 +77,7 @@ object InitWorld extends Controller {
     val conceptBush       = Concept("Bush", List(), List(ValuedProperty(propertyZIndex, 4),ValuedProperty(propertyStrength,2),ValuedProperty(propertyInstanciable,true)), "#2A6E37")
     val conceptAppleTree  = Concept("AppleTree", List(), List(ValuedProperty(propertyZIndex, 9),ValuedProperty(propertyStrength,2),ValuedProperty(propertyInstanciable,true)), "#2F1C13")
     val conceptTree       = Concept("Tree", List(), List(ValuedProperty(propertyZIndex, 7),ValuedProperty(propertyStrength,4),ValuedProperty(propertyInstanciable,true)), "#483431")
-    val conceptFir        = Concept("Fir", List(), List(ValuedProperty(propertyZIndex, 8),ValuedProperty(propertyStrength,4),ValuedProperty(propertyInstanciable,true)), "#221D1D")
+    val conceptFir        = Concept("Fir", List(), List(ValuedProperty(propertyZIndex, 8),ValuedProperty(propertyStrength,4)), "#221D1D")
     val conceptVegetable  = Concept("Vegetable", List(), List())
     val conceptGround     = Concept("Ground", List(), List())
     val conceptLiquid     = Concept("Liquid", List(), List(ValuedProperty(propertyZIndex, 0), ValuedProperty(propertyStrength,2),ValuedProperty(propertyInstanciable,true)), "#86B6B6")
@@ -90,6 +90,8 @@ object InitWorld extends Controller {
     val relationMove        = Relation("MOVE")
     val relationFlee        = Relation("FLEE")
     val relationGrowOn      = Relation("GROW_ON")
+
+    val relationLiveOn      = Relation("LIVE_ON")
 
     Statement.clearDB.execute
     /*Storage of the concepts in DB*/
@@ -132,5 +134,12 @@ object InitWorld extends Controller {
     NeoDAO.addRelationToDB(conceptTree.id, relationSubtypeOf, conceptVegetable.id)
     NeoDAO.addRelationToDB(conceptLiquid.id, relationSubtypeOf, conceptGround.id)
     NeoDAO.addRelationToDB(conceptSolid.id, relationSubtypeOf, conceptGround.id)
+
+    //live
+    NeoDAO.addRelationToDB(conceptGrass.id, relationLiveOn, conceptSolid.id)
+    NeoDAO.addRelationToDB(conceptTree.id, relationLiveOn, conceptSolid.id)
+    NeoDAO.addRelationToDB(conceptBush.id, relationLiveOn, conceptSolid.id)
+    NeoDAO.addRelationToDB(conceptSheep.id, relationLiveOn, conceptSolid.id)
+
   }
 }
