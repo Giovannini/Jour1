@@ -2,15 +2,17 @@ package controllers
 
 import models.graph.custom_types.Label
 import models.map.WorldMap
-import models.utils.{ActionParser, ActionManager}
+import models.utils.action.{ActionParser, ActionManager}
+import models.utils.precondition.PreconditionManager
 import play.api.mvc._
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 
 
 object Application extends Controller {
 
   val map = WorldMap(Label("MapOfTheWorld"), "description", 50, 50)
-  val actionManager = ActionManager(List(), map)
+  val preconditionManager = PreconditionManager(map)
+  val actionManager = ActionManager(List(), map, preconditionManager)
   val actionParser = ActionParser(actionManager)
 
   /**

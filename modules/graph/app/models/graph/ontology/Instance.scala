@@ -33,19 +33,6 @@ case class Instance(id:             Int,
   override def hashCode = label.hashCode + concept.hashCode
 
   /**
-   * Parse an Instance for it to be used in a Cypher statement
-   * @author Thomas GIOVANNINI
-   * @return a cypher statement compatible string representing the instance
-   */
-  def toNodeString = "(" + label.toLowerCase +
-    " { id: \"" + id + "\","+
-    " label: \"" + label + "\","+
-    " coordinate_x: " + coordinates.x + ", coordinate_y: " + coordinates.y + ","+
-    " concept: " + concept.id + ","+
-    " type: \"INSTANCE\","+
-    " properties: ["+properties.map("\"" + _ + "\"").mkString(",") + "]})"
-
-  /**
    * Method to see if the instance matches its concept properties
    * @author Thomas GIOVANNINI
    * @return true if it does

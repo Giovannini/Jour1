@@ -54,11 +54,6 @@ class InstanceTest extends FunSuite {
     assert(thomas.toJson == jsonInstance)
   }
 
-  test("method toNodeString"){
-    val nodeStringInstance = "(thomas { id: \"1\", label: \"Thomas\", coordinate_x: 0, coordinate_y: 0, concept: "+concept1.id+", type: \"INSTANCE\", id: "+thomas.hashCode+", properties: ["+thomas.properties.map(vp => "\"" + vp + "\"").mkString(",")+"]})"
-    assert(thomas.toNodeString == nodeStringInstance)
-  }
-
   test("an instance is valid if its properties match its concept properties else it cannot exists"){
     intercept[Exception] {
       Instance(1, "Thomas", Coordinates(0, 0),

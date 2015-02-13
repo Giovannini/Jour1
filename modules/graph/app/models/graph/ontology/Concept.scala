@@ -10,6 +10,8 @@ import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
  * @author Thomas GIOVANNINI
  * @param label for the concept
  * @param properties of this concept
+ * @param rules of this concept
+ * @param color for tis concept to be displayed
  */
 case class Concept(label: String,
                properties: List[Property],
@@ -68,6 +70,33 @@ case class Concept(label: String,
    */
   def createInstanceAt(coordinates: Coordinates): Instance = {
     Instance(0, label, coordinates, properties.map(_.defaultValuedProperty), this)
+  }
+
+  /**
+   * Retrieve the properties of a Concept but also the one from its parents
+   * @author Thomas GIOVANNINI
+   * @return a list of properties
+   */
+  def getAllProperties: Set[Property] = {
+    properties.toSet ++ getParents.flatMap(_.getAllProperties).toSet
+  }
+
+  /**
+   * Retrieve the rules of a Concept but also the one from its parents
+   * @author Thomas GIOVANNINI
+   * @return a list of rules
+   */
+  def getAllRules: List[ValuedProperty] = {
+    ValuedProperty.keepHighestLevelRules(rules ::: getParents.flatMap(_.getAllRules), List())
+  }
+
+  /**
+   * Retrieve the parents of the concept
+   * @author Thomas GIOVANNINI
+   * @return the list of parent concepts
+   */
+  def getParents: List[Concept] = {
+    Concept.getParents(id)
   }
 
 }

@@ -1,7 +1,7 @@
 package controllers
 
 import models.graph.ontology.{Relation, Concept}
-import models.utils.ActionParser
+import models.utils.action.ActionParser
 import play.api.libs.json._
 import play.api.mvc.{Controller, Action}
 
@@ -48,7 +48,7 @@ object RestCall extends Controller{
    * json model: {action: "action", instances: [instance, instance, ...]}
    */
   def executeAction = Action(parse.json) { request =>
-    println(request.body)
+    println("Received JSON: " + request.body)
     val jsonRequest = Json.toJson(request.body)
     val actionReference = (jsonRequest \ "action").as[String]
     val actionArguments = (jsonRequest \ "instances").as[List[Int]]

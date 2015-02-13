@@ -1,8 +1,9 @@
-package models.utils
+package models.utils.action
 
+import models.utils.Argument
 
 /**
- * Created by giovannini on 2/10/15.
+ * Parser class for actions
  */
 case class ActionParser(actionManager: ActionManager) {
 
@@ -33,10 +34,9 @@ case class ActionParser(actionManager: ActionManager) {
       case "REMOVE" => actionManager._actionRemoveInstanceAt
       case "ADD"  => actionManager._actionAddInstanceAt
       case "MOVE" => actionManager._actionMoveInstanceAt
-      case _ => {
+      case _ =>
         println(actionReference + " but removed")
         actionManager._actionRemoveInstanceAt
-      }
     }
 
     /*TODO
@@ -51,16 +51,11 @@ case class ActionParser(actionManager: ActionManager) {
    * @param ids the ids of the instances needed to execute the actions
    * @return a list of arguments and their values
    */
-  def getArgumentsList(action: Action, ids: Seq[Int]):List[(Argument, Any)] = {
-    if(ids.length == 2){
-      val instanceId = ids.head
-      val groundCoordinates = this.actionManager.map.getInstanceById(ids.last).coordinates
-      val xCoordinates = groundCoordinates.x
-      val yCoordinates = groundCoordinates.y
-      val argsValueList = List(instanceId, xCoordinates, yCoordinates)
-      action.arguments.zip(argsValueList)
+  def getArgumentsList(action: Action, ids: List[Int]):List[(Argument, Any)] = {
+    if(ids.length == action.arguments.length){
+      action.arguments.zip(ids)
     }else{
-      println("Error while getting arguments list.")
+      println("Error while getting arguments list: arguments list of different size.")
       action.arguments.zip(ids)
     }
   }

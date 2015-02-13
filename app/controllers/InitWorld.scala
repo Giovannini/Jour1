@@ -18,15 +18,16 @@ object InitWorld extends Controller {
    * Send an example of the json list of instances in the world map that will be sent to the client
    * @author Thomas GIOVANNINI
    */
-  def getFakeInstances = Action {
+  def getWorld = Action {
     val exampleMap = {
       if (isInitialized)
         Application.map
       else{
         isInitialized = true
-        fakeWorldMapGeneration
+        WorldGeneration
       }
     }
+    println(exampleMap.getInstances.count(_ == Instance.error))
     Ok(exampleMap.toJson)
   }
 
@@ -35,18 +36,11 @@ object InitWorld extends Controller {
    * @author Thomas GIOVANNINI
    * @return a fake world map
    */
-  def fakeWorldMapGeneration: WorldMap = {
+  def WorldGeneration: WorldMap = {
     val map = Application.map
     val width = map.width
     val height = map.height
     WorldInit.worldMapGeneration(width,height).foreach(map.addInstance)
-    //WorldInit.randomObjectInstanciation()
-/*    val conceptSheep = Concept.findAll.find(concept => concept.label == "Sheep").getOrElse(Concept.error)
-    Seq.fill(20)(Random.nextInt(width))
-      .zip(Seq.fill(20)(Random.nextInt(height)))
-      .map(coordsTuple => Coordinates(coordsTuple._1, coordsTuple._2))
-      .map(coordinates => conceptSheep.createInstanceAt(coordinates))
-      .foreach(map.addInstance)*/
     map
   }
   

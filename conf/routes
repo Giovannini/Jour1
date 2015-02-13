@@ -9,15 +9,10 @@ GET        /init                             controllers.InitWorld.initGraph
 
 GET        /concepts                         controllers.RestCall.getAllConcepts
 GET        /relations/:conceptId             controllers.RestCall.getAllRelationsOf(conceptId: Int)
-GET        /instances                        controllers.InitWorld.getFakeInstances
+GET        /instances                        controllers.InitWorld.getWorld
 GET        /instances/:conceptId             controllers.Application.getAllInstancesOf(conceptId: Int)
 
 GET        /simon                            controllers.mapGene.index
-
-GET        /socket                           controllers.SocketTestController.index
-GET        /start                            controllers.SocketTestController.start
-GET        /stop                             controllers.SocketTestController.stop
-GET        /websocket/                       controllers.SocketTestController.indexWS
 
 # Graph visualisation
 ->         /graph                            graph.Routes
@@ -27,7 +22,6 @@ GET        /map                              controllers.MapController.show
 POST       /action                           controllers.RestCall.executeAction
 
 # Map static resources from the /public folder to the /assets URL path
-GET        /assets/javascripts/routes        controllers.SocketTestController.javascriptRoutes
 GET        /assets/*file                     controllers.Assets.at(path="/public", file)
 
     

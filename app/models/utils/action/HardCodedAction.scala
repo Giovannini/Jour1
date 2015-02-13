@@ -1,13 +1,13 @@
-package models.utils
+package models.utils.action
 
 import models.graph.custom_types.Coordinates
-import models.graph.ontology.{Instance, Concept}
+import models.graph.ontology.{Concept, Instance}
 import models.map.WorldMap
 
 /**
  * Hard coded actions that user can make instances do.
  */
-object HardCodedActions {
+object HardCodedAction {
 
   /**
    * Add an instance to the map at given coordinates
@@ -18,20 +18,16 @@ object HardCodedActions {
   def addInstanceAt(args: Array[Any], map: WorldMap) = {
     println("Action: addInstanceAt")
     val instance = map.getInstanceById(args(0).asInstanceOf[Int])
-    val xCoordinate = args(1).asInstanceOf[Int]
-    val yCoordinate = args(2).asInstanceOf[Int]
-    val coordinates = Coordinates(xCoordinate, yCoordinate)
-    val key = instance.concept.id
+    val groundInstance = map.getInstanceById(args(1).asInstanceOf[Int])
+    val coordinates = groundInstance.coordinates
     map.addInstance(instance.at(coordinates))
   }
 
   def createInstanceAt(args: Array[Any], map: WorldMap) = {
     println("Action: createInstanceAt")
-    val concept = Concept.getById(args(0).asInstanceOf[Int]).getOrElse(Concept.error)
-    val instance = Instance.createRandomInstanceOf(concept)
-    val xCoordinate = args(1).asInstanceOf[Int]
-    val yCoordinate = args(2).asInstanceOf[Int]
-    val coordinates = Coordinates(xCoordinate, yCoordinate)
+    val instance = map.getInstanceById(args(0).asInstanceOf[Int])
+    val groundInstance = map.getInstanceById(args(1).asInstanceOf[Int])
+    val coordinates = groundInstance.coordinates
     map.addInstance(instance)
   }
 
