@@ -24,7 +24,7 @@ case class PreconditionManager(map: WorldMap){
    *         false else
    */
   def isFilled(precondition: Precondition, arguments: List[(Argument, Any)]): Boolean = {
-    println("Checking precondition " + precondition.label)
+    //println("Checking precondition " + precondition.label)
     val args = arguments.map(_._2).toArray
     precondition.referenceId match {
       case "isNextTo0" =>

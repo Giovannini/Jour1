@@ -3,25 +3,26 @@
 # ~~~~
 
 # Home page
-GET        /                                 controllers.Application.index
+GET         /                            controllers.Application.index
 
-GET        /init                             controllers.InitWorld.initGraph
+GET         /init                        controllers.InitWorld.initGraph
 
-GET        /concepts                         controllers.RestCall.getAllConcepts
-GET        /relations/:conceptId             controllers.RestCall.getAllRelationsOf(conceptId: Int)
-GET        /instances                        controllers.InitWorld.getWorld
-GET        /instances/:conceptId             controllers.Application.getAllInstancesOf(conceptId: Int)
+GET         /concepts                    controllers.RestCall.getAllConcepts
+GET         /relations/:conceptId        controllers.RestCall.getAllRelationsOf(conceptId: Int)
+POST        /relations                   controllers.RestCall.getPossibleDestinationOfAction
+GET         /instances                   controllers.InitWorld.getWorld
+GET         /instances/:conceptId        controllers.Application.getAllInstancesOf(conceptId: Int)
 
-GET        /simon                            controllers.mapGene.index
+GET         /simon                       controllers.mapGene.index
 
 # Graph visualisation
-->         /graph                            graph.Routes
+->          /graph                       graph.Routes
 
 # Map routes
-GET        /map                              controllers.MapController.show
-POST       /action                           controllers.RestCall.executeAction
+GET         /map                         controllers.MapController.show
+POST        /action                      controllers.RestCall.executeAction
 
 # Map static resources from the /public folder to the /assets URL path
-GET        /assets/*file                     controllers.Assets.at(path="/public", file)
+GET         /assets/*file                controllers.Assets.at(path="/public", file)
 
     

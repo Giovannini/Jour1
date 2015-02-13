@@ -11,7 +11,9 @@ object HardCodedPrecondition {
   def isNextTo(args: Array[Any], map: WorldMap):Boolean = {
     val instance1 = map.getInstanceById(args(0).asInstanceOf[Int])
     val instance2 = map.getInstanceById(args(1).asInstanceOf[Int])
-    instance1.coordinates.isNextTo(instance2.coordinates)
+    val result = instance1.coordinates.isNextTo(instance2.coordinates)
+    println("Is " + instance1.coordinates + " next to " + instance2.coordinates + ": " + result)
+    result
   }
 
   def isAtDistance(args: Array[Any], map: WorldMap): Boolean = {
