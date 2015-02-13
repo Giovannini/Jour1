@@ -29,15 +29,21 @@ case class ActionParser(actionManager: ActionManager) {
    * @return an action object
    */
   def getAction(actionReference: String): Action = {
-    //Just for test
-    actionManager._actionRemoveInstanceAt
+    actionReference match {
+      case "REMOVE" => actionManager._actionRemoveInstanceAt
+      case "ADD"  => actionManager._actionAddInstanceAt
+      case "MOVE" => actionManager._actionMoveInstanceAt
+      case _ => {
+        println(actionReference + " but removed")
+        actionManager._actionRemoveInstanceAt
+      }
+    }
+
     /*TODO
      * val fromDBResultAction = database.get(actionReference)
      * parse(fromDBResultAction)
      */
   }
-
-  def badParsing(action)
 
   /**
    * Get the argument list needed to execute an action

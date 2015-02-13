@@ -16,27 +16,39 @@ object HardCodedActions {
    * @param map where to add the instance
    */
   def addInstanceAt(args: Array[Any], map: WorldMap) = {
+    println("Action: addInstanceAt")
     val instance = map.getInstanceById(args(0).asInstanceOf[Int])
     val xCoordinate = args(1).asInstanceOf[Int]
     val yCoordinate = args(2).asInstanceOf[Int]
     val coordinates = Coordinates(xCoordinate, yCoordinate)
     val key = instance.concept.id
-    val newInstance = instance.at(coordinates).withId(map.getNewInstanceId)
-    map.instances(key) = newInstance :: map.instances.getOrElse(key, List())
-    newInstance
-    //map.addInstanceAt(instance, Coordinates(xCoordinate, yCoordinate))
+    map.addInstance(instance.at(coordinates))
   }
 
+  def createInstanceAt(args: Array[Any], map: WorldMap) = {
+    println("Action: createInstanceAt")
+    val concept = Concept.getById(args(0).asInstanceOf[Int]).getOrElse(Concept.error)
+    val instance = Instance.createRandomInstanceOf(concept)
+    val xCoordinate = args(1).asInstanceOf[Int]
+    val yCoordinate = args(2).asInstanceOf[Int]
+    val coordinates = Coordinates(xCoordinate, yCoordinate)
+    map.addInstance(instance)
+  }
+
+  /**
+   * Remove an instance from the map at given coordinates
+   * @author Thomas GIOVANNINI
+   * @param args arguments containing the instance to remove and the coordinates where to remove it
+   * @param map where to add the instance
+   */
   def removeInstanceAt(args: Array[Any], map: WorldMap) = {
+    println("Action: removeInstanceAt")
     val instance = map.getInstanceById(args(0).asInstanceOf[Int])
-    /*val xCoordinate = args(1).asInstanceOf[Int]
-    val yCoordinate = args(2).asInstanceOf[Int]*/
     val key = instance.concept.id
     if (map.instances.contains(key)) {
       map.instances(key) = map.instances(key) diff List(instance)
       instance
     } else Instance.error
-    //map.removeInstanceAt(instance, Coordinates(xCoordinate, yCoordinate))
   }
 
   def searchInstance(args: Array[Any], map: WorldMap) = {

@@ -13,10 +13,27 @@ case class ActionManager(actions: List[Action], map: WorldMap){
     List(Argument("instanceId", "Int"), Argument("coordinateX", "Int"), Argument("coordinateY", "Int")))
 
   val _actionRemoveInstanceAt = Action("removeInstanceAt", "removeInstanceAt0", List(), List(),
+    List(Argument("instanceId", "Int")))
+
+  /*Function to add to the BDD*/
+  /**
+   * NOTE: The add action must be done before the remove one because it is not possible to add a non existing instance.
+   */
+  val _actionMoveInstanceAt = Action("moveInstanceAt", "moveInstanceAt0", List(), List(_actionAddInstanceAt, _actionRemoveInstanceAt),
     List(Argument("instanceId", "Int"), Argument("coordinateX", "Int"), Argument("coordinateY", "Int")))
 
+
+  /**
+   * Execute a given action with given arguments
+   * @author THomas GIOVANNINI
+   * @param action to execute
+   * @param arguments with which execute the action
+   * @return true if the action was correctly executed
+   *         false else
+   */
   def execute(action: Action, arguments: List[(Argument, Any)]):Boolean = {
     val args = arguments.map(_._2).toArray
+
     action.referenceId match {
       case "addInstanceAt0" =>
         HardCodedActions.addInstanceAt(args, map)
@@ -24,24 +41,22 @@ case class ActionManager(actions: List[Action], map: WorldMap){
       case "removeInstanceAt0" =>
         HardCodedActions.removeInstanceAt(args, map)
         true
-      case "searchInstance0" =>
-        HardCodedActions.searchInstance(args, map)
-        true
-      case "searchConcept0" =>
-        HardCodedActions.searchConcept(args, map)
-        true
-      case _ => { println("toto"); true }
-      /*case _ => action.subActions
+      case _ => action.subActions
         .map(action => execute(action, takeGoodArguments(action, arguments)))
-        .foldRight(true)(_ & _)*/
+        .foldRight(true)(_ & _)
     }
   }
 
   def takeGoodArguments(action: Action, arguments: List[(Argument, Any)]) = {
-    arguments.filter{
+    println("Taking good arguments for action " + action.label + " in")
+    println(arguments.mkString(", "))
+    val keptArguments = arguments.filter{
       tuple => action.arguments
         .contains(tuple._1)
     }
+    println("Those arguments were kept")
+    println(keptArguments.mkString(", "))
+    keptArguments
   }
 }
 

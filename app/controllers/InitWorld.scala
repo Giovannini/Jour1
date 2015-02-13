@@ -1,13 +1,12 @@
 package controllers
 
 import models.graph.NeoDAO
-import models.graph.custom_types.{Statement, Coordinates, Label}
+import models.graph.custom_types.Statement
 import models.graph.ontology._
 import models.map.{WorldInit, WorldMap}
 import org.anormcypher.Neo4jREST
 import play.api.mvc._
 
-import scala.util.Random
 
 object InitWorld extends Controller {
 
@@ -118,7 +117,7 @@ object InitWorld extends Controller {
     NeoDAO.addConceptToDB(conceptSolid)
 
     /*Creation of the relations in DB*/
-    NeoDAO.addRelationToDB(conceptAnimal.id, relationMove, conceptAnimal.id)
+    NeoDAO.addRelationToDB(conceptAnimal.id, relationMove, conceptSolid.id)
     NeoDAO.addRelationToDB(conceptSheep.id, relationSubtypeOf, conceptAnimal.id)
     NeoDAO.addRelationToDB(conceptSheep.id, relationFlee, conceptPredator.id)
     NeoDAO.addRelationToDB(conceptSheep.id, relationEat, conceptEdible.id)
