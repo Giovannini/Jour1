@@ -1,6 +1,5 @@
-package controllers
+package controllers.rules
 
-import controllers.graph.GraphVisualisation._
 import play.api.mvc.{Controller, Action}
 
 /**
@@ -8,6 +7,6 @@ import play.api.mvc.{Controller, Action}
  */
 object RuleVisualization extends Controller{
   def index = Action {
-    Ok(views.html.graph.index())
+    Ok(views.html.rules.index())
   }
 }
