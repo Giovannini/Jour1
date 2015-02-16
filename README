@@ -14,6 +14,8 @@ Pour lancer les tests, ouvrir une console:
 $ activator
 [project] $ ~ test
 
+#####
+Pour la BDD : avoir installé MySQL et créé une base de données vide nommée "pfe" accessible à un utilisateur "pfe" sans mot de passe.
 
 #####
 Utilisation de bower pour les gestions de dépendances
