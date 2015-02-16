@@ -16,7 +16,7 @@ object HardCodedAction {
    * @param map where to add the instance
    */
   def addInstanceAt(args: Array[Any], map: WorldMap) = {
-    println("Action: addInstanceAt")
+    //println("Action: addInstanceAt")
     val instance = map.getInstanceById(args(0).asInstanceOf[Int])
     val groundInstance = map.getInstanceById(args(1).asInstanceOf[Int])
     val coordinates = groundInstance.coordinates
@@ -24,7 +24,7 @@ object HardCodedAction {
   }
 
   def createInstanceAt(args: Array[Any], map: WorldMap) = {
-    println("Action: createInstanceAt")
+    //println("Action: createInstanceAt")
     val instance = map.getInstanceById(args(0).asInstanceOf[Int])
     val groundInstance = map.getInstanceById(args(1).asInstanceOf[Int])
     val coordinates = groundInstance.coordinates

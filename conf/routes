@@ -5,15 +5,13 @@
 # Home page
 GET         /                            controllers.Application.index
 
-GET         /init                        controllers.InitWorld.initGraph
+GET         /init                        controllers.WorldInitialisation.initGraph
 
 GET         /concepts                    controllers.RestCall.getAllConcepts
 GET         /relations/:conceptId        controllers.RestCall.getAllRelationsOf(conceptId: Int)
 POST        /relations                   controllers.RestCall.getPossibleDestinationOfAction
-GET         /instances                   controllers.InitWorld.getWorld
+GET         /instances                   controllers.WorldInitialisation.getWorld
 GET         /instances/:conceptId        controllers.Application.getAllInstancesOf(conceptId: Int)
-
-GET         /simon                       controllers.mapGene.index
 
 # Graph visualisation
 ->          /graph                       graph.Routes

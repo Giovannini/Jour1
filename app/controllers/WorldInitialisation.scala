@@ -8,7 +8,7 @@ import org.anormcypher.Neo4jREST
 import play.api.mvc._
 
 
-object InitWorld extends Controller {
+object WorldInitialisation extends Controller {
 
   implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
 
@@ -20,14 +20,13 @@ object InitWorld extends Controller {
    */
   def getWorld = Action {
     val exampleMap = {
-      if (isInitialized)
-        Application.map
+      if (isInitialized) Application.map
       else{
         isInitialized = true
-        WorldGeneration
+        worldGeneration
       }
     }
-    println(exampleMap.getInstances.count(_ == Instance.error))
+    //println(exampleMap.getInstances.count(_ == Instance.error))
     Ok(exampleMap.toJson)
   }
 
@@ -36,7 +35,7 @@ object InitWorld extends Controller {
    * @author Thomas GIOVANNINI
    * @return a fake world map
    */
-  def WorldGeneration: WorldMap = {
+  def worldGeneration: WorldMap = {
     val map = Application.map
     val width = map.width
     val height = map.height
@@ -64,24 +63,97 @@ object InitWorld extends Controller {
     val propertyDuplicationSpeed  = Property("DuplicationSpeed", "Int", 5)
     val propertyStrength          = Property("Strength", "Int", 0)
     val propertyZIndex            = Property("ZIndex", "Int", 0)
-    
+    val propertyWalkingDistance   = Property("WalkingDistance", "Int", 5)
+
     /*Concepts declaration*/
-    val conceptMan        = Concept("Man", List(), List(ValuedProperty(propertyZIndex, 20),ValuedProperty(propertyStrength,2),ValuedProperty(propertyInstanciable,true)), "#E3B494")
-    val conceptPredator   = Concept("Predator", List(), List())
-    val conceptWolf       = Concept("Wolf", List(), List(ValuedProperty(propertyZIndex, 18),ValuedProperty(propertyStrength,2),ValuedProperty(propertyInstanciable,true)), "#1A1A22")
-    val conceptSheep      = Concept("Sheep", List(), List(ValuedProperty(propertyZIndex, 16),ValuedProperty(propertyStrength,2),ValuedProperty(propertyInstanciable,true)), "#EEE9D6")
-    val conceptAnimal     = Concept("Animal", List(), List())
-    val conceptGrass      = Concept("Grass", List(propertyDuplicationSpeed), List(ValuedProperty(propertyZIndex, 8),ValuedProperty(propertyStrength,40),ValuedProperty(propertyInstanciable,true)), "#62A663")
+    val conceptMan        =
+      Concept("Man",
+      List(),
+      List(ValuedProperty(propertyZIndex, 20),
+        ValuedProperty(propertyStrength,2),
+        ValuedProperty(propertyInstanciable,true)),
+      "#E3B494")
+    val conceptPredator   =
+      Concept("Predator",
+        List(),
+        List())
+    val conceptWolf       =
+      Concept("Wolf",
+        List(),
+        List(ValuedProperty(propertyZIndex, 18),
+          ValuedProperty(propertyStrength,2),
+          ValuedProperty(propertyInstanciable,true)),
+        "#1A1A22")
+    val conceptSheep      =
+      Concept("Sheep",
+        List(),
+        List(ValuedProperty(propertyZIndex, 16),
+          ValuedProperty(propertyStrength,2),
+          ValuedProperty(propertyInstanciable,true),
+          ValuedProperty(propertyWalkingDistance, 5)),
+        "#EEE9D6")
+    val conceptAnimal     =
+      Concept("Animal",
+        List(propertyWalkingDistance),
+        List())
+    val conceptGrass      =
+      Concept("Grass",
+        List(propertyDuplicationSpeed),
+        List(ValuedProperty(propertyZIndex, 8),
+          ValuedProperty(propertyStrength,40),
+          ValuedProperty(propertyInstanciable,true)),
+        "#62A663")
     val conceptEdible     = Concept("Edible", List(), List())
-    val conceptApple      = Concept("Apple", List(), List(ValuedProperty(propertyZIndex, 6),ValuedProperty(propertyStrength,2),ValuedProperty(propertyInstanciable,true)), "#A83B36")
-    val conceptBush       = Concept("Bush", List(), List(ValuedProperty(propertyZIndex, 4),ValuedProperty(propertyStrength,2),ValuedProperty(propertyInstanciable,true)), "#2A6E37")
-    val conceptAppleTree  = Concept("AppleTree", List(), List(ValuedProperty(propertyZIndex, 9),ValuedProperty(propertyStrength,2),ValuedProperty(propertyInstanciable,true)), "#2F1C13")
-    val conceptTree       = Concept("Tree", List(), List(ValuedProperty(propertyZIndex, 7),ValuedProperty(propertyStrength,4),ValuedProperty(propertyInstanciable,true)), "#483431")
-    val conceptFir        = Concept("Fir", List(), List(ValuedProperty(propertyZIndex, 8),ValuedProperty(propertyStrength,4)), "#221D1D")
+    val conceptApple      =
+      Concept("Apple",
+        List(),
+        List(ValuedProperty(propertyZIndex, 6),
+          ValuedProperty(propertyStrength,2),
+          ValuedProperty(propertyInstanciable,true)),
+        "#A83B36")
+    val conceptBush       =
+      Concept("Bush",
+        List(),
+        List(ValuedProperty(propertyZIndex, 4),
+          ValuedProperty(propertyStrength,2),
+          ValuedProperty(propertyInstanciable,true)),
+        "#2A6E37")
+    val conceptAppleTree  =
+      Concept("AppleTree",
+        List(),
+        List(ValuedProperty(propertyZIndex, 9),
+          ValuedProperty(propertyStrength,2),
+          ValuedProperty(propertyInstanciable,true)),
+        "#2F1C13")
+    val conceptTree       =
+      Concept("Tree",
+        List(),
+        List(ValuedProperty(propertyZIndex, 7),
+          ValuedProperty(propertyStrength,4),
+          ValuedProperty(propertyInstanciable,true)),
+        "#483431")
+    val conceptFir        =
+      Concept("Fir",
+        List(),
+        List(ValuedProperty(propertyZIndex, 8),
+          ValuedProperty(propertyStrength,4)),
+        "#221D1D")
     val conceptVegetable  = Concept("Vegetable", List(), List())
     val conceptGround     = Concept("Ground", List(), List())
-    val conceptLiquid     = Concept("Liquid", List(), List(ValuedProperty(propertyZIndex, 0), ValuedProperty(propertyStrength,2),ValuedProperty(propertyInstanciable,true)), "#86B6B6")
-    val conceptSolid      = Concept("Solid", List(), List(ValuedProperty(propertyZIndex, 1), ValuedProperty(propertyStrength,2),ValuedProperty(propertyInstanciable,true)), "#878377")
+    val conceptLiquid     =
+      Concept("Liquid",
+        List(),
+        List(ValuedProperty(propertyZIndex, 0),
+          ValuedProperty(propertyStrength,2),
+          ValuedProperty(propertyInstanciable,true)),
+        "#86B6B6")
+    val conceptSolid      =
+      Concept("Solid",
+        List(),
+        List(ValuedProperty(propertyZIndex, 1),
+          ValuedProperty(propertyStrength,2),
+          ValuedProperty(propertyInstanciable,true)),
+        "#878377")
 
     /*Relations declaration*/
     val relationSubtypeOf   = Relation("SUBTYPE_OF")
@@ -89,7 +161,7 @@ object InitWorld extends Controller {
     val relationCut         = Relation("CUT")
     val relationMove        = Relation("MOVE")
     val relationFlee        = Relation("FLEE")
-    val relationGrowOn      = Relation("GROW_ON")
+    val relationProduces    = Relation("PRODUCE")
 
     val relationLiveOn      = Relation("LIVE_ON")
 
@@ -125,7 +197,7 @@ object InitWorld extends Controller {
     NeoDAO.addRelationToDB(conceptMan.id, relationCut, conceptTree.id)
     NeoDAO.addRelationToDB(conceptFir.id, relationSubtypeOf, conceptTree.id)
     NeoDAO.addRelationToDB(conceptAppleTree.id, relationSubtypeOf, conceptTree.id)
-    NeoDAO.addRelationToDB(conceptApple.id, relationGrowOn, conceptAppleTree.id)
+    NeoDAO.addRelationToDB(conceptAppleTree.id, relationProduces, conceptApple.id)
     NeoDAO.addRelationToDB(conceptApple.id, relationSubtypeOf, conceptEdible.id)
     NeoDAO.addRelationToDB(conceptBush.id, relationSubtypeOf, conceptTree.id)
     NeoDAO.addRelationToDB(conceptBush.id, relationSubtypeOf, conceptEdible.id)
@@ -140,6 +212,5 @@ object InitWorld extends Controller {
     NeoDAO.addRelationToDB(conceptTree.id, relationLiveOn, conceptSolid.id)
     NeoDAO.addRelationToDB(conceptBush.id, relationLiveOn, conceptSolid.id)
     NeoDAO.addRelationToDB(conceptSheep.id, relationLiveOn, conceptSolid.id)
-
   }
 }

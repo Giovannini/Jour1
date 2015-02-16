@@ -10,7 +10,7 @@ import models.graph.ontology.{ValuedProperty, Instance, Property, Concept}
 object WorldInit {
 
   /**
-   * Get the sum of the strength of all the ground concepts.
+   * Get the sum of the surface strength of all the ground concepts.
    * @author Thomas GIOVANNINI
    * @param groundIdsList the list of the ground strength
    * @return the sum of the strength of all the ground concepts
@@ -18,13 +18,13 @@ object WorldInit {
   def getStrengthSum(groundIdsList: List[Int]): Int = {
     groundIdsList.map(Concept.getById)
       .map {
-      case Some(concept) => getStrengthOf(concept)
-      case _ => 0
-    }.sum
+        case Some(concept) => getStrengthOf(concept)
+        case _ => 0
+      }.sum
   }
 
   /**
-   * Get the strength of a given concept
+   * Get the surface strength of a given concept
    * @author Thomas GIOVANNINI
    * @param concept from which the strength is needed
    * @return the strength og the concept if it has one
@@ -41,74 +41,48 @@ object WorldInit {
   /**
    * Get a list  of tuple containing whatever is "maxOccupe" and its associated concept
    * @author Thomas GIOVANNINI
-   * @param lowestMatrixValue the lowest ground strength
-   * @param biggestMatrixValue the biggest ground strength
-   * @param listGrounds the ground list
+   * @param matrixExtremum a tuple containing the lowest and biggest ground surface strength
+   * @param groundsConceptsIDs the ground list
    * @return a list of tuple containing whatever is "maxOccupe" and its associated concept
    */
-  def repartition(lastBound: Int, lowestMatrixValue: Int, biggestMatrixValue: Int, listGrounds: List[Int], sumStr: Int): List[(Int, Concept)] = {
-    listGrounds match {
-      case conceptId :: tail => buildRepartitionOfOneConcept(conceptId,tail,lastBound,lowestMatrixValue,biggestMatrixValue,sumStr)
+  def repartition(lastRepartitionBound: Int,
+                  matrixExtremum: (Int, Int),
+                  groundsConceptsIDs: List[Int],
+                  sumStrength: Int): List[(Int, Concept)] = {
+    groundsConceptsIDs match {
+      case conceptId::tail =>
+        val concept   = Concept.getById(conceptId).getOrElse(Concept.error)
+        val repartitionBound = getRepartitionBound(lastRepartitionBound, matrixExtremum, sumStrength, concept, tail.length)
+        (repartitionBound, concept) :: repartition(repartitionBound, matrixExtremum, tail, sumStrength)
       case _ => List()
-
     }
   }
 
   /**
-   *  of tuple containing whatever is "maxOccupe" and its associated concept
-   * @author Simmon Roncière
-   * @param conceptId concept's id put in the map
-   * @param listConceptId List of concept's id not put
-   * @param lastBound biggest (and so lastest) bound attribuate to a concept
-   * @param lowestMatrixValue Matrix lowest value
-   * @param biggestMatrixValue Matrix highest value
-   * @param sumStrength strength sum of all concepts
-   * @return a list of tuple containing whatever is "maxOccupe" and its associated concept
-   */
-  def buildRepartitionOfOneConcept(conceptId:Int,listConceptId:List[Int],lastBound: Int, lowestMatrixValue: Int, biggestMatrixValue: Int, sumStrength: Int): List[(Int, Concept)] ={
-    Concept.getById(conceptId) match {
-      case Some(concept) =>
-        val maxOccupe = getMaxOccupe(lastBound, lowestMatrixValue, biggestMatrixValue, sumStrength, concept, listConceptId.length)
-        (maxOccupe, concept) :: repartition(maxOccupe, lowestMatrixValue, biggestMatrixValue, listConceptId, sumStrength)
-      case _ => repartition(lastBound, lowestMatrixValue, biggestMatrixValue, listConceptId, sumStrength)
-    }
-  }
-
-  /**
-   * Get highter bound of a concept
+   * Get upper bound of a concept
    * @author Thomas Giovannini, Simon Roncière
    * @param lastBound lower bound free
-   * @param lowestMatrixValue lowest value in the layer matrix
-   * @param biggestMatrixValue bigest value in layer matrix
+   * @param matrixMinMax lowest and highest values in the layer matrix
    * @param sumStr Sum of grounds strength
    * @param concept concept to put in the world
    * @param remainingElements number of remaining element
    * @return max value take up by concept
    */
-  def getMaxOccupe(lastBound: Int, lowestMatrixValue: Int, biggestMatrixValue: Int, sumStr: Int, concept: Concept, remainingElements: Int): Int = {
+  def getRepartitionBound(lastBound: Int, matrixMinMax: (Int, Int), sumStr: Int, concept: Concept, remainingElements: Int): Int = {
+    val (matrixMinValue, matrixMaxValue) = matrixMinMax
     if (remainingElements > 0)
-      lastBound + (getStrengthOf(concept) * (biggestMatrixValue - lowestMatrixValue) / sumStr)
-    else biggestMatrixValue
-  }
-
-  /**
-   *
-   * @author Thomas Giovannini
-   * @param tuple
-   * @return
-   */
-  def notARepartitionError(tuple: (Int, Concept)): Boolean = {
-    tuple._2 != Concept.error
+      lastBound + (getStrengthOf(concept) * (matrixMaxValue - matrixMinValue) / sumStr)
+    else matrixMaxValue
   }
 
   /**
    * Generate the world map
    * @author Simon Roncière
    * @param width width of the map
-   * @param heigth heigth of the map
+   * @param height height of the map
    * @return List of Instances of the world
    */
-  def worldMapGeneration(width: Int, heigth: Int): List[Instance] = {
+  def worldMapGeneration(width: Int, height: Int): List[Instance] = {
     val frequency = 20
     val octave = 35
     val persistence = 0.5f
@@ -116,22 +90,14 @@ object WorldInit {
     val outputSize = width
 
     val layer = Layer.generateLayer(frequency, octave, persistence, smoothed, outputSize)
-
-    val idGround = getGround(Concept.findAll)
-    val listGrounds = getGrounds(idGround :: Nil)
-
+    val listGrounds = getGrounds
 
     val sumStr = sumStrength(listGrounds)
-
-    val (min, moy, max) = layer.statMatrix
-    val repartitionList = repartition(min, min, max, listGrounds, sumStr).sortBy(_._1)
+    val matrixMinMax = layer.getMinMax
+    val repartitionList = repartition(matrixMinMax._1, matrixMinMax, listGrounds, sumStr).sortBy(_._1)
 
     val terrain = matrixToList(layer.matrix)
-      .map {
-      createInstance(_, repartitionList)
-    }
-
-
+      .map(createInstance(_, repartitionList))
 
     terrain ::: recursiveConcept(terrain,listGrounds, 1)
     //randomObjectInstanciation(listGrounds, outputSize, outputSize)
@@ -213,32 +179,26 @@ object WorldInit {
   }
 
   /**
-   * Get concept where label = "Ground"
-   * @param concepts List of concept to browse
-   * @return -1 if concept "Ground" not found, else id of the concept
+   * Retrieve the Ground root cocnept from the graph
+   * @return id of the concept "Ground"
+   *         ErrorConcept id else
    */
-  def getGround(concepts: List[Concept]): Int = {
-    concepts.find(_.label == "Ground") match {
-      case Some(c) => c.id
-      case _ => -1
-    }
+  def getConceptGroundID: Int = {
+    val allConcepts = Concept.findAll
+    allConcepts.find(_.label == "Ground")
+      .getOrElse(Concept.error)
+      .id
   }
 
   /**
    * get all grounds of the map
    * @author Simon Roncière
-   * @param listID concept's id list where we search grounds
    * @return list of every grounds
    */
-  def getGrounds(listID: List[Int]): List[Int] = {
-    listID match {
-      case Nil => Nil
-      case head :: tail => val listChild = Concept.getChildren(head)
-        if (listChild.isEmpty) head :: getGrounds(tail)
-        else getGrounds(tail ::: listChild.map(_.id))
-    }
-
-
+  def getGrounds: List[Int] = {
+    val conceptGround = getConceptGroundID
+    println("Ground ID: " + conceptGround)
+    Concept.getDescendance(conceptGround).map(_.id)
   }
 
   ///////////////////////////:: OBJECT - RANDOM :://///////////////////////////////

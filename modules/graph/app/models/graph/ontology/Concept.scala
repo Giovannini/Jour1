@@ -250,6 +250,12 @@ object Concept {
       .toList
   }
 
+  /*TODO*/
+  def getDescendance(conceptId: Int): List[Concept] = {
+    println(conceptId)
+    getChildren(conceptId).flatMap(concept => concept :: getDescendance(concept.id))
+  }
+
   /**
    * Get all the relations from a given concept
    * @author Thomas GIOVANNINI

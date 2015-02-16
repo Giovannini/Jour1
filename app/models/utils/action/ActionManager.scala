@@ -22,7 +22,7 @@ case class ActionManager(actions: List[Action], map: WorldMap, preconditionManag
    * NOTE: The add action must be done before the remove one because it is not possible to add a non existing instance.
    */
   val _actionMoveInstanceAt = Action("moveInstanceAt", "moveInstanceAt0",
-    List(preconditionManager._preconditionIsNextTo),
+    List(preconditionManager._preconditionIsAtWalkingDistance),
     List(_actionAddInstanceAt, _actionRemoveInstanceAt),
     List(Argument("instanceId", "Int"), Argument("groundId", "Int")))
 

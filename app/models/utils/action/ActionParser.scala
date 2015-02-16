@@ -16,8 +16,8 @@ case class ActionParser(actionManager: ActionManager) {
    *         false else
    */
   def parseAction(actionReference: String, instancesId: List[Int]): Boolean = {
-    println("Action Reference :" + actionReference)
-    println("Instances ids: " + instancesId.mkString(", "))
+    //println("Action Reference :" + actionReference)
+    //println("Instances ids: " + instancesId.mkString(", "))
     val action = getAction(actionReference)
     val arguments = getArgumentsList(action, instancesId)
     actionManager.execute(action, arguments)
