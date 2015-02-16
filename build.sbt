@@ -10,12 +10,12 @@ lazy val rules = (project in file("modules/rules"))
 
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
-  .dependsOn(graph)
-  .aggregate(graph)
+  .dependsOn(graph, rules)
+  .aggregate(graph, rules)
 
 scalaVersion := "2.11.1"
 
-libraryDependencies ++= Seq( anorm , cache)
+libraryDependencies ++= Seq( jdbc, anorm , cache, ws)
 
 libraryDependencies += "org.scalatestplus" %% "play" % "1.2.0" % "test"
 

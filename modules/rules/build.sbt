@@ -9,3 +9,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq( jdbc , anorm , cache , ws)
+
+libraryDependencies ++= Seq(
+  "mysql" % "mysql-connector-java" % "5.1.25"
+)

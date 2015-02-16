@@ -2,6 +2,7 @@ package models.rules
 
 import anorm._
 import anorm.SqlParser._
+import models.rules.custom_types.Statement
 import play.api.db.DB
 import play.api.Play.current
 
@@ -11,45 +12,40 @@ import play.api.Play.current
  * @param id primary key auto-increment
  * @param label name of the rule
  * @param param parameters for the function
- * @param rule content of the rule
+ * @param precond preconditions for the function
+ * @param content content of the rule
  */
-case class Rule(id: Option[Int], label: String, param: Array[String], rule: String)
+case class Rule(id: Option[Long], label: String, param: Array[String], precond: Array[String], content: Array[String])
 
 /**
  * Model for rule.
- * http://workwithplay.com/blog/2013/05/08/persist-data-with-anorm/
  */
 object Rule {
+  implicit val connection = DB.getConnection()
+
   /**
    * Parse rule to interact with database
    * @author Aurélie LORGEOUX
    */
   private val ruleParser: RowParser[Rule] = {
-    get[Option[Int]]("id") ~
+    get[Option[Long]]("id") ~
       get[String]("label") ~
-      get[Array[String]]("param") ~
-      get[String]("rule") map {
-      case id ~ label ~ param ~ rule => Rule(id, label, param, rule)
+      get[String]("param") ~
+      get[String]("precond") ~
+      get[String]("content") map {
+      case id ~ label ~ param ~ precond ~ content => Rule(id, label, param.split(";"), precond.split(";"), content.split(";"))
     }
   }
 
   /**
-   * Save rule in database
+   * Clear the database
    * @author Aurélie LORGEOUX
-   * @param rule rule to put in the database
+   * @return number of rules deleted
    */
-  def save(rule: Rule) {
+  def clear: Int = {
     DB.withConnection { implicit connection =>
-      SQL(
-        """
-            INSERT INTO rules(label, param, rule)
-            VALUES({label}, {param}, {rule})
-          """).on(
-          'label -> rule.label,
-          'param -> rule.param.mkString("[",";","]"),
-          'rule -> rule.
-            rule
-      ).executeUpdate
+      val statement = Statement.clearDB
+      statement.executeUpdate
     }
   }
 
@@ -58,9 +54,24 @@ object Rule {
    * @author Aurélie LORGEOUX
    * @return all rules
    */
-  def list = {
+  def list: List[Rule] = {
     DB.withConnection { implicit connection =>
-      SQL("SELECT * from rules").as(ruleParser *)
+      val statement = Statement.getAll
+      statement.as(ruleParser *)
+    }
+  }
+
+  /**
+   * Save rule in database
+   * @author Aurélie LORGEOUX
+   * @param rule rule to put in the database
+   * @return true if the rule saved
+   *         false else
+   */
+  def save(rule: Rule): Option[Long] = {
+    DB.withConnection { implicit connection =>
+      val statement = Statement.add(rule)
+      statement.executeInsert()
     }
   }
 
@@ -70,11 +81,10 @@ object Rule {
    * @param id id of the rule
    * @return rule identified by id
    */
-  def load(id: Int): Option[Rule] = {
+  def load(id: Long): Option[Rule] = {
     DB.withConnection { implicit connection =>
-      SQL("SELECT * from rules WHERE id = {id}")
-        .on('id -> id)
-        .as(ruleParser.singleOpt)
+        val statement = Statement.get(id)
+        statement.as(ruleParser.singleOpt)
     }
   }
 
@@ -84,20 +94,10 @@ object Rule {
    * @param id id of the rule
    * @param rule rule identified by id
    */
-  def update(id: Int, rule: Rule) {
+  def update(id: Long, rule: Rule): Int = {
     DB.withConnection { implicit connection =>
-      SQL("""
-            UPDATE rules SET
-            label = {label},
-            param = {param},
-            rule = {rule}
-            WHERE id = {id}
-          """).on(
-          'id -> id,
-          'label -> rule.label,
-          'param -> rule.param.mkString("[",";","]"),
-          'rule -> rule.rule
-        ).executeUpdate
+      val statement = Statement.set(id, rule)
+      statement.executeUpdate
     }
   }
 
@@ -106,14 +106,12 @@ object Rule {
    * @author Aurélie LORGEOUX
    * @param id id of the rule
    */
-  def delete(id: Int) {
+  def delete(id: Long): Int = {
     DB.withConnection { implicit connection =>
-      SQL("""
-          DELETE FROM rules where id = {id}
-          """).on(
-          'id -> id
-        ).executeUpdate
+      val statement = Statement.remove(id)
+      statement.executeUpdate
     }
   }
 }
+
 

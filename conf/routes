@@ -16,6 +16,9 @@ GET         /instances/:conceptId        controllers.Application.getAllInstances
 # Graph visualisation
 ->          /graph                       graph.Routes
 
+# Rules visualisation
+->         /rules                        rules.Routes
+
 # Map routes
 GET         /map                         controllers.MapController.show
 POST        /action                      controllers.RestCall.executeAction

@@ -1,6 +1,4 @@
-@main("Rules vizualisation") {
-    <h1>Say hi to rules!</h1>
-}
+@(bla:List[models.rules.Rule])
 
 <!DOCTYPE html>
 <html>
@@ -10,7 +8,13 @@
 </head>
 <body>
 
-    @main
-    
+<h1>Règles enregistrées</h1>
+
+<ul>
+    @bla.map { rule =>
+    <li>@rule.id - @rule.label</li>
+    }
+</ul>
+
 </body>
 </html>
