@@ -111,4 +111,19 @@ object ValuedProperty {
       case _ => List()
     }
   }
+
+  /**
+   * Remove from a long list of rules the recurrent ones, keeping the first coming.
+   * @author Thomas GIOVANNINI
+   * @param rulesList the list to reduce
+   * @param matchedProperties the already matched properties that shouldn't be added
+   * @return a shorter rules list
+   */
+  def keepHighestLevelRules(rulesList: List[ValuedProperty], matchedProperties: List[Property]): List[ValuedProperty] = {
+    rulesList match {
+      case head :: tail if matchedProperties.contains(head.property) => keepHighestLevelRules(tail, matchedProperties)
+      case head :: tail => head :: keepHighestLevelRules(tail, head.property :: matchedProperties)
+      case _ => List()
+    }
+  }
 }

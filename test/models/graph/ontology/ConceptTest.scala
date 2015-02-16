@@ -16,8 +16,12 @@ class ConceptTest extends FunSuite {
     val prop1 = Property("P1", "Int", 0)
     val prop2 = Property("P2", "String", "Hello")
     val prop3 = Property("P3", "Boolean", false)
-    val concept1 = Concept("C1", List(prop1, prop2), List())
-    val concept2 = Concept("C2", List(prop1, prop3), List())
+    val rule1 = ValuedProperty(prop1, 5)
+    val rule2 = prop3.defaultValuedProperty
+    val rule3 = prop1.defaultValuedProperty
+    val rule4 = prop2.defaultValuedProperty
+    val concept1 = Concept("C1", List(prop1, prop2), List(rule1, rule2))
+    val concept2 = Concept("C2", List(prop1, prop3), List(rule3, rule4))
     val concept3 = Concept("C3", List(prop1), List())
     val relation1 = Relation("R1")
     val relation2 = Relation("R2")
@@ -43,7 +47,10 @@ class ConceptTest extends FunSuite {
                 prop1.toJson,
                 prop2.toJson
             ),
-            "rules" -> Json.arr(),
+            "rules" -> Json.arr(
+                rule1.toJson,
+                rule2.toJson
+            ),
             "type" -> JsString("CONCEPT"),
             "id" -> JsNumber(concept1.id),
             "color" -> JsString(concept1.color)
@@ -52,8 +59,48 @@ class ConceptTest extends FunSuite {
     }
 
     test("method toNodeString"){
-        val desiredString = "(c1 { label: \"C1\", properties: [\"P1%Int%0\",\"P2%String%Hello\"], rules: [], color: \"#AAAAAA\", type: \"CONCEPT\", id:"+concept1.id+"})"
+        val desiredString = "(c1 { label: \"C1\", properties: [\"P1%Int%0\",\"P2%String%Hello\"], rules: [" +
+          concept1.rules.map(p => "\""+p+"\"").mkString(",")+ "], color: \"#AAAAAA\", type: \"CONCEPT\", id:"+concept1.id+"})"
         assert(concept1.toNodeString == desiredString)
+    }
+
+    test("method createInstanceAt"){
+        val coords = Coordinates(5, 7)
+        val createdInstance = concept1.createInstanceAt(coords)
+        assert(createdInstance ==
+          Instance(0, concept1.label, coords, concept1.properties.map(_.defaultValuedProperty), concept1))
+    }
+
+    test("method getAllProperties"){
+        NeoDAO.addConceptToDB(concept1)
+        NeoDAO.addConceptToDB(concept2)
+        NeoDAO.addRelationToDB(concept1.id, relSubtype, concept2.id)
+        val returnedPropertiesSet = Set[Property](prop1, prop2, prop3)
+        assert(concept1.getAllProperties == returnedPropertiesSet)
+        NeoDAO.removeConceptFromDB(concept1)
+        NeoDAO.removeConceptFromDB(concept2)
+    }
+
+    test("method getAllRules"){
+        NeoDAO.addConceptToDB(concept1)
+        NeoDAO.addConceptToDB(concept2)
+        NeoDAO.addRelationToDB(concept1.id, relSubtype, concept2.id)
+        val returnedRulesList = List(rule1, rule2, rule4)
+        assert(concept1.getAllRules == returnedRulesList)
+        NeoDAO.removeConceptFromDB(concept1)
+        NeoDAO.removeConceptFromDB(concept2)
+    }
+
+    test("method getParents"){
+        NeoDAO.addConceptToDB(concept1)
+        NeoDAO.addConceptToDB(concept2)
+        NeoDAO.addConceptToDB(concept3)
+        NeoDAO.addRelationToDB(concept1.id, relSubtype, concept2.id)
+        NeoDAO.addRelationToDB(concept1.id, relation1, concept3.id)
+        assert(concept1.getParents == List(concept2))
+        NeoDAO.removeConceptFromDB(concept1)
+        NeoDAO.removeConceptFromDB(concept2)
+        NeoDAO.removeConceptFromDB(concept3)
     }
 
     /*Object*/
@@ -71,10 +118,33 @@ class ConceptTest extends FunSuite {
 
     test("method addPropertyToConcept"){
         assert(NeoDAO.addConceptToDB(concept1))
-        assert(! thomas.properties.contains(prop3))
         assert(! concept1.properties.contains(prop3))
         val conceptWithProperty = Concept.addPropertyToConcept(concept1, prop3)
         assert(conceptWithProperty.properties.contains(prop3))
+        assert(NeoDAO.removeConceptFromDB(concept1))
+    }
+
+    test("method removePropertyFromConcept"){
+        assert(NeoDAO.addConceptToDB(concept1))
+        assert(concept1.properties.contains(prop2))
+        val conceptWithProperty = Concept.removePropertyFromConcept(concept1, prop2)
+        assert(! conceptWithProperty.properties.contains(prop2))
+        assert(NeoDAO.removeConceptFromDB(concept1))
+    }
+
+    test("method addRuleToConcept"){
+        assert(NeoDAO.addConceptToDB(concept1))
+        assert(! concept1.rules.contains(rule3))
+        val conceptWithProperty = Concept.addRuleToConcept(concept1, rule3)
+        assert(conceptWithProperty.rules.contains(rule3))
+        assert(NeoDAO.removeConceptFromDB(conceptWithProperty))
+    }
+
+    test("method removeRuleFromConcept"){
+        assert(NeoDAO.addConceptToDB(concept1))
+        assert(concept1.rules.contains(rule1))
+        val conceptWithProperty = Concept.removeRuleFromConcept(concept1, rule2)
+        assert(! conceptWithProperty.rules.contains(prop3))
         assert(NeoDAO.removeConceptFromDB(concept1))
     }
 
@@ -86,7 +156,7 @@ class ConceptTest extends FunSuite {
     }
 
     /*method findAll*/
-    test("method getParents"){
+    test("method getParents by id"){
         NeoDAO.addConceptToDB(concept1)
         NeoDAO.addConceptToDB(concept2)
         NeoDAO.addRelationToDB(concept1.id, relSubtype, concept2.id)
@@ -94,9 +164,17 @@ class ConceptTest extends FunSuite {
         NeoDAO.removeConceptFromDB(concept1)
         NeoDAO.removeConceptFromDB(concept2)
     }
-    /*method getChildren*/
 
-    test("method getRelations") {
+    test("method getChildren by id"){
+        NeoDAO.addConceptToDB(concept1)
+        NeoDAO.addConceptToDB(concept2)
+        NeoDAO.addRelationToDB(concept1.id, relSubtype, concept2.id)
+        assert(Concept.getChildren(concept2.id).contains(concept1))
+        NeoDAO.removeConceptFromDB(concept1)
+        NeoDAO.removeConceptFromDB(concept2)
+    }
+
+    test("method getRelationsFrom") {
         NeoDAO.addConceptToDB(concept1)
         NeoDAO.addConceptToDB(concept2)
         NeoDAO.addRelationToDB(concept1.id, relation1, concept2.id)
@@ -105,6 +183,20 @@ class ConceptTest extends FunSuite {
         assert(! relationsList.contains((Relation("INSTANCE_OF"), thomas)))
         NeoDAO.removeConceptFromDB(concept1)
         NeoDAO.removeConceptFromDB(concept2)
+    }
+
+    test("method getRelationsTo") {
+        NeoDAO.addConceptToDB(concept1)
+        NeoDAO.addConceptToDB(concept2)
+        NeoDAO.addConceptToDB(concept3)
+        NeoDAO.addRelationToDB(concept1.id, relation1, concept2.id)
+        NeoDAO.addRelationToDB(concept2.id, relation2, concept3.id)
+        val relationsList = Concept.getRelationsTo(concept2.id)
+        assert(relationsList.contains((relation1, concept1)))
+        assert(! relationsList.contains((relation2, concept3)))
+        NeoDAO.removeConceptFromDB(concept1)
+        NeoDAO.removeConceptFromDB(concept2)
+        NeoDAO.removeConceptFromDB(concept3)
     }
 
     /*noInstance*/

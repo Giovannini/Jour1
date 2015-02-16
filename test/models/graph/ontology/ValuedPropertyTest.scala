@@ -52,4 +52,15 @@ class ValuedPropertyTest extends FunSuite {
     assert(parsedVP.property.defaultValue == prop.defaultValue)
     assert(parsedVP.value == value)
   }
+
+  test("method keepHighestLevelRules"){
+    val vpList = List(
+      ValuedProperty(prop1, 5),
+      ValuedProperty(prop2, "Yo"),
+      ValuedProperty(prop3, true),
+      ValuedProperty(prop1, 11),
+      ValuedProperty(prop1, 17),
+      ValuedProperty(prop2, "Man")
+    )
+  }
 }

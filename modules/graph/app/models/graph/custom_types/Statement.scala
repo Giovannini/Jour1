@@ -4,17 +4,14 @@ import models.graph.ontology._
 import org.anormcypher.{Cypher, CypherStatement}
 
 /**
- * All values from this objects are CypherStatements
+ * All values from this objects are CypherStatements used in the Neo4J database
  */
 object Statement {
 
-  def updateInstancesOf(conceptId: Int, property: Property, defaultValue: Any): CypherStatement = {
-    Cypher("MATCH (n1 {id: {id}})-[r:INSTANCE_OF]-(n2) "+
-           " SET n2.properties = n2.properties + "+ ValuedProperty(property, defaultValue).toString +"")
-      .on("id" -> conceptId)
-  }
-
-
+  /**
+   * Statement returning all the concepts in the graph database.
+   * @author Thomas GIOVANNINI
+   */
   val getAllConcepts: CypherStatement = Cypher(
     """
     MATCH n
@@ -23,6 +20,10 @@ object Statement {
     """
   )
 
+  /**
+   * Statement to clear the whole graph database.
+   * @author Thomas GIOVANNINI
+   */
   val clearDB: CypherStatement = Cypher(
     """
       |MATCH (n)
@@ -31,15 +32,17 @@ object Statement {
     """.stripMargin)
 
   /**
-   * Create a cypher statement to create a concept.
+   * Generate a cypher statement to create a concept.
+   * @author Thomas GIOVANNINI
    * @param concept to create
    * @return a cypher statement
    */
-  def createConcept(concept: Concept): CypherStatement =
+  def createConcept(concept: Concept): CypherStatement = {
     Cypher("create " + concept.toNodeString + ";")
+  }
 
   /**
-   * Create a cypher statement to delete a concept and all its connected relations.
+   * Generate a cypher statement to delete a concept and all its connected relations.
    * @author Thomas GIOVANNINI
    * @param conceptId the concept to remove
    * @return a cypher statement to execute
@@ -53,7 +56,8 @@ object Statement {
   }
 
   /**
-   * Create a cypher statement to add a new property to a concept
+   * Generate a statement to add a new property to a concept
+   * @author Thomas GIOVANNINI
    * @param concept to which the property should be added
    * @param property to add to the concept
    * @return a cypher statement
@@ -67,12 +71,41 @@ object Statement {
 
   /**
    * Create a cypher statement to add a new property to a concept
+   * @author Thomas GIOVANNINI
+   * @param concept to which the property should be added
+   * @param property to add to the concept
+   * @return a cypher statement
+   */
+  def removePropertyFromConcept(concept: Concept, property: Property): CypherStatement = {
+    val newPropertiesList = concept.properties diff List(property)
+    Cypher("MATCH (n {id: {id1} }) " +
+      "SET n.properties = ["+newPropertiesList.mkString(",")+"]")
+      .on("id1" -> concept.id)
+  }
+
+  /**
+   * Create a cypher statement to add a new rule to a concept
+   * @author Thomas GIOVANNINI
    * @param concept to which the property should be added
    * @param rule to add to the concept
    * @return a cypher statement
    */
   def addRuleToConcept(concept: Concept, rule: ValuedProperty): CypherStatement =   {
     val newRulesList = rule :: concept.properties
+    Cypher("MATCH (n {id: {id1}}) " +
+      "SET n.rules = ["+newRulesList.mkString(",")+"]")
+      .on("id1" -> concept.id)
+  }
+
+  /**
+   * Create a cypher statement to remove a given rule from a concept
+   * @author Thomas GIOVANNINI
+   * @param concept to which the property should be removed
+   * @param rule to remove from the concept
+   * @return a cypher statement
+   */
+  def removeRuleFromConcept(concept: Concept, rule: ValuedProperty): CypherStatement =   {
+    val newRulesList = concept.properties diff List(rule)
     Cypher("MATCH (n {id: {id1}}) " +
       "SET n.rules = ["+newRulesList.mkString(",")+"]")
       .on("id1" -> concept.id)
@@ -120,62 +153,40 @@ object Statement {
   }
 
   /**
-   * Create a cypher statement to get the relations and related concepts to a given concept.
+   * Create a cypher statement to get all relation which source is a concept.
    * @author Thomas GIOVANNINI
    * @param conceptId the source concept
-   * @return a cypher statement returning the relation types and concepts labels and properties
+   * @return a cypher statement returning the relations types and concepts labels and properties
    */
   def getRelationsFrom(conceptId: Int): CypherStatement = {
     Cypher("""
-        |MATCH (n1 {id: {id}})-[r]->(n2)
-        |RETURN type(r) as rel_type,
-        |       n2.label as concept_label,
-        |       n2.properties as concept_prop,
-        |       n2.type as node_type,
-        |       n2.rules as concept_rules,
-        |       n2.color as concept_color
-      """.stripMargin)
+             |MATCH (n1 {id: {id}})-[r]->(n2)
+             |RETURN type(r) as rel_type,
+             |       n2.label as concept_label,
+             |       n2.properties as concept_prop,
+             |       n2.type as node_type,
+             |       n2.rules as concept_rules,
+             |       n2.color as concept_color
+           """.stripMargin)
       .on("id" -> conceptId)
   }
 
-  /* Instances */
   /**
-   * Create a cypher statement to create an instance node in the Neo4J graph
+   * Create a cypher statement to get all relation which destination is a given concept.
    * @author Thomas GIOVANNINI
-   * @param instance the instance to add
-   * @return a cypher statement
+   * @param conceptId the destination concept
+   * @return a cypher statement returning the relations types and concepts labels and properties
    */
-  def createInstance(instance: Instance): CypherStatement = {
-    Cypher("CREATE " + instance.toNodeString + ";")
-  }
-
-  /**
-   * Create a cypher statement to delete a relation in the Neo4J graph
-   * @author Thomas GIOVANNINI
-   * @param instance to delete
-   * @return a cypher statement
-   */
-  def deleteInstances(instance: Instance): CypherStatement = {
-    Cypher("MATCH (n {id: {id} }) " +
-      "OPTIONAL MATCH (n)-[r]-() " +
-      "DELETE n, r;")
-      .on("id" -> instance.hashCode)
-  }
-
-  /**
-   * Create a cypher statement to get the instances related to a given concept
-   * @author Thomas GIOVANNINI
-   * @param conceptId the source concept
-   * @return a cypher statement
-   */
-  def getInstances(conceptId: Int): CypherStatement = {
+  def getRelationsTo(conceptId: Int): CypherStatement = {
     Cypher("""
-        |MATCH (n1 {id: {id}})-[r:INSTANCE_OF]-(n2)
-        |RETURN n2.label as inst_label,
-        |       n2.properties as inst_prop,
-        |       n2.coordinate_x as inst_coordx,
-        |       n2.coordinate_y as inst_coordy
-      """.stripMargin)
+             |MATCH (n1 {id: {id}})<-[r]-(n2)
+             |RETURN type(r) as rel_type,
+             |       n2.label as concept_label,
+             |       n2.properties as concept_prop,
+             |       n2.type as node_type,
+             |       n2.rules as concept_rules,
+             |       n2.color as concept_color
+           """.stripMargin)
       .on("id" -> conceptId)
   }
 

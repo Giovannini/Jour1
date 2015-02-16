@@ -74,12 +74,12 @@ case class Layer(matrix: Array[Array[Int]], persist: Float) {
    * @author Thomas GIOVANNINI
    * @return a triplet containing the min and max elements of the matrix with the average value
    */
-  def statMatrix:(Int,Int,Int)={
+  def getMinMax:(Int,Int)={
     val valueList = this.matrix.flatten
     val min = valueList.min
     val max = valueList.max
-    val moy = valueList.sum / valueList.length
-    (min,moy,max)
+    //val moy = valueList.sum / valueList.length
+    (min/*,moy*/,max)
   }
 }
 
