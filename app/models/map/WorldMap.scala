@@ -138,14 +138,20 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
    * Remove an instance at the given coordinates from the map
    * @author Thomas GIOVANNINI
    * @param instance to remove to the tile
-   * @param coordinates of the tile
    */
-  def removeInstanceAt(instance: Instance, coordinates: Coordinates): Instance = {
+  def removeInstance(instance: Instance): Instance = {
     val key = instance.concept.id
     if (instances.contains(key)) {
       instances(key) = instances(key) diff List(instance)
       instance
     } else Instance.error
+  }
+
+  def updateInstance(oldInstance: Instance, newInstance: Instance) = {
+    val key = oldInstance.concept.id
+    removeInstance(oldInstance)
+    instances(key) = newInstance.withId(oldInstance.id) :: instances.getOrElse(key, List())
+    newInstance
   }
 
   /**

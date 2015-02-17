@@ -28,7 +28,7 @@ object HardCodedAction {
     val instance = map.getInstanceById(args(0).asInstanceOf[Int])
     val groundInstance = map.getInstanceById(args(1).asInstanceOf[Int])
     val coordinates = groundInstance.coordinates
-    map.addInstance(instance)
+    map.addInstance(instance.at(coordinates))
   }
 
   /**

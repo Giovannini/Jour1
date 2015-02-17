@@ -84,11 +84,9 @@ object RestCall extends Controller{
    */
   def reduceDestinationList(sourceInstance: Instance, action: InstanceAction, instances: List[Instance]) = {
     val preconditionsToValidate = action.preconditions
-    //println(sourceInstance.coordinates)
     val reducedInstanceList = instances.filter { instance =>
       preconditionsToValidate.forall(validateConditionFor(_, action, sourceInstance, instance))
     }
-    //println(reducedInstanceList.map(_.coordinates).mkString(", "))
     reducedInstanceList.map(_.toJson)
   }
 
@@ -105,5 +103,12 @@ object RestCall extends Controller{
   def validateConditionFor(precondition: Precondition, action: InstanceAction, sourceInstance: Instance, destInstance: Instance) = {
     val arguments = Application.actionParser.getArgumentsList(action, List(sourceInstance.id, destInstance.id))
     Application.preconditionManager.isFilled(precondition, arguments)
+  }
+
+  def editInstance(instanceId: Int) = Action {
+    val instance = Application.map.getInstanceById(instanceId)
+    println("Found the instance: ")
+    println(instance.label)
+    Ok(views.html.editor.instanceEditor(instance))
   }
 }

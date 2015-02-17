@@ -12,7 +12,6 @@ object HardCodedPrecondition {
     val instance1 = map.getInstanceById(args(0).asInstanceOf[Int])
     val instance2 = map.getInstanceById(args(1).asInstanceOf[Int])
     val result = instance1.coordinates.isNextTo(instance2.coordinates)
-    //println("Is " + instance1.coordinates + " next to " + instance2.coordinates + ": " + result)
     result
   }
 
@@ -26,8 +25,14 @@ object HardCodedPrecondition {
       .value
       .asInstanceOf[Int]
     val distance = sourceInstance.coordinates.getDistanceWith(destinationInstance.coordinates)
-    //println(distance + " < " + desiredDistance)
     distance < desiredDistance
+  }
+
+  def hasProperty(args: Array[Any], map: WorldMap): Boolean = {
+    val sourceInstance = map.getInstanceById(args(0).asInstanceOf[Int])
+    val propertyName = args(1).asInstanceOf[String]
+    /** TODO => this is not clean. */
+    sourceInstance.properties.map(_.property.label).contains(propertyName)
   }
 
 }

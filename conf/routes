@@ -3,27 +3,29 @@
 # ~~~~
 
 # Home page
-GET         /                            controllers.Application.index
+GET         /                                  controllers.Application.index
 
-GET         /init                        controllers.WorldInitialisation.initGraph
+GET         /init                              controllers.WorldInitialisation.initGraph
 
-GET         /concepts                    controllers.RestCall.getAllConcepts
-GET         /relations/:conceptId        controllers.RestCall.getAllRelationsOf(conceptId: Int)
-POST        /relations                   controllers.RestCall.getPossibleDestinationOfAction
-GET         /instances                   controllers.WorldInitialisation.getWorld
-GET         /instances/:conceptId        controllers.Application.getAllInstancesOf(conceptId: Int)
+GET         /concepts                          controllers.RestCall.getAllConcepts
+GET         /relations/:conceptId              controllers.RestCall.getAllRelationsOf(conceptId: Int)
+POST        /relations                         controllers.RestCall.getPossibleDestinationOfAction
+GET         /instances                         controllers.WorldInitialisation.getWorld
+GET         /instances/:conceptId              controllers.Application.getAllInstancesOf(conceptId: Int)
+GET         /instances/edit/:instanceId        controllers.RestCall.editInstance(instanceId: Int)
+POST        /instances/update                  controllers.InstanceEditor.update
 
 # Graph visualisation
-->          /graph                       graph.Routes
+->          /graph                             graph.Routes
 
 # Rules visualisation
-->         /rules                        rules.Routes
+->          /rules                             rules.Routes
 
 # Map routes
-GET         /map                         controllers.MapController.show
-POST        /action                      controllers.RestCall.executeAction
+GET         /map                               controllers.MapController.show
+POST        /action                            controllers.RestCall.executeAction
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file                controllers.Assets.at(path="/public", file)
+GET         /assets/*file                      controllers.Assets.at(path="/public", file)
 
     

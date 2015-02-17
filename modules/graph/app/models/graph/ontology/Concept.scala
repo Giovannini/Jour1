@@ -250,7 +250,7 @@ object Concept {
       .toList
   }
 
-  /*TODO*/
+  /**TODO*/
   def getDescendance(conceptId: Int): List[Concept] = {
     println(conceptId)
     getChildren(conceptId).flatMap(concept => concept :: getDescendance(concept.id))
