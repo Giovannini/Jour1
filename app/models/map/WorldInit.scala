@@ -197,7 +197,7 @@ object WorldInit {
    */
   def getGrounds: List[Int] = {
     val conceptGround = getConceptGroundID
-    println("Ground ID: " + conceptGround)
+    //println("Ground ID: " + conceptGround)
     Concept.getDescendance(conceptGround).map(_.id)
   }
 

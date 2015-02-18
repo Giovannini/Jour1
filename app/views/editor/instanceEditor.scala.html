@@ -23,6 +23,13 @@
       <input type="number" name="@name" id="@id" value="@instance.coordinates.y" min="0">
     }
 
+    @for(property <- instance.properties.zipWithIndex){
+      @helper.input(InstanceEditor.instanceForm("property["+property._2+"]")) { (id, name, value, args) =>
+        <p>@property._2 - @property._1.property.label</p>
+        <input type="text" name="@name" id="@id" value="@property._1.value.toString">
+      }
+    }
+
     <input type="submit">
     }
 </body>

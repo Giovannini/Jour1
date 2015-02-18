@@ -11,6 +11,7 @@ case class Relation(label: String){
 
     override def toString = label
 
+    def isAnAction = label.startsWith("ACTION_")
 }
 
 object Relation {

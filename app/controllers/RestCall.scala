@@ -26,11 +26,11 @@ object RestCall extends Controller {
    * @author Thomas GIOVANNINI
    * @param conceptId of the concept the relations are desired
    */
-  def getAllRelationsOf(conceptId: Int) = Action {
+  def getAllActionsOf(conceptId: Int) = Action {
     val relations = Concept.getReachableRelations(conceptId)
+    val actions = relations.filter(_._1.isAnAction)
       .map(relationnedConceptToJson)
-    
-    Ok(Json.toJson(relations))
+    Ok(Json.toJson(actions))
   }
 
   /**
@@ -49,7 +49,7 @@ object RestCall extends Controller {
    * json model: {action: "action", instances: [instance, instance, ...]}
    */
   def executeAction = Action(parse.json) { request =>
-    println("Received JSON: " + request.body)
+    //println("Received JSON: " + request.body)
     val jsonRequest = Json.toJson(request.body)
     val actionReference = (jsonRequest \ "action").as[String]
     val actionArguments = (jsonRequest \ "instances").as[List[Int]]
@@ -69,7 +69,6 @@ object RestCall extends Controller {
     val action = Application.actionParser.getAction(actionType)
     val destinationInstancesList = Application.map.getInstancesOf(conceptId)
     val reducedList = reduceDestinationList(sourceInstance, action, destinationInstancesList)
-
     Ok(Json.toJson(reducedList))
   }
 
@@ -83,10 +82,18 @@ object RestCall extends Controller {
    */
   def reduceDestinationList(sourceInstance: Instance, action: InstanceAction, instances: List[Instance]) = {
     val preconditionsToValidate = action.preconditions
-    val reducedInstanceList = instances.filter { instance =>
-      preconditionsToValidate.forall(validateConditionFor(_, action, sourceInstance, instance))
-    }
+    val reducedInstanceList = reduceInstanceList(instances, preconditionsToValidate, action, sourceInstance)
     reducedInstanceList.map(_.toJson)
+  }
+
+  def reduceInstanceList(instances: List[Instance], preconditions: List[Precondition], action: InstanceAction,
+                         sourceInstance: Instance): List[Instance] = {
+    preconditions match {
+      case precondition::tail =>
+        reduceInstanceList(instances.filter(validateConditionFor(precondition, action, sourceInstance, _)),
+        tail, action, sourceInstance)
+      case _ => instances
+    }
   }
 
   /**
@@ -106,8 +113,6 @@ object RestCall extends Controller {
 
   def editInstance(instanceId: Int) = Action {
     val instance = Application.map.getInstanceById(instanceId)
-    println("Found the instance: ")
-    println(instance.label)
     Ok(views.html.editor.instanceEditor(instance))
   }
 }

@@ -72,6 +72,25 @@ object ValuedProperty {
   }
 
   /**
+   * Method to convert a string value of an unknown type to its real type
+   * @param stringValue to convert
+   * @return the value in its correct type
+   */
+  def parseValue(property: Property, stringValue: String): ValuedProperty = {
+    println("Parsing value " + stringValue + " for property " + property.label)
+    val value = property.valueType match {
+      case "Int" => stringValue.toInt
+      case "Double" => stringValue.toDouble
+      case "String" => stringValue
+      case "Boolean" => stringValue.toBoolean
+      //case "Array" => jsonValue.as[List[JsValue]].map(parseValue(_))
+      case _ => stringValue
+    }
+    ValuedProperty(property, value)
+  }
+
+
+  /**
    * Read a Neo4J row from the DB and convert it to a concept object
    * @param row the row read from the db
    *            it should contains a string name label

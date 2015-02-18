@@ -52,6 +52,16 @@ case class Instance(id:             Int,
     Instance(id, label, coordinates, property.defaultValuedProperty :: properties, concept)
   }
 
+  def updateProperties(properties: List[ValuedProperty]): Instance = {
+    if(properties.map(_.property) == this.properties.map(_.property)){
+      Instance(id, label, coordinates, properties, concept)
+    }else this
+  }
+
+  def withLabel(newLabel: String): Instance = {
+    Instance(id, newLabel, coordinates, properties, concept)
+  }
+
   /**
    * Method to give coordinates to the instance
    * @param newCoordinates to give to the instance

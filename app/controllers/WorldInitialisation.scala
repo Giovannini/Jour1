@@ -26,7 +26,6 @@ object WorldInitialisation extends Controller {
         worldGeneration
       }
     }
-    //println(exampleMap.getInstances.count(_ == Instance.error))
     Ok(exampleMap.toJson)
   }
 
@@ -157,11 +156,11 @@ object WorldInitialisation extends Controller {
 
     /*Relations declaration*/
     val relationSubtypeOf   = Relation("SUBTYPE_OF")
-    val relationEat         = Relation("EAT")
-    val relationCut         = Relation("CUT")
-    val relationMove        = Relation("MOVE")
-    val relationFlee        = Relation("FLEE")
-    val relationProduces    = Relation("PRODUCE")
+    val relationEat         = Relation("ACTION_EAT")
+    val relationCut         = Relation("ACTION_CUT")
+    val relationMove        = Relation("ACTION_MOVE")
+    val relationFlee        = Relation("ACTION_FLEE")
+    val relationProduces    = Relation("ACTION_PRODUCE")
 
     val relationLiveOn      = Relation("LIVE_ON")
 

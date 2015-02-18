@@ -250,9 +250,14 @@ object Concept {
       .toList
   }
 
-  /**TODO*/
+  /**
+   * Get all the child node of a concept recursively
+   * @author Thomas GIOVANNINI
+   * @param conceptId of the desired concept
+   * @return a list of concepts which are the given concept's descendance
+   */
   def getDescendance(conceptId: Int): List[Concept] = {
-    println(conceptId)
+    //println(conceptId)
     getChildren(conceptId).flatMap(concept => concept :: getDescendance(concept.id))
   }
 
@@ -300,7 +305,7 @@ object Concept {
    * @return a list of relations and concepts
    */
   def getReachableRelations(conceptId: Int): List[(Relation, Concept)] = {
-    val conceptRelations = getRelationsFrom(conceptId).filter(notASubtype)
+    val conceptRelations = getRelationsFrom(conceptId)/*.filter(notASubtype)*/
     val parentsRelations = getParentsRelations(conceptId)
     conceptRelations ::: parentsRelations
   }
