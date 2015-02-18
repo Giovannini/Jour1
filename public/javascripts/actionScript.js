@@ -101,9 +101,10 @@ var ActionController = ['$scope', function($scope) {
             $scope.loadingChoice = true;
             $scope.selectedAction = id;
             var action = $scope.actions[$scope.selectedInstance][id];
-            Map.getInstancesByConcept(action.conceptId, applyChoices);
+            Map.getInstancesByConcept($scope.instances[$scope.selectedInstance].id, action.relationId, action.conceptId, applyChoices);
         }
     };
+    
     
     $scope.sendAction = function(initInstanceId, actionId, destInstanceId) {
         var action = $scope.actions[$scope.selectedInstance][actionId];

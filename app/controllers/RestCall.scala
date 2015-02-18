@@ -9,7 +9,7 @@ import models.utils.action.{Action => InstanceAction}
 /**
  * Controller to send Json data to client
  */
-object RestCall extends Controller{
+object RestCall extends Controller {
 
   /**
    * Get all the concepts existing in the graph
@@ -64,13 +64,12 @@ object RestCall extends Controller{
    * @author Thomas GIOVANNINI
    * @return a list of instances under JSON format
    */
-  def getPossibleDestinationOfAction = Action(parse.json) { request =>
-    val jsonRequest = Json.toJson(request.body)
-    val sourceInstance = Application.map.getInstanceById((jsonRequest \ "instance").as[Int])
-    val action = Application.actionParser.getAction((jsonRequest \ "action").as[String])
-    val destinationInstancesList = Application.map.getInstancesOf((jsonRequest \ "concept").as[Int])
+  def getPossibleDestinationOfAction(initInstanceId: Int, actionType: String, conceptId: Int) = Action {
+    val sourceInstance = Application.map.getInstanceById(initInstanceId)
+    val action = Application.actionParser.getAction(actionType)
+    val destinationInstancesList = Application.map.getInstancesOf(conceptId)
     val reducedList = reduceDestinationList(sourceInstance, action, destinationInstancesList)
-    
+
     Ok(Json.toJson(reducedList))
   }
 

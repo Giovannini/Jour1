@@ -9,9 +9,8 @@ GET         /init                              controllers.WorldInitialisation.i
 
 GET         /concepts                          controllers.RestCall.getAllConcepts
 GET         /relations/:conceptId              controllers.RestCall.getAllRelationsOf(conceptId: Int)
-POST        /relations                         controllers.RestCall.getPossibleDestinationOfAction
 GET         /instances                         controllers.WorldInitialisation.getWorld
-GET         /instances/:conceptId              controllers.Application.getAllInstancesOf(conceptId: Int)
+GET         /instances/:initInstanceId/:actionType/:conceptId        controllers.RestCall.getPossibleDestinationOfAction(initInstanceId: Int, actionType: String, conceptId: Int)
 GET         /instances/edit/:instanceId        controllers.RestCall.editInstance(instanceId: Int)
 POST        /instances/update                  controllers.InstanceEditor.update
 

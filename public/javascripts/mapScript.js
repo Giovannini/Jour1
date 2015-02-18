@@ -14,6 +14,7 @@ var RestFactory = function() {
             // Init the AJAX object
             var req = new XMLHttpRequest();
             req.open("GET", url, true);
+            req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
             req.onreadystatechange = function () {
                 if (req.readyState === 4) {
                     if (req.status === 200) {
@@ -57,7 +58,7 @@ var RestFactory = function() {
         },
         instances: {
             get: getUrl("/instances"),
-            getByConcept: function(conceptId) { return getUrl("/instances/"+conceptId); }
+            getByConcept: function(idInstance, action, conceptId) { return getUrl("/instances/"+idInstance+"/"+action+"/"+conceptId); }
         },
         action: {
             sendAction: function(initInstance, action, destInstance) {
@@ -289,8 +290,8 @@ var MapFactory = function(Rest) {
         }
     };
     
-    var getInstancesByConcept = function(idConcept, callback) {
-        Rest.instances.getByConcept(idConcept)(
+    var getInstancesByConcept = function(idInstance, action, idConcept, callback) {
+        Rest.instances.getByConcept(idInstance, action, idConcept)(
             function(responseText) {
                 callback(JSON.parse(responseText));
             },

@@ -3,7 +3,8 @@
   "directory": "public/components",
   "dependencies": {
     "angular": "latest",
-    "pixi.js": "https://github.com/GoodBoyDigital/pixi.js.git#~2.2.5"
+    "pixi.js": "https://github.com/GoodBoyDigital/pixi.js.git#~2.2.5",
+    "alchemyjs": "latest"
   },
   "version": "0.1.0",
   "authors": [
