@@ -38,7 +38,7 @@ object WorldInitialisation extends Controller {
     val map = Application.map
     val width = map.width
     val height = map.height
-    WorldInit.worldMapGeneration(width,height).foreach(map.addInstance)
+    WorldInit.worldMapGeneration(/*width,height*/)/*.foreach(map.addInstance)*/
     map
   }
   
@@ -207,9 +207,19 @@ object WorldInitialisation extends Controller {
     NeoDAO.addRelationToDB(conceptSolid.id, relationSubtypeOf, conceptGround.id)
 
     //live
+    NeoDAO.addRelationToDB(conceptMan.id, relationLiveOn, conceptSolid.id)
+    NeoDAO.addRelationToDB(conceptWolf.id, relationLiveOn, conceptSolid.id)
+    NeoDAO.addRelationToDB(conceptSheep.id, relationLiveOn, conceptSolid.id)
     NeoDAO.addRelationToDB(conceptGrass.id, relationLiveOn, conceptSolid.id)
     NeoDAO.addRelationToDB(conceptTree.id, relationLiveOn, conceptSolid.id)
     NeoDAO.addRelationToDB(conceptBush.id, relationLiveOn, conceptSolid.id)
+    NeoDAO.addRelationToDB(conceptAppleTree.id, relationLiveOn, conceptSolid.id)
+    NeoDAO.addRelationToDB(conceptFir.id, relationLiveOn, conceptSolid.id)
+    NeoDAO.addRelationToDB(conceptApple.id, relationLiveOn, conceptAppleTree.id)
+
+
+
+
     NeoDAO.addRelationToDB(conceptSheep.id, relationLiveOn, conceptSolid.id)
   }
 }
