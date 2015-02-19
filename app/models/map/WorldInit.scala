@@ -463,10 +463,27 @@ object WorldInit {
    * @param size number of tile possible for put
    * @return
    */
-  def putInstanciesOfOneConcept(nbTile: Int, concept: Concept, listTile:List[Coordinates], size:Int): List[Instance] = {
+  def putInstanciesOfOneConcept1(nbTile: Int, concept: Concept, listTile:List[Coordinates], size:Int): List[Instance] = {
     val r = scala.util.Random
     Seq.fill(nbTile)(Instance.createRandomInstanceOf(concept).at(listTile(r.nextInt(size)))).toList
   }
+
+  /**
+   * Build list of random instance for on concept without two instances on same tile
+   * @param nbTile Number of tile to fill with the concept
+   * @param concept concept to instanciate
+   * @param listTile list of tile where we put the concept
+   * @param size number of tile possible for put
+   * @return
+   */
+  def putInstanciesOfOneConcept(nbTile: Int, concept: Concept, listTile:List[Coordinates], size:Int): List[Instance] = {
+    if(nbTile>0) {
+      val r = scala.util.Random
+      val randomIndex = r.nextInt(size)
+      Instance.createRandomInstanceOf(concept).at(listTile(randomIndex)) :: putInstanciesOfOneConcept(nbTile - 1, concept, listTile.filterNot(listTile.indexOf(_) == randomIndex), size - 1)
+    }else{Nil}
+  }
+
 
   ///////////////////////////:: Util - Tools :://///////////////////////////////
   /**
