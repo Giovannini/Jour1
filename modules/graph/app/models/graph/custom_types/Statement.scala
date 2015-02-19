@@ -152,6 +152,10 @@ object Statement {
       "id2" -> destNodeId)
   }
 
+  def getAllRelations: CypherStatement = {
+    Cypher("match n-[r]->m return distinct type(r) as relation_label")
+  }
+
   /**
    * Create a cypher statement to get all relation which source is a concept.
    * @author Thomas GIOVANNINI

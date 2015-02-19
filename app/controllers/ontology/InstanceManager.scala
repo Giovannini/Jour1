@@ -1,16 +1,16 @@
-package controllers
+package controllers.ontology
 
+import controllers.{Application}
 import models.graph.custom_types.Coordinates
-import models.graph.ontology.{ValuedProperty, Instance}
-import play.api.mvc.{Action, Controller}
-
+import models.graph.ontology.{Instance, ValuedProperty}
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.mvc.{Action, Controller}
 
 /**
  * Object containing tools for instance editing
  */
-object InstanceEditor extends Controller{
+object InstanceManager extends Controller{
 
   val instanceForm = Form(
     tuple(
@@ -21,6 +21,7 @@ object InstanceEditor extends Controller{
       "property" -> list(nonEmptyText)
     )
   )
+
   def update = Action { implicit request =>
     val newTodoForm = instanceForm.bindFromRequest()
     newTodoForm.fold(
@@ -36,7 +37,7 @@ object InstanceEditor extends Controller{
         }
       }
     )
-    Redirect(routes.Application.index())
+    Redirect(controllers.routes.Application.index())
   }
 
   def updateProperties(valuesToString: List[String], oldInstance: Instance): List[ValuedProperty] = {

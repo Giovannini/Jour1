@@ -8,6 +8,14 @@ import models.map.WorldMap
  */
 object HardCodedPrecondition {
 
+  /**
+   * Precondition to check id an instance is next to an other
+   * @author Thomas GIOVANNINI
+   * @param args an array containing the two instances ids
+   * @param map of the world
+   * @return true if the two instances are next to each others
+   *         false else
+   */
   def isNextTo(args: Array[Any], map: WorldMap):Boolean = {
     val instance1 = map.getInstanceById(args(0).asInstanceOf[Int])
     val instance2 = map.getInstanceById(args(1).asInstanceOf[Int])
@@ -15,11 +23,19 @@ object HardCodedPrecondition {
     result
   }
 
+  /**
+   * Precondition to check if an instance is at walking distance of an other one
+   * @author Thomas GIOVANNINI
+   * @param args an array containing the two instances ids
+   * @param map of the world
+   * @return true if the firts instance can reach the second one by walking
+   *         false else
+   */
   def isAtWalkingDistance(args: Array[Any], map: WorldMap): Boolean = {
     val propertyWalkingDistance   = Property("WalkingDistance", "Int", 5)
     val sourceInstance      = map.getInstanceById(args(0).asInstanceOf[Int])
     val destinationInstance = map.getInstanceById(args(1).asInstanceOf[Int])
-    val desiredDistance     = sourceInstance.properties
+    val desiredDistance     = sourceInstance.concept.rules
       .find(_.property == propertyWalkingDistance)
       .getOrElse(propertyWalkingDistance.defaultValuedProperty)
       .value
@@ -28,11 +44,21 @@ object HardCodedPrecondition {
     distance < desiredDistance
   }
 
+  /**
+   * Precondition to check whether an instance has a property or not.
+   * @param args array containing the instance id and the property name
+   * @param map of the world
+   * @return true if the instance has the desired property
+   *         false else
+   */
   def hasProperty(args: Array[Any], map: WorldMap): Boolean = {
     val sourceInstance = map.getInstanceById(args(0).asInstanceOf[Int])
     val propertyName = args(1).asInstanceOf[String]
     /** TODO => this is not clean. */
-    sourceInstance.properties.map(_.property.label).contains(propertyName)
+    sourceInstance.concept
+      .properties
+      .map(_.label)
+      .contains(propertyName)
   }
 
 }

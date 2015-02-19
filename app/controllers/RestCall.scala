@@ -113,6 +113,6 @@ object RestCall extends Controller {
 
   def editInstance(instanceId: Int) = Action {
     val instance = Application.map.getInstanceById(instanceId)
-    Ok(views.html.editor.instanceEditor(instance))
+    Ok(views.html.manager.instance.instanceEditor(instance))
   }
 }

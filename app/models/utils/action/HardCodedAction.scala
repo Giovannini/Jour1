@@ -57,7 +57,7 @@ object HardCodedAction {
   }
 
   def searchConcept(args: Array[Any], map: WorldMap) = {
-    val concept = Concept.getById(args(0).asInstanceOf[Int]).get
+    val concept = Concept.getById(args(0).asInstanceOf[Int])
     val xCoordinate = args(1).asInstanceOf[Int]
     val yCoordinate = args(2).asInstanceOf[Int]
     val coordinates = Coordinates(xCoordinate, yCoordinate)

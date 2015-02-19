@@ -3,28 +3,34 @@
 # ~~~~
 
 # Home page
-GET         /                                  controllers.Application.index
+GET         /                                                        controllers.Application.index
 
-GET         /init                              controllers.WorldInitialisation.initGraph
+GET         /init                                                    controllers.WorldInitialisation.initGraph
 
-GET         /concepts                          controllers.RestCall.getAllConcepts
-GET         /instances                         controllers.WorldInitialisation.getWorld
+GET         /concepts                                                controllers.RestCall.getAllConcepts
+GET         /instances                                               controllers.WorldInitialisation.getWorld
 GET         /instances/:initInstanceId/:actionType/:conceptId        controllers.RestCall.getPossibleDestinationOfAction(initInstanceId: Int, actionType: String, conceptId: Int)
-GET         /instances/edit/:instanceId        controllers.RestCall.editInstance(instanceId: Int)
-POST        /instances/update                  controllers.InstanceEditor.update
+
+#Instances manipulation
+GET         /instances/edit/:instanceId                              controllers.RestCall.editInstance(instanceId: Int)
+POST        /instances/update                                        controllers.ontology.InstanceManager.update
+
+#Graph manipulation
+GET         /relation/create                                         controllers.ontology.RelationManager.createRelation
+POST        /relation/create                                         controllers.ontology.RelationManager.create
 
 # Graph visualisation
-->          /graph                             graph.Routes
+->          /graph                                                   graph.Routes
 
 # Rules visualisation
-->          /rules                             rules.Routes
+->          /rules                                                   rules.Routes
 
 # Map routes
-GET         /map                               controllers.MapController.show
-POST        /action                            controllers.RestCall.executeAction
-GET         /relations/:conceptId              controllers.RestCall.getAllActionsOf(conceptId: Int)
+GET         /map                                                     controllers.MapController.show
+POST        /action                                                  controllers.RestCall.executeAction
+GET         /relations/:conceptId                                    controllers.RestCall.getAllActionsOf(conceptId: Int)
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file                      controllers.Assets.at(path="/public", file)
+GET         /assets/*file                                            controllers.Assets.at(path="/public", file)
 
     

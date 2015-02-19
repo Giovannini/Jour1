@@ -90,6 +90,12 @@ case class Concept(label: String,
     ValuedProperty.keepHighestLevelRules(rules ::: getParents.flatMap(_.getAllRules), List())
   }
 
+  def getRuleValue(property: Property): Any = {
+    rules.find(_.property == property)
+      .getOrElse(property.defaultValuedProperty)
+      .value
+  }
+
   /**
    * Retrieve the parents of the concept
    * @author Thomas GIOVANNINI
@@ -99,14 +105,20 @@ case class Concept(label: String,
     Concept.getParents(id)
   }
 
+  def getDescendance: List[Concept] = {
+    Concept.getChildren(id).flatMap(concept => concept :: concept.getDescendance)
+  }
+
 }
 
 object Concept {
 
+  implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
+
   val error = Concept("XXX", List(), List(), "#ff0000")
 
   /**
-   * Apply method for the second constructor
+    * Apply method for the second constructor
    * @author Thomas GIOVANNINI
    * @param label of the concept
    * @param properties of the concept
@@ -114,7 +126,6 @@ object Concept {
    */
   def apply(label: String, properties: List[Property], rules: List[ValuedProperty]) = new Concept(label, properties, rules)
 
-  implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
 
   /**
    * Parse a Json value to a concept
@@ -204,13 +215,13 @@ object Concept {
    * @param conceptId the ID of the desired concept
    * @return the desired concept if exists
    */
-  def getById(conceptId: Int): Option[Concept] = {
+  def getById(conceptId: Int): Concept = {
     val statement = Statement.getConceptById(conceptId)
     val cypherResultRowStream = statement.apply
     if(cypherResultRowStream.nonEmpty) {
       val row: CypherResultRow = statement.apply.head
-      Some(parseRow(row))
-    }else None
+      parseRow(row)
+    }else error
   }
 
   /**

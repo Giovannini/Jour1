@@ -1,4 +1,10 @@
 @(instance: models.graph.ontology.Instance)
+@import controllers.ontology.InstanceManager
+@import controllers.ontology.InstanceManager
+@import controllers.ontology.InstanceManager
+@import controllers.ontology.InstanceManager
+@import controllers.ontology.InstanceManager
+@import controllers.ontology.InstanceManager
 
 <!DOCTYPE html>
 <html>
@@ -9,22 +15,22 @@
 <body>
   <h1>Edition of instance @instance.label @instance.id of concept @instance.concept</h1>
 
-  @helper.form(action = routes.InstanceEditor.update()){
-    @helper.input(InstanceEditor.instanceForm("id")) { (id, name, value, args) =>
+  @helper.form(action = controllers.ontology.routes.InstanceManager.update()){
+    @helper.input(InstanceManager.instanceForm("id")) { (id, name, value, args) =>
       <input type="number" name="@name" id="@id" value="@instance.id" min="0" readonly>
     }
-    @helper.input(InstanceEditor.instanceForm("label")) { (id, name, value, args) =>
+    @helper.input(InstanceManager.instanceForm("label")) { (id, name, value, args) =>
       <input type="text" name="@name" id="@id" value="@instance.label">
     }
-    @helper.input(InstanceEditor.instanceForm("coordinateX")) { (id, name, value, args) =>
+    @helper.input(InstanceManager.instanceForm("coordinateX")) { (id, name, value, args) =>
       <input type="number" name="@name" id="@id" value="@instance.coordinates.x" min="0">
     }
-    @helper.input(InstanceEditor.instanceForm("coordinateY")) { (id, name, value, args) =>
+    @helper.input(InstanceManager.instanceForm("coordinateY")) { (id, name, value, args) =>
       <input type="number" name="@name" id="@id" value="@instance.coordinates.y" min="0">
     }
 
     @for(property <- instance.properties.zipWithIndex){
-      @helper.input(InstanceEditor.instanceForm("property["+property._2+"]")) { (id, name, value, args) =>
+      @helper.input(InstanceManager.instanceForm("property["+property._2+"]")) { (id, name, value, args) =>
         <p>@property._2 - @property._1.property.label</p>
         <input type="text" name="@name" id="@id" value="@property._1.value.toString">
       }

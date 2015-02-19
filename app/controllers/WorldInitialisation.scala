@@ -89,7 +89,7 @@ object WorldInitialisation extends Controller {
         List(ValuedProperty(propertyZIndex, 16),
           ValuedProperty(propertyStrength,2),
           ValuedProperty(propertyInstanciable,true),
-          ValuedProperty(propertyWalkingDistance, 5)),
+          ValuedProperty(propertyWalkingDistance, 3)),
         "#EEE9D6")
     val conceptAnimal     =
       Concept("Animal",

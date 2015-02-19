@@ -8,7 +8,7 @@ import play.api.libs.json._
  * @param property the property which is valued
  * @param value the value for the property
  */
-case class ValuedProperty(property: Property, value: Any){
+case class  ValuedProperty(property: Property, value: Any){
   /**
    * Parse a ValuedProperty to Json
    * @author Thomas GIOVANNINI

@@ -33,7 +33,7 @@ case class ActionParser(actionManager: ActionManager) {
     actionReference match {
       case "REMOVE" => actionManager._actionRemoveInstanceAt
       case "ADD"  => actionManager._actionAddInstanceAt
-      case "MOVE" => actionManager._actionMoveInstanceAt
+      case "ACTION_MOVE" => actionManager._actionMoveInstanceAt
       case _ =>
         println(actionReference + "not found: REMOVE instead")
         actionManager._actionRemoveInstanceAt

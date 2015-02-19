@@ -1,0 +1,40 @@
+@import controllers.ontology.RelationManager
+@import models.graph.ontology.Concept
+@import models.graph.ontology.Relation
+
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title></title>
+</head>
+<body>
+  Yo!
+    @helper.form(action = controllers.ontology.routes.RelationManager.create()) {
+      @helper.input(RelationManager.relationCreationForm("concept1_id")) { (id, name, value, args) =>
+        <select name="@name" id="@id">
+        @for(concept <- Concept.findAll){
+          <option value="@concept.id">@concept.label</option>
+        }
+        </select>
+      }
+      @helper.input(RelationManager.relationCreationForm("relation_label")) { (id, name, value, args) =>
+        <select name="@name" id="@id">
+        @for(relation <- Relation.getAll){
+          <option value="@relation.label">@relation.label</option>
+        }
+        </select>
+      }
+      @helper.input(RelationManager.relationCreationForm("concept2_id")) { (id, name, value, args) =>
+        <select name="@name" id="@id">
+        @for(concept <- Concept.findAll){
+          <option value="@concept.id">@concept.label</option>
+        }
+        </select>
+      }
+      @helper.checkbox(RelationManager.relationCreationForm("is_action"))
+
+      <input type="submit">
+    }
+</body>
+</html>

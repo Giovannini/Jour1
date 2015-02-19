@@ -100,8 +100,8 @@ object Instance {
     val properties = (jsonInstance \ "properties").as[List[JsValue]].map(ValuedProperty.parseJson)
     val conceptId = (jsonInstance \ "concept").as[Int]
     Concept.getById(conceptId) match {
-      case Some(concept) => Instance(id, label, coordinates, properties, concept)
-      case _ => error
+      case Concept.error => error
+      case concept => Instance(id, label, coordinates, properties, concept)
     }
   }
 
