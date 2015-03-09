@@ -31,7 +31,7 @@ object InstanceManager extends Controller{
   def update = Action { implicit request =>
     /**
      * Print errors contained in a form
-     * @author Thhomas GIOVANNINI
+     * @author Thomas GIOVANNINI
      */
     def printErrors(form: Form[(Int, String, Int, Int, List[String])]) = {
       form.errors.foreach(error => println("###Error:\n" + error.messages.mkString("\n")))

@@ -1,5 +1,7 @@
 package models.utils.precondition
 
+import controllers.Application
+import models.graph.ontology.Instance
 import models.map.WorldMap
 import models.utils.Argument
 
@@ -48,6 +50,19 @@ case class Precondition(label: String, referenceId: String, subConditions: List[
     arguments.filter{
       tuple => this.arguments
         .contains(tuple._1)
+    }
+  }
+
+  def instancesThatFill(source: Instance): Set[Instance] = {
+    this.referenceId match {
+      case "isNextTo0" =>
+        InstancesThatFillPrecondition.isNextTo(source).toSet
+      case "isAtWalkingDistance0" =>
+        //println("Checking distance precondition")
+        InstancesThatFillPrecondition.isAtWalkingDistance(source).toSet
+      case _ => this.subConditions
+        .map(precondition => precondition.instancesThatFill(source))
+        .foldRight(Application.map.getInstances.toSet)(_ intersect _)
     }
   }
 }

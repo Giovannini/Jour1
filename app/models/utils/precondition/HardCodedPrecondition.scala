@@ -16,7 +16,7 @@ object HardCodedPrecondition {
    * @return true if the two instances are next to each others
    *         false else
    */
-  def isNextTo(args: Array[Any], map: WorldMap):Boolean = {
+  def isNextTo(args: Array[Any], map: WorldMap): Boolean = {
     val instance1 = map.getInstanceById(args(0).asInstanceOf[Int])
     val instance2 = map.getInstanceById(args(1).asInstanceOf[Int])
     val result = instance1.coordinates.isNextTo(instance2.coordinates)
@@ -32,8 +32,9 @@ object HardCodedPrecondition {
    *         false else
    */
   def isAtWalkingDistance(args: Array[Any], map: WorldMap): Boolean = {
+    val propertyWalkingDistance = Property("WalkingDistance", "Int", 5)
+
     def retrieveWalkingDistanceValue(instance: Instance) = {
-      val propertyWalkingDistance   = Property("WalkingDistance", "Int", 5)
       instance.properties
         .find(_.property == propertyWalkingDistance)
         .getOrElse(propertyWalkingDistance.defaultValuedProperty)
@@ -58,6 +59,7 @@ object HardCodedPrecondition {
   def hasProperty(args: Array[Any], map: WorldMap): Boolean = {
     val sourceInstance = map.getInstanceById(args(0).asInstanceOf[Int])
     val propertyName = args(1).asInstanceOf[String]
+
     /** TODO => this is not clean. */
     sourceInstance.concept
       .properties

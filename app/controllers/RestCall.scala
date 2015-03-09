@@ -1,10 +1,9 @@
 package controllers
 
-import models.graph.ontology.{Instance, Relation, Concept}
-import models.utils.precondition.Precondition
-import play.api.libs.json._
-import play.api.mvc.{Request, Controller, Action}
+import models.graph.ontology.{Concept, Instance, Relation}
 import models.utils.action.{Action => InstanceAction}
+import play.api.libs.json._
+import play.api.mvc.{Action, Controller, Request}
 
 /**
  * Controller to send Json data to client
@@ -90,33 +89,10 @@ object RestCall extends Controller {
    */
   def reduceDestinationList(sourceInstance: Instance, action: InstanceAction, instances: List[Instance]) = {
     val preconditionsToValidate = action.preconditions
-    val reducedInstanceList = reduceInstanceList(instances, preconditionsToValidate, action, sourceInstance)
-    reducedInstanceList.map(_.toJson)
-  }
-
-  def reduceInstanceList(instances: List[Instance], preconditions: List[Precondition], action: InstanceAction,
-                         sourceInstance: Instance): List[Instance] = {
-    preconditions match {
-      case precondition::tail =>
-        val validatedInstances = instances.filter(validateConditionFor(precondition, action, sourceInstance, _))
-        reduceInstanceList (validatedInstances, tail, action, sourceInstance)
-      case _ => instances
-    }
-  }
-
-  /**
-   * Validate or invalidate a precondition between two instances
-   * @author Thomas GIOVANNINI
-   * @param precondition to validate
-   * @param action from which the precondition is
-   * @param source of the action
-   * @param destination of the action
-   * @return true if te precondition is validated
-   *         false else
-   */
-  def validateConditionFor(precondition: Precondition, action: InstanceAction, source: Instance, destination: Instance) = {
-    val arguments = Application.actionParser.getArgumentsList(action, List(source.id, destination.id))
-    precondition.isFilled(arguments, Application.map)
+    preconditionsToValidate.map(_.instancesThatFill(sourceInstance))
+      .foldRight(instances.toSet)(_ intersect _)
+      .toList
+      .map(_.toJson)
   }
 
   def editInstance(instanceId: Int) = Action {
