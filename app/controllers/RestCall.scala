@@ -97,6 +97,13 @@ object RestCall extends Controller {
 
   def editInstance(instanceId: Int) = Action {
     val instance = Application.map.getInstanceById(instanceId)
-    Ok(views.html.manager.instance.instanceEditor(instance))
+    Ok(views.html.manager.instance.instanceEditor(instance, controllers.ontology.routes.InstanceManager.update()))
+  }
+
+  def createInstance(conceptId: Int) = Action {
+    val concept = Concept.getById(conceptId)
+    val initInstance = Instance.createRandomInstanceOf(concept)
+    val instance = Application.map.addInstance(initInstance)
+    Ok(views.html.manager.instance.instanceEditor(instance, controllers.ontology.routes.InstanceManager.create))
   }
 }

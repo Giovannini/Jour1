@@ -1,4 +1,4 @@
-@(instance: models.graph.ontology.Instance)
+@(instance: models.graph.ontology.Instance, call: Call)
 @import controllers.ontology.InstanceManager
 @import controllers.ontology.InstanceManager
 @import controllers.ontology.InstanceManager
@@ -15,7 +15,7 @@
 <body>
   <h1>Edition of instance @instance.label @instance.id of concept @instance.concept</h1>
 
-  @helper.form(action = controllers.ontology.routes.InstanceManager.update()){
+  @helper.form(action = call){
     @helper.input(InstanceManager.instanceForm("id")) { (id, name, value, args) =>
       <input type="number" name="@name" id="@id" value="@instance.id" min="0" readonly>
     }

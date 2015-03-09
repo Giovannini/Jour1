@@ -13,7 +13,9 @@ GET         /instances/:initInstanceId/:actionType/:conceptId        controllers
 
 #Instances manipulation
 GET         /instances/edit/:instanceId                              controllers.RestCall.editInstance(instanceId: Int)
+GET         /instances/create/:conceptId                             controllers.RestCall.createInstance(conceptId: Int)
 POST        /instances/update                                        controllers.ontology.InstanceManager.update
+POST        /instances/create                                        controllers.ontology.InstanceManager.create
 
 #Graph manipulation
 GET         /relation/create                                         controllers.ontology.RelationManager.createRelation

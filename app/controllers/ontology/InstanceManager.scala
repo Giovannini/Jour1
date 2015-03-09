@@ -1,6 +1,7 @@
 package controllers.ontology
 
 import controllers.Application
+import models.graph.NeoDAO
 import models.graph.custom_types.Coordinates
 import models.graph.ontology.{Instance, ValuedProperty}
 import play.api.data.Form
@@ -22,6 +23,40 @@ object InstanceManager extends Controller{
       "property" -> list(nonEmptyText) // TODO secure properties
     )
   )
+
+  /**
+   * Create a given instance from a received form.
+   * @author Simon RONCIERE
+   * @return an action redirecting to the index page of the application
+   */
+  def create = Action { implicit request =>
+    /**
+     * Print errors contained in a form
+     * @author Thhomas GIOVANNINI
+     */
+    def printErrors(form: Form[(Int, String, Int, Int, List[String])]) = {
+      form.errors.foreach(error => println("###Error:\n" + error.messages.mkString("\n")))
+    }
+
+    /**
+     * Create the relation following a form with no errors in it.
+     * @author Thomas GIOVANNINI
+     * @param form containing the update
+     * @return whether the creation went well or not
+     */
+    def doCreate(form: (Int, String, Int, Int, List[String])) = {
+      val oldInstance = Application.map.getInstanceById(form._1)
+      println(oldInstance.toString)
+      val newInstance = getNewInstance(form, oldInstance)
+      println(newInstance.toString)
+      Application.map.updateInstance(oldInstance, newInstance)
+    }
+
+    val newTodoForm = instanceForm.bindFromRequest()
+    newTodoForm.fold( hasErrors = {form => printErrors(form)},
+      success = {newInstanceForm => doCreate(newInstanceForm)})
+    Redirect(controllers.routes.Application.index())
+  }
 
   /**
    * Update a given instance from a received form.

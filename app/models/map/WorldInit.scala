@@ -28,14 +28,16 @@ object WorldInit {
    * @return List of Instances of the world
    */
   def worldMapGeneration(): Unit = {
-    generateGround()
-    fillWorldWithInstances(map, getInstanciableConcepts.map(_._1).tail.tail)
+    val allGroundsConcepts = getGroundConcept(Concept.findAll).getDescendance
+    val ordonateConcepts = getInstanciableConcepts.map(_._1).span(concept => allGroundsConcepts.contains(concept))
+    generateGround(ordonateConcepts._1)
+    fillWorldWithInstances(map, ordonateConcepts._2)
   }
 
-  def generateGround() {
+  def generateGround(allGroundsConcepts:List[Concept]) {
     val layer = Layer.generateLayer(frequency, octave, persistence, smoothed, outputSize)
-    val allGroundsConcepts = getGroundConcept(Concept.findAll).getDescendance
     val layerExtremums = layer.getExtremums
+
     val repartitionList = repartition(layerExtremums, allGroundsConcepts).sortBy(_._1)
 
     matrixToList(layer.matrix)
