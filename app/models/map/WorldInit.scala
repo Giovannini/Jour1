@@ -32,10 +32,7 @@ object WorldInit {
     val instanciableConcepts = getInstanciableConcepts diff allGroundsConcepts
     generateGround(allGroundsConcepts)
     //Take a lot of time
-    val time1 = System.currentTimeMillis()
     instanciableConcepts.foreach(fillWorldWithInstances(map, _))
-    val time2 = System.currentTimeMillis()
-    println("World instances generation: " + (time2 - time1))
   }
 
   /**
@@ -46,7 +43,6 @@ object WorldInit {
     val layer = Layer.generateLayer(frequency, octave, persistence, smoothed, outputSize)
     val layerExtremums = layer.getExtremums
     val repartitionList = repartition(layerExtremums, allGroundsConcepts).sortBy(_._1)
-    //println("Repartition list created")
     matrixToList(layer.matrix)
       .map(createInstance(_, repartitionList))
       .foreach(map.addInstance)
@@ -83,7 +79,6 @@ object WorldInit {
    */
   def repartition(matrixExtremums: (Int, Int), listGrounds: List[Concept]): List[(Int, Concept)] = {
     val sumStrength = computeSumStrength(listGrounds)
-    //println("Strength: " + sumStrength)
     val matrixMinimum = matrixExtremums._2
     repartitionStream(matrixMinimum, matrixExtremums, listGrounds, sumStrength)
       .take(listGrounds.length)
@@ -259,9 +254,7 @@ object WorldInit {
   def fillWorldWithInstances(worldMap: WorldMap, concept: Concept): Unit = {
     //instanciate first concept
     val instances = createInstances(worldMap, concept)
-    println("wut? " + instances.length)
     instances.foreach(worldMap.addInstance)
-    //println("First concept instanciated")
     //instanciate rest
 
   }
@@ -291,18 +284,9 @@ object WorldInit {
   def buildInstancesList(instancesOfLivingPlace: List[Instance], conceptsLivingOnSameGrounds: List[Concept], conceptToInstanciate: Concept): List[Instance] = {
     if (conceptsLivingOnSameGrounds.nonEmpty) {
       val strengthSum = computeSumStrength(conceptsLivingOnSameGrounds)
-      //println("sterngthSum " + strengthSum)
       val strengthOfConceptToInstanciate = getStrengthOf(conceptToInstanciate)
-      //println("strengthOfConceptToInstanciate " + strengthOfConceptToInstanciate)
       val nbTile = (strengthOfConceptToInstanciate * instancesOfLivingPlace.size) / (strengthSum * parameterOfEmptiness)
-      //println("nbTile " + nbTile)
-      //println("shuffled")
-      println("nbTile = " + nbTile)
-      val time1 = System.currentTimeMillis()
       val result = (0 until nbTile).map(_ => putInstanciesOfOneConcept(conceptToInstanciate, instancesOfLivingPlace.map(_.coordinates))).toList
-      val time2 = System.currentTimeMillis()
-      println("build instances list: " + (time2 - time1))
-      println("result: " + result.length)
       result
     } else List()
   }

@@ -1,7 +1,6 @@
 package controllers.ontology
 
 import controllers.Application
-import models.graph.NeoDAO
 import models.graph.custom_types.Coordinates
 import models.graph.ontology.{Instance, ValuedProperty}
 import play.api.data.Form
@@ -12,7 +11,7 @@ import play.api.mvc.{Action, Controller}
 /**
  * Object containing tools for instance editing
  */
-object InstanceManager extends Controller{
+object InstanceManager extends Controller {
 
   val instanceForm = Form(
     tuple(
@@ -25,37 +24,34 @@ object InstanceManager extends Controller{
   )
 
   /**
+   * Print errors contained in a form
+   * @author Thomas GIOVANNINI
+   */
+  def printErrors(form: Form[(Int, String, Int, Int, List[String])]) = {
+    form.errors.foreach(error => println("###Error:\n" + error.messages.mkString("\n")))
+  }
+
+  /**
    * Create a given instance from a received form.
    * @author Simon RONCIERE
    * @return an action redirecting to the index page of the application
    */
   def create = Action { implicit request =>
-    /**
-     * Print errors contained in a form
-     * @author Thhomas GIOVANNINI
-     */
-    def printErrors(form: Form[(Int, String, Int, Int, List[String])]) = {
-      form.errors.foreach(error => println("###Error:\n" + error.messages.mkString("\n")))
-    }
 
     /**
      * Create the relation following a form with no errors in it.
      * @author Thomas GIOVANNINI
-     * @param form containing the update
-     * @return whether the creation went well or not
      */
     def doCreate(form: (Int, String, Int, Int, List[String])) = {
       val oldInstance = Application.map.getInstanceById(form._1)
-      println(oldInstance.toString)
       val newInstance = getNewInstance(form, oldInstance)
-      println(newInstance.toString)
       Application.map.updateInstance(oldInstance, newInstance)
     }
 
     val newTodoForm = instanceForm.bindFromRequest()
-    newTodoForm.fold( hasErrors = {form => printErrors(form)},
-      success = {newInstanceForm => doCreate(newInstanceForm)})
-    Redirect(controllers.routes.Application.index())
+    newTodoForm.fold(hasErrors = { form => printErrors(form)},
+      success = { newInstanceForm => doCreate(newInstanceForm)})
+    Redirect(controllers.routes.MapController.show())
   }
 
   /**
@@ -65,16 +61,8 @@ object InstanceManager extends Controller{
    */
   def update = Action { implicit request =>
     /**
-     * Print errors contained in a form
-     * @author Thomas GIOVANNINI
-     */
-    def printErrors(form: Form[(Int, String, Int, Int, List[String])]) = {
-      form.errors.foreach(error => println("###Error:\n" + error.messages.mkString("\n")))
-    }
-    /**
      * Update the map following a form with no errors in it.
      * @author Thomas GIOVANNINI
-     * @param form containing the update
      * @return the updated instance
      */
     def doUpdate(form: (Int, String, Int, Int, List[String])) = {
@@ -82,11 +70,17 @@ object InstanceManager extends Controller{
       val newInstance = getNewInstance(form, oldInstance)
       Application.map.updateInstance(oldInstance, newInstance)
     }
-    
+
     val newTodoForm = instanceForm.bindFromRequest()
-    newTodoForm.fold( hasErrors = {form => printErrors(form)},
-                      success = {newInstanceForm => doUpdate(newInstanceForm)})
-    Redirect(controllers.routes.Application.index())
+    newTodoForm.fold(hasErrors = { form => printErrors(form)},
+      success = { newInstanceForm => doUpdate(newInstanceForm)})
+    Redirect(controllers.routes.MapController.show())
+  }
+
+  def delete(instanceId: Int) = Action {
+    val instanceToRemove = Application.map.getInstanceById(instanceId)
+    Application.map.removeInstance(instanceToRemove)
+    Redirect(controllers.routes.MapController.show())
   }
 
   /**
