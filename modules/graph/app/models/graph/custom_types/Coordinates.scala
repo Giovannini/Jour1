@@ -26,4 +26,14 @@ case class Coordinates(x: Int, y: Int){
         math.sqrt(math.pow(xDistance, 2) + math.pow(yDistance, 2))
     }
 
+    def getNearCoordinate(rayon:Int):List[Coordinates]={
+        val listCoord:List[Coordinates]=List()
+        for(x <- (-rayon) until rayon;y <- (-rayon) until rayon){
+            val coord = Coordinates(x,y)
+            if (this.getDistanceWith(coord)<=rayon){
+                coord::listCoord
+            }
+        }
+        listCoord
+    }
 }
