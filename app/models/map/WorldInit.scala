@@ -34,6 +34,10 @@ object WorldInit {
     fillWorldWithInstances(map, ordonateConcepts._2)
   }
 
+  /**
+   *
+   * @param allGroundsConcepts
+   */
   def generateGround(allGroundsConcepts:List[Concept]) {
     val layer = Layer.generateLayer(frequency, octave, persistence, smoothed, outputSize)
     val layerExtremums = layer.getExtremums
