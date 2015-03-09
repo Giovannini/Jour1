@@ -29,21 +29,24 @@ object WorldInit {
    */
   def worldMapGeneration(): Unit = {
     val allGroundsConcepts = getGroundConcept(Concept.findAll).getDescendance
-    val ordonateConcepts = getInstanciableConcepts.map(_._1).span(concept => allGroundsConcepts.contains(concept))
-    generateGround(ordonateConcepts._1)
-    fillWorldWithInstances(map, ordonateConcepts._2)
+    val instanciableConcepts = getInstanciableConcepts diff allGroundsConcepts
+    generateGround(allGroundsConcepts)
+    //Take a lot of time
+    val time1 = System.currentTimeMillis()
+    instanciableConcepts.foreach(fillWorldWithInstances(map, _))
+    val time2 = System.currentTimeMillis()
+    println("World instances generation: " + (time2 - time1))
   }
 
   /**
    *
    * @param allGroundsConcepts
    */
-  def generateGround(allGroundsConcepts:List[Concept]) {
+  def generateGround(allGroundsConcepts: List[Concept]) {
     val layer = Layer.generateLayer(frequency, octave, persistence, smoothed, outputSize)
     val layerExtremums = layer.getExtremums
-
     val repartitionList = repartition(layerExtremums, allGroundsConcepts).sortBy(_._1)
-
+    //println("Repartition list created")
     matrixToList(layer.matrix)
       .map(createInstance(_, repartitionList))
       .foreach(map.addInstance)
@@ -80,6 +83,7 @@ object WorldInit {
    */
   def repartition(matrixExtremums: (Int, Int), listGrounds: List[Concept]): List[(Int, Concept)] = {
     val sumStrength = computeSumStrength(listGrounds)
+    //println("Strength: " + sumStrength)
     val matrixMinimum = matrixExtremums._2
     repartitionStream(matrixMinimum, matrixExtremums, listGrounds, sumStrength)
       .take(listGrounds.length)
@@ -123,10 +127,10 @@ object WorldInit {
    * @return List of triplet (value, coordinate_x, coordinate_y)
    */
   def matrixToList(matrix: Array[Array[Int]]): List[(Int, Int, Int)] = {
-    matrix.map(_.toList.zipWithIndex).toList
+    matrix.map(_.zipWithIndex)
       .zipWithIndex
-      .map(indexedLine => indexedLine._1.map(element => (element._1, element._2, indexedLine._2)))
-      .flatten
+      .flatMap(indexedLine => indexedLine._1.map(element => (element._1, element._2, indexedLine._2)))
+      .toList
   }
 
   /**
@@ -161,6 +165,7 @@ object WorldInit {
    * @return the concept which label is Ground if it exists
    *         the error concept else
    */
+  // TODO: pas propre
   def getGroundConcept(concepts: List[Concept]): Concept = {
     concepts.find(_.label == "Ground")
       .getOrElse(Concept.error)
@@ -249,16 +254,16 @@ object WorldInit {
   /**
    * Fill the world with concepts
    * @param worldMap map with instances fill yet
-   * @param listConcept sorted list of concept to instanciate
+   * @param concept concept to instanciate
    */
-  def fillWorldWithInstances(worldMap: WorldMap, listConcept: List[Concept]): Unit = {
-    if (listConcept.nonEmpty) {
-      //instanciate first concept
-      createInstances(worldMap, listConcept.head)
-        .foreach(worldMap.addInstance)
-      //instanciate rest
-      fillWorldWithInstances(worldMap, listConcept.tail)
-    }
+  def fillWorldWithInstances(worldMap: WorldMap, concept: Concept): Unit = {
+    //instanciate first concept
+    val instances = createInstances(worldMap, concept)
+    println("wut? " + instances.length)
+    instances.foreach(worldMap.addInstance)
+    //println("First concept instanciated")
+    //instanciate rest
+
   }
 
   /**
@@ -268,14 +273,14 @@ object WorldInit {
    * @return List of instances of the concept
    */
   def createInstances(worldMap: WorldMap, conceptToInstanciate: Concept): List[Instance] = {
-    getLivingPlacesIdsFor(conceptToInstanciate.id)
-      .flatMap { livingPlaceConceptId =>
-        val instancesOfLivingPlace = worldMap.getInstancesOf(livingPlaceConceptId)
-        val listConceptLivingOnSameGrounds = getConceptsLivingOn(livingPlaceConceptId)
-        buildInstancesList(instancesOfLivingPlace, listConceptLivingOnSameGrounds, conceptToInstanciate)
-      }
+    val livingPlaces = getLivingPlacesIdsFor(conceptToInstanciate.id)
+    livingPlaces.flatMap { livingPlaceConceptId =>
+      val instancesOfLivingPlace = worldMap.getInstancesOf(livingPlaceConceptId)
+      val listConceptLivingOnSameGrounds = getConceptsLivingOn(livingPlaceConceptId)
+      buildInstancesList(instancesOfLivingPlace, listConceptLivingOnSameGrounds, conceptToInstanciate)
+    }
   }
-  
+
   /**
    * Build list of Instances of the concept
    * @param instancesOfLivingPlace list of ground instances
@@ -286,10 +291,19 @@ object WorldInit {
   def buildInstancesList(instancesOfLivingPlace: List[Instance], conceptsLivingOnSameGrounds: List[Concept], conceptToInstanciate: Concept): List[Instance] = {
     if (conceptsLivingOnSameGrounds.nonEmpty) {
       val strengthSum = computeSumStrength(conceptsLivingOnSameGrounds)
+      //println("sterngthSum " + strengthSum)
       val strengthOfConceptToInstanciate = getStrengthOf(conceptToInstanciate)
+      //println("strengthOfConceptToInstanciate " + strengthOfConceptToInstanciate)
       val nbTile = (strengthOfConceptToInstanciate * instancesOfLivingPlace.size) / (strengthSum * parameterOfEmptiness)
-      val shuffledCoordinatesList = Random.shuffle(instancesOfLivingPlace.map(_.coordinates))
-      putInstanciesOfOneConcept(nbTile, conceptToInstanciate, shuffledCoordinatesList)
+      //println("nbTile " + nbTile)
+      //println("shuffled")
+      println("nbTile = " + nbTile)
+      val time1 = System.currentTimeMillis()
+      val result = (0 until nbTile).map(_ => putInstanciesOfOneConcept(conceptToInstanciate, instancesOfLivingPlace.map(_.coordinates))).toList
+      val time2 = System.currentTimeMillis()
+      println("build instances list: " + (time2 - time1))
+      println("result: " + result.length)
+      result
     } else List()
   }
 
@@ -317,17 +331,14 @@ object WorldInit {
 
   /**
    * Build list of random instance for on concept without two instances on same tile
-   * @param nbTile Number of tile to fill with the concept
    * @param concept concept to instanciate
-   * @param shuffledCoordinatesList list of tile where we put the concept
+   * @param instancesOfLivingPlace list of tile where we put the concept
    * @return
    */
-  def putInstanciesOfOneConcept(nbTile: Int, concept: Concept, shuffledCoordinatesList: List[Coordinates]): List[Instance] = {
-    if (nbTile > 0) {
-      val randomCoordinate = shuffledCoordinatesList.head
-      Instance.createRandomInstanceOf(concept).at(randomCoordinate) ::
-        putInstanciesOfOneConcept(nbTile - 1, concept, Random.shuffle(shuffledCoordinatesList))
-    } else List()
+  def putInstanciesOfOneConcept(concept: Concept, instancesOfLivingPlace: List[Coordinates]): Instance = {
+    // TODO shuffle take a lot of time and this is where the problem is
+    val randomCoordinate = Random.shuffle(instancesOfLivingPlace).head
+      Instance.createRandomInstanceOf(concept).at(randomCoordinate)
   }
 
 
@@ -337,7 +348,7 @@ object WorldInit {
    * @author Simon Roncière
    * @return list of Object instanciables in the world, sort by order of appearance
    */
-  def getInstanciableConcepts: List[(Concept, Int)] = {
+  def getInstanciableConcepts: List[Concept] = {
     val instanciableConcepts = getInstanciableConceptsInList(Concept.findAll)
     val listLiveOnRelationTriplets = getLiveOnRelationTriplets(instanciableConcepts)
     getConceptsByAppearanceOrder(listLiveOnRelationTriplets, instanciableConcepts)
@@ -360,11 +371,11 @@ object WorldInit {
    * @param instanciableConceptsList List of instanciable of in the world
    * @return map of order concept
    */
-  def getConceptsByAppearanceOrder(listLiveOnRelationTriplets: List[(Concept, List[(Relation, Concept)])], instanciableConceptsList: List[Concept]): List[(Concept, Int)] = {
+  def getConceptsByAppearanceOrder(listLiveOnRelationTriplets: List[(Concept, List[(Relation, Concept)])], instanciableConceptsList: List[Concept]): List[Concept] = {
     val conceptToApparitionOrderMap = collection.mutable.Map.empty[Concept, Int]
     instanciableConceptsList.foreach(conceptToApparitionOrderMap(_) = 0)
     listLiveOnRelationTriplets.foreach(relationTriplet => computeAppearanceOrder(relationTriplet._1, listLiveOnRelationTriplets, conceptToApparitionOrderMap))
-    conceptToApparitionOrderMap.toList.sortBy(_._2)
+    conceptToApparitionOrderMap.toList.sortBy(_._2).map(_._1)
   }
 
   /**

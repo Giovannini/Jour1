@@ -39,6 +39,7 @@ object WorldInitialisation extends Controller {
     val width = map.width
     val height = map.height
     WorldInit.worldMapGeneration(/*width,height*/)/*.foreach(map.addInstance)*/
+    println("Generated!")
     map
   }
   
@@ -149,7 +150,7 @@ object WorldInitialisation extends Controller {
       Concept("Earth",
         List(),
         List(ValuedProperty(propertyZIndex, 1),
-          ValuedProperty(propertyStrength,2),
+          ValuedProperty(propertyStrength,3),
           ValuedProperty(propertyInstanciable,true)),
         "#878377")
 
