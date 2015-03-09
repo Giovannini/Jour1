@@ -26,7 +26,7 @@ object RelationManager extends Controller{
   /**
    * Action to direct to the telation creation form
    * @author Thomas GIOVANNINI
-   * @return
+   * @return an action creating a relation
    */
   def createRelation = Action {
     Ok(views.html.manager.relation.relationCreator())
@@ -37,20 +37,30 @@ object RelationManager extends Controller{
    * @author Thomas GIOVANNINI
    */
   def create = Action { implicit request =>
+    /**
+    * Print errors contained in a form
+    * @author Thhomas GIOVANNINI
+    */
+    def printErrors(form: Form[(Int, String, Int, Boolean)]) = {
+      form.errors.foreach(error => println("###Error:\n" + error.messages.mkString("\n")))
+    }
+
+    /**
+     * Create the relation following a form with no errors in it.
+     * @author Thomas GIOVANNINI
+     * @param form containing the update
+     * @return whether the creation went well or not
+     */
+    def doCreate(form: (Int, String, Int, Boolean)): Boolean = {
+      val concept1_id = form._1
+      val relation = Relation(form._2)
+      val concept2_id = form._3
+      NeoDAO.addRelationToDB(concept1_id, relation, concept2_id)
+    }
+
     val newTodoForm = relationCreationForm.bindFromRequest()
-    newTodoForm.fold(
-      hasErrors = { form =>
-        println("###Error")
-        form.errors.foreach(println)
-      },
-      success = { relationCreationForm =>
-        println("Success")
-        val concept1_id = relationCreationForm._1
-        val relation = Relation(relationCreationForm._2)
-        val concept2_id = relationCreationForm._3
-        NeoDAO.addRelationToDB(concept1_id, relation, concept2_id)
-      }
-    )
+    newTodoForm.fold( hasErrors = {form => printErrors(form)},
+                      success = {relationCreationForm => doCreate(relationCreationForm)})
     Redirect(controllers.routes.Application.index())
   }
 

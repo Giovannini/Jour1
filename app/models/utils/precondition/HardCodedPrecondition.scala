@@ -1,6 +1,6 @@
 package models.utils.precondition
 
-import models.graph.ontology.Property
+import models.graph.ontology.{Instance, Property}
 import models.map.WorldMap
 
 /**
@@ -28,20 +28,24 @@ object HardCodedPrecondition {
    * @author Thomas GIOVANNINI
    * @param args an array containing the two instances ids
    * @param map of the world
-   * @return true if the firts instance can reach the second one by walking
+   * @return true if the first instance can reach the second one by walking
    *         false else
    */
   def isAtWalkingDistance(args: Array[Any], map: WorldMap): Boolean = {
-    val propertyWalkingDistance   = Property("WalkingDistance", "Int", 5)
+    def retrieveWalkingDistanceValue(instance: Instance) = {
+      val propertyWalkingDistance   = Property("WalkingDistance", "Int", 5)
+      instance.properties
+        .find(_.property == propertyWalkingDistance)
+        .getOrElse(propertyWalkingDistance.defaultValuedProperty)
+        .value
+        .asInstanceOf[Int]
+    }
+
     val sourceInstance      = map.getInstanceById(args(0).asInstanceOf[Int])
     val destinationInstance = map.getInstanceById(args(1).asInstanceOf[Int])
-    val desiredDistance     = sourceInstance.concept.rules
-      .find(_.property == propertyWalkingDistance)
-      .getOrElse(propertyWalkingDistance.defaultValuedProperty)
-      .value
-      .asInstanceOf[Int]
+    val desiredDistance     = retrieveWalkingDistanceValue(sourceInstance)
     val distance = sourceInstance.coordinates.getDistanceWith(destinationInstance.coordinates)
-    distance < desiredDistance
+    distance <= desiredDistance
   }
 
   /**

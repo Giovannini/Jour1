@@ -3,7 +3,7 @@ package controllers
 import models.graph.ontology.{Instance, Relation, Concept}
 import models.utils.precondition.Precondition
 import play.api.libs.json._
-import play.api.mvc.{Controller, Action}
+import play.api.mvc.{Request, Controller, Action}
 import models.utils.action.{Action => InstanceAction}
 
 /**
@@ -47,13 +47,21 @@ object RestCall extends Controller {
   /**
    * Receive a json action and execute it server side, then actualize the client-side.
    * json model: {action: "action", instances: [instance, instance, ...]}
+   * @author Thomas GIOVANNINI
    */
   def executeAction = Action(parse.json) { request =>
-    //println("Received JSON: " + request.body)
-    val jsonRequest = Json.toJson(request.body)
-    val actionReference = (jsonRequest \ "action").as[String]
-    val actionArguments = (jsonRequest \ "instances").as[List[Int]]
-    val result = Application.actionParser.parseAction(actionReference, actionArguments)
+    /**
+     * Parse json request and execute it.
+     * @author Thomas GIOVANNINI
+     */
+    def execution(request: Request[JsValue]): Boolean = {
+      val jsonRequest = Json.toJson(request.body)
+      val actionReference = (jsonRequest \ "action").as[String]
+      val actionArguments = (jsonRequest \ "instances").as[List[Int]]
+      Application.actionParser.parseAction(actionReference, actionArguments)
+    }
+
+    val result = execution(request)
     if(result) Ok("Ok")
     else Ok("Error while executing this action")
   }
@@ -90,8 +98,8 @@ object RestCall extends Controller {
                          sourceInstance: Instance): List[Instance] = {
     preconditions match {
       case precondition::tail =>
-        reduceInstanceList(instances.filter(validateConditionFor(precondition, action, sourceInstance, _)),
-        tail, action, sourceInstance)
+        val validatedInstances = instances.filter(validateConditionFor(precondition, action, sourceInstance, _))
+        reduceInstanceList (validatedInstances, tail, action, sourceInstance)
       case _ => instances
     }
   }
@@ -101,14 +109,14 @@ object RestCall extends Controller {
    * @author Thomas GIOVANNINI
    * @param precondition to validate
    * @param action from which the precondition is
-   * @param sourceInstance of the action
-   * @param destInstance of the action
+   * @param source of the action
+   * @param destination of the action
    * @return true if te precondition is validated
    *         false else
    */
-  def validateConditionFor(precondition: Precondition, action: InstanceAction, sourceInstance: Instance, destInstance: Instance) = {
-    val arguments = Application.actionParser.getArgumentsList(action, List(sourceInstance.id, destInstance.id))
-    Application.preconditionManager.isFilled(precondition, arguments)
+  def validateConditionFor(precondition: Precondition, action: InstanceAction, source: Instance, destination: Instance) = {
+    val arguments = Application.actionParser.getArgumentsList(action, List(source.id, destination.id))
+    precondition.isFilled(arguments, Application.map)
   }
 
   def editInstance(instanceId: Int) = Action {

@@ -35,7 +35,7 @@ case class ActionManager(actions: List[Action], map: WorldMap, preconditionManag
    *         false else
    */
   def execute(action: Action, arguments: List[(Argument, Any)]):Boolean = {
-    val preconditionCheck = action.preconditions.forall(preconditionManager.isFilled(_, arguments))
+    val preconditionCheck = action.preconditions.forall(_.isFilled(arguments, map))
     if (preconditionCheck) {
       val args = arguments.map(_._2).toArray
       action.referenceId match {

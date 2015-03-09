@@ -28,6 +28,11 @@ object WorldInit {
    * @return List of Instances of the world
    */
   def worldMapGeneration(): Unit = {
+    generateGround()
+    fillWorldWithInstances(map, getInstanciableConcepts.map(_._1).tail.tail)
+  }
+
+  def generateGround() {
     val layer = Layer.generateLayer(frequency, octave, persistence, smoothed, outputSize)
     val allGroundsConcepts = getGroundConcept(Concept.findAll).getDescendance
     val layerExtremums = layer.getExtremums
@@ -36,7 +41,6 @@ object WorldInit {
     matrixToList(layer.matrix)
       .map(createInstance(_, repartitionList))
       .foreach(map.addInstance)
-    fillWorldWithInstances(map, getInstanciableConcepts.map(tuple => tuple._1).tail.tail)
   }
 
   /**
@@ -328,11 +332,9 @@ object WorldInit {
    * @return list of Object instanciables in the world, sort by order of appearance
    */
   def getInstanciableConcepts: List[(Concept, Int)] = {
-    val listOfInstanciable = getInstanciableConceptsInList(Concept.findAll)
-    val listLiveOnRelationTriplets = getLiveOnRelationTriplets(listOfInstanciable)
-    buildMap(listLiveOnRelationTriplets, listOfInstanciable)
-      .toList
-      .sortBy(_._2)
+    val instanciableConcepts = getInstanciableConceptsInList(Concept.findAll)
+    val listLiveOnRelationTriplets = getLiveOnRelationTriplets(instanciableConcepts)
+    getConceptsByAppearanceOrder(listLiveOnRelationTriplets, instanciableConcepts)
   }
 
   /**
@@ -352,18 +354,17 @@ object WorldInit {
    * @param instanciableConceptsList List of instanciable of in the world
    * @return map of order concept
    */
-  def buildMap(listLiveOnRelationTriplets: List[(Concept, List[(Relation, Concept)])], instanciableConceptsList: List[Concept]): collection.mutable.Map[Concept, Int] = {
+  def getConceptsByAppearanceOrder(listLiveOnRelationTriplets: List[(Concept, List[(Relation, Concept)])], instanciableConceptsList: List[Concept]): List[(Concept, Int)] = {
     val conceptToApparitionOrderMap = collection.mutable.Map.empty[Concept, Int]
     instanciableConceptsList.foreach(conceptToApparitionOrderMap(_) = 0)
     listLiveOnRelationTriplets.foreach(relationTriplet => computeAppearanceOrder(relationTriplet._1, listLiveOnRelationTriplets, conceptToApparitionOrderMap))
-    conceptToApparitionOrderMap
+    conceptToApparitionOrderMap.toList.sortBy(_._2)
   }
 
   /**
-   * Calculate Order Value of on Concept
+   * Compute order of a Concept
    * @param concept Concept to evaluate
-   * @param listLiveOnRelationTriplets list of concept to find preceding concept to instanciate
-   * @param mapOrder map with every order
+&   * @param mapOrder map with every order
    * @return value of the concept
    */
   def computeAppearanceOrder(concept: Concept, listLiveOnRelationTriplets: List[(Concept, List[(Relation, Concept)])], mapOrder: collection.mutable.Map[Concept, Int]): Int = {
@@ -381,10 +382,9 @@ object WorldInit {
    * @return value of the concept
    */
   def getOrderOfConcept(relation: (Concept, List[(Relation, Concept)]), listLiveOnRelationTriplets: List[(Concept, List[(Relation, Concept)])], mapOrder: collection.mutable.Map[Concept, Int]): Int = {
-    if (relation._2.isEmpty) {
-      mapOrder(relation._1) = math.max(mapOrder(relation._1), 1)
-    }
-    else mapOrder(relation._1) = maxOrdre(relation._2.map(_._2), listLiveOnRelationTriplets, mapOrder) + 1
+    mapOrder(relation._1) =
+      if (relation._2.isEmpty) math.max(mapOrder(relation._1), 1)
+      else maxOrdre(relation._2.map(_._2), listLiveOnRelationTriplets, mapOrder) + 1
     mapOrder(relation._1)
   }
 
@@ -396,7 +396,7 @@ object WorldInit {
    * @return value of the concept
    */
   def maxOrdre(listConceptPrecedent: List[Concept], listLiveOnRelationTriplets: List[(Concept, List[(Relation, Concept)])], mapOrder: collection.mutable.Map[Concept, Int]): Int = {
-    listConceptPrecedent.map(c => (c, computeAppearanceOrder(c, listLiveOnRelationTriplets, mapOrder))).sortBy(-_._2).head._2
+    listConceptPrecedent.map(concept => (concept, computeAppearanceOrder(concept, listLiveOnRelationTriplets, mapOrder))).sortBy(-_._2).head._2
   }
 
 }
