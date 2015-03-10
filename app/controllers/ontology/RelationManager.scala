@@ -63,8 +63,6 @@ object RelationManager extends Controller{
                       success = {relationCreationForm => doCreate(relationCreationForm)})
     Redirect(controllers.routes.Application.index())
   }
-<<<<<<< HEAD
-=======
 
   /**
    * Update a given instance from a received form.
@@ -90,6 +88,4 @@ object RelationManager extends Controller{
       success = { newInstanceForm => doUpdate(newInstanceForm)})
     Redirect(controllers.routes.MapController.show())
   }
-
->>>>>>> c75da5579694c295f3aefde7095c033170f86672
 }

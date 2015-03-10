@@ -40,9 +40,9 @@ object RuleStatement {
             VALUES({label}, {param}, {precond}, {content})
     """).on(
       'label -> rule.label,
-      'param -> rule.parameters.mkString(";"),
-      'precond -> rule.preconditions.mkString(";"),
-      'content-> rule.subRules.mkString(";")
+      'param -> rule.param.mkString(";"),
+      'precond -> rule.precond.mkString(";"),
+      'content-> rule.content.mkString(";")
     )
   }
 
@@ -75,9 +75,9 @@ object RuleStatement {
         """).on(
         'id -> id,
         'label -> rule.label,
-        'param -> rule.parameters.mkString(";"),
-        'precond -> rule.preconditions.mkString(";"),
-        'content -> rule.subRules.mkString(";")
+        'param -> rule.param.mkString(";"),
+        'precond -> rule.precond.mkString(";"),
+        'content -> rule.content.mkString(";")
       )
   }
 

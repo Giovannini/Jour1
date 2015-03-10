@@ -13,20 +13,11 @@ import scala.language.postfixOps
  * @author Aurélie LORGEOUX
  * @param id primary key auto-increment
  * @param label name of the rule
- * @param parameters parameters for the function
- * @param preconditions preconditions for the function
- * @param subRules content of the rule
+ * @param param parameters for the function
+ * @param precond preconditions for the function
+ * @param content content of the rule
  */
-<<<<<<< HEAD:modules/rules/app/models/rules/Rule.scala
 case class Rule(id: Option[Long], label: String, param: List[String], precond: List[String], content: List[String])
-=======
-case class Rule(id: Option[Long],
-                label: String,
-                parameters: Array[String],
-                preconditions: Array[String],// TODO Make a table for preconditions too => Array[Long]
-                subRules: Array[String])//TODO should be id of other rules => Array[Long]
-
->>>>>>> c75da5579694c295f3aefde7095c033170f86672:app/models/rules/Rule.scala
 
 /**
  * Model for rule.
