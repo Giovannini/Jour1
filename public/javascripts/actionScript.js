@@ -62,11 +62,11 @@ var ActionController = ['$scope', function($scope) {
     
     // Select an instance and get its relations
     $scope.selectInstance = function(id) {
-        console.log(id);
+        $scope.showChoice = false;
+        $scope.selectedAction = -1;
         if($scope.selectedInstance == id) {
             $scope.selectedAction = -1;
             $scope.loadingActions = -1;
-
         } else {
             $scope.loadingActions = id;
             $scope.selectedInstance = id;

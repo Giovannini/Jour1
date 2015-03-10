@@ -23,7 +23,7 @@ GET         /relation/create                                         controllers
 POST        /relation/create                                         controllers.ontology.RelationManager.create
 
 # Graph visualisation
-->          /graph                                                   graph.Routes
+GET          /graph                                                   controllers.graph.GraphVisualisation.index
 
 # Rules visualisation
 GET         /rules                                                   controllers.rules.RulesVisualisation.index

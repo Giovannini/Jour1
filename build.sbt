@@ -2,17 +2,18 @@ name := "projet"
 
 version := "0.1-SNAPSHOT"
 
-lazy val graph = (project in file("modules/graph"))
-  .enablePlugins(PlayScala)
-
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
-  .dependsOn(graph)
-  .aggregate(graph)
 
 scalaVersion := "2.11.1"
 
+resolvers ++= Seq(
+  "anormcypher" at "http://repo.anormcypher.org/",
+  "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases/"
+)
+
 libraryDependencies ++= Seq( jdbc, anorm , cache, ws,
+  "org.anormcypher" %% "anormcypher" % "0.6.0",
   "mysql" % "mysql-connector-java" % "5.1.27",
   "org.scalatestplus" %% "play" % "1.2.0" % "test",
   "org.scalatest" % "scalatest_2.11" % "2.2.1" % "test"
