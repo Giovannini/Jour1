@@ -8,7 +8,7 @@ import play.api.test.Helpers._
  * Test class for the object Rule
  */
 class Rule$Test extends FunSuite {
-  val test : Rule = Rule(None, "test", Array("bonjour","coucou","salut"), Array("preconditions"), Array("blabla"))
+  val test : Rule = Rule(None, "test", List("bonjour","coucou","salut"), List("preconditions"), List("blabla"))
 
   test("save a rule") {
     running(FakeApplication()) {
@@ -50,7 +50,7 @@ class Rule$Test extends FunSuite {
     running(FakeApplication()) {
       assert(Rule.save(test) match {
         case Some(id) => {
-          val res = Rule.update(id, Rule(None, "test2", Array("bouh"), Array("precond"), Array("bla"))) == 1
+          val res = Rule.update(id, Rule(None, "test2", List("bouh"), List("precond"), List("bla"))) == 1
           Rule.delete(id)
           res
         }

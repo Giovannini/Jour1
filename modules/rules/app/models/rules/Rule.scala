@@ -15,7 +15,7 @@ import play.api.Play.current
  * @param precond preconditions for the function
  * @param content content of the rule
  */
-case class Rule(id: Option[Long], label: String, param: Array[String], precond: Array[String], content: Array[String])
+case class Rule(id: Option[Long], label: String, param: List[String], precond: List[String], content: List[String])
 
 /**
  * Model for rule.
@@ -33,7 +33,7 @@ object Rule {
       get[String]("param") ~
       get[String]("precond") ~
       get[String]("content") map {
-      case id ~ label ~ param ~ precond ~ content => Rule(id, label, param.split(";"), precond.split(";"), content.split(";"))
+      case id ~ label ~ param ~ precond ~ content => Rule(id, label, param.split(";").toList, precond.split(";").toList, content.split(";").toList)
     }
   }
 

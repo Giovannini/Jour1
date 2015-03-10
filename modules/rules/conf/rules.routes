@@ -1,3 +1,8 @@
 # routes for the rules vizualization/
 
-GET /                       controllers.rules.RulesVisualisation.index
+GET         /                  controllers.rules.RulesVisualisation.index
+GET         /delete/:id        controllers.rules.RulesVisualisation.delete(id: Long)
+GET         /load/:id          controllers.rules.RulesVisualisation.load(id: Long)
+GET         /save              controllers.rules.RulesVisualisation.form
+
+POST        /save              controllers.rules.RulesVisualisation.submit

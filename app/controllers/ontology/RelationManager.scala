@@ -53,5 +53,4 @@ object RelationManager extends Controller{
     )
     Redirect(controllers.routes.Application.index())
   }
-
 }

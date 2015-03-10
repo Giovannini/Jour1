@@ -1,3 +1,5 @@
+@(form: Form[models.rules.Rule])
+
 <!DOCTYPE html>
 <html>
 <head lang="en">
@@ -5,6 +7,20 @@
   <title></title>
 </head>
 <body>
+
+    <form method="post" action="save">
+        @helper.inputText(form("label"))
+        @helper.repeat(form("param"), min = 1) { param =>
+            @helper.inputText(param)
+        }
+        @helper.repeat(form("precond"), min = 2) { precond =>
+            @helper.inputText(precond)
+        }
+        @helper.repeat(form("content"), min = 1) { content =>
+            @helper.inputText(content)
+        }
+        <input type="submit" value="go" />
+    </form>
 
 </body>
 </html>

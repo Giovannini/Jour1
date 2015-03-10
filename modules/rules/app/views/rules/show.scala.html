@@ -1,10 +1,37 @@
+@(rule:models.rules.Rule)
+
 <!DOCTYPE html>
 <html>
 <head lang="en">
   <meta charset="UTF-8">
-  <title></title>
+  <title>Règle @rule.label</title>
 </head>
 <body>
+
+    <h1>Règle @rule.label (ID @rule.id)</h1>
+
+    <h2>Paramètres</h2>
+    <ul>
+        @rule.param.map { param =>
+            <li>@param</li>
+        }
+    </ul>
+
+    <h2>Préconditions</h2>
+    <ul>
+        @rule.precond.map { precond =>
+            <li>@precond</li>
+        }
+    </ul>
+
+    <h2>Contenu</h2>
+    <ul>
+    @rule.content.map { content =>
+        <li>@content</li>
+    }
+    </ul>
+
+    <a href="/rules">Retour à la liste</a>
 
 </body>
 </html>
