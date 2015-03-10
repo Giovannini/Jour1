@@ -10,7 +10,8 @@ import org.anormcypher._
  */
 object NeoDAO {
   // Setup the Rest Client
-  implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
+  // implicit val connection = Neo4jREST("localhost", 7474, "/db/data")
+  implicit val connection = Neo4jREST("192.168.129.12", 7474, "/db/data/")
 
 
   /**

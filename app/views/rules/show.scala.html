@@ -12,21 +12,21 @@
 
     <h2>Paramètres</h2>
     <ul>
-        @rule.param.map { param =>
+        @rule.parameters.map { param =>
             <li>@param</li>
         }
     </ul>
 
     <h2>Préconditions</h2>
     <ul>
-        @rule.precond.map { precond =>
+        @rule.preconditions.map { precond =>
             <li>@precond</li>
         }
     </ul>
 
     <h2>Contenu</h2>
     <ul>
-    @rule.content.map { content =>
+    @rule.subRules.map { content =>
         <li>@content</li>
     }
     </ul>
