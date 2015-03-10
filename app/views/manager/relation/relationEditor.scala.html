@@ -9,7 +9,6 @@
   <title></title>
 </head>
 <body>
-  Yo!
     @helper.form(action = controllers.ontology.routes.RelationManager.create()) {
       @helper.input(RelationManager.relationForm("concept1_id")) { (id, name, value, args) =>
         <select name="@name" id="@id">
@@ -24,6 +23,9 @@
           <option value="@relation.label">@relation.label</option>
         }
         </select>
+      }
+      @helper.input(RelationManager.relationForm("relation_new_label")) { (id, name, value, args) =>
+        <input type="text" name="@name" id="@id" value="">
       }
       @helper.input(RelationManager.relationForm("concept2_id")) { (id, name, value, args) =>
         <select name="@name" id="@id">

@@ -1,9 +1,9 @@
 package controllers
 
+import models.{WorldMap, WorldInit}
 import models.graph.NeoDAO
 import models.graph.custom_types.Statement
 import models.graph.ontology._
-import models.map.{WorldInit, WorldMap}
 import org.anormcypher.Neo4jREST
 import play.api.mvc._
 
@@ -39,6 +39,7 @@ object WorldInitialisation extends Controller {
     val width = map.width
     val height = map.height
     WorldInit.worldMapGeneration(/*width,height*/)/*.foreach(map.addInstance)*/
+    println("Generated!")
     map
   }
   
@@ -62,7 +63,7 @@ object WorldInitialisation extends Controller {
     val propertyDuplicationSpeed  = Property("DuplicationSpeed", "Int", 5)
     val propertyStrength          = Property("Strength", "Int", 0)
     val propertyZIndex            = Property("ZIndex", "Int", 0)
-    val propertyWalkingDistance   = Property("WalkingDistance", "Int", 5)
+    val propertyWalkingDistance   = Property("WalkingDistance", "Int", 3)
 
     /*Concepts declaration*/
     val conceptMan        =
@@ -85,11 +86,10 @@ object WorldInitialisation extends Controller {
         "#1A1A22")
     val conceptSheep      =
       Concept("Sheep",
-        List(),
+        List(propertyWalkingDistance),
         List(ValuedProperty(propertyZIndex, 16),
           ValuedProperty(propertyStrength,2),
-          ValuedProperty(propertyInstanciable,true),
-          ValuedProperty(propertyWalkingDistance, 3)),
+          ValuedProperty(propertyInstanciable,true)),
         "#EEE9D6")
     val conceptAnimal     =
       Concept("Animal",
@@ -106,7 +106,7 @@ object WorldInitialisation extends Controller {
     val conceptApple      =
       Concept("Apple",
         List(),
-        List(ValuedProperty(propertyZIndex, 6),
+        List(ValuedProperty(propertyZIndex, 20),
           ValuedProperty(propertyStrength,2),
           ValuedProperty(propertyInstanciable,true)),
         "#A83B36")
@@ -140,17 +140,17 @@ object WorldInitialisation extends Controller {
     val conceptVegetable  = Concept("Vegetable", List(), List())
     val conceptGround     = Concept("Ground", List(), List())
     val conceptLiquid     =
-      Concept("Liquid",
+      Concept("Water",
         List(),
         List(ValuedProperty(propertyZIndex, 0),
           ValuedProperty(propertyStrength,2),
           ValuedProperty(propertyInstanciable,true)),
         "#86B6B6")
     val conceptSolid      =
-      Concept("Solid",
+      Concept("Earth",
         List(),
         List(ValuedProperty(propertyZIndex, 1),
-          ValuedProperty(propertyStrength,2),
+          ValuedProperty(propertyStrength,3),
           ValuedProperty(propertyInstanciable,true)),
         "#878377")
 

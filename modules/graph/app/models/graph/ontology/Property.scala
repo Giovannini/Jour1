@@ -61,7 +61,7 @@ object Property {
       case "String" => propAttributes(2)
       case "Boolean" => propAttributes(2).toBoolean
       //case "List" => (jsonProperty \ "defaultValue").as[String]/**TODO deal with lists correctly*/
-      case _ => propAttributes(2).toString
+      case _ => propAttributes(2)
     }
     Property(propAttributes(0), valueType, defaultValue)
   }

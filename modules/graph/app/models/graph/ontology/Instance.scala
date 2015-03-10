@@ -1,7 +1,6 @@
 package models.graph.ontology
 
 import models.graph.custom_types.Coordinates
-import org.anormcypher.CypherResultRow
 import play.api.libs.json._
 
 

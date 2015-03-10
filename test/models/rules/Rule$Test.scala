@@ -1,5 +1,6 @@
 package models.rules
 
+import models.rules.Rule
 import org.scalatest.FunSuite
 import play.api.test.FakeApplication
 import play.api.test.Helpers._

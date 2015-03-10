@@ -1,10 +1,9 @@
 package controllers
 
-import models.graph.ontology.{Instance, Relation, Concept}
-import models.utils.precondition.Precondition
+import models.graph.ontology.{Concept, Instance, Relation}
 import play.api.libs.json._
-import play.api.mvc.{Controller, Action}
-import models.utils.action.{Action => InstanceAction}
+import play.api.mvc.{Action, Controller, Request}
+import models.rules.action.{Action => InstanceAction}
 
 /**
  * Controller to send Json data to client
@@ -47,13 +46,21 @@ object RestCall extends Controller {
   /**
    * Receive a json action and execute it server side, then actualize the client-side.
    * json model: {action: "action", instances: [instance, instance, ...]}
+   * @author Thomas GIOVANNINI
    */
   def executeAction = Action(parse.json) { request =>
-    //println("Received JSON: " + request.body)
-    val jsonRequest = Json.toJson(request.body)
-    val actionReference = (jsonRequest \ "action").as[String]
-    val actionArguments = (jsonRequest \ "instances").as[List[Int]]
-    val result = Application.actionParser.parseAction(actionReference, actionArguments)
+    /**
+     * Parse json request and execute it.
+     * @author Thomas GIOVANNINI
+     */
+    def execution(request: Request[JsValue]): Boolean = {
+      val jsonRequest = Json.toJson(request.body)
+      val actionReference = (jsonRequest \ "action").as[String]
+      val actionArguments = (jsonRequest \ "instances").as[List[Int]]
+      Application.actionParser.parseAction(actionReference, actionArguments)
+    }
+
+    val result = execution(request)
     if(result) Ok("Ok")
     else Ok("Error while executing this action")
   }
@@ -82,37 +89,21 @@ object RestCall extends Controller {
    */
   def reduceDestinationList(sourceInstance: Instance, action: InstanceAction, instances: List[Instance]) = {
     val preconditionsToValidate = action.preconditions
-    val reducedInstanceList = reduceInstanceList(instances, preconditionsToValidate, action, sourceInstance)
-    reducedInstanceList.map(_.toJson)
-  }
-
-  def reduceInstanceList(instances: List[Instance], preconditions: List[Precondition], action: InstanceAction,
-                         sourceInstance: Instance): List[Instance] = {
-    preconditions match {
-      case precondition::tail =>
-        reduceInstanceList(instances.filter(validateConditionFor(precondition, action, sourceInstance, _)),
-        tail, action, sourceInstance)
-      case _ => instances
-    }
-  }
-
-  /**
-   * Validate or invalidate a precondition between two instances
-   * @author Thomas GIOVANNINI
-   * @param precondition to validate
-   * @param action from which the precondition is
-   * @param sourceInstance of the action
-   * @param destInstance of the action
-   * @return true if te precondition is validated
-   *         false else
-   */
-  def validateConditionFor(precondition: Precondition, action: InstanceAction, sourceInstance: Instance, destInstance: Instance) = {
-    val arguments = Application.actionParser.getArgumentsList(action, List(sourceInstance.id, destInstance.id))
-    Application.preconditionManager.isFilled(precondition, arguments)
+    preconditionsToValidate.map(_.instancesThatFill(sourceInstance))
+      .foldRight(instances.toSet)(_ intersect _)
+      .toList
+      .map(_.toJson)
   }
 
   def editInstance(instanceId: Int) = Action {
     val instance = Application.map.getInstanceById(instanceId)
-    Ok(views.html.manager.instance.instanceEditor(instance))
+    Ok(views.html.manager.instance.instanceEditor(instance, controllers.ontology.routes.InstanceManager.update()))
+  }
+
+  def createInstance(conceptId: Int) = Action {
+    val concept = Concept.getById(conceptId)
+    val initInstance = Instance.createRandomInstanceOf(concept)
+    val instance = Application.map.addInstance(initInstance)
+    Ok(views.html.manager.instance.instanceEditor(instance, controllers.ontology.routes.InstanceManager.create()))
   }
 }

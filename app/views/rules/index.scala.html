@@ -1,0 +1,28 @@
+@()
+
+@import models.rules.Rule
+
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Liste des règles</title>
+</head>
+<body>
+
+    <h1>Règles enregistrées</h1>
+
+    <ul>
+    @for(rule <- Rule.getAll){
+        <li>
+            @rule.id - @rule.label
+            <a href="/rules/load/@rule.id">Voir</a>
+            <a href="/rules/delete/@rule.id">Supprimer</a>
+        </li>
+    }
+    </ul>
+
+    <a href="/rules/save">Ajouter une nouvelle règle</a>
+
+</body>
+</html>

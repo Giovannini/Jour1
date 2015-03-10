@@ -12,8 +12,11 @@ GET         /instances                                               controllers
 GET         /instances/:initInstanceId/:actionType/:conceptId        controllers.RestCall.getPossibleDestinationOfAction(initInstanceId: Int, actionType: String, conceptId: Int)
 
 #Instances manipulation
-GET         /instances/edit/:instanceId                              controllers.RestCall.editInstance(instanceId: Int)
-POST        /instances/update                                        controllers.ontology.InstanceManager.update
+GET         /instances/edit/:instanceId                   controllers.RestCall.editInstance(instanceId: Int)
+GET         /instances/create/:conceptId                  controllers.RestCall.createInstance(conceptId: Int)
+GET         /instances/delete/:instanceId                 controllers.ontology.InstanceManager.delete(instanceId: Int)
+POST        /instances/update                             controllers.ontology.InstanceManager.update
+POST        /instances/create                             controllers.ontology.InstanceManager.create
 
 #Graph manipulation
 GET         /relation/create                                         controllers.ontology.RelationManager.createRelation
@@ -23,7 +26,7 @@ POST        /relation/create                                         controllers
 ->          /graph                                                   graph.Routes
 
 # Rules visualisation
-->          /rules                                                   rules.Routes
+GET         /rules                                        controllers.rules.RulesVisualisation.rules
 
 # Map routes
 GET         /map                                                     controllers.MapController.show
