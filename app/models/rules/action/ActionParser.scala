@@ -35,14 +35,10 @@ case class ActionParser(actionManager: ActionManager) {
       case "ADD"  => actionManager._actionAddInstanceAt
       case "ACTION_MOVE" => actionManager._actionMoveInstanceAt
       case _ =>
+        //TODO take action from "rules" BDD instead of two next lines
         println(actionReference + "not found: REMOVE instead")
         actionManager._actionRemoveInstanceAt
     }
-
-    /*TODO
-     * val fromDBResultAction = database.get(actionReference)
-     * parse(fromDBResultAction)
-     */
   }
 
   /**
@@ -52,11 +48,11 @@ case class ActionParser(actionManager: ActionManager) {
    * @return a list of arguments and their values
    */
   def getArgumentsList(action: Action, ids: List[Int]):List[(Argument, Any)] = {
-    if(ids.length == action.arguments.length){
-      action.arguments.zip(ids)
+    if(ids.length == action.parameters.length){
+      action.parameters.zip(ids)
     }else{
       println("Error while getting arguments list: arguments list of different size.")
-      action.arguments.zip(ids)
+      action.parameters.zip(ids)
     }
   }
 

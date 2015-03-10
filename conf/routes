@@ -27,10 +27,8 @@ GET          /graph                                                   controller
 
 # Rules visualisation
 GET         /rules                                                   controllers.rules.RulesVisualisation.index
-GET         /rules/delete/:id                                        controllers.rules.RulesVisualisation.delete(id: Long)
-GET         /rules/load/:id                                          controllers.rules.RulesVisualisation.load(id: Long)
-GET         /rules/save                                              controllers.rules.RulesVisualisation.form
-POST        /rules/save                                              controllers.rules.RulesVisualisation.submit
+GET         /rules/init                                   controllers.rules.RulesVisualisation.init
+GET         /preconditions                                controllers.rules.PreconditionsVisualisation.preconditions
 
 # Map routes
 GET         /map                                                     controllers.MapController.show

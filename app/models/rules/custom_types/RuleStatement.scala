@@ -1,7 +1,7 @@
 package models.rules.custom_types
 
 import anorm._
-import models.rules.Rule
+import models.rules.action.Action
 
 /**
  * All values from this objects are SQLStatements
@@ -31,18 +31,18 @@ object RuleStatement {
   /**
    * Add a rule to database
    * @author Aurélie LORGEOUX
-   * @param rule rule to add
+   * @param action rule to add
    * @return a sql statement
    */
-  def add(rule: Rule) = {
+  def add(action: Action) = {
     SQL("""
             INSERT INTO rules(label, param, precond, content)
             VALUES({label}, {param}, {precond}, {content})
     """).on(
-      'label -> rule.label,
-      'param -> rule.parameters.mkString(";"),
-      'precond -> rule.preconditions.mkString(";"),
-      'content-> rule.subRules.mkString(";")
+      'label -> action.label,
+      'param -> action.parameters.map(p => p.reference + ":" + p._type).mkString(";"),
+      'precond -> action.preconditions.map(_.id).mkString(";"),
+      'content-> action.subActions.map(_.id).mkString(";")
     )
   }
 
@@ -61,10 +61,10 @@ object RuleStatement {
    * Set a rule in database
    * @author Aurélie LORGEOUX
    * @param id id of the rule
-   * @param rule new rule with changes
+   * @param action new rule with changes
    * @return a sql statement
    */
-  def set(id: Long, rule: Rule) = {
+  def set(id: Long, action: Action) = {
     SQL("""
       UPDATE rules SET
       label = {label},
@@ -74,10 +74,10 @@ object RuleStatement {
       WHERE id = {id}
         """).on(
         'id -> id,
-        'label -> rule.label,
-        'param -> rule.parameters.mkString(";"),
-        'precond -> rule.preconditions.mkString(";"),
-        'content -> rule.subRules.mkString(";")
+        'label -> action.label,
+        'param -> action.parameters.mkString(";"),
+        'precond -> action.preconditions.mkString(";"),
+        'content -> action.subActions.mkString(";")
       )
   }
 

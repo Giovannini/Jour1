@@ -98,7 +98,7 @@ object NeoDAO {
    *         false else
    */
   def addRelationToDB(sourceId: Int, relation: Relation, destId: Int): Boolean = {
-    /** TODO
+    /* TODO
       * Be careful when creating a relation SUBTYPE_OF not to insert loop.
       */
     val statement = Statement.createRelation(sourceId, relation, destId)

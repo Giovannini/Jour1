@@ -1,0 +1,22 @@
+@()
+
+@import models.rules.precondition.PreconditionDAO
+
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+
+<h1>Préconditions enregistrées</h1>
+
+  <ul>
+  @for(precondition <- PreconditionDAO.getAll){
+    <li>@precondition.id - @precondition.label</li>
+  }
+  </ul>
+
+</body>
+</html>

@@ -1,33 +1,33 @@
-@(rule:models.rules.Rule)
+@(action:models.rules.action.Action)
 
 <!DOCTYPE html>
 <html>
 <head lang="en">
   <meta charset="UTF-8">
-  <title>Règle @rule.label</title>
+  <title>Règle @action.label</title>
 </head>
 <body>
 
-    <h1>Règle @rule.label (ID @rule.id)</h1>
+    <h1>Règle @action.label (ID @action.id)</h1>
 
     <h2>Paramètres</h2>
     <ul>
-        @rule.parameters.map { param =>
+        @action.parameters.map { param =>
             <li>@param</li>
         }
     </ul>
 
     <h2>Préconditions</h2>
     <ul>
-        @rule.preconditions.map { precond =>
+        @action.preconditions.map { precond =>
             <li>@precond</li>
         }
     </ul>
 
     <h2>Contenu</h2>
     <ul>
-    @rule.subRules.map { content =>
-        <li>@content</li>
+    @action.subActions.map { action =>
+        <li>@action</li>
     }
     </ul>
 

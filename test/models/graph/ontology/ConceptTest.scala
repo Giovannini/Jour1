@@ -151,7 +151,7 @@ class ConceptTest extends FunSuite {
     /* Getters */
     test("method getById"){
         assert(NeoDAO.addConceptToDB(concept1))
-        assert(Concept.getById(concept1.id).get == concept1)
+        assert(Concept.getById(concept1.id) == concept1)
         assert(NeoDAO.removeConceptFromDB(concept1))
     }
 
