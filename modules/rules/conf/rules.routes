@@ -1,3 +1,0 @@
-# routes for the rules vizualization/
-
-GET /                       controllers.rules.RulesVisualisation.index

@@ -1,9 +1,9 @@
 package controllers
 
 import models.graph.ontology.{Concept, Instance, Relation}
-import models.utils.action.{Action => InstanceAction}
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller, Request}
+import models.rules.action.{Action => InstanceAction}
 
 /**
  * Controller to send Json data to client
@@ -104,6 +104,6 @@ object RestCall extends Controller {
     val concept = Concept.getById(conceptId)
     val initInstance = Instance.createRandomInstanceOf(concept)
     val instance = Application.map.addInstance(initInstance)
-    Ok(views.html.manager.instance.instanceEditor(instance, controllers.ontology.routes.InstanceManager.create))
+    Ok(views.html.manager.instance.instanceEditor(instance, controllers.ontology.routes.InstanceManager.create()))
   }
 }

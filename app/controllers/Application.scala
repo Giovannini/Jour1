@@ -1,9 +1,9 @@
 package controllers
 
+import models.WorldMap
 import models.graph.custom_types.Label
-import models.map.WorldMap
-import models.utils.action.{ActionParser, ActionManager}
-import models.utils.precondition.PreconditionManager
+import models.rules.action.{ActionParser, ActionManager}
+import models.rules.precondition.PreconditionManager
 import play.api.mvc._
 import play.api.libs.json.Json
 

@@ -7,7 +7,6 @@ import org.anormcypher.{Cypher, CypherStatement}
  * All values from this objects are CypherStatements used in the Neo4J database
  */
 object Statement {
-
   /**
    * Statement returning all the concepts in the graph database.
    * @author Thomas GIOVANNINI
@@ -19,6 +18,7 @@ object Statement {
     RETURN n.label as concept_label, n.properties as concept_prop, n.rules as concept_rules, n.color as concept_color
     """
   )
+
 
   /**
    * Statement to clear the whole graph database.
@@ -123,7 +123,6 @@ object Statement {
       .on("id1" -> conceptId)
   }
 
-  /* Relations */
   /**
    * Create a cypher statement to create a relation
    * @author Thomas GIOVANNINI
@@ -151,6 +150,8 @@ object Statement {
       .on("id1" -> sourceNodeId,
       "id2" -> destNodeId)
   }
+
+  def updateRelation(sourceId: Int, oldRelation: Relation, newRelation: Relation, destId: Int): CypherStatement = ???
 
   def getAllRelations: CypherStatement = {
     Cypher("match n-[r]->m return distinct type(r) as relation_label")
@@ -227,5 +228,5 @@ object Statement {
       """.stripMargin)
       .on("id" -> conceptId)
   }
-  
 }
+/* Relations */

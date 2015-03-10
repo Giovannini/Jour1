@@ -66,7 +66,7 @@ case class Concept(label: String,
    * Create an instance of the concept at given coordinates
    * @author Thomas GIOVANNINI
    * @param coordinates to give to the instance
-   * @return an instance of the concept at the given concept with default properties values.
+   * @return an instance of the concept at the given concept with evolutions.default properties values.
    */
   def createInstanceAt(coordinates: Coordinates): Instance = {
     Instance(0, label, coordinates, properties.map(_.defaultValuedProperty), this)

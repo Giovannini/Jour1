@@ -9,9 +9,9 @@ import org.anormcypher._
  * Model for the NeoDAO class.
  */
 object NeoDAO {
-
   // Setup the Rest Client
   implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
+
 
   /**
    * Add a concept into the DB.
@@ -117,4 +117,8 @@ object NeoDAO {
     statement.execute
   }
 
+  def updateRelationInDB(sourceId: Int, oldRelation: Relation, newRelation: Relation, destId: Int) = {
+    val statement = Statement.updateRelation(sourceId, oldRelation, newRelation, destId)
+    statement.execute
+  }
 }

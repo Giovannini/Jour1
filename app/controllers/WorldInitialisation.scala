@@ -1,9 +1,9 @@
 package controllers
 
+import models.{WorldMap, WorldInit}
 import models.graph.NeoDAO
 import models.graph.custom_types.Statement
 import models.graph.ontology._
-import models.map.{WorldInit, WorldMap}
 import org.anormcypher.Neo4jREST
 import play.api.mvc._
 
