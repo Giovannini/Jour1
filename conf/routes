@@ -12,21 +12,21 @@ GET         /instances                                               controllers
 GET         /instances/:initInstanceId/:actionType/:conceptId        controllers.RestCall.getPossibleDestinationOfAction(initInstanceId: Int, actionType: String, conceptId: Int)
 
 #Instances manipulation
-GET         /instances/edit/:instanceId                   controllers.RestCall.editInstance(instanceId: Int)
-GET         /instances/create/:conceptId                  controllers.RestCall.createInstance(conceptId: Int)
-GET         /instances/delete/:instanceId                 controllers.ontology.InstanceManager.delete(instanceId: Int)
-POST        /instances/update                             controllers.ontology.InstanceManager.update
-POST        /instances/create                             controllers.ontology.InstanceManager.create
+GET         /instances/edit/:instanceId                              controllers.RestCall.editInstance(instanceId: Int)
+GET         /instances/create/:conceptId                             controllers.RestCall.createInstance(conceptId: Int)
+GET         /instances/delete/:instanceId                            controllers.ontology.InstanceManager.delete(instanceId: Int)
+POST        /instances/update                                        controllers.ontology.InstanceManager.update
+POST        /instances/create                                        controllers.ontology.InstanceManager.create
 
 #Graph manipulation
 GET         /relation/create                                         controllers.ontology.RelationManager.createRelation
 POST        /relation/create                                         controllers.ontology.RelationManager.create
 
 # Graph visualisation
-->          /graph                                                   graph.Routes
+GET          /graph                                                   controllers.graph.GraphVisualisation.index
 
 # Rules visualisation
-GET         /rules                                        controllers.rules.RulesVisualisation.rules
+GET         /rules                                                   controllers.rules.RulesVisualisation.rules
 
 # Map routes
 GET         /map                                                     controllers.MapController.show

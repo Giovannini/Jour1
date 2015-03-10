@@ -1,0 +1,91 @@
+$lightColor: #eeeeee;
+$darkColor: #222222;
+
+body {
+  background-color: $lightColor;
+  color: $darkColor;
+  margin: 0;
+  padding: 0;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.game-container {
+  display: table;
+  width: 100%;
+  height: 100%;
+}
+
+.game-row {
+  display: table-row;
+}
+
+.right-panel, .left-panel {
+  display: table-cell;
+  vertical-align: top;
+}
+
+.left-panel {
+  width: 80%;
+}
+
+.right-panel {
+  background-color: lighten($darkColor, 5);
+  color: $lightColor;
+  width: 20%;
+  border-left: 1px solid lighten($darkColor, 15);
+  overflow: scroll;
+}
+
+.right-panel ul {
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid #222222;
+}
+
+.right-panel li {
+  border-bottom: 1px solid #222222;
+  list-style: none;
+  line-height: 30px;
+  padding: 0;
+}
+
+.loading {
+  display: block;
+  text-align: center;
+  line-height: 100%;
+}
+
+.tile-info {
+  background-color: lighten($darkColor, 15);
+}
+
+.tile-info h2 {
+  margin: 0;
+  padding: 20px 30px;
+  font-size: 1.2em;
+  font-style: normal;
+  background-color: lighten($darkColor, 25);
+
+}
+
+.tile-info .item, .tile-info .no-item, .loading {
+  display: block;
+  color: #f0f0f0;
+  cursor: pointer;
+  padding: 10px 30px;
+  line-height: 30px;
+}
+
+.instance-info {
+  background: $darkColor;
+}
+
+.instance-info .item, .instance-info .no-item {
+  color: darken($lightColor, 15);
+  border-bottom: 1px solid darken($darkColor, 20);
+}
+
+.map-container {
+  width: 100%;
+  height: 500px;
+}
