@@ -1,6 +1,7 @@
 package models.graph.ontology
 
 import models.graph.custom_types.Coordinates
+import models.graph.ontology.property.Property
 import play.api.libs.json._
 
 

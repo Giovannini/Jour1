@@ -1,6 +1,7 @@
 package models.graph.custom_types
 
 import models.graph.ontology._
+import models.graph.ontology.property.Property
 import org.anormcypher.{Cypher, CypherStatement}
 
 /**
@@ -15,7 +16,7 @@ object Statement {
     """
     MATCH n
     WHERE n.type = "CONCEPT"
-    RETURN n.label as concept_label, n.properties as concept_prop, n.rules as concept_rules, n.color as concept_color
+    RETURN n.label as concept_label, n.properties as concept_prop, n.rules as concept_rules, n.display as concept_display
     """
   )
 
@@ -120,7 +121,7 @@ object Statement {
    */
   def getConceptById(conceptId: Int): CypherStatement = {
     Cypher("MATCH (n {id: {id1} }) " +
-      "RETURN n.label as concept_label, n.properties as concept_prop, n.rules as concept_rules, n.color as concept_color")
+      "RETURN n.label as concept_label, n.properties as concept_prop, n.rules as concept_rules, n.display as concept_display")
       .on("id1" -> conceptId)
   }
 
@@ -172,7 +173,7 @@ object Statement {
              |       n2.properties as concept_prop,
              |       n2.type as node_type,
              |       n2.rules as concept_rules,
-             |       n2.color as concept_color
+             |       n2.display as concept_display
            """.stripMargin)
       .on("id" -> conceptId)
   }
@@ -191,7 +192,7 @@ object Statement {
              |       n2.properties as concept_prop,
              |       n2.type as node_type,
              |       n2.rules as concept_rules,
-             |       n2.color as concept_color
+             |       n2.display as concept_display
            """.stripMargin)
       .on("id" -> conceptId)
   }
@@ -208,7 +209,7 @@ object Statement {
         |RETURN n2.label as concept_label,
         |       n2.properties as concept_prop,
         |       n2.rules as concept_rules,
-        |       n2.color as concept_color
+        |       n2.display as concept_display
       """.stripMargin)
       .on("id" -> conceptId)
   }
@@ -225,7 +226,7 @@ object Statement {
         |RETURN n2.label as concept_label,
         |       n2.properties as concept_prop,
         |       n2.rules as concept_rules,
-        |       n2.color as concept_color
+        |       n2.display as concept_display
       """.stripMargin)
       .on("id" -> conceptId)
   }

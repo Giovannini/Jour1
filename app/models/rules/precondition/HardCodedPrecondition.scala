@@ -1,7 +1,8 @@
 package models.rules.precondition
 
 import models.WorldMap
-import models.graph.ontology.{Instance, Property}
+import models.graph.ontology.Instance
+import models.graph.ontology.property.PropertyDAO
 
 /**
  * List of hard codded preconditions
@@ -32,7 +33,7 @@ object HardCodedPrecondition {
    *         false else
    */
   def isAtWalkingDistance(args: Array[Any], map: WorldMap): Boolean = {
-    val propertyWalkingDistance = Property("WalkingDistance", "Int", 5)
+    val propertyWalkingDistance = PropertyDAO.getByName("WalkingDistance")
 
     def retrieveWalkingDistanceValue(instance: Instance) = {
       instance.properties

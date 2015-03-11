@@ -1,0 +1,14 @@
+# --- !Ups
+
+CREATE TABLE relations (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  label VARCHAR(255) NOT NULL,
+  src BIGINT UNSIGNED NOT NULL,
+  dest BIGINT UNSIGNED NOT NULL,
+  PRIMARY KEY(id)
+)
+  ENGINE=MYISAM;
+
+# --- !Downs
+
+DROP TABLE relations;

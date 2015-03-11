@@ -2,6 +2,7 @@ package models.graph.ontology
 
 import models.graph.NeoDAO
 import models.graph.custom_types.Statement
+import models.graph.ontology.property.Property
 import org.anormcypher.Neo4jREST
 import org.scalatest.FunSuite
 import play.api.libs.json.{JsValue, JsNumber, Json, JsString}

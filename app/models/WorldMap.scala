@@ -1,7 +1,8 @@
 package models
 
 import models.graph.custom_types.{Label, Coordinates}
-import models.graph.ontology.{Property, Concept, Instance}
+import models.graph.ontology.property.Property
+import models.graph.ontology.{Concept, Instance}
 import play.api.libs.json.{JsValue, Json}
 
 
@@ -131,6 +132,7 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
     val key = instance.concept.id
     val newInstance = instance.withId(getNewInstanceId)
     instances(key) = newInstance :: instances.getOrElse(key, List())
+    println(instances(key).length)
     newInstance
   }
 

@@ -1,14 +1,14 @@
 # --- !Ups
 
-CREATE TABLE relations (
+CREATE TABLE preconditions (
 	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	label VARCHAR(255) NOT NULL,
-	src BIGINT UNSIGNED NOT NULL,
-  dest BIGINT UNSIGNED NOT NULL,
+	parameters TEXT,
+  subconditions TEXT,
 	PRIMARY KEY(id)
 )
 ENGINE=MYISAM;
 
 # --- !Downs
 
-DROP TABLE relations;
+DROP TABLE preconditions;

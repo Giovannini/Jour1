@@ -1,29 +1,29 @@
-package models.graph.ontology
+package models.graph.ontology.property
 
-import org.anormcypher.CypherResultRow
-import play.api.libs.json._
+import models.graph.ontology.ValuedProperty
 
 /**
  * Model for properties
  * @author Thomas GIOVANNINI
  */
-case class Property(label: String, valueType: String, defaultValue: Any) {
+case class Property(id: Long, label: String, valueType: String, defaultValue: Any) {
   require(label.matches("^[A-Z][A-Za-z0-9]*$"))
-  override def toString = label+"%"+valueType+"%"+defaultValue
 
-  def toJson : JsValue = Json.obj(
+  override def toString = label + ": " + valueType + " = " + defaultValue
+
+  /*def toJson : JsValue = Json.obj(
     "label" -> JsString(label),
     "valueType" -> JsString(valueType),
-    "defaultValue" -> jsonDefaultValue)
+    "defaultValue" -> jsonDefaultValue)*/
 
-  private val jsonDefaultValue: JsValue = valueType match {
+  /*private val jsonDefaultValue: JsValue = valueType match {
     case "Int" => JsNumber(defaultValue.toString.toInt)
     case "Double" => JsNumber(defaultValue.toString.toDouble)
     case "String" => JsString(defaultValue.toString)
     case "Boolean" => JsBoolean(defaultValue.toString.toBoolean)
     //case "List" => (jsonProperty \ "defaultValue").as[String]/**TODO deal with lists correctly*/
     case _ => JsString(defaultValue.toString)
-  }
+  }*/
 
   def defaultValuedProperty: ValuedProperty = {
     ValuedProperty(this, defaultValue)
@@ -32,13 +32,29 @@ case class Property(label: String, valueType: String, defaultValue: Any) {
 
 object Property {
 
-  /**
+  val error = Property(-1L, "Error", "error", "error")
+
+  def parse(maybeId: Option[Long], label: String, valueType: String, defaultValueToParse: String): Property = {
+    val id = maybeId.getOrElse(-1L)
+    val defaultValue = valueType match {
+      case "Int" => defaultValueToParse.toInt
+      case "Double" => defaultValueToParse.toDouble
+      case "Boolean" => defaultValueToParse.toBoolean
+      //case "List" => (jsonProperty \ "defaultValue").as[String]/**TODO deal with lists correctly*/
+      case _ => defaultValueToParse
+    }
+    if(id == -1L) Property.error
+    else Property(id, label, valueType, defaultValue)
+  }
+
+
+  /*
    * Transform a json representing a property into the Property it represents
    * @author Thomas GIOVANNINI
    * @param jsonProperty the property in json format to parse
    * @return the represented property
    */
-  def parseJson(jsonProperty: JsValue): Property = {
+  /*def parseJson(jsonProperty: JsValue): Property = {
     val label = (jsonProperty \ "label").as[String]
     val valueType = (jsonProperty \ "valueType").as[String]
     val defaultValue = valueType match{
@@ -50,23 +66,24 @@ object Property {
       case _ => (jsonProperty \ "defaultValue").as[String]
     }
     Property(label, valueType, defaultValue)
-  }
+  }*/
 
   def parseString(stringProperty: String): Property = {
-    val propAttributes = stringProperty.split("%")
-    val valueType = propAttributes(1)
+    val firstSplit = stringProperty.split(": ")
+    val secondSplit = firstSplit(1).split(" = ")
+    val label = firstSplit(0)
+    val valueType = secondSplit(0)
     val defaultValue = valueType match{
-      case "Int" => propAttributes(2).toInt
-      case "Double" => propAttributes(2).toDouble
-      case "String" => propAttributes(2)
-      case "Boolean" => propAttributes(2).toBoolean
+      case "Int" => secondSplit(1).toInt
+      case "Double" => secondSplit(1).toDouble
+      case "Boolean" => secondSplit(1).toBoolean
       //case "List" => (jsonProperty \ "defaultValue").as[String]/**TODO deal with lists correctly*/
-      case _ => propAttributes(2)
+      case _ => secondSplit(1)
     }
-    Property(propAttributes(0), valueType, defaultValue)
+    Property(0L, label, valueType, defaultValue)
   }
 
-  /**
+  /*
    * Read a Neo4J row from the DB and convert it to a concept object
    * @author Thomas GIOVANNINI
    * @param row the row read from the db
@@ -74,7 +91,7 @@ object Property {
    *            and a sequence of strings name properties
    * @return the concept translated from the given row
    */
-  def rowToPropertiesList(row: CypherResultRow): List[Property] = {
+  /*def rowToPropertiesList(row: CypherResultRow): List[Property] = {
     row[Seq[String]]("concept_prop") // get the properties sequence from the row
       .toList
       .map { property =>
@@ -88,5 +105,5 @@ object Property {
             case _ => Property(p(0), p(1), p(2))
           }
         }
-  }
+  }*/
 }

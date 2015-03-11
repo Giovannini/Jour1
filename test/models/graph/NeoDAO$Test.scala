@@ -2,6 +2,7 @@ package models.graph
 
 import models.graph.custom_types.Coordinates
 import models.graph.ontology._
+import models.graph.ontology.property.Property
 import org.anormcypher.Neo4jREST
 import org.scalatest.FunSuite
 
