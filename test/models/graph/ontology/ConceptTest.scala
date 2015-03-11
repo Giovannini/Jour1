@@ -14,9 +14,9 @@ class ConceptTest extends FunSuite {
 
   implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
 
-  val prop1 = Property("P1", "Int", 0)
-  val prop2 = Property("P2", "String", "Hello")
-  val prop3 = Property("P3", "Boolean", false)
+  val prop1 = Property(0L, "P1", "Int", 0)
+  val prop2 = Property(0L, "P2", "String", "Hello")
+  val prop3 = Property(0L, "P3", "Boolean", false)
   val rule1 = ValuedProperty(prop1, 5)
   val rule2 = prop3.defaultValuedProperty
   val rule3 = prop1.defaultValuedProperty
@@ -45,8 +45,8 @@ class ConceptTest extends FunSuite {
     val supposedJsonValue = Json.obj(
       "label" -> JsString("C1"),
       "properties" -> Json.arr(
-        prop1.toJson,
-        prop2.toJson
+        prop1.id,
+        prop2.id
       ),
       "rules" -> Json.arr(
         rule1.toJson,
@@ -54,7 +54,7 @@ class ConceptTest extends FunSuite {
       ),
       "type" -> JsString("CONCEPT"),
       "id" -> JsNumber(concept1.id),
-      "color" -> JsString(concept1.displayProperty)
+      "display" -> concept1.displayProperty.toJson
     )
     assert(concept1.toJson == supposedJsonValue)
   }
@@ -72,7 +72,7 @@ class ConceptTest extends FunSuite {
       Instance(0, concept1.label, coords, concept1.properties.map(_.defaultValuedProperty), concept1))
   }
 
-  test("method getAllProperties") {
+  /*test("method getAllProperties") {
     NeoDAO.addConceptToDB(concept1)
     NeoDAO.addConceptToDB(concept2)
     NeoDAO.addRelationToDB(concept1.id, relSubtype, concept2.id)
@@ -80,7 +80,7 @@ class ConceptTest extends FunSuite {
     assert(concept1.getAllProperties == returnedPropertiesSet)
     NeoDAO.removeConceptFromDB(concept1)
     NeoDAO.removeConceptFromDB(concept2)
-  }
+  }*/
 
   test("method getAllRules") {
     NeoDAO.addConceptToDB(concept1)
@@ -143,9 +143,9 @@ class ConceptTest extends FunSuite {
 
   test("method removeRuleFromConcept") {
     assert(NeoDAO.addConceptToDB(concept1))
-    assert(concept1.rules.contains(rule1))
+    assert(concept1.rules.contains(rule2))
     val conceptWithProperty = Concept.removeRuleFromConcept(concept1, rule2)
-    assert(!conceptWithProperty.rules.contains(prop3))
+    assert(!conceptWithProperty.rules.contains(rule2))
     assert(NeoDAO.removeConceptFromDB(concept1))
   }
 

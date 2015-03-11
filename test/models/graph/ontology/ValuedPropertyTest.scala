@@ -14,9 +14,9 @@ class ValuedPropertyTest extends FunSuite {
 
   implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
 
-  val prop1 = Property("P1", "Int", 0)
-  val prop2 = Property("P2", "String", "thomas")
-  val prop3 = Property("P3", "Boolean", false)
+  val prop1 = Property(0L, "P1", "Int", 0)
+  val prop2 = Property(0L, "P2", "String", "thomas")
+  val prop3 = Property(0L, "P3", "Boolean", false)
   val concept1 = Concept("C1", List(prop1, prop2), List(prop3.defaultValuedProperty))
   val aurelie = Instance(0,
     "Aurelie",
@@ -44,7 +44,7 @@ class ValuedPropertyTest extends FunSuite {
   }
 
   test("method parse"){
-    val prop = Property("Property", "Int", 0)
+    val prop = Property(0L, "Property", "Int", 0)
     val value = 5
     val stringToParse = prop +"%%5"
     val parsedVP = ValuedProperty.parse(stringToParse)

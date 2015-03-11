@@ -11,7 +11,7 @@ import org.scalatest.FunSuite
  */
 class RelationTest extends FunSuite {
 
-  val prop1 = Property("P1", "Int", 0)
+  val prop1 = Property(0L, "P1", "Int", 0)
   val concept1 = Concept("C1", List(prop1), List())
   val concept2 = Concept("C2", List(prop1), List())
   val relation1 = Relation("R1")

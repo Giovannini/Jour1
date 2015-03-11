@@ -39,7 +39,9 @@ object RestCall extends Controller {
    * @return a JsValue representing the relationned concept
    */
   def relationnedConceptToJson(tuple: (Relation, Concept)): JsValue = {
-    Json.obj( "relation" -> JsString(tuple._1.toString),
+    println("RelationID = " + tuple._1.id)
+    Json.obj( "relationID" -> JsNumber(tuple._1.id),
+              "relationLabel" -> JsString(tuple._1.label),
               "conceptId" -> JsNumber(tuple._2.hashCode()))
   }
 
@@ -72,9 +74,13 @@ object RestCall extends Controller {
    * @return a list of instances under JSON format
    */
   def getPossibleDestinationOfAction(initInstanceId: Int, actionType: String, conceptId: Int) = Action {
+    println("okok")
     val sourceInstance = Application.map.getInstanceById(initInstanceId)
+    println("okok")
     val action = Application.actionParser.getAction(actionType.toLong)
+    println("okok")
     val destinationInstancesList = Application.map.getInstancesOf(conceptId)
+    println("okok")
     if (sourceInstance == Instance.error || action == InstanceAction.error){
       Ok(Json.arr())
     }

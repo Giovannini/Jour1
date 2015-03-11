@@ -12,9 +12,9 @@ import play.api.libs.json.{JsString, JsNumber, Json, JsValue}
  */
 class InstanceTest extends FunSuite {
 
-  val prop1 = Property("P1", "Int", 0)
-  val prop2 = Property("P2", "String", "Hello")
-  val prop3 = Property("P3", "Boolean", false)
+  val prop1 = Property(0L, "P1", "Int", 0)
+  val prop2 = Property(0L, "P2", "String", "Hello")
+  val prop3 = Property(0L, "P3", "Boolean", false)
   val concept1 = Concept("C1", List(prop1, prop2), List())
   val concept2 = Concept("C2", List(prop1, prop3), List())
   val rel1 = Relation("R1")

@@ -132,7 +132,7 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
     val key = instance.concept.id
     val newInstance = instance.withId(getNewInstanceId)
     instances(key) = newInstance :: instances.getOrElse(key, List())
-    println(instances(key).length)
+    //println(instances(key).length)
     newInstance
   }
 

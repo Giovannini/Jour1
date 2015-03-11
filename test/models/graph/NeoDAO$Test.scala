@@ -14,9 +14,9 @@ class NeoDAO$Test extends FunSuite {
 
   implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
 
-  val prop1 = Property("P1", "Int", 0)
-  val prop2 = Property("P2", "String", "Hello")
-  val prop3 = Property("P3", "Boolean", false)
+  val prop1 = Property(0L, "P1", "Int", 0)
+  val prop2 = Property(1L, "P2", "String", "Hello")
+  val prop3 = Property(2L, "P3", "Boolean", false)
   val concept1 = Concept("C1", List(prop1, prop2), List())
   val concept2 = Concept("C2", List(prop1, prop3), List())
   val concept3 = Concept("C3", List(prop1), List())

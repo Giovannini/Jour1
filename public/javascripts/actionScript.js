@@ -49,7 +49,7 @@ var ActionController = ['$scope', function($scope) {
             relatedConcept = Graph.getConcepts([conceptId])[conceptId];
             actions.push({
                 id: id,
-                relationId: relations[id].label,
+                relationId: relations[id].id,
                 label: relations[id].label + "(" + relatedConcept.label + ")",
                 conceptId: relatedConcept.id
             });

@@ -165,7 +165,6 @@ object WorldInit {
    */
   // TODO: pas propre
   def getGroundConcept(concepts: List[Concept]): Concept = {
-    println("getGroundConcept")
     concepts.find(_.label == "Ground")
       .getOrElse(Concept.error)
   }
@@ -258,7 +257,7 @@ object WorldInit {
   def fillWorldWithInstances(worldMap: WorldMap, concept: Concept): Unit = {
     //instanciate first concept
     val instances = createInstances(worldMap, concept)
-    println(concept.label + ": " + instances.length)
+    //println(concept.label + ": " + instances.length)
     instances.foreach(worldMap.addInstance)
     //instanciate rest
 

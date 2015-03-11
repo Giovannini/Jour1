@@ -87,7 +87,8 @@ var GraphFactory = function(Rest) {
 
         // Object constructor
         (function() {
-            _this.label = relation.relation;
+            _this.id = relation.relationID;
+            _this.label = relation.relationLabel;
             _this.relatedConcept = relation.conceptId;
         })();
     };

@@ -41,7 +41,6 @@ object Action {
 
   def parse(id: Long, label: String, parameters: String, preconditions: String, subActions: String): Action = {
     val parsedParameters = {
-      println(label)
       println("parameters: " + parameters)
       if (parameters == "") List()
       else if (! parameters.contains(":")){
@@ -55,7 +54,7 @@ object Action {
     }
     val parsedPreconditions = {
       if(preconditions == "") List()
-      else if(preconditions.matches("^[A-Za-z]$")){
+      else if(! preconditions.matches("[0-9;]*")){
         Action.delete(id)
         List()
       }

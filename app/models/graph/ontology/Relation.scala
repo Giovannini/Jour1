@@ -8,6 +8,8 @@ import play.Play
 import play.api.db.DB
 import play.api.Play.current
 
+import scala.language.postfixOps
+
 /**TODO test
  * Model for a relation in an ontology
  * @param id id of the relation
