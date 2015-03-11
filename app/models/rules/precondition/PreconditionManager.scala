@@ -8,10 +8,11 @@ import models.rules.Argument
  */
 case class PreconditionManager(map: WorldMap){
 
-  val _preconditionIsNextTo = Precondition(0, "isNextTo", List(),
-    List(Argument("instance1ID", "Int"), Argument("instance2ID", "Int")))
+  val _preconditionIsNextTo = PreconditionDAO.save(Precondition(0, "isNextTo", List[Precondition](),
+    List(Argument("instance1ID", "Int"), Argument("instance2ID", "Int"))))
 
-  val _preconditionIsAtWalkingDistance = Precondition(0, "isAtWalkingDistance", List(),
-    List(Argument("instance1ID", "Int"), Argument("instance2ID", "Int"), Argument("distance", "Int")))
+  val _preconditionIsAtWalkingDistance = PreconditionDAO.save(Precondition(0, "isAtWalkingDistance",
+    List[Precondition](),
+    List(Argument("instance1ID", "Int"), Argument("instance2ID", "Int"), Argument("distance", "Int"))))
 
 }

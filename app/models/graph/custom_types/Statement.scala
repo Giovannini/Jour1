@@ -38,7 +38,8 @@ object Statement {
    * @return a cypher statement
    */
   def createConcept(concept: Concept): CypherStatement = {
-    Cypher("create " + concept.toNodeString + ";")
+    val nodeToCreate = concept.toNodeString
+    Cypher("CREATE " + nodeToCreate)
   }
 
   /**

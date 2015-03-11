@@ -55,7 +55,7 @@ object RestCall extends Controller {
      */
     def execution(request: Request[JsValue]): Boolean = {
       val jsonRequest = Json.toJson(request.body)
-      val actionReference = (jsonRequest \ "action").as[String]
+      val actionReference = (jsonRequest \ "action").as[String].toLong
       val actionArguments = (jsonRequest \ "instances").as[List[Int]]
       Application.actionParser.parseAction(actionReference, actionArguments)
     }
@@ -73,8 +73,11 @@ object RestCall extends Controller {
    */
   def getPossibleDestinationOfAction(initInstanceId: Int, actionType: String, conceptId: Int) = Action {
     val sourceInstance = Application.map.getInstanceById(initInstanceId)
-    val action = Application.actionParser.getAction(actionType)
+    val action = Application.actionParser.getAction(actionType.toLong)
     val destinationInstancesList = Application.map.getInstancesOf(conceptId)
+    if (sourceInstance == Instance.error || action == InstanceAction.error){
+      Ok(Json.arr())
+    }
     val reducedList = reduceDestinationList(sourceInstance, action, destinationInstancesList)
     Ok(Json.toJson(reducedList))
   }

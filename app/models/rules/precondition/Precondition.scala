@@ -19,6 +19,10 @@ case class Precondition(id: Long, label: String, subConditions: List[Preconditio
     this.isFilled(arguments, map) && other.isFilled(arguments, map)
   }
 
+  def withId(id: Long): Precondition = {
+    Precondition(id, this.label, this.subConditions, this.arguments)
+  }
+
   /**
    * Execute a given action with given arguments
    * @author Thomas GIOVANNINI
@@ -68,10 +72,17 @@ case class Precondition(id: Long, label: String, subConditions: List[Preconditio
 }
 
 object Precondition {
-  def apply(id: Long, label: String, argumentsToParse: Array[String], subConditionsToIdentify: Array[String]): Precondition = {
+
+  def identify(id: Long, label: String, subConditions: List[Long], arguments: List[Argument]): Precondition = {
+    Precondition(id, label, subConditions.map(PreconditionDAO.getById), arguments)
+  }
+
+  def parse(id: Long, label: String, argumentsToParse: Array[String], subConditionsToIdentify: Array[String]): Precondition = {
     val subConditions: List[Precondition] = List()
     val arguments: List[Argument] = List()
     Precondition(id, label, subConditions, arguments)
   }
+
+  val error = Precondition(-1L, "error", List[Precondition](), List[Argument]())
 }
 

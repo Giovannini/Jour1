@@ -25,6 +25,9 @@
         }
         </select>
       }
+      @helper.input(RelationManager.relationForm("relation_label2")) { (id, name, value, args) =>
+        <input type="text" name="@name" id="@id" value="">
+      }
       @helper.input(RelationManager.relationForm("concept2_id")) { (id, name, value, args) =>
         <select name="@name" id="@id">
         @for(concept <- Concept.findAll){

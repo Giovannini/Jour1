@@ -1,6 +1,6 @@
 @()
+@import models.rules.action.Action
 
-@import models.rules.Rule
 
 <!DOCTYPE html>
 <html>
@@ -13,11 +13,11 @@
     <h1>Règles enregistrées</h1>
 
     <ul>
-    @for(rule <- Rule.getAll){
+    @for(action <- Action.getAll){
         <li>
-            @rule.id - @rule.label
-            <a href="/rules/load/@rule.id">Voir</a>
-            <a href="/rules/delete/@rule.id">Supprimer</a>
+            @action.id - @action.label
+            <a href="/rules/load/@action.id">Voir</a>
+            <a href="/rules/delete/@action.id">Supprimer</a>
         </li>
     }
     </ul>

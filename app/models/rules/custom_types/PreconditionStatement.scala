@@ -32,7 +32,7 @@ object PreconditionStatement {
    * @param precondition precondition to add
    * @return a sql statement
    */
-  def add(precondition: Precondition) = {
+  def add(precondition: Precondition): SimpleSql[Row] = {
     SQL("""INSERT INTO preconditions(label, parameters, subconditions)
            VALUES({label}, {parameters}, {subconditions})""").on(
       'label -> precondition.label,

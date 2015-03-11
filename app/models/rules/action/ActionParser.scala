@@ -15,10 +15,9 @@ case class ActionParser(actionManager: ActionManager) {
    * @return true if the execution went well
    *         false else
    */
-  def parseAction(actionReference: String, instancesId: List[Int]): Boolean = {
-    //println("Action Reference :" + actionReference)
-    //println("Instances ids: " + instancesId.mkString(", "))
+  def parseAction(actionReference: Long, instancesId: List[Int]): Boolean = {
     val action = getAction(actionReference)
+    //println("Got action: " + action.label)
     val arguments = getArgumentsList(action, instancesId)
     actionManager.execute(action, arguments)
   }
@@ -29,20 +28,17 @@ case class ActionParser(actionManager: ActionManager) {
    * @param actionReference the id of the desired action
    * @return an action object
    */
-  def getAction(actionReference: String): Action = {
-    actionReference match {
+  def getAction(actionReference: Long): Action = {
+    Action.getById(actionReference)
+    /*actionReference match {
       case "REMOVE" => actionManager._actionRemoveInstanceAt
       case "ADD"  => actionManager._actionAddInstanceAt
       case "ACTION_MOVE" => actionManager._actionMoveInstanceAt
       case _ =>
+        //TODO take action from "rules" BDD instead of two next lines
         println(actionReference + "not found: REMOVE instead")
         actionManager._actionRemoveInstanceAt
-    }
-
-    /*TODO
-     * val fromDBResultAction = database.get(actionReference)
-     * parse(fromDBResultAction)
-     */
+    }*/
   }
 
   /**
@@ -52,11 +48,11 @@ case class ActionParser(actionManager: ActionManager) {
    * @return a list of arguments and their values
    */
   def getArgumentsList(action: Action, ids: List[Int]):List[(Argument, Any)] = {
-    if(ids.length == action.arguments.length){
-      action.arguments.zip(ids)
+    if(ids.length == action.parameters.length){
+      action.parameters.zip(ids)
     }else{
       println("Error while getting arguments list: arguments list of different size.")
-      action.arguments.zip(ids)
+      action.parameters.zip(ids)
     }
   }
 

@@ -2,7 +2,7 @@ package models.rules.precondition
 
 import anorm.SqlParser._
 import anorm._
-import models.rules.custom_types.{PreconditionStatement, RuleStatement}
+import models.rules.custom_types.PreconditionStatement
 import play.api.Play.current
 import play.api.db.DB
 
@@ -35,9 +35,9 @@ object PreconditionDAO {
   private val preconditionParser: RowParser[Precondition] = {
     get[Option[Long]]("id") ~
       get[String]("label") ~
-      get[String]("param") ~
-      get[String]("subcondition")map {
-      case id ~ label ~ param ~ precond => Precondition(id.get, label, param.split(";"), precond.split(";"))
+      get[String]("parameters") ~
+      get[String]("subconditions")map {
+      case id ~ label ~ param ~ precond => Precondition.parse(id.get, label, param.split(";"), precond.split(";"))
     }
   }
 
@@ -60,7 +60,7 @@ object PreconditionDAO {
    */
   def getAll: List[Precondition] = {
     DB.withConnection { implicit connection =>
-      val statement = RuleStatement.getAll
+      val statement = PreconditionStatement.getAll
       statement.as(preconditionParser *)
     }
   }
@@ -72,10 +72,12 @@ object PreconditionDAO {
    * @return true if the precondition saved
    *         false else
    */
-  def save(precondition: Precondition): Option[Long] = {
+  def save(precondition: Precondition): Long = {
     DB.withConnection { implicit connection =>
       val statement = PreconditionStatement.add(precondition)
-      statement.executeInsert()
+      val optionId: Option[Long] = statement.executeInsert()
+      /*val id = */optionId.getOrElse(-1L)
+      //if (id == -1L) Precondition.error else precondition.withId(id)
     }
   }
 
@@ -85,10 +87,11 @@ object PreconditionDAO {
    * @param id id of the precondition
    * @return precondition identified by id
    */
-  def getById(id: Long): Option[Precondition] = {
+  def getById(id: Long): Precondition = {
     DB.withConnection { implicit connection =>
       val statement = PreconditionStatement.getById(id)
-      statement.as(preconditionParser.singleOpt)
+      val maybePrecondition = statement.as(preconditionParser.singleOpt)
+      maybePrecondition.getOrElse(Precondition.error)
     }
   }
 
@@ -112,7 +115,7 @@ object PreconditionDAO {
    */
   def delete(id: Long): Int = {
     DB.withConnection { implicit connection =>
-      val statement = RuleStatement.remove(id)
+      val statement = PreconditionStatement.remove(id)
       statement.executeUpdate
     }
   }
