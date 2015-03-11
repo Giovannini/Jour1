@@ -7,7 +7,7 @@ import org.anormcypher.{Neo4jREST, CypherResultRow}
  * Model for a relation in an ontology
  * @param label for the relation
  */
-case class Relation(label: String){
+case class Relation(label: String, src: Long, dest: Long){
     require(label.matches("^[A-Z][A-Z0-9_]*$"))
 
     override def toString = label
