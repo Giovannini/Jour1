@@ -30,7 +30,7 @@ case class Action(id: Long,
 }
 
 /**
- * Model for rule.
+ * Model for rule
  */
 object Action {
   implicit val connection = DB.getConnection()
@@ -55,7 +55,7 @@ object Action {
     }
     val parsedPreconditions = {
       if(preconditions == "") List()
-      else if(preconditions.matches("*[A-Za-z]*")){
+      else if(preconditions.matches("^[A-Za-z]$")){
         Action.delete(id)
         List()
       }
