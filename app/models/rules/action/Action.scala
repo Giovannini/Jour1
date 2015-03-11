@@ -41,7 +41,13 @@ object Action {
 
   def parse(id: Long, label: String, parameters: String, preconditions: String, subActions: String): Action = {
     val parsedParameters = {
+      println(label)
+      println("parameters: " + parameters)
       if (parameters == "") List()
+      else if (! parameters.contains(":")){
+        Action.delete(id)
+        List()
+      }
       else parameters.split(";")
         .map(_.split(":"))
         .map(array => Argument(array(0), array(1)))
@@ -49,6 +55,10 @@ object Action {
     }
     val parsedPreconditions = {
       if(preconditions == "") List()
+      else if(preconditions.matches("*[A-Za-z]*")){
+        Action.delete(id)
+        List()
+      }
       else preconditions.split(";")
         .map(_.toLong)
         .map(PreconditionDAO.getById)

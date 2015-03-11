@@ -2,6 +2,7 @@ package models.graph.ontology
 
 import models.graph.NeoDAO
 import models.graph.custom_types.{Coordinates, Statement}
+import models.graph.ontology.property.Property
 import org.anormcypher.Neo4jREST
 import org.scalatest.FunSuite
 import play.api.libs.json.{JsNumber, JsString, Json}
@@ -53,7 +54,7 @@ class ConceptTest extends FunSuite {
       ),
       "type" -> JsString("CONCEPT"),
       "id" -> JsNumber(concept1.id),
-      "color" -> JsString(concept1.color)
+      "color" -> JsString(concept1.displayProperty)
     )
     assert(concept1.toJson == supposedJsonValue)
   }

@@ -1,5 +1,6 @@
 package models.graph.ontology
 
+import models.graph.ontology.property.{PropertyDAO, Property}
 import org.anormcypher.CypherResultRow
 import play.api.libs.json._
 
@@ -14,21 +15,20 @@ case class ValuedProperty(property: Property, value: Any){
    * @author Thomas GIOVANNINI
    * @return the parsed valued property to json format
    */
-  def toJson : JsValue = Json.obj("property" -> property.toJson, "value" -> toJson(value))
+  def toJson : JsValue = Json.obj("property" -> JsNumber(property.id), "value" -> jsonValue)
 
   /**
    * Convert a value with an unknown type to the correct JsValue
    * @author Thomas GIOVANNINI
-   * @param value the value to convert
    * @return a Json value representing the input one
    */
-  private def toJson(value: Any): JsValue = {
-    value match {
-      case number: Int => JsNumber(number)
-      case number: Double => JsNumber(number)
-      case string: String => JsString(string)
-      case boolean: Boolean => JsBoolean(boolean)
-      case list: List[Any] => JsArray(list.map(toJson(_)))
+  private def jsonValue: JsValue = {
+    property.valueType match {
+      case "Int" => JsNumber(value.asInstanceOf[Int])
+      case "Double" => JsNumber(value.asInstanceOf[Double])
+      case "String" => JsString(value.asInstanceOf[String])
+      case "Boolean" => JsBoolean(value.asInstanceOf[Boolean])
+      //case list: List[Any] => JsArray(list.map(toJson(_)))
       case _ => JsString(value.toString)
     }
   }
@@ -38,10 +38,14 @@ case class ValuedProperty(property: Property, value: Any){
    * @author Thomas GIOVANNINI
    * @return the string value for a ValuedProperty
    */
-  override def toString = property.toString + "%%" + value
+  override def toString = property.id + " -> " + value
 }
 
 object ValuedProperty {
+
+  def apply(id: Long, value: Any): ValuedProperty = {
+    ValuedProperty(PropertyDAO.getById(id), value)
+  }
 
   /**
    * Method to parse a json to a ValuedProperty
@@ -50,7 +54,7 @@ object ValuedProperty {
    * @return a Valued property
    */
   def parseJson(jsonVP: JsValue): ValuedProperty = {
-    val property = Property.parseJson(jsonVP \ "property")
+    val property = PropertyDAO.getById((jsonVP \ "property").as[Long])
     val value = parseValue(jsonVP \ "value", property.valueType)
     ValuedProperty(property, value)
   }
@@ -77,7 +81,7 @@ object ValuedProperty {
    * @return the value in its correct type
    */
   def parseValue(property: Property, stringValue: String): ValuedProperty = {
-    println("Parsing value " + stringValue + " for property " + property.label)
+    //println("Parsing value " + stringValue + " for property " + property.label)
     val value = property.valueType match {
       case "Int" => stringValue.toInt
       case "Double" => stringValue.toDouble
@@ -110,8 +114,8 @@ object ValuedProperty {
    * @return the proper ValuedProperty
    */
   def parse(string: String): ValuedProperty = {
-    val vpArray = string.split("%%")
-    val prop = Property.parseString(vpArray(0))
+    val vpArray = string.split(" -> ")
+    val prop = PropertyDAO.getById(vpArray(0).toLong)
     val value = prop.valueType match{
       case "Int" => vpArray(1).toInt
       case "Double" => vpArray(1).toDouble

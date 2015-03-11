@@ -1,7 +1,8 @@
 package models.graph.ontology
 
 import models.graph.NeoDAO
-import models.graph.custom_types.{Coordinates, Statement}
+import models.graph.custom_types.{DisplayProperty, Coordinates, Statement}
+import models.graph.ontology.property.{PropertyDAO, Property}
 import org.anormcypher.{Neo4jREST, CypherResultRow}
 import play.Play
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
@@ -12,13 +13,13 @@ import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
  * @param label for the concept
  * @param properties of this concept
  * @param rules of this concept
- * @param color for tis concept to be displayed
+ * @param displayProperty for tis concept to be displayed
  */
 case class Concept(label: String,
                properties: List[Property],
                rules: List[ValuedProperty],
-               color: String) {
-  require(label.matches("^[A-Z][A-Za-z0-9_ ]*$") && color.matches("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$") )
+               displayProperty: DisplayProperty) {
+  require(label.matches("^[A-Z][A-Za-z0-9_ ]*$"))
 
   /**
    * Constructor giving automatically the color #AAAAAA to the concept.
@@ -27,7 +28,7 @@ case class Concept(label: String,
    * @param properties of the concept
    */
   def this(label: String, properties: List[Property], rules: List[ValuedProperty]) = {
-    this(label, properties, rules, "#AAAAAA")
+    this(label, properties, rules, DisplayProperty())
   }
 
   val id = hashCode
@@ -41,11 +42,11 @@ case class Concept(label: String,
    */
   def toJson: JsValue = {
     Json.obj("label" -> JsString(label),
-      "properties" -> properties.map(_.toJson),
+      "properties" -> properties.map(p => JsNumber(p.id)),
       "rules" -> rules.map(_.toJson),
       "type" -> JsString("CONCEPT"),
       "id" -> JsNumber(hashCode()),
-      "color" -> JsString(color))
+      "display" -> displayProperty.toJson)
   }
 
   /**
@@ -56,9 +57,9 @@ case class Concept(label: String,
   def toNodeString = {
     "(" + label.toLowerCase +
       " { label: \"" + label + "\","+
-      " properties: [" + properties.map(p => "\""+p+"\"").mkString(",") + "],"+
+      " properties: [" + properties.map(_.id).mkString(",") + "],"+
       " rules: [" + rules.map(p => "\""+p+"\"").mkString(",") + "],"+
-      " color: \""+color+"\","+
+      " display: \""+displayProperty+"\","+
       " type: \"CONCEPT\","+
       " id:" + id + "})"
   }
@@ -73,14 +74,14 @@ case class Concept(label: String,
     Instance(0, label, coordinates, properties.map(_.defaultValuedProperty), this)
   }
 
-  /**
+  /*
    * Retrieve the properties of a Concept but also the one from its parents
    * @author Thomas GIOVANNINI
    * @return a list of properties
    */
-  def getAllProperties: Set[Property] = {
+  /*def getAllProperties: Set[Property] = {
     properties.toSet ++ getParents.flatMap(_.getAllProperties).toSet
-  }
+  }*/
 
   /**
    * Retrieve the rules of a Concept but also the one from its parents
@@ -116,7 +117,7 @@ object Concept {
 
   implicit val connection = Neo4jREST(Play.application.configuration.getString("serverIP"), 7474, "/db/data/")
 
-  val error = Concept("XXX", List(), List(), "#ff0000")
+  val error = Concept("XXX", List(), List(), DisplayProperty())
 
   /**
     * Apply method for the second constructor
@@ -127,6 +128,14 @@ object Concept {
    */
   def apply(label: String, properties: List[Property], rules: List[ValuedProperty]) = new Concept(label, properties, rules)
 
+  def create(label: String, properties: List[Long], rules: List[ValuedProperty]): Concept = {
+    Concept(label, properties.map(PropertyDAO.getById), rules)
+  }
+
+  def create(label: String, properties: List[Long], rules: List[ValuedProperty], displayProperty: DisplayProperty): Concept = {
+    Concept(label, properties.map(PropertyDAO.getById), rules, displayProperty)
+  }
+
 
   /**
    * Parse a Json value to a concept
@@ -136,10 +145,10 @@ object Concept {
    */
   def parseJson(jsonConcept: JsValue): Concept = {
     val label = (jsonConcept \ "label").as[String]
-    val properties = (jsonConcept \ "properties").as[List[JsValue]].map(Property.parseJson)
+    val properties = (jsonConcept \ "properties").as[List[Long]].map(PropertyDAO.getById)
     val rulesProperties = (jsonConcept \ "rules").as[List[JsValue]].map(ValuedProperty.parseJson)
-    val color = (jsonConcept \ "color").as[String]
-    Concept(label, properties, rulesProperties, color)
+    val displayProperty = DisplayProperty.parseJson(jsonConcept \ "displayProperty")
+    Concept(label, properties, rulesProperties, displayProperty)
   }
 
   /**
@@ -152,10 +161,11 @@ object Concept {
    */
   def parseRow(row: CypherResultRow): Concept = {
     val label = row[String]("concept_label")
-    val properties = Property.rowToPropertiesList(row)
+    val properties = row[Seq[Long]]("concept_prop").map(PropertyDAO.getById).toList
     val rulesProperty = ValuedProperty.rowToPropertiesList(row, "concept_rules")
-    val color = row[String]("concept_color")
-    Concept(label, properties, rulesProperty, color)
+    val display = DisplayProperty.parseString(row[String]("concept_display"))
+    val result = Concept(label, properties, rulesProperty, display)
+    result
   }
 
   /**

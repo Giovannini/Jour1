@@ -2,7 +2,8 @@ package models.rules.precondition
 
 import controllers.Application
 import models.graph.custom_types.Coordinates
-import models.graph.ontology.{Instance, Property, ValuedProperty}
+import models.graph.ontology.property.PropertyDAO
+import models.graph.ontology.{Instance, ValuedProperty}
 
 
 object InstancesThatFillPrecondition {
@@ -17,7 +18,7 @@ object InstancesThatFillPrecondition {
 
   def isAtWalkingDistance(source: Instance): List[Instance] = {
     println("Yo")
-    val propertyWalkingDistance = Property("WalkingDistance", "Int", 3)
+    val propertyWalkingDistance = PropertyDAO.getByName("WalkingDistance")
 
     def getNear(source: Instance, remainingDistance: Int, coordinatesList: List[Coordinates]): List[Instance] = {
       println("Bim: " + remainingDistance)

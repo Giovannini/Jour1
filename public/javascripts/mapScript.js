@@ -108,10 +108,16 @@ var GraphFactory = function(Rest) {
                 _this.defineRules(concept.rules);
             }
 
-            if(typeof concept.color === "undefined") {
+            if(typeof concept.display.color === "undefined") {
                 _this.color = "#aaaaaa";
             } else {
-                _this.color = concept.color;
+                _this.color = concept.display.color;
+            }
+
+            if(typeof concept.display.zindex === "undefined") {
+                _this.zindex = "1";
+            } else {
+                _this.zindex = concept.display.zindex;
             }
 
             _this.relations = null;
@@ -570,8 +576,8 @@ var DrawerFactory = function() {
 
         var sortedConcepts = [];
         for(id in concepts) {
-            if(typeof concepts[id].rules.ZIndex !== "undefined")
-                sortedConcepts.push({id: concepts[id].id, zindex: concepts[id].rules.ZIndex});
+            if(typeof concepts[id].zindex !== "undefined")
+                sortedConcepts.push({id: concepts[id].id, zindex: concepts[id].zindex});
         }
         sortedConcepts = sortedConcepts.sort(function(conceptA, conceptB) {
             if (conceptA.zindex < conceptB.zindex)
@@ -606,6 +612,8 @@ var DrawerFactory = function() {
 
             // add it to the map
             map[instance.coordinates.x][instance.coordinates.y].push(instance.id);
+        } else {
+            console.log("raté")
         }
     };
 

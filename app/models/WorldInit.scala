@@ -3,6 +3,7 @@ package models
 import controllers.Application
 import models.graph.custom_types.Coordinates
 import models.graph.ontology._
+import models.graph.ontology.property.PropertyDAO
 
 import scala.util.Random
 
@@ -29,7 +30,9 @@ object WorldInit {
    */
   def worldMapGeneration(): Unit = {
     val allGroundsConcepts = getGroundConcept(Concept.findAll).getDescendance
+    //println("allGroundsConcepts: " + allGroundsConcepts.length)
     val instanciableConcepts = getInstanciableConcepts diff allGroundsConcepts
+    //println("instanciableConcepts: " + instanciableConcepts.length)
     generateGround(allGroundsConcepts)
     //Take a lot of time
     instanciableConcepts.foreach(fillWorldWithInstances(map, _))
@@ -56,7 +59,7 @@ object WorldInit {
    *         0 else
    */
   def getStrengthOf(concept: Concept): Int = {
-    val propertyStrength = Property("Strength", "Int", 0)
+    val propertyStrength = PropertyDAO.getByName("Strength")
     concept.getRuleValue(propertyStrength).asInstanceOf[Int]
   }
 
@@ -162,6 +165,7 @@ object WorldInit {
    */
   // TODO: pas propre
   def getGroundConcept(concepts: List[Concept]): Concept = {
+    println("getGroundConcept")
     concepts.find(_.label == "Ground")
       .getOrElse(Concept.error)
   }
@@ -175,7 +179,7 @@ object WorldInit {
    * @return
    */
   def getInstanciableConceptsInList(listConcepts: List[Concept]): List[Concept] = {
-    val propertyInstanciable = Property("Instanciable", "Boolean", false)
+    val propertyInstanciable = PropertyDAO.getByName("Instanciable")
     listConcepts.filter {
       _.rules.contains(ValuedProperty(propertyInstanciable, true))
     }
@@ -254,6 +258,7 @@ object WorldInit {
   def fillWorldWithInstances(worldMap: WorldMap, concept: Concept): Unit = {
     //instanciate first concept
     val instances = createInstances(worldMap, concept)
+    println(concept.label + ": " + instances.length)
     instances.foreach(worldMap.addInstance)
     //instanciate rest
 

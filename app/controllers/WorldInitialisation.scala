@@ -1,8 +1,9 @@
 package controllers
 
 import models.graph.NeoDAO
-import models.graph.custom_types.Statement
+import models.graph.custom_types.{DisplayProperty, Statement}
 import models.graph.ontology._
+import models.graph.ontology.property.{PropertyDAO, Property}
 import models.{WorldInit, WorldMap}
 import org.anormcypher.Neo4jREST
 import play.Play
@@ -13,7 +14,7 @@ object WorldInitialisation extends Controller {
 
   implicit val connection = Neo4jREST(Play.application.configuration.getString("serverIP"), 7474, "/db/data/")
 
-  private var isInitialized = false
+  private var isWorldMapInitialized = false
 
   /**
    * Send an example of the json list of instances in the world map that will be sent to the client
@@ -21,10 +22,10 @@ object WorldInitialisation extends Controller {
    */
   def getWorld = Action {
     val exampleMap = {
-      if (isInitialized) Application.map
+      if (isWorldMapInitialized) Application.map
       else{
         println("World is not initialized yet.")
-        isInitialized = true
+        isWorldMapInitialized = true
         worldGeneration
       }
     }
@@ -50,7 +51,7 @@ object WorldInitialisation extends Controller {
     //this is working
     if (result) {
       if(putInitialConceptsInDB) {
-        isInitialized = false
+        isWorldMapInitialized = false
         Ok("Le graph a été correctement initialisé")
       }
       else Ok("Error while filling the graph")
@@ -65,87 +66,77 @@ object WorldInitialisation extends Controller {
    */
   def putInitialConceptsInDB: Boolean = {
     /*Property declaration*/
-    val propertyInstanciable      = Property("Instanciable", "Boolean", false)
-    val propertyDuplicationSpeed  = Property("DuplicationSpeed", "Int", 5)
-    val propertyStrength          = Property("Strength", "Int", 0)
-    val propertyZIndex            = Property("ZIndex", "Int", 0)
-    val propertyWalkingDistance   = Property("WalkingDistance", "Int", 3)
+    PropertyDAO.clear
+    val propertyInstanciable      = PropertyDAO.save(Property(0, "Instanciable", "Boolean", false))
+    val propertyDuplicationSpeed  = PropertyDAO.save(Property(0, "DuplicationSpeed", "Int", 5))
+    val propertyStrength          = PropertyDAO.save(Property(0, "Strength", "Int", 0))
+    val propertyZIndex            = PropertyDAO.save(Property(0, "ZIndex", "Int", 0))
+    val propertyWalkingDistance   = PropertyDAO.save(Property(0, "WalkingDistance", "Int", 3))
 
     /*Concepts declaration*/
-    val conceptMan        = Concept("Man",
+    val conceptMan        = Concept.create("Man",
       List(),
-      List(ValuedProperty(propertyZIndex, 20),
-        ValuedProperty(propertyStrength,2),
+      List(ValuedProperty(propertyStrength,2),
         ValuedProperty(propertyInstanciable,true)),
-      "#E3B494")
-    val conceptPredator   = Concept("Predator",
+      DisplayProperty("#E3B494", 20))
+    val conceptPredator   = Concept.create("Predator",
         List(),
         List())
-    val conceptWolf       = Concept("Wolf",
+    val conceptWolf       = Concept.create("Wolf",
         List(),
-        List(ValuedProperty(propertyZIndex, 18),
-          ValuedProperty(propertyStrength,2),
+        List(ValuedProperty(propertyStrength,2),
           ValuedProperty(propertyInstanciable,true)),
-        "#1A1A22")
-    val conceptSheep      = Concept("Sheep",
+      DisplayProperty("#1A1A22", 18))
+    val conceptSheep      = Concept.create("Sheep",
         List(propertyWalkingDistance),
-        List(ValuedProperty(propertyZIndex, 16),
-          ValuedProperty(propertyStrength,2),
+        List(ValuedProperty(propertyStrength,2),
           ValuedProperty(propertyInstanciable,true)),
-        "#EEE9D6")
-    val conceptAnimal     = Concept("Animal",
+      DisplayProperty("#EEE9D6", 16))
+    val conceptAnimal     = Concept.create("Animal",
         List(propertyWalkingDistance),
         List())
-    val conceptGrass      = Concept("Grass",
+    val conceptGrass      = Concept.create("Grass",
         List(propertyDuplicationSpeed),
-        List(ValuedProperty(propertyZIndex, 8),
-          ValuedProperty(propertyStrength,40),
+        List(ValuedProperty(propertyStrength,40),
           ValuedProperty(propertyInstanciable,true)),
-        "#62A663")
-    val conceptEdible     = Concept("Edible", List(), List())
-    val conceptApple      = Concept("Apple",
+      DisplayProperty("#62A663", 8))
+    val conceptEdible     = Concept.create("Edible", List(), List())
+    val conceptApple      = Concept.create("Apple",
         List(),
-        List(ValuedProperty(propertyZIndex, 20),
-          ValuedProperty(propertyStrength,2),
+        List(ValuedProperty(propertyStrength,2),
           ValuedProperty(propertyInstanciable,true)),
-        "#A83B36")
-    val conceptBush       = Concept("Bush",
+      DisplayProperty("#A83B36", 20))
+    val conceptBush       = Concept.create("Bush",
         List(),
-        List(ValuedProperty(propertyZIndex, 4),
-          ValuedProperty(propertyStrength,2),
+        List(ValuedProperty(propertyStrength,2),
           ValuedProperty(propertyInstanciable,true)),
-        "#2A6E37")
-    val conceptAppleTree  = Concept("AppleTree",
+      DisplayProperty("#2A6E37", 4))
+    val conceptAppleTree  = Concept.create("AppleTree",
         List(),
-        List(ValuedProperty(propertyZIndex, 9),
-          ValuedProperty(propertyStrength,2),
+        List(ValuedProperty(propertyStrength,2),
           ValuedProperty(propertyInstanciable,true)),
-        "#2F1C13")
-    val conceptTree       = Concept("Tree",
+      DisplayProperty("#2F1C13", 9))
+    val conceptTree       = Concept.create("Tree",
         List(),
-        List(ValuedProperty(propertyZIndex, 7),
-          ValuedProperty(propertyStrength,4),
+        List(ValuedProperty(propertyStrength,4),
           ValuedProperty(propertyInstanciable,true)),
-        "#483431")
-    val conceptFir        = Concept("Fir",
+      DisplayProperty("#483431", 7))
+    val conceptFir        = Concept.create("Fir",
         List(),
-        List(ValuedProperty(propertyZIndex, 8),
-          ValuedProperty(propertyStrength,4)),
-        "#221D1D")
-    val conceptVegetable  = Concept("Vegetable", List(), List())
-    val conceptGround     = Concept("Ground", List(), List())
-    val conceptWater      = Concept("Water",
+        List(ValuedProperty(propertyStrength,4)),
+        DisplayProperty("#221D1D", 8))
+    val conceptVegetable  = Concept.create("Vegetable", List(), List())
+    val conceptGround     = Concept.create("Ground", List(), List())
+    val conceptWater      = Concept.create("Water",
         List(),
-        List(ValuedProperty(propertyZIndex, 0),
-          ValuedProperty(propertyStrength,2),
+        List(ValuedProperty(propertyStrength,2),
           ValuedProperty(propertyInstanciable,true)),
-        "#86B6B6")
-    val conceptEarth      = Concept("Earth",
+        DisplayProperty("#86B6B6", 0))
+    val conceptEarth      = Concept.create("Earth",
         List(),
-        List(ValuedProperty(propertyZIndex, 1),
-          ValuedProperty(propertyStrength,3),
+        List(ValuedProperty(propertyStrength,3),
           ValuedProperty(propertyInstanciable,true)),
-        "#878377")
+        DisplayProperty("#878377", 1))
 
     /*Relations declaration*/
     val relationSubtypeOf   = Relation("SUBTYPE_OF")
@@ -157,7 +148,8 @@ object WorldInitialisation extends Controller {
 
     val relationLiveOn      = Relation("LIVE_ON")
 
-//    Statement.clearDB.execute
+    Statement.clearDB.execute
+
     /*Storage of the concepts in DB*/
     val addConceptVerification = NeoDAO.addConceptToDB(conceptMan) &&
       NeoDAO.addConceptToDB(conceptPredator) &&
