@@ -91,6 +91,7 @@ object Instance {
    * @return the represented instance
    */
   def parseJson(jsonInstance: JsValue): Instance = {
+    println(jsonInstance.toString)
     val id = (jsonInstance \ "id").as[Int]
     val label = (jsonInstance \ "label").as[String]
     val x_coordinate = (jsonInstance \ "coordinates" \ "x").as[Int]

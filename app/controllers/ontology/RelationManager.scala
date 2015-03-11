@@ -18,6 +18,7 @@ object RelationManager extends Controller{
     tuple(
       "concept1_id" -> number,
       "relation_label" -> nonEmptyText,
+      "relation_label2" -> text,
       "relation_new_label" -> optional(nonEmptyText),
       "concept2_id" -> number,
       "is_action" -> boolean
@@ -37,7 +38,7 @@ object RelationManager extends Controller{
    * Print errors contained in a form
    * @author Thhomas GIOVANNINI
    */
-  def printErrors(form: Form[(Int, String, Option[String], Int, Boolean)]) = {
+  def printErrors(form: Form[(Int, String, String, Option[String], Int, Boolean)]) = {
     form.errors.foreach(error => println("###Error:\n" + error.messages.mkString("\n")))
   }
   
@@ -51,10 +52,10 @@ object RelationManager extends Controller{
      * @author Thomas GIOVANNINI
      * @return whether the creation went well or not
      */
-    def doCreate(form: (Int, String, Option[String], Int, Boolean)): Boolean = {
+    def doCreate(form: (Int, String, String, Option[String], Int, Boolean)): Boolean = {
       val concept1_id = form._1
-      val relation = Relation(form._2)
-      val concept2_id = form._4
+      val relation = { if (form._3 == "") Relation(form._2) else Relation(form._3) }
+      val concept2_id = form._5
       NeoDAO.addRelationToDB(concept1_id, relation, concept2_id)
     }
 
@@ -75,11 +76,11 @@ object RelationManager extends Controller{
      * @author Thomas GIOVANNINI
      * @return the updated instance
      */
-    def doUpdate(form: (Int, String, Option[String], Int, Boolean)) = {
+    def doUpdate(form: (Int, String, String, Option[String], Int, Boolean)) = {
       val concept1_id = form._1
       val oldRelation = Relation(form._2)
-      val newRelation = Relation(form._3.getOrElse(""))
-      val concept2_id = form._4
+      val newRelation = Relation(form._4.getOrElse(""))
+      val concept2_id = form._5
       NeoDAO.updateRelationInDB(concept1_id, oldRelation, newRelation, concept2_id)
     }
 

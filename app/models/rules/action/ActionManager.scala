@@ -2,24 +2,24 @@ package models.rules.action
 
 import models.WorldMap
 import models.rules.Argument
-import models.rules.precondition.PreconditionManager
+import models.rules.precondition.{Precondition, PreconditionManager}
 
 /**
  * Manage actions
  */
 case class ActionManager(actions: List[Action], map: WorldMap, preconditionManager: PreconditionManager){
 
-  val _actionAddInstanceAt = Action.save(Action(0, "addInstanceAt", List(), List(),
+  val _actionAddInstanceAt = Action.save(Action(0, "addInstanceAt", List[Precondition](), List[Action](),
     List(Argument("instanceId", "Int"), Argument("groundId", "Int"))))
 
   val _actionRemoveInstanceAt = Action.save(Action(0, "removeInstanceAt",
-    List(), List(), List(Argument("instanceId", "Int"))))
+    List[Precondition](), List[Action](), List(Argument("instanceId", "Int"))))
 
   /*Function to add to the BDD*/
   /**
    * NOTE: The add action must be done before the remove one because it is not possible to add a non existing instance.
    */
-  val _actionMoveInstanceAt = Action.save(Action(0, "moveInstanceAt",
+  val _actionMoveInstanceAt = Action.save(Action.identify(0L, "moveInstanceAt",
     List(preconditionManager._preconditionIsAtWalkingDistance),
     List(_actionAddInstanceAt, _actionRemoveInstanceAt),
     List(Argument("instanceId", "Int"), Argument("groundId", "Int"))))

@@ -15,9 +15,7 @@ case class ActionParser(actionManager: ActionManager) {
    * @return true if the execution went well
    *         false else
    */
-  def parseAction(actionReference: String, instancesId: List[Int]): Boolean = {
-    //println("Action Reference :" + actionReference)
-    //println("Instances ids: " + instancesId.mkString(", "))
+  def parseAction(actionReference: Long, instancesId: List[Int]): Boolean = {
     val action = getAction(actionReference)
     val arguments = getArgumentsList(action, instancesId)
     actionManager.execute(action, arguments)
@@ -29,8 +27,9 @@ case class ActionParser(actionManager: ActionManager) {
    * @param actionReference the id of the desired action
    * @return an action object
    */
-  def getAction(actionReference: String): Action = {
-    actionReference match {
+  def getAction(actionReference: Long): Action = {
+    Action.getById(actionReference)
+    /*actionReference match {
       case "REMOVE" => actionManager._actionRemoveInstanceAt
       case "ADD"  => actionManager._actionAddInstanceAt
       case "ACTION_MOVE" => actionManager._actionMoveInstanceAt
@@ -38,7 +37,7 @@ case class ActionParser(actionManager: ActionManager) {
         //TODO take action from "rules" BDD instead of two next lines
         println(actionReference + "not found: REMOVE instead")
         actionManager._actionRemoveInstanceAt
-    }
+    }*/
   }
 
   /**

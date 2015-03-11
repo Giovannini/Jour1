@@ -37,7 +37,7 @@ object PreconditionDAO {
       get[String]("label") ~
       get[String]("parameters") ~
       get[String]("subconditions")map {
-      case id ~ label ~ param ~ precond => Precondition(id.get, label, param.split(";"), precond.split(";"))
+      case id ~ label ~ param ~ precond => Precondition.parse(id.get, label, param.split(";"), precond.split(";"))
     }
   }
 
@@ -72,12 +72,12 @@ object PreconditionDAO {
    * @return true if the precondition saved
    *         false else
    */
-  def save(precondition: Precondition): Precondition = {
+  def save(precondition: Precondition): Long = {
     DB.withConnection { implicit connection =>
       val statement = PreconditionStatement.add(precondition)
       val optionId: Option[Long] = statement.executeInsert()
-      val id = optionId.getOrElse(-1L)
-      if (id == -1L) Precondition.error else precondition.withId(id)
+      /*val id = */optionId.getOrElse(-1L)
+      //if (id == -1L) Precondition.error else precondition.withId(id)
     }
   }
 
@@ -87,10 +87,11 @@ object PreconditionDAO {
    * @param id id of the precondition
    * @return precondition identified by id
    */
-  def getById(id: Long): Option[Precondition] = {
+  def getById(id: Long): Precondition = {
     DB.withConnection { implicit connection =>
       val statement = PreconditionStatement.getById(id)
-      statement.as(preconditionParser.singleOpt)
+      val maybePrecondition = statement.as(preconditionParser.singleOpt)
+      maybePrecondition.getOrElse(Precondition.error)
     }
   }
 

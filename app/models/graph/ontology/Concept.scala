@@ -54,7 +54,7 @@ case class Concept(label: String,
    */
   def toNodeString = {
     "(" + label.toLowerCase +
-      " { label: \"" + label + "\","+
+      " {label: \"" + label + "\","+
       " properties: [" + properties.map(p => "\""+p+"\"").mkString(",") + "],"+
       " rules: [" + rules.map(p => "\""+p+"\"").mkString(",") + "],"+
       " color: \""+color+"\","+

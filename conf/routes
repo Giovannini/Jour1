@@ -27,7 +27,6 @@ GET          /graph                                                   controller
 
 # Rules visualisation
 GET         /rules                                                   controllers.rules.RulesVisualisation.index
-GET         /rules/init                                   controllers.rules.RulesVisualisation.init
 GET         /preconditions                                controllers.rules.PreconditionsVisualisation.preconditions
 
 # Map routes

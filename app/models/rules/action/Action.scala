@@ -36,7 +36,11 @@ case class Action(id: Long,
 object Action {
   implicit val connection = DB.getConnection()
 
-  def apply(id: Long, label: String, parameters: String, preconditions: String, subActions: String): Action = {
+  def identify(id: Long, label: String, preconditions: List[Long], subActions: List[Long], parameters: List[Argument]): Action = {
+    Action(id, label, preconditions.map(PreconditionDAO.getById), subActions.map(getById), parameters)
+  }
+
+  def parse(id: Long, label: String, parameters: String, preconditions: String, subActions: String): Action = {
     val parsedParameters = {
       if (parameters == "") List()
       else parameters.split(";")
@@ -48,7 +52,7 @@ object Action {
       if(preconditions == "") List()
       else preconditions.split(";")
         .map(_.toLong)
-        .map(PreconditionDAO.getById(_).get)
+        .map(PreconditionDAO.getById)
         .toList
     }
     val parsedSubActions: List[Action] = {
@@ -58,7 +62,7 @@ object Action {
     Action(id, label, parsedPreconditions, parsedSubActions, parsedParameters)
   }
   
-  val error = Action(-1, "error", List(), List(), List())
+  val error = Action(-1, "error", List[Precondition](), List[Action](), List[Argument]())
 
   /**
    * Parse rule to interact with database
@@ -70,7 +74,7 @@ object Action {
       get[String]("param") ~
       get[String]("precond") ~
       get[String]("content") map {
-      case id ~ label ~ param ~ precond ~ content => Action(id, label, param, precond, content)
+      case id ~ label ~ param ~ precond ~ content => Action.parse(id, label, param, precond, content)
     }
   }
 
@@ -105,12 +109,12 @@ object Action {
    * @return true if the rule saved
    *         false else
    */
-  def save(action: Action): Action = {
+  def save(action: Action): Long = {
     DB.withConnection { implicit connection =>
       val statement = RuleStatement.add(action)
       val optionId: Option[Long] = statement.executeInsert()
-      val id = optionId.getOrElse(-1L)
-      if (id == -1L) Action.error else action.withId(id)
+      /*val id = */optionId.getOrElse(-1L)
+      //if (id == -1L) Action.error else action.withId(id)
     }
   }
 

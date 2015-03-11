@@ -10,9 +10,7 @@ import org.anormcypher._
  */
 object NeoDAO {
   // Setup the Rest Client
-  // implicit val connection = Neo4jREST("localhost", 7474, "/db/data")
-  implicit val connection = Neo4jREST("192.168.129.12", 7474, "/db/data/")
-
+  implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
 
   /**
    * Add a concept into the DB.
@@ -23,7 +21,9 @@ object NeoDAO {
    */
   def addConceptToDB(concept: Concept): Boolean = {
     val statement = Statement.createConcept(concept)
-    statement.execute
+    val result = statement.execute()
+    println(concept.label + ": " + result)
+    result
   }
 
   /**
@@ -122,4 +122,5 @@ object NeoDAO {
     val statement = Statement.updateRelation(sourceId, oldRelation, newRelation, destId)
     statement.execute
   }
+
 }
