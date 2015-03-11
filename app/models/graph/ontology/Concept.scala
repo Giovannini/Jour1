@@ -283,7 +283,7 @@ object Concept {
     Statement.getRelationsFrom(conceptId).apply
       .toList
       .filter(noInstance)
-      .map{ row => (Relation.parseRow(row), Concept.parseRow(row))}
+      .map{ row => (Relation.DBGraph.parseRow(row), Concept.parseRow(row))}
   }
 
   /**
@@ -296,7 +296,7 @@ object Concept {
     Statement.getRelationsTo(conceptId).apply
       .toList
       .filter(noInstance)
-      .map{ row => (Relation.parseRow(row), Concept.parseRow(row))}
+      .map{ row => (Relation.DBGraph.parseRow(row), Concept.parseRow(row))}
   }
 
   /**

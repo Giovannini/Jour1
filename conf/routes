@@ -23,11 +23,13 @@ GET         /relation/create                                         controllers
 POST        /relation/create                                         controllers.ontology.RelationManager.create
 
 # Graph visualisation
-GET          /graph                                                   controllers.graph.GraphVisualisation.index
+GET         /graph                                                   controllers.graph.GraphVisualisation.index
 
 # Rules visualisation
 GET         /rules                                                   controllers.rules.RulesVisualisation.index
-GET         /preconditions                                controllers.rules.PreconditionsVisualisation.preconditions
+GET         /rules                                                   controllers.rules.RulesVisualisation.index
+GET         /rules/load/:id                                          controllers.rules.RulesVisualisation.load(id: Long)
+GET         /preconditions                                           controllers.rules.PreconditionsVisualisation.preconditions
 
 # Map routes
 GET         /map                                                     controllers.MapController.show

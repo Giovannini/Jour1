@@ -2,7 +2,6 @@ package models.graph.custom_types
 
 import anorm._
 import models.graph.ontology.Relation
-import play.api.db.DB
 
 /**
  * All values from this objects are SQLStatements

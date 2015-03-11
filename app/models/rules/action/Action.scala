@@ -29,7 +29,6 @@ case class Action(id: Long,
   }
 }
 
-
 /**
  * Model for rule.
  */
@@ -69,7 +68,7 @@ object Action {
    * Parse rule to interact with database
    * @author Aurélie LORGEOUX
    */
-  private val ruleParser: RowParser[Action] = {
+  private val actionParser: RowParser[Action] = {
     get[Long]("id") ~
       get[String]("label") ~
       get[String]("param") ~
@@ -99,7 +98,7 @@ object Action {
   def getAll: List[Action] = {
     DB.withConnection { implicit connection =>
       val statement = RuleStatement.getAll
-      statement.as(ruleParser *)
+      statement.as(actionParser *)
     }
   }
 
@@ -128,7 +127,7 @@ object Action {
   def getById(id: Long): Action = {
     DB.withConnection { implicit connection =>
         val statement = RuleStatement.get(id)
-        statement.as(ruleParser.singleOpt).getOrElse(Action.error)
+        statement.as(actionParser.singleOpt).getOrElse(Action.error)
     }
   }
 

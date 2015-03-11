@@ -20,7 +20,7 @@
       }
       @helper.input(RelationManager.relationForm("relation_label")) { (id, name, value, args) =>
         <select name="@name" id="@id">
-        @for(relation <- Relation.getAll){
+        @for(relation <- Relation.DBGraph.getAll){
           <option value="@relation.label">@relation.label</option>
         }
         </select>
