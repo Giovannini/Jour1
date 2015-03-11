@@ -39,9 +39,7 @@ object Statement {
    */
   def createConcept(concept: Concept): CypherStatement = {
     val nodeToCreate = concept.toNodeString
-    val string = "CREATE " + nodeToCreate
-    println(string)
-    Cypher(string)
+    Cypher("CREATE " + nodeToCreate)
   }
 
   /**

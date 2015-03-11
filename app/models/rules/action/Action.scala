@@ -55,6 +55,7 @@ object Action {
         .map(PreconditionDAO.getById)
         .toList
     }
+    //println("Got preconditions: " + parsedPreconditions.map(_.label).mkString(", "))
     val parsedSubActions: List[Action] = {
       if (subActions == "") List()
       else subActions.split(";").map(s => getById(s.toLong)).toList

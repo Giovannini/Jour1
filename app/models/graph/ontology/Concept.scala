@@ -3,6 +3,7 @@ package models.graph.ontology
 import models.graph.NeoDAO
 import models.graph.custom_types.{Coordinates, Statement}
 import org.anormcypher.{Neo4jREST, CypherResultRow}
+import play.Play
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
 /**
@@ -54,7 +55,7 @@ case class Concept(label: String,
    */
   def toNodeString = {
     "(" + label.toLowerCase +
-      " {label: \"" + label + "\","+
+      " { label: \"" + label + "\","+
       " properties: [" + properties.map(p => "\""+p+"\"").mkString(",") + "],"+
       " rules: [" + rules.map(p => "\""+p+"\"").mkString(",") + "],"+
       " color: \""+color+"\","+
@@ -113,7 +114,7 @@ case class Concept(label: String,
 
 object Concept {
 
-  implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
+  implicit val connection = Neo4jREST(Play.application.configuration.getString("serverIP"), 7474, "/db/data/")
 
   val error = Concept("XXX", List(), List(), "#ff0000")
 

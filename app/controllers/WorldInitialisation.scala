@@ -5,12 +5,13 @@ import models.graph.custom_types.Statement
 import models.graph.ontology._
 import models.{WorldInit, WorldMap}
 import org.anormcypher.Neo4jREST
+import play.Play
 import play.api.mvc._
 
 
 object WorldInitialisation extends Controller {
 
-  implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
+  implicit val connection = Neo4jREST(Play.application.configuration.getString("serverIP"), 7474, "/db/data/")
 
   private var isInitialized = false
 
@@ -37,8 +38,10 @@ object WorldInitialisation extends Controller {
    */
   def worldGeneration: WorldMap = {
     val map = Application.map
+    val t1 = System.currentTimeMillis()
     WorldInit.worldMapGeneration()
-    println("Generated!")
+    val t2 = System.currentTimeMillis()
+    println("Generation took " + (t2 - t1) + "ms.")
     map
   }
   
@@ -172,7 +175,6 @@ object WorldInitialisation extends Controller {
       NeoDAO.addConceptToDB(conceptGround) &&
       NeoDAO.addConceptToDB(conceptWater) &&
       NeoDAO.addConceptToDB(conceptEarth)
-    println(addConceptVerification)
     /*Creation of the relations in DB*/
     val addRelationVerification =
       NeoDAO.addRelationToDB(conceptAnimal.id, relationMove, conceptEarth.id) &&
@@ -196,7 +198,6 @@ object WorldInitialisation extends Controller {
       NeoDAO.addRelationToDB(conceptTree.id, relationSubtypeOf, conceptVegetable.id) &&
       NeoDAO.addRelationToDB(conceptWater.id, relationSubtypeOf, conceptGround.id) &&
       NeoDAO.addRelationToDB(conceptEarth.id, relationSubtypeOf, conceptGround.id)
-    println(addRelationVerification)
     //live
     val addRelationVerification2 =
     NeoDAO.addRelationToDB(conceptMan.id, relationLiveOn, conceptEarth.id) &&
@@ -209,7 +210,6 @@ object WorldInitialisation extends Controller {
     NeoDAO.addRelationToDB(conceptFir.id, relationLiveOn, conceptEarth.id) &&
     NeoDAO.addRelationToDB(conceptApple.id, relationLiveOn, conceptAppleTree.id) &&
     NeoDAO.addRelationToDB(conceptSheep.id, relationLiveOn, conceptEarth.id)
-    println(addRelationVerification2)
 
     addConceptVerification && addRelationVerification && addRelationVerification2
   }

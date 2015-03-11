@@ -3,6 +3,7 @@ package models.graph
 import models.graph.custom_types.Statement
 import models.graph.ontology._
 import org.anormcypher._
+import play.Play
 
 
 /**
@@ -10,7 +11,7 @@ import org.anormcypher._
  */
 object NeoDAO {
   // Setup the Rest Client
-  implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
+  implicit val connection = Neo4jREST(Play.application.configuration.getString("serverIP"), 7474, "/db/data/")
 
   /**
    * Add a concept into the DB.
@@ -21,9 +22,7 @@ object NeoDAO {
    */
   def addConceptToDB(concept: Concept): Boolean = {
     val statement = Statement.createConcept(concept)
-    val result = statement.execute()
-    println(concept.label + ": " + result)
-    result
+    statement.execute()
   }
 
   /**
