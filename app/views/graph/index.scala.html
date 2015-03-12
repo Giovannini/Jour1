@@ -4,12 +4,12 @@
     <div ng-app="graphEditor" class="graph-container">
         <div class="graph-row">
             <div class="graph-view" ng-controller="ViewerController">
-                <div id="alchemy"></div>
+                <div class="alchemy" id="alchemy"></div>
                 <div class="view-options">
                     <form class="form">
                         <div class="form-group">
                             <label for="search" class="form-label">Profondeur :</label>
-                            <input class="form-input" id="search" type="number" ng-model="profondeur" value="1" min="1" max="3" />
+                            <input class="form-input" id="search" type="number" ng-model="deepness" value="1" min="1" max="3" />
                         </div>
                     </form>
                 </div>
@@ -22,6 +22,9 @@
                             <input class="form-input" id="search" type="text" ng-model="search" />
                         </div>
                     </form>
+                    <div class="error">
+                        <p>{{ error }}</p>
+                    </div>
                 </div>
                 <div ng-controller="EditNodeController">
                     <div ng-hide="isShowingNode()">
@@ -31,7 +34,19 @@
                         </ul>
                     </div>
                     <div ng-show="isShowingNode()" class="table">
-                        {{ nodeSelected.label }}
+                        <h4>{{ nodeSelected.label }}</h4>
+                        <div>
+                            Properties :
+                            <ul>
+                                <li ng-repeat="property in nodeSelected.properties">{{ property.label }} : {{ property.defaultValue }}</li>
+                            </ul>
+                        </div>
+                        <div>
+                            Rules :
+                            <ul>
+                                <li ng-repeat="element in nodeSelected.rules">{{ element.property.label }} : {{ element.value }}</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -39,6 +54,9 @@
     </div>
 
     <script src="@routes.Assets.at("components/angular/angular.min.js")" ></script>
-    <script src="http://cdn.graphalchemist.com/alchemy.min.js"></script>
+    <script src="@routes.Assets.at("components/angular-resource/angular-resource.min.js")" ></script>
+    <script src="@routes.Assets.at("components/lodash/dist/lodash.js")" ></script>
+    <script src="@routes.Assets.at("components/d3/d3.js")" ></script>
+    <script src="@routes.Assets.at("components/alchemyjs/dist/alchemy.js")" ></script>
     <script src="@routes.Assets.at("javascripts/graph-script.js")" ></script>
 }

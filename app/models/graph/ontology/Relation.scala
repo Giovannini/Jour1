@@ -2,11 +2,13 @@ package models.graph.ontology
 
 import anorm.{~, RowParser}
 import anorm.SqlParser._
+import models.graph.NeoDAO
 import models.graph.custom_types.{RelationStatement, Statement}
 import org.anormcypher.{Neo4jREST, CypherResultRow}
 import play.Play
 import play.api.db.DB
 import play.api.Play.current
+import play.api.libs.json.{JsNumber, JsString, Json, JsValue}
 
 import scala.language.postfixOps
 
@@ -22,6 +24,13 @@ case class Relation(id: Long, label: String, src: Long, dest: Long){
 
     override def toString = label
 
+    override def equals(obj:Any) = {
+      (obj.isInstanceOf[Relation]
+        && obj.asInstanceOf[Relation].id == this.id
+        && obj.asInstanceOf[Relation].src == this.src
+        && obj.asInstanceOf[Relation].dest == this.dest)
+    }
+
     def isAnAction = label.startsWith("ACTION_")
 }
 
@@ -33,14 +42,15 @@ object Relation {
     new Relation(0, label, 0, 0)
   }
 
+
   val error = Relation(-1, "ERROR", -1, -1)
 
   /**
    * Object for connection with the graph database
    */
   object DBGraph {
-    implicit val connection = Neo4jREST(Play.application.configuration.getString("serverIP"), 7474, "/db/data/")
-
+    implicit val connection = NeoDAO.connection
+    
     /**TODO
       * Method to get the Scala function associated to the given relation
       * @param relation key of the Scala function's name in the DB

@@ -7,6 +7,8 @@ import org.anormcypher.{Neo4jREST, CypherResultRow}
 import play.Play
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
+import scala.util.{Failure, Success, Try}
+
 /**
  * Model for a concept of an ontology
  * @author Thomas GIOVANNINI
@@ -31,9 +33,13 @@ case class Concept(label: String,
     this(label, properties, rules, DisplayProperty())
   }
 
-  val id = hashCode
+  val id : Long = hashCode
 
   override def hashCode = label.hashCode + "CONCEPT".hashCode()
+
+  override def equals(obj:Any) = {
+    obj.isInstanceOf[Concept] && obj.asInstanceOf[Concept].id == this.id
+  }
 
   /**
    * Parse a Concept to Json
@@ -232,7 +238,7 @@ object Concept {
     if(cypherResultRowStream.nonEmpty) {
       val row: CypherResultRow = statement.apply.head
       parseRow(row)
-    }else error
+    } else error
   }
 
   /**
@@ -252,7 +258,7 @@ object Concept {
    * @param conceptId the ID of the concept
    * @return a list of relations and concepts
    */
-  def getParents(conceptId: Int): List[Concept] = {
+  def getParents(conceptId: Long): List[Concept] = {
     val statement = Statement.getParentConcepts(conceptId)
     statement.apply
       .toList
@@ -265,7 +271,7 @@ object Concept {
    * @param conceptId the ID of the concept
    * @return a list of relations and concepts
    */
-  def getChildren(conceptId: Int): List[Concept] = {
+  def getChildren(conceptId: Long): List[Concept] = {
     val statement = Statement.getChildrenConcepts(conceptId)
     statement.apply
       .map(Concept.parseRow)
@@ -278,18 +284,17 @@ object Concept {
    * @param conceptId of the desired concept
    * @return a list of concepts which are the given concept's descendance
    */
-  def getDescendance(conceptId: Int): List[Concept] = {
-    //println(conceptId)
+  def getDescendance(conceptId: Long): List[Concept] = {
     getChildren(conceptId).flatMap(concept => concept :: getDescendance(concept.id))
   }
 
   /**
-   * Get all the relations from a given concept
+   * Get all the relations from a given source concept
    * @author Thomas GIOVANNINI
    * @param conceptId id of the source concept
    * @return a list of tuple containing the relation and destination concept.
    */
-  def getRelationsFrom(conceptId: Int): List[(Relation, Concept)] = {
+  def getRelationsFrom(conceptId: Long): List[(Relation, Concept)] = {
     Statement.getRelationsFrom(conceptId).apply
       .toList
       .filter(noInstance)
@@ -297,16 +302,25 @@ object Concept {
   }
 
   /**
-   * Get all the relations to a given concept
+   * Get all the relations to a given destination concept
    * @author Thomas GIOVANNINI
    * @param conceptId id of the source concept
    * @return a list of tuple containing the relation and destination concept.
    */
-  def getRelationsTo(conceptId: Int): List[(Relation, Concept)] = {
+  def getRelationsTo(conceptId: Long): List[(Relation, Concept)] = {
     Statement.getRelationsTo(conceptId).apply
       .toList
       .filter(noInstance)
       .map{ row => (Relation.DBGraph.parseRow(row), Concept.parseRow(row))}
+  }
+
+  /**
+   * Get all the relations given a concept
+   * @param conceptId id of the concept
+   * @return (relations from, relations to)
+   */
+  def getRelationsFromAndTo(conceptId: Long): (List[(Relation, Concept)], List[(Relation, Concept)]) = {
+    (getRelationsFrom(conceptId),getRelationsTo(conceptId))
   }
 
   /**
@@ -326,7 +340,7 @@ object Concept {
    * @param conceptId the ID of the concept
    * @return a list of relations and concepts
    */
-  def getReachableRelations(conceptId: Int): List[(Relation, Concept)] = {
+  def getReachableRelations(conceptId: Long): List[(Relation, Concept)] = {
     val conceptRelations = getRelationsFrom(conceptId)/*.filter(notASubtype)*/
     val parentsRelations = getParentsRelations(conceptId)
     conceptRelations ::: parentsRelations
@@ -338,7 +352,7 @@ object Concept {
    * @param conceptId the concept from which the parent relations are desired
    * @return a list of relations and concepts
    */
-  def getParentsRelations(conceptId: Int): List[(Relation, Concept)] = {
+  def getParentsRelations(conceptId: Long): List[(Relation, Concept)] = {
     getParents(conceptId).map {
       parent => getReachableRelations(parent.id)
     }.flatten

@@ -51,6 +51,7 @@ input[type="number"] {
 #alchemy {
   height: calc(100vh - 67px);
   overflow: hidden;
+  color: red;
 }
 
 .view-options {
@@ -94,4 +95,31 @@ input[type="number"] {
 .title {
   background-color: lighten($darkColor, 15);
   padding: 15px;
+}
+
+svg {
+  cursor: grab;
+  height: 100%;
+  width: 100%;
+}
+
+svg:active {
+  cursor: grabbing;
+}
+
+.edge text {
+  fill: #777;
+  stroke: none;
+  text-anchor: middle;
+  font-size: 0.75em;
+}
+
+.node text {
+  opacity: 0.5;
+  fill: #333;
+  text-anchor: middle;
+}
+
+.node:hover text {
+  opacity: 1;
 }

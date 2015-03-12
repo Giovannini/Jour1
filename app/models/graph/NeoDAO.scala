@@ -97,7 +97,7 @@ object NeoDAO {
    * @return true if the relation was correctly added
    *         false else
    */
-  def addRelationToDB(sourceId: Int, relation: Relation, destId: Int): Boolean = {
+  def addRelationToDB(sourceId: Long, relation: Relation, destId: Long): Boolean = {
     /* TODO
       * Be careful when creating a relation SUBTYPE_OF not to insert loop.
       */
@@ -113,12 +113,12 @@ object NeoDAO {
    * @return true if the relation was correctly removed
    *         false else
    */
-  def removeRelationFromDB(sourceId: Int, relation: Relation, destId: Int): Boolean = {
+  def removeRelationFromDB(sourceId: Long, relation: Relation, destId: Long): Boolean = {
     val statement = Statement.deleteRelation(sourceId, relation, destId)
     statement.execute
   }
 
-  def updateRelationInDB(sourceId: Int, oldRelation: Relation, newRelation: Relation, destId: Int) = {
+  def updateRelationInDB(sourceId: Long, oldRelation: Relation, newRelation: Relation, destId: Long) = {
     val statement = Statement.updateRelation(sourceId, oldRelation, newRelation, destId)
     statement.execute
   }

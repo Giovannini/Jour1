@@ -191,7 +191,7 @@ object WorldInit {
    * @param concepts list of instanciable concept
    * @return list concept to instanciate
    */
-  def getInstance(grounds: List[Int], concepts: List[Concept]): List[Int] = {
+  def getInstance(grounds: List[Int], concepts: List[Concept]): List[Long] = {
     concepts.map(_.id) diff grounds
   }
 
@@ -300,7 +300,7 @@ object WorldInit {
    * @param conceptId concept whose we search the life evironment
    * @return list of Concept Id's life place of a concept
    */
-  def getLivingPlacesIdsFor(conceptId: Int): List[Int] = {
+  def getLivingPlacesIdsFor(conceptId: Long): List[Long] = {
     Concept.getRelationsFrom(conceptId)
       .filter(_._1 == Relation("LIVE_ON"))
       .map(_._2.id)
@@ -311,7 +311,7 @@ object WorldInit {
    * @param conceptId environment whose we search population
    * @return list of Concept Id's living on
    */
-  def getConceptsLivingOn(conceptId: Int): List[Concept] = {
+  def getConceptsLivingOn(conceptId: Long): List[Concept] = {
     Concept.getRelationsTo(conceptId)
       .filter(tuple => tuple._1.label == "LIVE_ON")
       .map(tuple => tuple._2)

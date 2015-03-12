@@ -28,7 +28,7 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
     instanceIdCounter
   }
 
-  val instances: collection.mutable.Map[Int, List[Instance]] = collection.mutable.Map.empty[Int, List[Instance]]
+  val instances: collection.mutable.Map[Long, List[Instance]] = collection.mutable.Map.empty[Long, List[Instance]]
 
   /**
    * Get all the instances existing on the world map
@@ -43,7 +43,7 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
    * @param conceptId from which the instances are desired
    * @return a list of instances
    */
-  def getInstancesOf(conceptId: Int): List[Instance] = {
+  def getInstancesOf(conceptId: Long): List[Instance] = {
     val conceptInstances = instances.getOrElse(conceptId, List())
     val childrenInstances = Concept.getChildren(conceptId)
       .flatMap {

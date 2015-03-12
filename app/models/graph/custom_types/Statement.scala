@@ -49,7 +49,7 @@ object Statement {
    * @param conceptId the concept to remove
    * @return a cypher statement to execute
    */
-  def deleteConcept(conceptId: Int): CypherStatement = {
+  def deleteConcept(conceptId: Long): CypherStatement = {
     Cypher("MATCH (n {id: {id1} }) " +
       "OPTIONAL MATCH (n)-[r]-() " +
       "OPTIONAL MATCH (n)-[r2]-(n2 {type: {type}}) " +
@@ -119,10 +119,16 @@ object Statement {
    * @param conceptId the id of the concept to get
    * @return a cypher statement to execute
    */
-  def getConceptById(conceptId: Int): CypherStatement = {
+  def getConceptById(conceptId: Long): CypherStatement = {
     Cypher("MATCH (n {id: {id1} }) " +
       "RETURN n.label as concept_label, n.properties as concept_prop, n.rules as concept_rules, n.display as concept_display")
       .on("id1" -> conceptId)
+  }
+
+  def getConceptByLabel(label: String): CypherStatement = {
+    Cypher("MATCH (n {label: {label1}}) " +
+      "RETURN n.label as concept_label, n.properties as concept_prop, n.rules as concept_rules, n.display as concept_display")
+      .on("label1" -> label)
   }
 
   /**
@@ -133,7 +139,7 @@ object Statement {
    * @param destNodeId the destimation of the linkl
    * @return a cypher statement to execute
    */
-  def createRelation(sourceNodeId: Int, relation: Relation, destNodeId: Int) : CypherStatement = {
+  def createRelation(sourceNodeId: Long, relation: Relation, destNodeId: Long) : CypherStatement = {
     Cypher("MATCH (n1 {id: {id1}}), (n2 {id: {id2}})\nCREATE (n1)-[r:"+relation.label+"]->(n2)")
       .on("id1" -> sourceNodeId,
           "id2" -> destNodeId)
@@ -147,13 +153,13 @@ object Statement {
    * @param destNodeId the destination concept of the relation to delete
    * @return a cypher statement deleting the desired relation
    */
-  def deleteRelation(sourceNodeId: Int, relation: Relation, destNodeId: Int) : CypherStatement = {
+  def deleteRelation(sourceNodeId: Long, relation: Relation, destNodeId: Long) : CypherStatement = {
     Cypher( "MATCH (n1 {id: {id1}})-[r:"+relation.label+"]-(n2 {id:{id2}}) DELETE r")
       .on("id1" -> sourceNodeId,
       "id2" -> destNodeId)
   }
 
-  def updateRelation(sourceId: Int, oldRelation: Relation, newRelation: Relation, destId: Int): CypherStatement = ???
+  def updateRelation(sourceId: Long, oldRelation: Relation, newRelation: Relation, destId: Long): CypherStatement = ???
 
   def getAllRelations: CypherStatement = {
     Cypher("match n-[r]->m return distinct type(r) as relation_label")
@@ -165,7 +171,7 @@ object Statement {
    * @param conceptId the source concept
    * @return a cypher statement returning the relations types and concepts labels and properties
    */
-  def getRelationsFrom(conceptId: Int): CypherStatement = {
+  def getRelationsFrom(conceptId: Long): CypherStatement = {
     Cypher("""
              |MATCH (n1 {id: {id}})-[r]->(n2)
              |RETURN type(r) as rel_type,
@@ -184,7 +190,7 @@ object Statement {
    * @param conceptId the destination concept
    * @return a cypher statement returning the relations types and concepts labels and properties
    */
-  def getRelationsTo(conceptId: Int): CypherStatement = {
+  def getRelationsTo(conceptId: Long): CypherStatement = {
     Cypher("""
              |MATCH (n1 {id: {id}})<-[r]-(n2)
              |RETURN type(r) as rel_type,
@@ -203,7 +209,7 @@ object Statement {
    * @param conceptId of which the parents are desired
    * @return a cypher statement
    */
-  def getParentConcepts(conceptId: Int): CypherStatement = {
+  def getParentConcepts(conceptId: Long): CypherStatement = {
     Cypher("""
         |MATCH (n1 {id: {id}})-[r:SUBTYPE_OF]->(n2)
         |RETURN n2.label as concept_label,
@@ -220,7 +226,7 @@ object Statement {
    * @param conceptId of which the children are desired
    * @return a cypher statement
    */
-  def getChildrenConcepts(conceptId: Int): CypherStatement = {
+  def getChildrenConcepts(conceptId: Long): CypherStatement = {
     Cypher("""
         |MATCH (n1 {id: {id}})<-[r:SUBTYPE_OF]-(n2)
         |RETURN n2.label as concept_label,

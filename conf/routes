@@ -24,6 +24,7 @@ POST        /relation/create                                         controllers
 
 # Graph visualisation
 GET         /graph                                                   controllers.graph.GraphVisualisation.index
+GET         /graph/:search/:deepness                                 controllers.graph.GraphVisualisation.searchNodes(search: String, deepness: Int)
 
 # Rules visualisation
 GET         /rules                                                   controllers.rules.RulesVisualisation.index
