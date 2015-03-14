@@ -43,8 +43,8 @@ object HardCodedPrecondition {
         .asInstanceOf[Int]
     }
 
-    val sourceInstance      = map.getInstanceById(args(0).asInstanceOf[Int])
-    val destinationInstance = map.getInstanceById(args(1).asInstanceOf[Int])
+    val sourceInstance      = map.getInstanceById(args(0).asInstanceOf[Long])
+    val destinationInstance = map.getInstanceById(args(1).asInstanceOf[Long])
     val desiredDistance     = retrieveWalkingDistanceValue(sourceInstance)
     val distance = sourceInstance.coordinates.getDistanceWith(destinationInstance.coordinates)
     distance <= desiredDistance

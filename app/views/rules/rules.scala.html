@@ -1,5 +1,5 @@
 @()
-@import models.rules.action.Action
+@import models.rules.action.InstanceAction
 
 
 <!DOCTYPE html>
@@ -13,7 +13,7 @@
     <h1>Règles enregistrées</h1>
 
     <ul>
-    @for(action <- Action.getAll){
+    @for(action <- InstanceAction.getAll){
         <li>
             @action.id - @action.label
             <a href="/rules/load/@action.id">Voir</a>

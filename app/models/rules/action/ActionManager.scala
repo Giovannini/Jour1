@@ -11,22 +11,26 @@ object ActionManager{
 
   val map = Application.map
 
-  Action.clearDB
+  InstanceAction.clearDB
 
-  val _actionAddInstanceAt = Action.save(Action(0, "addInstanceAt", List[Precondition](), List[Action](),
+  val _actionAddInstanceAt = InstanceAction.save(InstanceAction(0, "addInstanceAt", List[Precondition](), List[InstanceAction](),
     List(Argument("instanceId", "Int"), Argument("groundId", "Int"))))
 
-  val _actionRemoveInstanceAt = Action.save(Action(0, "removeInstanceAt",
-    List[Precondition](), List[Action](), List(Argument("instanceId", "Int"))))
+  val _actionRemoveInstanceAt = InstanceAction.save(InstanceAction(0, "removeInstanceAt",
+    List[Precondition](), List[InstanceAction](), List(Argument("instanceId", "Int"))))
 
   /*Function to add to the BDD*/
   /**
    * NOTE: The add action must be done before the remove one because it is not possible to add a non existing instance.
    */
-  val _actionMoveInstanceAt = Action.save(Action.identify(0L, "ACTION_MOVE",
+  val _actionMoveInstanceAt = InstanceAction.save(InstanceAction.identify(0L, "ACTION_MOVE",
     List(PreconditionManager._preconditionIsAtWalkingDistance),
     List(_actionAddInstanceAt, _actionRemoveInstanceAt),
     List(Argument("instanceId", "Int"), Argument("groundId", "Int"))))
+
+  def initialization = {
+    println("ActionManager is initialized")
+  }
 
   /**
    * Execute a given action with given arguments
@@ -36,7 +40,7 @@ object ActionManager{
    * @return true if the action was correctly executed
    *         false else
    */
-  def execute(action: Action, arguments: List[(Argument, Any)]):Boolean = {
+  def execute(action: InstanceAction, arguments: List[(Argument, Any)]):Boolean = {
     val preconditionCheck = action.preconditions.forall(_.isFilled(arguments, map))
     if (preconditionCheck) {
       val args = arguments.map(_._2).toArray
@@ -47,12 +51,13 @@ object ActionManager{
         case `_actionRemoveInstanceAt` =>
           HardCodedAction.removeInstanceAt(args, map)
           true
-        case _ => action.subActions
+        case _ =>
+          action.subActions
           .map(action => execute(action, takeGoodArguments(action, arguments)))
           .foldRight(true)(_ & _)
       }
     }else{
-      println("Precondition not filled.")
+      println("Precondition not filled for action " + action.label + ".")
       false
     }
   }
@@ -64,7 +69,7 @@ object ActionManager{
    * @param arguments list to reduce
    * @return a reduced argument list
    */
-  def takeGoodArguments(action: Action, arguments: List[(Argument, Any)]): List[(Argument, Any)] = {
+  def takeGoodArguments(action: InstanceAction, arguments: List[(Argument, Any)]): List[(Argument, Any)] = {
     val keptArguments = arguments.filter{
       tuple => action.parameters
         .contains(tuple._1)

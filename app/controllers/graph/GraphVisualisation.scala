@@ -4,12 +4,9 @@ import models.graph.NeoDAO
 import models.graph.custom_types.Statement
 import models.graph.ontology.Concept
 import models.graph.ontology.property.{Property, PropertyDAO}
-import models.graph.ontology.relation.Relation
-import models.rules
+import models.rules.action.InstanceAction
 import play.api.libs.json.Json
 import play.api.mvc._
-
-import scala.annotation.tailrec
 
 object GraphVisualisation extends Controller {
   def index = Action {
@@ -69,8 +66,8 @@ object GraphVisualisation extends Controller {
   }
 
   def getAction(actionLabel: String) = Action {
-    val action = rules.action.Action.getByName(actionLabel)
-    if(action == rules.action.Action.error) {
+    val action = InstanceAction.getByName(actionLabel)
+    if(action == InstanceAction.error) {
       NotFound("Undefined action")
     } else {
       Ok(action.toJson)

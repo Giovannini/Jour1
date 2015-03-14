@@ -5,7 +5,7 @@ import anorm.{RowParser, ~}
 import models.graph.NeoDAO
 import models.graph.custom_types.Statement
 import models.graph.ontology.Concept
-import models.rules.action.Action
+import models.rules.action.InstanceAction
 import org.anormcypher.CypherResultRow
 import play.api.Play.current
 import play.api.db.DB
@@ -125,7 +125,7 @@ object Relation {
      *         false else
      */
     def save(relationName: String): Long = {
-      val id = Action.getByName(relationName).id
+      val id = InstanceAction.getByName(relationName).id
       DB.withConnection { implicit connection =>
         val statement = RelationSQLStatement.add(id, relationName)
         val optionId: Option[Long] = statement.executeInsert()

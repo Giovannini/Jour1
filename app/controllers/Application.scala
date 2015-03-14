@@ -8,7 +8,7 @@ import play.api.mvc._
 
 object Application extends Controller {
 
-  val map = WorldMap(Label("MapOfTheWorld"), "description", 100, 100)
+  val map = WorldMap(Label("MapOfTheWorld"), "description", 50, 50)
 
   /**
    * Show the different urls of the project

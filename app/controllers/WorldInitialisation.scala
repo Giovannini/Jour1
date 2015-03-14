@@ -5,6 +5,8 @@ import models.graph.custom_types.DisplayProperty
 import models.graph.ontology._
 import models.graph.ontology.property.{Property, PropertyDAO}
 import models.graph.ontology.relation.Relation
+import models.rules.action.ActionManager
+import models.rules.precondition.PreconditionManager
 import models.{WorldInit, WorldMap}
 import play.api.mvc._
 
@@ -65,6 +67,8 @@ object WorldInitialisation extends Controller {
 
     PropertyDAO.clear
     Relation.DBList.clear
+    ActionManager.initialization
+    PreconditionManager.initialization
 
     /*Property declaration*/
     val propertyInstanciable      = PropertyDAO.save(Property(0, "Instanciable", "Boolean", false))

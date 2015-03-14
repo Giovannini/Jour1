@@ -4,7 +4,7 @@ import models.graph.ontology.relation.Relation
 import models.graph.ontology.{Concept, Instance}
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller, Request}
-import models.rules.action.{Action => InstanceAction, ActionParser}
+import models.rules.action.{InstanceAction, ActionParser}
 
 /**
  * Controller to send Json data to client
@@ -40,7 +40,6 @@ object RestCall extends Controller {
    * @return a JsValue representing the relationned concept
    */
   def relationnedConceptToJson(tuple: (Relation, Concept)): JsValue = {
-    //println("RelationID = " + tuple._1.id)
     Json.obj( "relationID" -> JsNumber(tuple._1.id),
               "relationLabel" -> JsString(tuple._1.label),
               "conceptId" -> JsNumber(tuple._2.hashCode()))
@@ -58,9 +57,10 @@ object RestCall extends Controller {
      */
     def execution(request: Request[JsValue]): Boolean = {
       val jsonRequest = Json.toJson(request.body)
-      val actionReference = (jsonRequest \ "action").as[String].toLong
-      val actionArguments = (jsonRequest \ "instances").as[List[Int]]
-      ActionParser.parseAction(actionReference, actionArguments)
+      val actionReference = (jsonRequest \ "action").as[Long]
+      val actionId = Relation.DBList.getActionIdFromId(actionReference)
+      val actionArguments = (jsonRequest \ "instances").as[List[Long]]
+      ActionParser.parseAction(actionId, actionArguments)
     }
 
     val result = execution(request)

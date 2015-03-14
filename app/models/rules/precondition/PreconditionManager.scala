@@ -18,4 +18,8 @@ object PreconditionManager {
     List[Precondition](),
     List(Argument("instance1ID", "Int"), Argument("instance2ID", "Int"), Argument("distance", "Int"))))
 
+  def initialization = {
+    println("PreconditionManager is initialized")
+  }
+
 }

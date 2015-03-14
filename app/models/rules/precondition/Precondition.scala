@@ -33,14 +33,13 @@ case class Precondition(id: Long, label: String, subConditions: List[Preconditio
    */
   def isFilled(arguments: List[(Argument, Any)], map: WorldMap): Boolean = {
     val args = arguments.map(_._2).toArray
-    //println("This is for : " + precondition.referenceId)
     this.label match {
       case "isNextTo" =>
         HardCodedPrecondition.isNextTo(args, map)
       case "isAtWalkingDistance" =>
-        //println("Checking distance precondition")
         HardCodedPrecondition.isAtWalkingDistance(args, map)
-      case _ => this.subConditions
+      case _ =>
+        this.subConditions
         .map(precondition => precondition.isFilled(precondition.takeGoodArguments(arguments), map))
         .foldRight(true)(_ & _)
     }

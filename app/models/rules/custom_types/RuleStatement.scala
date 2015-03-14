@@ -1,7 +1,7 @@
 package models.rules.custom_types
 
 import anorm._
-import models.rules.action.Action
+import models.rules.action.InstanceAction
 
 /**
  * All values from this objects are SQLStatements
@@ -34,7 +34,7 @@ object RuleStatement {
    * @param action rule to add
    * @return a sql statement
    */
-  def add(action: Action) = {
+  def add(action: InstanceAction) = {
     SQL("""
             INSERT INTO rules(label, param, precond, content)
             VALUES({label}, {param}, {precond}, {content})
@@ -69,7 +69,7 @@ object RuleStatement {
    * @param action new rule with changes
    * @return a sql statement
    */
-  def set(id: Long, action: Action) = {
+  def set(id: Long, action: InstanceAction) = {
     SQL("""
       UPDATE rules SET
       label = {label},

@@ -16,15 +16,15 @@ object HardCodedAction {
    * @param map where to add the instance
    */
   def addInstanceAt(args: Array[Any], map: WorldMap) = {
-    val instance = map.getInstanceById(args(0).asInstanceOf[Int])
-    val groundInstance = map.getInstanceById(args(1).asInstanceOf[Int])
+    val instance = map.getInstanceById(args(0).asInstanceOf[Long])
+    val groundInstance = map.getInstanceById(args(1).asInstanceOf[Long])
     val coordinates = groundInstance.coordinates
     map.addInstance(instance.at(coordinates))
   }
 
   def createInstanceAt(args: Array[Any], map: WorldMap) = {
-    val instance = map.getInstanceById(args(0).asInstanceOf[Int])
-    val groundInstance = map.getInstanceById(args(1).asInstanceOf[Int])
+    val instance = map.getInstanceById(args(0).asInstanceOf[Long])
+    val groundInstance = map.getInstanceById(args(1).asInstanceOf[Long])
     val coordinates = groundInstance.coordinates
     map.addInstance(instance.at(coordinates))
   }
@@ -36,7 +36,7 @@ object HardCodedAction {
    * @param map where to add the instance
    */
   def removeInstanceAt(args: Array[Any], map: WorldMap) = {
-    val instance = map.getInstanceById(args(0).asInstanceOf[Int])
+    val instance = map.getInstanceById(args(0).asInstanceOf[Long])
     val key = instance.concept.id
     if (map.instances.contains(key)) {
       map.instances(key) = map.instances(key) diff List(instance)
@@ -45,21 +45,19 @@ object HardCodedAction {
   }
 
   def searchInstance(args: Array[Any], map: WorldMap) = {
-    val instance = map.getInstanceById(args(0).asInstanceOf[Int])
+    val instance = map.getInstanceById(args(0).asInstanceOf[Long])
     val xCoordinate = args(1).asInstanceOf[Int]
     val yCoordinate = args(2).asInstanceOf[Int]
     val coordinates = Coordinates(xCoordinate, yCoordinate)
     map.getInstancesAt(coordinates).contains(instance)
-    //map.search(instance, Coordinates(xCoordinate, yCoordinate))
   }
 
   def searchConcept(args: Array[Any], map: WorldMap) = {
-    val concept = Concept.getById(args(0).asInstanceOf[Int])
+    val concept = Concept.getById(args(0).asInstanceOf[Long])
     val xCoordinate = args(1).asInstanceOf[Int]
     val yCoordinate = args(2).asInstanceOf[Int]
     val coordinates = Coordinates(xCoordinate, yCoordinate)
     map.getInstancesAt(coordinates).map(_.concept).contains(concept)
-    //map.search(concept, Coordinates(xCoordinate, yCoordinate))
   }
 
 }
