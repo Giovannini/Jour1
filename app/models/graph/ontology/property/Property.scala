@@ -1,6 +1,7 @@
 package models.graph.ontology.property
 
 import models.graph.ontology.ValuedProperty
+import play.api.libs.json._
 
 /**
  * Model for properties
@@ -11,19 +12,20 @@ case class Property(id: Long, label: String, valueType: String, defaultValue: An
 
   override def toString = label + ": " + valueType + " = " + defaultValue
 
-  /*def toJson : JsValue = Json.obj(
+  def toJson : JsValue = Json.obj(
     "label" -> JsString(label),
     "valueType" -> JsString(valueType),
-    "defaultValue" -> jsonDefaultValue)*/
+    "defaultValue" -> jsonDefaultValue
+  )
 
-  /*private val jsonDefaultValue: JsValue = valueType match {
+  private val jsonDefaultValue: JsValue = valueType match {
     case "Int" => JsNumber(defaultValue.toString.toInt)
     case "Double" => JsNumber(defaultValue.toString.toDouble)
     case "String" => JsString(defaultValue.toString)
     case "Boolean" => JsBoolean(defaultValue.toString.toBoolean)
     //case "List" => (jsonProperty \ "defaultValue").as[String]/**TODO deal with lists correctly*/
     case _ => JsString(defaultValue.toString)
-  }*/
+  }
 
   def defaultValuedProperty: ValuedProperty = {
     ValuedProperty(this, defaultValue)

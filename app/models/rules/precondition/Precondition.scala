@@ -4,6 +4,7 @@ import controllers.Application
 import models.WorldMap
 import models.graph.ontology.Instance
 import models.rules.Argument
+import play.api.libs.json.{JsString, JsNumber, Json}
 
 /**
  * Model for preconditions
@@ -69,6 +70,11 @@ case class Precondition(id: Long, label: String, subConditions: List[Preconditio
         .foldRight(Application.map.getInstances.toSet)(_ intersect _)
     }
   }
+
+  def toJson = Json.obj(
+    "id" -> JsNumber(id),
+    "label" -> JsString(label)
+  )
 }
 
 object Precondition {

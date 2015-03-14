@@ -1,8 +1,12 @@
 package models.rules
 
+import play.api.libs.json.{JsString, Json}
+
 
 case class Argument(reference: String, _type: String){
   require(reference.matches("^[a-z][A-Za-z0-9_]*$"))
+
+  def toJson = JsString(reference)
 }
 
 object Argument {

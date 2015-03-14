@@ -12,10 +12,11 @@ var Scopes = [function() {
     }
 }];
 
-var NodesFactory = [function() {
+var NodesFactory = ['$resource', function($resource) {
     var currentNode = -1;
     var _displayedNodes = [];
     var _edges = [];
+    var _properties = {};
     var options = {
         deepness: 2
     };
@@ -29,6 +30,45 @@ var NodesFactory = [function() {
         return null;
     };
 
+    var getProperty = function(id, success, failure) {
+        if(_properties.hasOwnProperty(id)) {
+            success(_properties[id]);
+        } else {
+            var request = $resource(
+                'graph/property/:propertyId',
+                { 'propertyId': "0" },
+                { 'get': { method: "GET" } }
+            );
+            request.get(
+                { propertyId: id },
+                function(response) {
+                    _properties[id] = response;
+                    success(response);
+                },
+                function(response) {
+                    failure(response);
+                }
+            );
+        }
+    };
+
+    var getRelation = function(label, success, failure) {
+        var request = $resource(
+            'graph/action/:label',
+            { label: "" },
+            { 'get': { method: "GET" } }
+        );
+        request.get(
+            {label: label},
+            function(edge) {
+                success(edge);
+            },
+            function(response) {
+                failure(response);
+            }
+        )
+    };
+
     return {
         getCurrentNode: getCurrentNode,
         setCurrentNode: function(nodeId) { currentNode = nodeId; },
@@ -36,6 +76,8 @@ var NodesFactory = [function() {
         getEdges: function() { return _edges; },
         setDisplayedNodes: function(displayedNodes) { _displayedNodes = displayedNodes; },
         getDisplayedNodes: function() { return _displayedNodes; },
+        getProperty: getProperty,
+        getRelation: getRelation,
         options: options
     }
 }];
@@ -43,6 +85,10 @@ var NodesFactory = [function() {
 var ViewerController = ['$scope', 'Scopes', 'NodesFactory', function($scope, Scopes, NodesFactory) {
     Scopes.add('viewer', $scope);
     $scope.deepness = NodesFactory.options.deepness;
+
+    $scope.updateDeepness = function() {
+        NodesFactory.options.deepness = $scope.deepness;
+    };
 
     $scope.select = function(nodeId) {
         NodesFactory.setCurrentNode(nodeId);
@@ -53,11 +99,10 @@ var ViewerController = ['$scope', 'Scopes', 'NodesFactory', function($scope, Sco
     var alchemy = null;
 
     var toAlchemy = function(nodes, edges) {
-        var res = {
+        return {
             nodes: nodes,
             edges: edges
-        };
-        return res
+        }
     };
 
     var getColor = function(node) {
@@ -67,11 +112,17 @@ var ViewerController = ['$scope', 'Scopes', 'NodesFactory', function($scope, Sco
     var nodeClick = function(node) {
         var id = node.getProperties().id;
         if(lastClick === id) {
-            $scope.select(id);
+            Scopes.get('search').$emit('Search_searchNode', node.getProperties().label);
             lastClick = 0;
         } else {
+            $scope.select(id);
             lastClick = id;
         }
+    };
+
+    var edgeClick = function(edge) {
+        var label = edge.getProperties().label;
+        Scopes.get('editNode').$emit('EditNode_searchEdge', label);
     };
 
     var displayNodes = function() {
@@ -83,7 +134,6 @@ var ViewerController = ['$scope', 'Scopes', 'NodesFactory', function($scope, Sco
             /* Labels */
             nodeCaption: "label",
             edgeCaption: "label",
-            nodeCaptionsOnByDefault: false,
             directedEdges: true,
 
             /* Positionning */
@@ -121,11 +171,12 @@ var ViewerController = ['$scope', 'Scopes', 'NodesFactory', function($scope, Sco
                 }
             },
 
-            /* Node events */
-            nodeClick: nodeClick
+            /* events */
+            nodeClick: nodeClick,
+            edgeClick: edgeClick
         };
 
-        var children = document.getElementById("alchemy").innerHTML = "";
+        document.getElementById("alchemy").innerHTML = "";
         alchemy = new Alchemy(config);
     };
 
@@ -134,14 +185,42 @@ var ViewerController = ['$scope', 'Scopes', 'NodesFactory', function($scope, Sco
     });
 }];
 
+var PropertyDirective = ['NodesFactory', function(NodesFactory) {
+    var link = function($scope, element, attrs) {
+        var propertyId = attrs.propertyId;
+        NodesFactory.getProperty(
+            propertyId,
+            function(property) {
+                $scope.isDefined = true;
+                $scope.label = property.label;
+            },
+            function(response) {
+                $scope.isDefined = false;
+                $scope.error = "Undefined property";
+            }
+        )
+    };
+
+    return {
+        restrict: 'E',
+        templateUrl: 'assets/javascripts/templates/property.html',
+        link: link
+    }
+}];
+
 var EditNodeController = ['$scope', 'Scopes', 'NodesFactory', function($scope, Scopes, NodesFactory) {
     Scopes.add('editNode', $scope);
     //$scope.NodesFactory = NodesFactory;
     $scope.displayedNodes = [];
     $scope.nodeSelected = null;
+    $scope.relationSelected = null;
 
     $scope.isShowingNode = function() {
         return $scope.nodeSelected != null;
+    };
+
+    $scope.isShowingRelation = function() {
+        return $scope.relationSelected != null;
     };
 
     var init = function() {
@@ -154,12 +233,29 @@ var EditNodeController = ['$scope', 'Scopes', 'NodesFactory', function($scope, S
         $scope.$apply();
     };
 
+    var updateRelation = function(relationLabel) {
+        NodesFactory.getRelation(
+            relationLabel,
+            function(relation) {
+                $scope.relationSelected = relation;
+                $scope.$apply();
+            },
+            function(response) {
+
+            }
+        );
+    };
+
     $scope.$on('EditNode_init', function(event) {
         init();
     });
 
     $scope.$on('EditNode_updateNode', function(event) {
         updateNode();
+    });
+
+    $scope.$on('EditNode_searchEdge', function(event, relationLabel) {
+        updateRelation(relationLabel);
     });
 }];
 
@@ -179,7 +275,7 @@ var SearchController = [
 
         $scope.launchSearch = function() {
             search.get(
-                {"search": $scope.search},
+                {"search": $scope.search, "deepness": NodesFactory.options.deepness},
                 function(res) {
                     $scope.error = "";
 
@@ -211,13 +307,19 @@ var SearchController = [
                     }
                 }
             );
-        }
+        };
+
+        Scopes.get('search').$on('Search_searchNode', function(event, search) {
+            $scope.search = search;
+            $scope.launchSearch();
+        });
     }
 ];
 
 angular.module('graphEditor', ["ngResource"])
     .factory('Scopes', Scopes)
     .factory('NodesFactory', NodesFactory)
+    .directive('property', PropertyDirective)
     .controller('ViewerController', ViewerController)
     .controller('EditNodeController', EditNodeController)
     .controller('SearchController', SearchController);

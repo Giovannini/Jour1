@@ -3,6 +3,9 @@ package controllers.graph
 import models.graph.NeoDAO
 import models.graph.custom_types.Statement
 import models.graph.ontology.Concept
+import models.graph.ontology.property.{Property, PropertyDAO}
+import models.graph.ontology.relation.Relation
+import models.rules
 import play.api.libs.json.Json
 import play.api.mvc._
 
@@ -14,19 +17,6 @@ object GraphVisualisation extends Controller {
   }
 
   def searchNodes(search: String, deepness: Int) = Action {
-    def deleteDuplicates(concepts: List[Concept]): List[Concept] = {
-      @tailrec
-      def loop(concepts: List[Concept], acc: List[Concept]): List[Concept] = {
-        concepts match {
-          case Nil => acc
-          case head::tail if acc.contains(head) => loop(tail, acc)
-          case head::tail => loop(tail, head::acc)
-        }
-      }
-
-      loop(concepts, Nil)
-    }
-
     def getRelationsAndLinkedConceptsFromNodes(nodes: List[Concept]): (List[(Long, String, Long)], List[Concept]) = {
       nodes.flatMap(node => {
         val relations = Concept.getRelationsFromAndTo(node.id)
@@ -66,6 +56,24 @@ object GraphVisualisation extends Controller {
       )
     } else {
       NotFound("\""+search+"\" not found")
+    }
+  }
+
+  def getProperty(propertyId: Int) = Action {
+    val property = PropertyDAO.getById(propertyId)
+    if(property == Property.error) {
+      NotFound("Undefined property")
+    } else {
+      Ok(property.toJson)
+    }
+  }
+
+  def getAction(actionLabel: String) = Action {
+    val action = rules.action.Action.getByName(actionLabel)
+    if(action == rules.action.Action.error) {
+      NotFound("Undefined action")
+    } else {
+      Ok(action.toJson)
     }
   }
  }

@@ -9,7 +9,7 @@
                     <form class="form">
                         <div class="form-group">
                             <label for="search" class="form-label">Profondeur :</label>
-                            <input class="form-input" id="search" type="number" ng-model="deepness" value="1" min="1" max="3" />
+                            <input class="form-input" id="search" type="number" ng-model="deepness" ng-change="updateDeepness()" value="1" min="1" max="3" />
                         </div>
                     </form>
                 </div>
@@ -27,7 +27,7 @@
                     </div>
                 </div>
                 <div ng-controller="EditNodeController">
-                    <div ng-hide="isShowingNode()">
+                    <div ng-hide="isShowingNode() || isShowingRelation()">
                         <h4>No node selected</h4>
                         <ul>
                             <li ng-repeat="node in displayedNodes">{{ node.id }} : {{ node.label }}</li>
@@ -38,14 +38,20 @@
                         <div>
                             Properties :
                             <ul>
-                                <li ng-repeat="property in nodeSelected.properties">{{ property.label }} : {{ property.defaultValue }}</li>
+                                <li ng-repeat="property in nodeSelected.properties"><property property-id="{{ property }}" /></li>
                             </ul>
                         </div>
                         <div>
                             Rules :
                             <ul>
-                                <li ng-repeat="element in nodeSelected.rules">{{ element.property.label }} : {{ element.value }}</li>
+                                <li ng-repeat="element in nodeSelected.rules"><property property-id="{{ element.property }}"></property> : {{ element.value }}</li>
                             </ul>
+                        </div>
+                    </div>
+                    <div ng-show="isShowingRelation()" class="table">
+                        <h4>{{ relationSelected.label }}</h4>
+                        <div>
+                            Property
                         </div>
                     </div>
                 </div>

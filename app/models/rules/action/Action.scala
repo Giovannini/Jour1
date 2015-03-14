@@ -7,6 +7,7 @@ import models.rules.custom_types.RuleStatement
 import models.rules.precondition.{PreconditionDAO, Precondition}
 import play.api.Play.current
 import play.api.db.DB
+import play.api.libs.json.{JsArray, JsString, JsNumber, Json}
 
 import scala.language.postfixOps
 
@@ -26,6 +27,15 @@ case class Action(id: Long,
                   parameters: List[Argument]) {
   def withId(id: Long): Action = {
     Action(id, this.label, this.preconditions, this.subActions, this.parameters)
+  }
+
+  def toJson = {
+    Json.obj(
+      "id" -> JsNumber(id),
+      "label" -> JsString(label),
+      "preconditions" -> JsArray(preconditions.map(_.toJson)),
+      "parameters" -> JsArray(parameters.map(_.toJson))
+    )
   }
 }
 
