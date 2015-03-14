@@ -150,7 +150,7 @@ object Relation {
       DB.withConnection { implicit connection =>
         val statement = RelationSQLStatement.getActionId(id)
         val result = statement.apply.map(row => row[Long]("actionId")).head
-        println(result)
+        //println(result)
         result
       }
     }

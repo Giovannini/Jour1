@@ -31,9 +31,9 @@ object WorldInit {
    */
   def worldMapGeneration(): Unit = {
     val allGroundsConcepts = getGroundConcept(Concept.findAll).getDescendance
-    println("allGroundsConcepts: " + allGroundsConcepts.length)
+    //println("allGroundsConcepts: " + allGroundsConcepts.length)
     val instanciableConcepts = getInstanciableConcepts diff allGroundsConcepts
-    println("instanciableConcepts: " + instanciableConcepts.length)
+    //println("instanciableConcepts: " + instanciableConcepts.length)
     generateGround(allGroundsConcepts)
     //Take a lot of time
     instanciableConcepts.foreach(fillWorldWithInstances(map, _))

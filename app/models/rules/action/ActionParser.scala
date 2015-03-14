@@ -31,17 +31,8 @@ object ActionParser {
    */
   def getAction(actionReference: Long): Action = {
     val action = Action.getById(actionReference)
-    println("Action: " + action.label + " - " + action.id)
+    //println("Action: " + action.label + " - " + action.id)
     action
-    /*actionReference match {
-      case "REMOVE" => actionManager._actionRemoveInstanceAt
-      case "ADD"  => actionManager._actionAddInstanceAt
-      case "ACTION_MOVE" => actionManager._actionMoveInstanceAt
-      case _ =>
-        //TODO take action from "rules" BDD instead of two next lines
-        println(actionReference + "not found: REMOVE instead")
-        actionManager._actionRemoveInstanceAt
-    }*/
   }
 
   /**

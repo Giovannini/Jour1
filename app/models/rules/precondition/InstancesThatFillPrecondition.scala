@@ -12,16 +12,13 @@ object InstancesThatFillPrecondition {
 
   def isNextTo(source: Instance): List[Instance] = {
     val result = allInstances.filter(_.coordinates.isNextTo(source.coordinates))
-    println("result = " + result.length)
     result
   }
 
   def isAtWalkingDistance(source: Instance): List[Instance] = {
-    println("Yo")
     val propertyWalkingDistance = PropertyDAO.getByName("WalkingDistance")
 
     def getNear(source: Instance, remainingDistance: Int, coordinatesList: List[Coordinates]): List[Instance] = {
-      println("Bim: " + remainingDistance)
       if (remainingDistance < 1) List()
       else {
         source :: isNextTo(source)

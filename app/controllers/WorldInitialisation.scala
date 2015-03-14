@@ -143,7 +143,6 @@ object WorldInitialisation extends Controller {
 
     /*Relations declaration*/
     val relationSubtypeOf   = Relation.DBList.save("SUBTYPE_OF")
-    println("SUBTYPE id = " + relationSubtypeOf)
     val relationEat         = Relation.DBList.save("ACTION_EAT")
     val relationCut         = Relation.DBList.save("ACTION_CUT")
     val relationMove        = Relation.DBList.save("ACTION_MOVE")

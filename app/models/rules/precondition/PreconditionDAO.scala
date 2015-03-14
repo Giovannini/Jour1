@@ -76,8 +76,7 @@ object PreconditionDAO {
     DB.withConnection { implicit connection =>
       val statement = PreconditionStatement.add(precondition)
       val optionId: Option[Long] = statement.executeInsert()
-      /*val id = */optionId.getOrElse(-1L)
-      //if (id == -1L) Precondition.error else precondition.withId(id)
+      optionId.getOrElse(-1L)
     }
   }
 

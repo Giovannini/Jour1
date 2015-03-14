@@ -75,11 +75,8 @@ object RestCall extends Controller {
    * @return a list of instances under JSON format
    */
   def getPossibleDestinationOfAction(initInstanceId: Long, relationId: Long, conceptId: Long) = Action {
-    println("Getting source")
     val sourceInstance = Application.map.getInstanceById(initInstanceId)
-    println("Retrieving action...")
     val action = ActionParser.getAction(Relation.DBList.getActionIdFromId(relationId))
-    println("getting destination...")
     val destinationInstancesList = Application.map.getInstancesOf(conceptId)
     if (sourceInstance == Instance.error || action == InstanceAction.error){
       Ok(Json.arr())

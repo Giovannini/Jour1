@@ -127,7 +127,6 @@ case class Concept(label: String,
       println("ERROR: Trying to get descendence of an error")
       List()
     }else {
-      println("Getting descendance of concept: " + this.label)
       Concept.getChildren(id).flatMap(concept => concept :: concept.getDescendance)
     }
   }
@@ -290,7 +289,6 @@ object Concept {
    * @return a list of relations and concepts
    */
   def getParents(conceptId: Long): List[Concept] = {
-    println("Getting parents")
     val statement = Statement.getParentConcepts(conceptId)
     statement.apply
       .toList
@@ -307,7 +305,6 @@ object Concept {
     val statement = Statement.getChildrenConcepts(conceptId)
     statement.apply
       .map { row =>
-      println("Parsing to get children of " + row[String]("concept_label"))
       Concept.parseRow(row)
     }
       .toList
@@ -380,13 +377,8 @@ object Concept {
    * @return a list of relations and concepts
    */
   def getReachableRelations(conceptId: Long): List[(Relation, Concept)] = {
-    //println("Get reachable relations for " + Concept.getById(conceptId).label)
     val conceptRelations = getRelationsFrom(conceptId) /*.filter(notASubtype)*/
-    //println("  Personal relations")
-    conceptRelations.foreach(tuple => println(tuple._1.label))
     val parentsRelations = getParentsRelations(conceptId)
-    println("  parents relations")
-    parentsRelations.foreach(tuple => println(tuple._1.label))
     conceptRelations ::: parentsRelations
   }
 
