@@ -81,13 +81,11 @@ object ValuedProperty {
    * @return the value in its correct type
    */
   def parseValue(property: Property, stringValue: String): ValuedProperty = {
-    //println("Parsing value " + stringValue + " for property " + property.label)
     val value = property.valueType match {
       case "Int" => stringValue.toInt
       case "Double" => stringValue.toDouble
       case "String" => stringValue
       case "Boolean" => stringValue.toBoolean
-      //case "Array" => jsonValue.as[List[JsValue]].map(parseValue(_))
       case _ => stringValue
     }
     ValuedProperty(property, value)
@@ -121,7 +119,6 @@ object ValuedProperty {
       case "Double" => vpArray(1).toDouble
       case "String" => vpArray(1)
       case "Boolean" => vpArray(1).toBoolean
-      //case "List" => (jsonProperty \ "defaultValue").as[String]/**TODO deal with lists correctly*/
       case _ => vpArray(1)
     }
     ValuedProperty(prop, value)

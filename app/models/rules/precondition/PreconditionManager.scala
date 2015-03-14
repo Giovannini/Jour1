@@ -1,12 +1,15 @@
 package models.rules.precondition
 
-import models.WorldMap
 import models.rules.Argument
 
 /**
  * Manager for the preconditions.
  */
-case class PreconditionManager(map: WorldMap){
+object PreconditionManager {
+
+  //val map = Application.map
+
+  PreconditionDAO.clear
 
   val _preconditionIsNextTo = PreconditionDAO.save(Precondition(0, "isNextTo", List[Precondition](),
     List(Argument("instance1ID", "Int"), Argument("instance2ID", "Int"))))

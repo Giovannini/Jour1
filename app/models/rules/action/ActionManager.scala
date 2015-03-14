@@ -1,13 +1,17 @@
 package models.rules.action
 
-import models.WorldMap
+import controllers.Application
 import models.rules.Argument
 import models.rules.precondition.{Precondition, PreconditionManager}
 
 /**
  * Manage actions
  */
-case class ActionManager(actions: List[Action], map: WorldMap, preconditionManager: PreconditionManager){
+object ActionManager{
+
+  val map = Application.map
+
+  Action.clearDB
 
   val _actionAddInstanceAt = Action.save(Action(0, "addInstanceAt", List[Precondition](), List[Action](),
     List(Argument("instanceId", "Int"), Argument("groundId", "Int"))))
@@ -19,8 +23,8 @@ case class ActionManager(actions: List[Action], map: WorldMap, preconditionManag
   /**
    * NOTE: The add action must be done before the remove one because it is not possible to add a non existing instance.
    */
-  val _actionMoveInstanceAt = Action.save(Action.identify(0L, "moveInstanceAt",
-    List(preconditionManager._preconditionIsAtWalkingDistance),
+  val _actionMoveInstanceAt = Action.save(Action.identify(0L, "ACTION_MOVE",
+    List(PreconditionManager._preconditionIsAtWalkingDistance),
     List(_actionAddInstanceAt, _actionRemoveInstanceAt),
     List(Argument("instanceId", "Int"), Argument("groundId", "Int"))))
 
@@ -37,10 +41,10 @@ case class ActionManager(actions: List[Action], map: WorldMap, preconditionManag
     if (preconditionCheck) {
       val args = arguments.map(_._2).toArray
       action.id match {
-        case 1 =>
+        case `_actionAddInstanceAt` =>
           HardCodedAction.addInstanceAt(args, map)
           true
-        case 2 =>
+        case `_actionRemoveInstanceAt` =>
           HardCodedAction.removeInstanceAt(args, map)
           true
         case _ => action.subActions
@@ -53,7 +57,14 @@ case class ActionManager(actions: List[Action], map: WorldMap, preconditionManag
     }
   }
 
-  def takeGoodArguments(action: Action, arguments: List[(Argument, Any)]) = {
+  /**
+   * Take the god argument list from the list of arguments of sur-action
+   * @author Thomas GIOVANNINI
+   * @param action from which the arguments are needed
+   * @param arguments list to reduce
+   * @return a reduced argument list
+   */
+  def takeGoodArguments(action: Action, arguments: List[(Argument, Any)]): List[(Argument, Any)] = {
     val keptArguments = arguments.filter{
       tuple => action.parameters
         .contains(tuple._1)

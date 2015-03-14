@@ -1,18 +1,15 @@
 package controllers
 
 import models.graph.NeoDAO
-import models.graph.custom_types.{DisplayProperty, Statement}
+import models.graph.custom_types.DisplayProperty
 import models.graph.ontology._
-import models.graph.ontology.property.{PropertyDAO, Property}
+import models.graph.ontology.property.{Property, PropertyDAO}
+import models.graph.ontology.relation.Relation
 import models.{WorldInit, WorldMap}
-import org.anormcypher.Neo4jREST
-import play.Play
 import play.api.mvc._
 
 
 object WorldInitialisation extends Controller {
-
-  implicit val connection = Neo4jREST(Play.application.configuration.getString("serverIP"), 7474, "/db/data/")
 
   private var isWorldMapInitialized = false
 
@@ -47,7 +44,7 @@ object WorldInitialisation extends Controller {
   }
   
   def initGraph = Action {
-    val result = Statement.clearDB.execute
+    val result = NeoDAO.clearDB()
     //this is working
     if (result) {
       if(putInitialConceptsInDB) {
@@ -65,13 +62,17 @@ object WorldInitialisation extends Controller {
    * @author Thomas GIOVANNINI
    */
   def putInitialConceptsInDB: Boolean = {
-    /*Property declaration*/
+
     PropertyDAO.clear
+    Relation.DBList.clear
+
+    /*Property declaration*/
     val propertyInstanciable      = PropertyDAO.save(Property(0, "Instanciable", "Boolean", false))
     val propertyDuplicationSpeed  = PropertyDAO.save(Property(0, "DuplicationSpeed", "Int", 5))
     val propertyStrength          = PropertyDAO.save(Property(0, "Strength", "Int", 0))
-    val propertyZIndex            = PropertyDAO.save(Property(0, "ZIndex", "Int", 0))
     val propertyWalkingDistance   = PropertyDAO.save(Property(0, "WalkingDistance", "Int", 3))
+
+    println("Declaration of concepts...")
 
     /*Concepts declaration*/
     val conceptMan        = Concept.create("Man",
@@ -138,18 +139,20 @@ object WorldInitialisation extends Controller {
           ValuedProperty(propertyInstanciable,true)),
         DisplayProperty("#878377", 1))
 
+    println("Relations declaration...")
+
     /*Relations declaration*/
-    val relationSubtypeOf   = Relation("SUBTYPE_OF")
-    val relationEat         = Relation("ACTION_EAT")
-    val relationCut         = Relation("ACTION_CUT")
-    val relationMove        = Relation("ACTION_MOVE")
-    val relationFlee        = Relation("ACTION_FLEE")
-    val relationProduces    = Relation("ACTION_PRODUCE")
+    val relationSubtypeOf   = Relation.DBList.save("SUBTYPE_OF")
+    println("SUBTYPE id = " + relationSubtypeOf)
+    val relationEat         = Relation.DBList.save("ACTION_EAT")
+    val relationCut         = Relation.DBList.save("ACTION_CUT")
+    val relationMove        = Relation.DBList.save("ACTION_MOVE")
+    val relationFlee        = Relation.DBList.save("ACTION_FLEE")
+    val relationProduces    = Relation.DBList.save("ACTION_PRODUCE")
+    val relationLiveOn      = Relation.DBList.save("LIVE_ON")
 
-    val relationLiveOn      = Relation("LIVE_ON")
-
-    Statement.clearDB.execute
-
+    NeoDAO.clearDB()
+    println("Adding concepts to graph...")
     /*Storage of the concepts in DB*/
     val addConceptVerification = NeoDAO.addConceptToDB(conceptMan) &&
       NeoDAO.addConceptToDB(conceptPredator) &&
@@ -168,6 +171,7 @@ object WorldInitialisation extends Controller {
       NeoDAO.addConceptToDB(conceptWater) &&
       NeoDAO.addConceptToDB(conceptEarth)
     /*Creation of the relations in DB*/
+    println("Adding relations to graph...")
     val addRelationVerification =
       NeoDAO.addRelationToDB(conceptAnimal.id, relationMove, conceptEarth.id) &&
       NeoDAO.addRelationToDB(conceptSheep.id, relationSubtypeOf, conceptAnimal.id) &&
@@ -203,6 +207,8 @@ object WorldInitialisation extends Controller {
     NeoDAO.addRelationToDB(conceptApple.id, relationLiveOn, conceptAppleTree.id) &&
     NeoDAO.addRelationToDB(conceptSheep.id, relationLiveOn, conceptEarth.id)
 
-    addConceptVerification && addRelationVerification && addRelationVerification2
+    val result = addConceptVerification && addRelationVerification && addRelationVerification2
+    println("Initialization of the graph completed: " + result)
+    result
   }
 }

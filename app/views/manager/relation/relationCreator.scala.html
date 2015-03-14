@@ -1,6 +1,6 @@
+@import models.graph.ontology.relation.Relation
 @import controllers.ontology.RelationManager
 @import models.graph.ontology.Concept
-@import models.graph.ontology.Relation
 
 <!DOCTYPE html>
 <html>
@@ -18,14 +18,14 @@
         }
         </select>
       }
-      @helper.input(RelationManager.relationForm("relation_label")) { (id, name, value, args) =>
+      @helper.input(RelationManager.relationForm("existing_label")) { (id, name, value, args) =>
         <select name="@name" id="@id">
         @for(relation <- Relation.DBGraph.getAll){
           <option value="@relation.label">@relation.label</option>
         }
         </select>
       }
-      @helper.input(RelationManager.relationForm("relation_label2")) { (id, name, value, args) =>
+      @helper.input(RelationManager.relationForm("new_label")) { (id, name, value, args) =>
         <input type="text" name="@name" id="@id" value="">
       }
       @helper.input(RelationManager.relationForm("concept2_id")) { (id, name, value, args) =>

@@ -1,5 +1,7 @@
 package models.graph.custom_types
 
+import play.api.libs.json.JsValue
+
 /**
  * Model for coordinates
  * @author Thomas GIOVANNINI
@@ -59,5 +61,13 @@ case class Coordinates(x: Int, y: Int) {
           this + Coordinates(0, -1),
           this + Coordinates(1, 0),
           this + Coordinates(-1, 0))
+  }
+}
+
+object Coordinates {
+  def parseJson(json: JsValue): Coordinates = {
+    val x = (json \ "x").as[Int]
+    val y = (json \ "y").as[Int]
+    Coordinates(x, y)
   }
 }

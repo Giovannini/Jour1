@@ -7,20 +7,20 @@ import models.rules.action.Action
  * All values from this objects are SQLStatements
  */
 object RuleStatement {
-
   /**
    * Request to clear the database
    * @author Aurélie LORGEOUX
-   * @return a sql statement        
+   * @return a sql statement
    */
   val clearDB = {
     SQL("DELETE FROM rules;")
   }
 
+
   /**
    * Request to select all elements from database
    * @author Aurélie LORGEOUX
-   * @return a sql statement        
+   * @return a sql statement
    */
   val getAll = {
     SQL("""
@@ -55,6 +55,11 @@ object RuleStatement {
   def get(id: Long) = {
     SQL("SELECT * from rules WHERE id = {id}")
       .on('id -> id)
+  }
+
+  def getByName(name: String) = {
+    SQL("SELECT * from rules WHERE label = {label}")
+      .on('label -> name)
   }
 
   /**

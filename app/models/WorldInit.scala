@@ -4,6 +4,7 @@ import controllers.Application
 import models.graph.custom_types.Coordinates
 import models.graph.ontology._
 import models.graph.ontology.property.PropertyDAO
+import models.graph.ontology.relation.Relation
 
 import scala.util.Random
 
@@ -30,9 +31,9 @@ object WorldInit {
    */
   def worldMapGeneration(): Unit = {
     val allGroundsConcepts = getGroundConcept(Concept.findAll).getDescendance
-    //println("allGroundsConcepts: " + allGroundsConcepts.length)
+    println("allGroundsConcepts: " + allGroundsConcepts.length)
     val instanciableConcepts = getInstanciableConcepts diff allGroundsConcepts
-    //println("instanciableConcepts: " + instanciableConcepts.length)
+    println("instanciableConcepts: " + instanciableConcepts.length)
     generateGround(allGroundsConcepts)
     //Take a lot of time
     instanciableConcepts.foreach(fillWorldWithInstances(map, _))
@@ -100,7 +101,7 @@ object WorldInit {
   def repartitionStream(lastBound: Int, matrixExtremums: (Int, Int), listGround: List[Concept], sumStrength: Int)
   : Stream[(Int, Concept)] = {
     val newBound = getBounds(lastBound, matrixExtremums, sumStrength, listGround)
-    val newListGround = if (listGround.tail.nonEmpty) listGround.tail else List(Concept.error)
+    val newListGround = if (listGround.length > 1) listGround.tail else List(Concept.error)
     (newBound, listGround.head) #:: repartitionStream(newBound, matrixExtremums, newListGround, sumStrength)
   }
 
@@ -165,6 +166,7 @@ object WorldInit {
    */
   // TODO: pas propre
   def getGroundConcept(concepts: List[Concept]): Concept = {
+    //println("Concepts: " + concepts.length)
     concepts.find(_.label == "Ground")
       .getOrElse(Concept.error)
   }
@@ -270,6 +272,7 @@ object WorldInit {
    * @return List of instances of the concept
    */
   def createInstances(worldMap: WorldMap, conceptToInstanciate: Concept): List[Instance] = {
+    println("createInstances: " + conceptToInstanciate.label)
     val livingPlaces = getLivingPlacesIdsFor(conceptToInstanciate.id)
     livingPlaces.flatMap { livingPlaceConceptId =>
       val instancesOfLivingPlace = worldMap.getInstancesOf(livingPlaceConceptId)
@@ -302,7 +305,7 @@ object WorldInit {
    */
   def getLivingPlacesIdsFor(conceptId: Long): List[Long] = {
     Concept.getRelationsFrom(conceptId)
-      .filter(_._1 == Relation("LIVE_ON"))
+      .filter(tuple => tuple._1.id == Relation.DBList.getByName("LIVE_ON").id)
       .map(_._2.id)
   }
 

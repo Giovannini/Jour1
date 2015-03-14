@@ -3,6 +3,7 @@ package models.graph
 import models.graph.custom_types.Statement
 import models.graph.ontology._
 import models.graph.ontology.property.Property
+import models.graph.ontology.relation.Relation
 import org.anormcypher._
 import play.Play
 
@@ -13,6 +14,11 @@ import play.Play
 object NeoDAO {
   // Setup the Rest Client
   implicit val connection = Neo4jREST(Play.application.configuration.getString("serverIP"), 7474, "/db/data/")
+
+  def clearDB(): Boolean = {
+    val statement = Statement.clearDB
+    statement.execute()
+  }
 
   /**
    * Add a concept into the DB.
@@ -93,15 +99,15 @@ object NeoDAO {
   /**
    * Create a relation into two existing concepts in the Neo4J DB.
    * @author Thomas GIOVANNINI
-   * @param relation the relation to add, containing the source concept, the relation name and the destination concept
+   * @param relationID the relation to add, containing the source concept, the relation name and the destination concept
    * @return true if the relation was correctly added
    *         false else
    */
-  def addRelationToDB(sourceId: Long, relation: Relation, destId: Long): Boolean = {
+  def addRelationToDB(sourceId: Long, relationID: Long, destId: Long): Boolean = {
     /* TODO
       * Be careful when creating a relation SUBTYPE_OF not to insert loop.
       */
-    val statement = Statement.createRelation(sourceId, relation, destId)
+    val statement = Statement.createRelation(sourceId, relationID, destId)
     statement.execute
   }
 

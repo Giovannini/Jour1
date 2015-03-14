@@ -9,7 +9,7 @@ GET         /init                                                    controllers
 
 GET         /concepts                                                controllers.RestCall.getAllConcepts
 GET         /instances                                               controllers.WorldInitialisation.getWorld
-GET         /instances/:initInstanceId/:actionType/:conceptId        controllers.RestCall.getPossibleDestinationOfAction(initInstanceId: Int, actionType: String, conceptId: Int)
+GET         /instances/:initInstanceId/:actionType/:conceptId        controllers.RestCall.getPossibleDestinationOfAction(initInstanceId: Long, actionType: Long, conceptId: Long)
 
 #Instances manipulation
 GET         /instances/edit/:instanceId                              controllers.RestCall.editInstance(instanceId: Int)
@@ -27,7 +27,6 @@ GET         /graph                                                   controllers
 GET         /graph/:search/:deepness                                 controllers.graph.GraphVisualisation.searchNodes(search: String, deepness: Int)
 
 # Rules visualisation
-GET         /rules                                                   controllers.rules.RulesVisualisation.index
 GET         /rules                                                   controllers.rules.RulesVisualisation.index
 GET         /rules/delete/:id                                        controllers.rules.RulesVisualisation.delete(id: Long)
 GET         /rules/load/:id                                          controllers.rules.RulesVisualisation.load(id: Long)

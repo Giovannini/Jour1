@@ -92,15 +92,12 @@ object Instance {
    * @return the represented instance
    */
   def parseJson(jsonInstance: JsValue): Instance = {
-    println(jsonInstance.toString)
     val id = (jsonInstance \ "id").as[Int]
     val label = (jsonInstance \ "label").as[String]
-    val x_coordinate = (jsonInstance \ "coordinates" \ "x").as[Int]
-    val y_coordinate = (jsonInstance \ "coordinates" \ "y").as[Int]
-    val coordinates = Coordinates(x_coordinate, y_coordinate)
+    val coordinates = Coordinates.parseJson(jsonInstance \ "coordinates")
     val properties = (jsonInstance \ "properties").as[List[JsValue]].map(ValuedProperty.parseJson)
     val conceptId = (jsonInstance \ "concept").as[Int]
-    Concept.getById(conceptId) match {
+    Concept.getById(conceptId) match { // TODO better verification
       case Concept.error => error
       case concept => Instance(id, label, coordinates, properties, concept)
     }

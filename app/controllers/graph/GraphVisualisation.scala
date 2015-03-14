@@ -2,7 +2,7 @@ package controllers.graph
 
 import models.graph.NeoDAO
 import models.graph.custom_types.Statement
-import models.graph.ontology.{Relation, Concept}
+import models.graph.ontology.Concept
 import play.api.libs.json.Json
 import play.api.mvc._
 

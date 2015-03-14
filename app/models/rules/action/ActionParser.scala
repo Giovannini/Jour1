@@ -5,7 +5,7 @@ import models.rules.Argument
 /**
  * Parser class for actions
  */
-case class ActionParser(actionManager: ActionManager) {
+object ActionParser {
 
   /**
    * Parse an action from client-side and execute it.
@@ -17,9 +17,10 @@ case class ActionParser(actionManager: ActionManager) {
    */
   def parseAction(actionReference: Long, instancesId: List[Int]): Boolean = {
     val action = getAction(actionReference)
-    //println("Got action: " + action.label)
-    val arguments = getArgumentsList(action, instancesId)
-    actionManager.execute(action, arguments)
+    (action == Action.error) && {
+      val arguments = getArgumentsList(action, instancesId)
+      ActionManager.execute(action, arguments)
+    }
   }
 
   /**
@@ -29,7 +30,9 @@ case class ActionParser(actionManager: ActionManager) {
    * @return an action object
    */
   def getAction(actionReference: Long): Action = {
-    Action.getById(actionReference)
+    val action = Action.getById(actionReference)
+    println("Action: " + action.label + " - " + action.id)
+    action
     /*actionReference match {
       case "REMOVE" => actionManager._actionRemoveInstanceAt
       case "ADD"  => actionManager._actionAddInstanceAt
@@ -47,15 +50,14 @@ case class ActionParser(actionManager: ActionManager) {
    * @param ids the ids of the instances needed to execute the actions
    * @return a list of arguments and their values
    */
-  def getArgumentsList(action: Action, ids: List[Int]):List[(Argument, Any)] = {
-    if(ids.length == action.parameters.length){
+  def getArgumentsList(action: Action, ids: List[Int]): List[(Argument, Any)] = {
+    if (ids.length == action.parameters.length) {
       action.parameters.zip(ids)
-    }else{
+    } else {
       println("Error while getting arguments list: arguments list of different size.")
       action.parameters.zip(ids)
     }
   }
-
 
 
 }

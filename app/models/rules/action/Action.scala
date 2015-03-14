@@ -39,36 +39,49 @@ object Action {
     Action(id, label, preconditions.map(PreconditionDAO.getById), subActions.map(getById), parameters)
   }
 
-  def parse(id: Long, label: String, parameters: String, preconditions: String, subActions: String): Action = {
-    val parsedParameters = {
-      println("parameters: " + parameters)
-      if (parameters == "") List()
-      else if (! parameters.contains(":")){
-        Action.delete(id)
+  /**
+   * Parse an action from strings
+   * @param id of the action
+   * @param label of the action
+   * @param parametersToParse to retrieve real parameters of the action
+   * @param preconditionsToParse to retrieve real preconditions of the action
+   * @param subActionsToParse to retrieve real sub-actions of the action
+   * @return the corresponding action
+   */
+  def parse(id: Long, label: String, parametersToParse: String, preconditionsToParse: String, subActionsToParse: String): Action = {
+    var error = false
+    def parseParameters(): List[Argument] = {
+      if (parametersToParse == "") List()
+      else if (! parametersToParse.contains(":")){
+        error = true
         List()
       }
-      else parameters.split(";")
+      else parametersToParse.split(";")
         .map(_.split(":"))
         .map(array => Argument(array(0), array(1)))
         .toList
     }
-    val parsedPreconditions = {
-      if(preconditions == "") List()
-      else if(! preconditions.matches("[0-9;]*")){
+    def parsePreconditions(): List[Precondition] = {
+      if(preconditionsToParse == "") List()
+      else if(! preconditionsToParse.matches("[0-9;]*")){
         Action.delete(id)
         List()
       }
-      else preconditions.split(";")
+      else preconditionsToParse.split(";")
         .map(_.toLong)
         .map(PreconditionDAO.getById)
         .toList
     }
-    //println("Got preconditions: " + parsedPreconditions.map(_.label).mkString(", "))
-    val parsedSubActions: List[Action] = {
-      if (subActions == "") List()
-      else subActions.split(";").map(s => getById(s.toLong)).toList
+    def parseSubActions(): List[Action] = {
+      if (subActionsToParse == "") List()
+      else subActionsToParse.split(";").map(s => getById(s.toLong)).toList
     }
-    Action(id, label, parsedPreconditions, parsedSubActions, parsedParameters)
+    
+    val parameters = parseParameters()
+    val preconditions = parsePreconditions()
+    val parsedSubActions = parseSubActions()
+    if(error) Action.error
+    else Action(id, label, preconditions, parsedSubActions, parameters)
   }
   
   val error = Action(-1, "error", List[Precondition](), List[Action](), List[Argument]())
@@ -92,7 +105,7 @@ object Action {
    * @author Aurélie LORGEOUX
    * @return number of rules deleted
    */
-  def clear: Int = {
+  def clearDB: Int = {
     DB.withConnection { implicit connection =>
       val statement = RuleStatement.clearDB
       statement.executeUpdate
@@ -122,8 +135,7 @@ object Action {
     DB.withConnection { implicit connection =>
       val statement = RuleStatement.add(action)
       val optionId: Option[Long] = statement.executeInsert()
-      /*val id = */optionId.getOrElse(-1L)
-      //if (id == -1L) Action.error else action.withId(id)
+      optionId.getOrElse(-1L)
     }
   }
 
@@ -135,8 +147,21 @@ object Action {
    */
   def getById(id: Long): Action = {
     DB.withConnection { implicit connection =>
-        val statement = RuleStatement.get(id)
-        statement.as(actionParser.singleOpt).getOrElse(Action.error)
+      val statement = RuleStatement.get(id)
+      statement.as(actionParser.singleOpt).getOrElse(Action.error)
+    }
+  }
+
+  /**
+   * Get one rule saved in database with its name
+   * @author Thomas GIOVANNINI
+   * @param name of the rule
+   * @return rule identified by id
+   */
+  def getByName(name: String): Action = {
+    DB.withConnection { implicit connection =>
+      val statement = RuleStatement.getByName(name)
+      statement.as(actionParser.singleOpt).getOrElse(Action.error)
     }
   }
 

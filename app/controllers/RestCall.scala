@@ -1,9 +1,10 @@
 package controllers
 
-import models.graph.ontology.{Concept, Instance, Relation}
+import models.graph.ontology.relation.Relation
+import models.graph.ontology.{Concept, Instance}
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller, Request}
-import models.rules.action.{Action => InstanceAction}
+import models.rules.action.{Action => InstanceAction, ActionParser}
 
 /**
  * Controller to send Json data to client
@@ -39,7 +40,7 @@ object RestCall extends Controller {
    * @return a JsValue representing the relationned concept
    */
   def relationnedConceptToJson(tuple: (Relation, Concept)): JsValue = {
-    println("RelationID = " + tuple._1.id)
+    //println("RelationID = " + tuple._1.id)
     Json.obj( "relationID" -> JsNumber(tuple._1.id),
               "relationLabel" -> JsString(tuple._1.label),
               "conceptId" -> JsNumber(tuple._2.hashCode()))
@@ -59,7 +60,7 @@ object RestCall extends Controller {
       val jsonRequest = Json.toJson(request.body)
       val actionReference = (jsonRequest \ "action").as[String].toLong
       val actionArguments = (jsonRequest \ "instances").as[List[Int]]
-      Application.actionParser.parseAction(actionReference, actionArguments)
+      ActionParser.parseAction(actionReference, actionArguments)
     }
 
     val result = execution(request)
@@ -73,14 +74,13 @@ object RestCall extends Controller {
    * @author Thomas GIOVANNINI
    * @return a list of instances under JSON format
    */
-  def getPossibleDestinationOfAction(initInstanceId: Int, actionType: String, conceptId: Int) = Action {
-    println("okok")
+  def getPossibleDestinationOfAction(initInstanceId: Long, relationId: Long, conceptId: Long) = Action {
+    println("Getting source")
     val sourceInstance = Application.map.getInstanceById(initInstanceId)
-    println("okok")
-    val action = Application.actionParser.getAction(actionType.toLong)
-    println("okok")
+    println("Retrieving action...")
+    val action = ActionParser.getAction(Relation.DBList.getActionIdFromId(relationId))
+    println("getting destination...")
     val destinationInstancesList = Application.map.getInstancesOf(conceptId)
-    println("okok")
     if (sourceInstance == Instance.error || action == InstanceAction.error){
       Ok(Json.arr())
     }

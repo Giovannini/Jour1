@@ -1,13 +1,11 @@
 package models.graph.ontology
 
 import models.graph.NeoDAO
-import models.graph.custom_types.{DisplayProperty, Coordinates, Statement}
-import models.graph.ontology.property.{PropertyDAO, Property}
-import org.anormcypher.{Neo4jREST, CypherResultRow}
-import play.Play
+import models.graph.custom_types.{Coordinates, DisplayProperty, Statement}
+import models.graph.ontology.property.{Property, PropertyDAO}
+import models.graph.ontology.relation.Relation
+import org.anormcypher.CypherResultRow
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
-
-import scala.util.{Failure, Success, Try}
 
 /**
  * Model for a concept of an ontology
@@ -18,9 +16,9 @@ import scala.util.{Failure, Success, Try}
  * @param displayProperty for tis concept to be displayed
  */
 case class Concept(label: String,
-               properties: List[Property],
-               rules: List[ValuedProperty],
-               displayProperty: DisplayProperty) {
+                   properties: List[Property],
+                   rules: List[ValuedProperty],
+                   displayProperty: DisplayProperty) {
   require(label.matches("^[A-Z][A-Za-z0-9_ ]*$"))
 
   /**
@@ -33,11 +31,11 @@ case class Concept(label: String,
     this(label, properties, rules, DisplayProperty())
   }
 
-  val id : Long = hashCode
+  val id: Long = hashCode
 
   override def hashCode = label.hashCode + "CONCEPT".hashCode()
 
-  override def equals(obj:Any) = {
+  override def equals(obj: Any) = {
     obj.isInstanceOf[Concept] && obj.asInstanceOf[Concept].id == this.id
   }
 
@@ -62,11 +60,11 @@ case class Concept(label: String,
    */
   def toNodeString = {
     "(" + label.toLowerCase +
-      " { label: \"" + label + "\","+
-      " properties: [" + properties.map(_.id).mkString(",") + "],"+
-      " rules: [" + rules.map(p => "\""+p+"\"").mkString(",") + "],"+
-      " display: \""+displayProperty+"\","+
-      " type: \"CONCEPT\","+
+      " { label: \"" + label + "\"," +
+      " properties: [" + properties.map(_.id).mkString(",") + "]," +
+      " rules: [" + rules.map(p => "\"" + p + "\"").mkString(",") + "]," +
+      " display: \"" + displayProperty + "\"," +
+      " type: \"CONCEPT\"," +
       " id:" + id + "})"
   }
 
@@ -98,6 +96,12 @@ case class Concept(label: String,
     ValuedProperty.keepHighestLevelRules(rules ::: getParents.flatMap(_.getAllRules), List())
   }
 
+  /**
+   * Get value for a given rule
+   * @author Thomas GIOVANNINI
+   * @param property to evaluate
+   * @return the value associated to the given property in rules
+   */
   def getRuleValue(property: Property): Any = {
     rules.find(_.property == property)
       .getOrElse(property.defaultValuedProperty)
@@ -113,20 +117,31 @@ case class Concept(label: String,
     Concept.getParents(id)
   }
 
+  /**
+   * Get descendance of the concept
+   * @author Thomas GIOVANNINI
+   * @return all children of gthe concept and their children
+   */
   def getDescendance: List[Concept] = {
-    Concept.getChildren(id).flatMap(concept => concept :: concept.getDescendance)
+    if (this == Concept.error){
+      println("ERROR: Trying to get descendence of an error")
+      List()
+    }else {
+      println("Getting descendance of concept: " + this.label)
+      Concept.getChildren(id).flatMap(concept => concept :: concept.getDescendance)
+    }
   }
 
 }
 
 object Concept {
 
-  implicit val connection = Neo4jREST(Play.application.configuration.getString("serverIP"), 7474, "/db/data/")
+  implicit val connection = NeoDAO.connection
 
   val error = Concept("XXX", List(), List(), DisplayProperty())
 
   /**
-    * Apply method for the second constructor
+   * Apply method for the second constructor
    * @author Thomas GIOVANNINI
    * @param label of the concept
    * @param properties of the concept
@@ -134,14 +149,30 @@ object Concept {
    */
   def apply(label: String, properties: List[Property], rules: List[ValuedProperty]) = new Concept(label, properties, rules)
 
+  /**
+   * Create a concept given a list of ids of properties instead of a list of properties directly.
+   * @author Thomas GIOVANNINI
+   * @param label of the concept
+   * @param properties id for the concept
+   * @param rules of the concept
+   * @return a concept
+   */
   def create(label: String, properties: List[Long], rules: List[ValuedProperty]): Concept = {
     Concept(label, properties.map(PropertyDAO.getById), rules)
   }
 
+  /**
+   * Create a concept given a list of ids of properties instead of a list of properties directly.
+   * @author Thomas GIOVANNINI
+   * @param label of the concept
+   * @param properties id for the concept
+   * @param rules of the concept
+   * @param displayProperty of the concept
+   * @return a concept
+   */
   def create(label: String, properties: List[Long], rules: List[ValuedProperty], displayProperty: DisplayProperty): Concept = {
     Concept(label, properties.map(PropertyDAO.getById), rules, displayProperty)
   }
-
 
   /**
    * Parse a Json value to a concept
@@ -181,7 +212,7 @@ object Concept {
    * @param property to be added
    * @return the concept with the given property added
    */
-  def addPropertyToConcept(concept: Concept, property: Property): Concept ={
+  def addPropertyToConcept(concept: Concept, property: Property): Concept = {
     NeoDAO.addPropertyToConcept(concept, property)
     this(concept.label, property :: concept.properties, concept.rules)
   }
@@ -193,11 +224,11 @@ object Concept {
    * @param property to be removed
    * @return the concept without the given property
    */
-  def removePropertyFromConcept(concept: Concept, property: Property): Concept ={
-    if (concept.properties.contains(property)){
+  def removePropertyFromConcept(concept: Concept, property: Property): Concept = {
+    if (concept.properties.contains(property)) {
       NeoDAO.removePropertyFromConcept(concept, property)
       this(concept.label, concept.properties diff List(property), concept.rules)
-    }else concept
+    } else concept
   }
 
   /**
@@ -207,7 +238,7 @@ object Concept {
    * @param rule to be added
    * @return the concept with the given property added
    */
-  def addRuleToConcept(concept: Concept, rule: ValuedProperty): Concept ={
+  def addRuleToConcept(concept: Concept, rule: ValuedProperty): Concept = {
     NeoDAO.addRuleToConcept(concept, rule)
     this(concept.label, concept.properties, rule :: concept.rules)
   }
@@ -219,23 +250,23 @@ object Concept {
    * @param rule to be removed
    * @return the concept without the given rule
    */
-  def removeRuleFromConcept(concept: Concept, rule: ValuedProperty): Concept ={
-    if(concept.rules.contains(rule)){
+  def removeRuleFromConcept(concept: Concept, rule: ValuedProperty): Concept = {
+    if (concept.rules.contains(rule)) {
       NeoDAO.removeRuleFromConcept(concept, rule)
       this(concept.label, concept.properties, concept.rules diff List(rule))
-    }else concept
+    } else concept
   }
-  
+
   /**
    * Method to get a concept from the graph by its ID
    * @author Thomas GIOVANNINI
    * @param conceptId the ID of the desired concept
    * @return the desired concept if exists
    */
-  def getById(conceptId: Int): Concept = {
+  def getById(conceptId: Long): Concept = {
     val statement = Statement.getConceptById(conceptId)
     val cypherResultRowStream = statement.apply
-    if(cypherResultRowStream.nonEmpty) {
+    if (cypherResultRowStream.nonEmpty) {
       val row: CypherResultRow = statement.apply.head
       parseRow(row)
     } else error
@@ -259,6 +290,7 @@ object Concept {
    * @return a list of relations and concepts
    */
   def getParents(conceptId: Long): List[Concept] = {
+    println("Getting parents")
     val statement = Statement.getParentConcepts(conceptId)
     statement.apply
       .toList
@@ -274,7 +306,10 @@ object Concept {
   def getChildren(conceptId: Long): List[Concept] = {
     val statement = Statement.getChildrenConcepts(conceptId)
     statement.apply
-      .map(Concept.parseRow)
+      .map { row =>
+      println("Parsing to get children of " + row[String]("concept_label"))
+      Concept.parseRow(row)
+    }
       .toList
   }
 
@@ -295,10 +330,14 @@ object Concept {
    * @return a list of tuple containing the relation and destination concept.
    */
   def getRelationsFrom(conceptId: Long): List[(Relation, Concept)] = {
+    val conceptLabel = Concept.getById(conceptId).label
     Statement.getRelationsFrom(conceptId).apply
-      .toList
       .filter(noInstance)
-      .map{ row => (Relation.DBGraph.parseRow(row), Concept.parseRow(row))}
+      .map { row =>
+        val toto = (Relation.DBGraph.parseRow(row), Concept.parseRow(row))
+        //println(conceptLabel + " - " + toto._1.label + " - " + toto._2.label)
+        toto
+      }.toList
   }
 
   /**
@@ -311,7 +350,7 @@ object Concept {
     Statement.getRelationsTo(conceptId).apply
       .toList
       .filter(noInstance)
-      .map{ row => (Relation.DBGraph.parseRow(row), Concept.parseRow(row))}
+      .map { row => (Relation.DBGraph.parseRow(row), Concept.parseRow(row))}
   }
 
   /**
@@ -320,7 +359,7 @@ object Concept {
    * @return (relations from, relations to)
    */
   def getRelationsFromAndTo(conceptId: Long): (List[(Relation, Concept)], List[(Relation, Concept)]) = {
-    (getRelationsFrom(conceptId),getRelationsTo(conceptId))
+    (getRelationsFrom(conceptId), getRelationsTo(conceptId))
   }
 
   /**
@@ -341,8 +380,13 @@ object Concept {
    * @return a list of relations and concepts
    */
   def getReachableRelations(conceptId: Long): List[(Relation, Concept)] = {
-    val conceptRelations = getRelationsFrom(conceptId)/*.filter(notASubtype)*/
+    //println("Get reachable relations for " + Concept.getById(conceptId).label)
+    val conceptRelations = getRelationsFrom(conceptId) /*.filter(notASubtype)*/
+    //println("  Personal relations")
+    conceptRelations.foreach(tuple => println(tuple._1.label))
     val parentsRelations = getParentsRelations(conceptId)
+    println("  parents relations")
+    parentsRelations.foreach(tuple => println(tuple._1.label))
     conceptRelations ::: parentsRelations
   }
 
@@ -357,6 +401,15 @@ object Concept {
       parent => getReachableRelations(parent.id)
     }.flatten
   }
-  
-  private def notASubtype(tuple: (Relation, Concept)): Boolean = tuple._1 != Relation("SUBTYPE_OF")
+
+  /**
+   * Predicates indicating if a given relation is a SUBTYPE relation or not
+   * @author Thomas GIOVANNINI
+   * @param tuple containing the relation
+   * @return true if the relation is not a subtype
+   *         false else
+   */
+  private def notASubtype(tuple: (Relation, Concept)): Boolean = {
+    tuple._1 != Relation("SUBTYPE_OF")
+  }
 }

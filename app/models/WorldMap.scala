@@ -58,7 +58,7 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
    * @param instanceId the ID of the desired Instance
    * @return the desired instance
    */
-  def getInstanceById(instanceId: Int): Instance = {
+  def getInstanceById(instanceId: Long): Instance = {
     getInstances.find(_.id == instanceId)
       .getOrElse(Instance.error)
   }

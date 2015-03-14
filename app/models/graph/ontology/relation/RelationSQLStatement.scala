@@ -1,12 +1,12 @@
-package models.graph.custom_types
+package models.graph.ontology.relation
 
 import anorm._
-import models.graph.ontology.Relation
 
 /**
  * All values from this objects are SQLStatements
  */
-object RelationStatement {
+object RelationSQLStatement {
+
   /**
    * Request to clear the database
    * @author Aurélie LORGEOUX
@@ -30,17 +30,16 @@ object RelationStatement {
   /**
    * Add a rule to database
    * @author Aurélie LORGEOUX
-   * @param relation relation to add
+   * @param relationName relation to add
    * @return a sql statement
    */
-  def add(relation: Relation) = {
+  def add(actionID: Long, relationName: String) = {
     SQL("""
-            INSERT INTO relation(label, src, dest)
-            VALUES({label}, {src}, {dest})
+            INSERT INTO relations(actionId, label)
+            VALUES({actionId}, {label})
         """).on(
-        'label -> relation.label,
-        'src -> relation.src,
-        'dest -> relation.dest
+        'actionId -> actionID,
+        'label -> relationName
       )
   }
 
@@ -50,8 +49,30 @@ object RelationStatement {
    * @param id id of the relation
    * @return a sql statement
    */
-  def get(id: Long) = {
+  def getById(id: Long) = {
     SQL("SELECT * from relations WHERE id = {id}")
+      .on('id -> id)
+  }
+
+  /**
+   * Get a relation from database
+   * @author Aurélie LORGEOUX
+   * @param name of the relation
+   * @return a sql statement
+   */
+  def getByName(name: String) = {
+    SQL("SELECT * from relations WHERE label = {label}")
+      .on('label -> name)
+  }
+
+  /**
+   * Get a relation from database
+   * @author Aurélie LORGEOUX
+   * @param id of the relation
+   * @return a sql statement
+   */
+  def getActionId(id: Long) = {
+    SQL("SELECT actionId from relations WHERE id = {id}")
       .on('id -> id)
   }
 
@@ -59,21 +80,17 @@ object RelationStatement {
    * Set a rule in database
    * @author Aurélie LORGEOUX
    * @param id id of the relation
-   * @param relation new relation with changes
+   * @param relationName new relation name
    * @return a sql statement
    */
-  def set(id: Long, relation: Relation) = {
+  def rename(id: Long, relationName: String) = {
     SQL("""
-      UPDATE rules SET
-      label = {label},
-      src = {src},
-      dest = {dest}
+      UPDATE relations SET
+      label = {label}
       WHERE id = {id}
         """).on(
         'id -> id,
-        'label -> relation.label,
-        'src -> relation.src,
-        'dest -> relation.dest
+        'label -> relationName
       )
   }
 

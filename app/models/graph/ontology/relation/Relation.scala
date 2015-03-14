@@ -1,14 +1,14 @@
-package models.graph.ontology
+package models.graph.ontology.relation
 
-import anorm.{~, RowParser}
 import anorm.SqlParser._
+import anorm.{RowParser, ~}
 import models.graph.NeoDAO
-import models.graph.custom_types.{RelationStatement, Statement}
-import org.anormcypher.{Neo4jREST, CypherResultRow}
-import play.Play
-import play.api.db.DB
+import models.graph.custom_types.Statement
+import models.graph.ontology.Concept
+import models.rules.action.Action
+import org.anormcypher.CypherResultRow
 import play.api.Play.current
-import play.api.libs.json.{JsNumber, JsString, Json, JsValue}
+import play.api.db.DB
 
 import scala.language.postfixOps
 
@@ -16,34 +16,29 @@ import scala.language.postfixOps
  * Model for a relation in an ontology
  * @param id id of the relation
  * @param label for the relation
- * @param src concept source
- * @param dest concept destination
  */
-case class Relation(id: Long, label: String, src: Long, dest: Long){
+case class Relation(id: Long, label: String){
     require(label.matches("^[A-Z][A-Z0-9_]*$"))
 
     override def toString = label
 
     override def equals(obj:Any) = {
       (obj.isInstanceOf[Relation]
-        && obj.asInstanceOf[Relation].id == this.id
-        && obj.asInstanceOf[Relation].src == this.src
-        && obj.asInstanceOf[Relation].dest == this.dest)
+        && obj.asInstanceOf[Relation].id == this.id)
     }
 
     def isAnAction = label.startsWith("ACTION_")
 }
 
 object Relation {
-  def apply(id: Long) = Relation.DBList.getById(id)
+  //def apply(id: Long) = Relation.DBList.getById(id)
 
   /* apply temporaire juste pour pas tout faire planter de suite */
   def apply(label: String) = {
-    new Relation(0, label, 0, 0)
+    new Relation(0, label)
   }
 
-
-  val error = Relation(-1, "ERROR", -1, -1)
+  val error = Relation(-1, "ERROR")
 
   /**
    * Object for connection with the graph database
@@ -65,8 +60,8 @@ object Relation {
      * @return the appropriate relation
      */
     def parseRow(row: CypherResultRow): Relation = {
-      val label = row[String]("rel_type")
-      Relation(label)
+      val relationID = row[String]("rel_type").substring(2).toLong //row return something like R_123
+      Relation.DBList.getById(relationID)
     }
 
     /**
@@ -76,8 +71,7 @@ object Relation {
     def getAll: List[Relation] = {
       val statement = Statement.getAllRelations
       statement.apply
-        .map(row => row[String]("relation_label"))
-        .map(Relation(_))
+        .map(parseRow)
         .toList
     }
   }
@@ -94,10 +88,8 @@ object Relation {
      */
     private val relationParser: RowParser[Relation] = {
       get[Long]("id") ~
-        get[String]("label") ~
-        get[Long]("src") ~
-        get[Long]("dest") map {
-        case id ~ label ~ src ~ dest => Relation(id, label, src, dest)
+        get[String]("label") map {
+        case id ~ label => Relation(id, label)
       }
     }
 
@@ -108,7 +100,7 @@ object Relation {
      */
     def clear: Int = {
       DB.withConnection { implicit connection =>
-        val statement = RelationStatement.clearDB
+        val statement = RelationSQLStatement.clearDB
         statement.executeUpdate
       }
     }
@@ -120,7 +112,7 @@ object Relation {
      */
     def getAll: List[Relation] = {
       DB.withConnection { implicit connection =>
-        val statement = RelationStatement.getAll
+        val statement = RelationSQLStatement.getAll
         statement.as(relationParser *)
       }
     }
@@ -128,16 +120,16 @@ object Relation {
     /**
      * Save relation in database
      * @author Aurélie LORGEOUX
-     * @param relation relation to put in the database
+     * @param relationName relation to put in the database
      * @return true if the relation saved
      *         false else
      */
-    def save(relation: Relation): Long = {
+    def save(relationName: String): Long = {
+      val id = Action.getByName(relationName).id
       DB.withConnection { implicit connection =>
-        val statement = RelationStatement.add(relation)
+        val statement = RelationSQLStatement.add(id, relationName)
         val optionId: Option[Long] = statement.executeInsert()
-        /*val id = */optionId.getOrElse(-1L)
-        //if (id == -1L) Action.error else action.withId(id)
+        optionId.getOrElse(-1L)
       }
     }
 
@@ -149,7 +141,29 @@ object Relation {
      */
     def getById(id: Long): Relation = {
       DB.withConnection { implicit connection =>
-        val statement = RelationStatement.get(id)
+        val statement = RelationSQLStatement.getById(id)
+        statement.as(relationParser.singleOpt).getOrElse(Relation.error)
+      }
+    }
+
+    def getActionIdFromId(id: Long): Long = {
+      DB.withConnection { implicit connection =>
+        val statement = RelationSQLStatement.getActionId(id)
+        val result = statement.apply.map(row => row[Long]("actionId")).head
+        println(result)
+        result
+      }
+    }
+
+    /**
+     * Get one relation saved in database with its id
+     * @author Aurélie LORGEOUX
+     * @param name of the relation
+     * @return relation identified by id
+     */
+    def getByName(name: String): Relation = {
+      DB.withConnection { implicit connection =>
+        val statement = RelationSQLStatement.getByName(name)
         statement.as(relationParser.singleOpt).getOrElse(Relation.error)
       }
     }
@@ -158,11 +172,11 @@ object Relation {
      * Update a relation in database
      * @author Aurélie LORGEOUX
      * @param id id of the relation
-     * @param relation relation identified by id
+     * @param relationName to update
      */
-    def update(id: Long, relation: Relation): Int = {
+    def update(id: Long, relationName: String): Int = {
       DB.withConnection { implicit connection =>
-        val statement = RelationStatement.set(id, relation)
+        val statement = RelationSQLStatement.rename(id, relationName)
         statement.executeUpdate
       }
     }
@@ -174,7 +188,7 @@ object Relation {
      */
     def delete(id: Long): Int = {
       DB.withConnection { implicit connection =>
-        val statement = RelationStatement.remove(id)
+        val statement = RelationSQLStatement.remove(id)
         statement.executeUpdate
       }
     }
