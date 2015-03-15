@@ -1,7 +1,9 @@
 package models.rules.action
 
+import controllers.Application
 import models.WorldMap
 import models.graph.custom_types.Coordinates
+import models.graph.ontology.property.PropertyDAO
 import models.graph.ontology.{Concept, Instance}
 
 /**
@@ -58,6 +60,14 @@ object HardCodedAction {
     val yCoordinate = args(2).asInstanceOf[Int]
     val coordinates = Coordinates(xCoordinate, yCoordinate)
     map.getInstancesAt(coordinates).map(_.concept).contains(concept)
+  }
+
+  def modifyProperty(args: Array[Any], map: WorldMap) = {
+    val instance = Application.map.getInstanceById(args(0).asInstanceOf[Long])
+    val property = PropertyDAO.getById(args(1).asInstanceOf[Long])
+    val value = args(2)
+    val newInstance = instance.modifyProperty(property, value)
+    Application.map.updateInstance(instance, newInstance)
   }
 
 }

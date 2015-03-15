@@ -8,19 +8,6 @@ import play.api.db.DB
 
 import scala.language.postfixOps
 
-/**
- * Model of rule for persistence
- * @author Aurélie LORGEOUX
- * @param id primary key auto-increment
- * @param label name of the rule
- * @param parameters parameters for the function
- * @param subconditions preconditions for the function
- */
-case class PreconditionDAO(id: Option[Long],
-                           label: String,
-                           parameters: Array[String],
-                           subconditions: Array[String])// TODO Make a table for preconditions too => Array[Long]
-
 
 /**
  * Model for rule.
@@ -33,11 +20,11 @@ object PreconditionDAO {
    * @author Aurélie LORGEOUX
    */
   private val preconditionParser: RowParser[Precondition] = {
-    get[Option[Long]]("id") ~
+    get[Long]("id") ~
       get[String]("label") ~
       get[String]("parameters") ~
       get[String]("subconditions")map {
-      case id ~ label ~ param ~ precond => Precondition.parse(id.get, label, param.split(";"), precond.split(";"))
+      case id ~ label ~ param ~ precond => Precondition.parse(id, label, param.split(";"), precond.split(";"))
     }
   }
 

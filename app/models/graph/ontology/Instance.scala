@@ -58,6 +58,22 @@ case class Instance(id:             Int,
     }else this
   }
 
+  def modifyProperty(property: Property, value: Any): Instance = {
+    def modifyPropertyRec(vp: ValuedProperty, remainingProperties: List[ValuedProperty]): List[ValuedProperty] = {
+      remainingProperties match {
+        case List() => List()
+        case head::tail =>
+          if (head.property == vp.property) vp :: tail
+          else head :: modifyPropertyRec(vp, tail)
+      }
+    }
+
+    if (this.properties.map(_.property).contains(property)){
+      val modifiedProperties = modifyPropertyRec(ValuedProperty(property, value), this.properties)
+      this.updateProperties(modifiedProperties)
+    } else this
+  }
+
   def withLabel(newLabel: String): Instance = {
     Instance(id, newLabel, coordinates, properties, concept)
   }

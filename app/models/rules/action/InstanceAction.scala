@@ -23,7 +23,7 @@ import scala.language.postfixOps
 case class InstanceAction(id: Long,
                   label: String,
                   preconditions: List[Precondition],
-                  subActions: List[InstanceAction],
+                  subActions: List[(InstanceAction, String)],
                   parameters: List[Argument]) {
   def withId(id: Long): InstanceAction = {
     InstanceAction(id, this.label, this.preconditions, this.subActions, this.parameters)
@@ -37,6 +37,10 @@ case class InstanceAction(id: Long,
       "parameters" -> JsArray(parameters.map(_.toJson))
     )
   }
+
+  def save: Long = {
+    InstanceAction.save(this)
+  }
 }
 
 /**
@@ -45,8 +49,10 @@ case class InstanceAction(id: Long,
 object InstanceAction {
   implicit val connection = DB.getConnection()
 
-  def identify(id: Long, label: String, preconditions: List[Long], subActions: List[Long], parameters: List[Argument]): InstanceAction = {
-    InstanceAction(id, label, preconditions.map(PreconditionDAO.getById), subActions.map(getById), parameters)
+  def identify(id: Long, label: String, preconditions: List[Long], subActions: List[(Long, String)], parameters: List[Argument]): InstanceAction = {
+    InstanceAction(id, label, preconditions.map(PreconditionDAO.getById),
+      subActions.map(tuple => (getById(tuple._1), tuple._2)),
+      parameters)
   }
 
   /**
@@ -72,29 +78,40 @@ object InstanceAction {
         .toList
     }
     def parsePreconditions(): List[Precondition] = {
+      //println("Parsing preconditions from: " + preconditionsToParse)
+      //println(PreconditionDAO.getAll.mkString(", "))
       if(preconditionsToParse == "") List()
       else if(! preconditionsToParse.matches("[0-9;]*")){
-        InstanceAction.delete(id)
+        InstanceAction.delete(id) // TODO: better than deleting, notifying that an error has occured
         List()
       }
-      else preconditionsToParse.split(";")
-        .map(_.toLong)
-        .map(PreconditionDAO.getById)
-        .toList
+      else{
+        preconditionsToParse.split(";")
+          .map(_.toLong)
+          .map(PreconditionDAO.getById)
+          .toList
+      }
     }
-    def parseSubActions(): List[InstanceAction] = {
+    def parseSubActions(): List[(InstanceAction, String)] = {
       if (subActionsToParse == "") List()
-      else subActionsToParse.split(";").map(s => getById(s.toLong)).toList
+      else subActionsToParse.split(";").map { s =>
+        val splitted = s.split(":")
+        (getById(splitted(0).toLong), splitted(1))
+      }.toList
     }
-    
+    //println("Parsing action " + label + "...")
     val parameters = parseParameters()
+    //println("Parameters: " + parameters.map(_.reference).mkString(", "))
     val preconditions = parsePreconditions()
+    //println("Preconditions: " + preconditions.map(_.label).mkString(", "))
     val parsedSubActions = parseSubActions()
+    //println("Subactions: " + parsedSubActions.map(_._1.label).mkString(", "))
+    //println("Error? " + error)
     if(error) InstanceAction.error
     else InstanceAction(id, label, preconditions, parsedSubActions, parameters)
   }
   
-  val error = InstanceAction(-1, "error", List[Precondition](), List[InstanceAction](), List[Argument]())
+  val error = InstanceAction(-1, "error", List[Precondition](), List[(InstanceAction, String)](), List[Argument]())
 
   /**
    * Parse rule to interact with database

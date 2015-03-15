@@ -19,7 +19,7 @@ object InstanceManager extends Controller {
       "label" -> nonEmptyText,
       "coordinateX" -> number.verifying(min(0), max(Application.map.width)),
       "coordinateY" -> number.verifying(min(0), max(Application.map.height)),
-      "property" -> list(nonEmptyText) // TODO secure properties
+      "property" -> list(nonEmptyText)
     )
   )
 
@@ -105,6 +105,7 @@ object InstanceManager extends Controller {
    * @return a new instance containing attributes from the form
    */
   def getNewInstance(newInstanceForm: (Int, String, Int, Int, List[String]), oldInstance: Instance): Instance = {
+    //TODO secure properties here
     val newProperties = getUpdatedProperties(newInstanceForm._5, oldInstance)
     oldInstance
       .withLabel(newInstanceForm._2)

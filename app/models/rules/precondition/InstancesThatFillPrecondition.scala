@@ -15,6 +15,12 @@ object InstancesThatFillPrecondition {
     result
   }
 
+  def isOnSameTile(source: Instance): List[Instance] = {
+    val result = allInstances.filter(_.coordinates == source.coordinates)
+    //println("Number of instances on same tile: " + result.length)
+    result
+  }
+
   def isAtWalkingDistance(source: Instance): List[Instance] = {
     val propertyWalkingDistance = PropertyDAO.getByName("WalkingDistance")
 

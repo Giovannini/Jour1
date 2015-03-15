@@ -10,7 +10,7 @@ import models.graph.ontology.property.PropertyDAO
 object HardCodedPrecondition {
 
   /**
-   * Precondition to check id an instance is next to an other
+   * Precondition to check if an instance is next to an other
    * @author Thomas GIOVANNINI
    * @param args an array containing the two instances ids
    * @param map of the world
@@ -18,9 +18,24 @@ object HardCodedPrecondition {
    *         false else
    */
   def isNextTo(args: Array[Any], map: WorldMap): Boolean = {
-    val instance1 = map.getInstanceById(args(0).asInstanceOf[Int])
-    val instance2 = map.getInstanceById(args(1).asInstanceOf[Int])
+    val instance1 = map.getInstanceById(args(0).asInstanceOf[Long])
+    val instance2 = map.getInstanceById(args(1).asInstanceOf[Long])
     val result = instance1.coordinates.isNextTo(instance2.coordinates)
+    result
+  }
+
+  /**
+   * Precondition to check if an instance is on same tile as an other
+   * @author Thomas GIOVANNINI
+   * @param args an array containing the two instances ids
+   * @param map of the world
+   * @return true if the two instances are on same tile
+   *         false else
+   */
+  def isOnSameTile(args: Array[Any], map: WorldMap): Boolean = {
+    val instance1 = map.getInstanceById(args(0).asInstanceOf[Long])
+    val instance2 = map.getInstanceById(args(1).asInstanceOf[Long])
+    val result = instance1.coordinates == instance2.coordinates
     result
   }
 
@@ -58,14 +73,12 @@ object HardCodedPrecondition {
    *         false else
    */
   def hasProperty(args: Array[Any], map: WorldMap): Boolean = {
-    val sourceInstance = map.getInstanceById(args(0).asInstanceOf[Int])
-    val propertyName = args(1).asInstanceOf[String]
+    val sourceInstance = map.getInstanceById(args(0).asInstanceOf[Long])
+    val property = PropertyDAO.getById(args(1).asInstanceOf[Long])
 
-    /** TODO => this is not clean. */
     sourceInstance.concept
       .properties
-      .map(_.label)
-      .contains(propertyName)
+      .contains(property)
   }
 
 }

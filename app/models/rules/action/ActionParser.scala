@@ -44,12 +44,25 @@ object ActionParser {
    * @return a list of arguments and their values
    */
   def getArgumentsList(action: InstanceAction, ids: List[Long]): List[(Argument, Any)] = {
-    if (ids.length == action.parameters.length) {
+    def getArgumentsListRec(arguments: List[Argument], ids: List[Long]): List[(Argument, Any)] = {
+      arguments match {
+        case List() => List()
+        case head::tail =>
+          if (head._type == "Property") (head, head.reference.toLong) :: getArgumentsListRec(tail, ids)
+          else if (ids.nonEmpty) (head, ids.head) :: getArgumentsListRec(tail, ids.tail)
+          else List() //error
+      }
+    }
+    getArgumentsListRec(action.parameters, ids)
+
+    /*if (ids.length == action.parameters.length) {
       action.parameters.zip(ids)
     } else {
+      action.parameters.filter(_._type == "Property")
+      // TODO add needed properties ID for later use
       println("Error while getting arguments list: arguments list of different size.")
       action.parameters.zip(ids)
-    }
+    }*/
   }
 
 

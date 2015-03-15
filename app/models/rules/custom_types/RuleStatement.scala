@@ -42,7 +42,7 @@ object RuleStatement {
       'label -> action.label,
       'param -> action.parameters.map(p => p.reference + ":" + p._type).mkString(";"),
       'precond -> action.preconditions.map(_.id).mkString(";"),
-      'content-> action.subActions.map(_.id).mkString(";")
+      'content-> action.subActions.map(tuple => tuple._1.id + ":" + tuple._2).mkString(";")
     )
   }
 

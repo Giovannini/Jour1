@@ -1,6 +1,6 @@
 package models.rules
 
-import play.api.libs.json.{JsString, Json}
+import play.api.libs.json.JsString
 
 
 case class Argument(reference: String, _type: String){
@@ -10,6 +10,8 @@ case class Argument(reference: String, _type: String){
 }
 
 object Argument {
+
+  val error = Argument("error", "error")
 
   def parseArgument(argumentToString: String): Argument = {
     val splittedString = argumentToString.split(": ")

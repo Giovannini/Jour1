@@ -11,12 +11,15 @@ object PreconditionManager {
 
   PreconditionDAO.clear
 
-  val _preconditionIsNextTo = PreconditionDAO.save(Precondition(0, "isNextTo", List[Precondition](),
-    List(Argument("instance1ID", "Int"), Argument("instance2ID", "Int"))))
+  val _preconditionIsNextTo = Precondition(0, "isNextTo", List[Precondition](),
+    List(Argument("instance1ID", "Long"), Argument("instance2ID", "Long"))).save
 
-  val _preconditionIsAtWalkingDistance = PreconditionDAO.save(Precondition(0, "isAtWalkingDistance",
+  val _preconditionIsOnSameTile = Precondition(0, "isOnSameTile", List[Precondition](),
+    List(Argument("instance1ID", "Long"), Argument("instance2ID", "Long"))).save
+
+  val _preconditionIsAtWalkingDistance = Precondition(0, "isAtWalkingDistance",
     List[Precondition](),
-    List(Argument("instance1ID", "Int"), Argument("instance2ID", "Int"), Argument("distance", "Int"))))
+    List(Argument("instance1ID", "Int"), Argument("instance2ID", "Int"), Argument("distance", "Int"))).save
 
   def initialization = {
     println("PreconditionManager is initialized")

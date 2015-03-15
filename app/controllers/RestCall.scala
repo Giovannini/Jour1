@@ -95,8 +95,8 @@ object RestCall extends Controller {
    */
   def reduceDestinationList(sourceInstance: Instance, action: InstanceAction, instances: List[Instance]) = {
     val preconditionsToValidate = action.preconditions
-    preconditionsToValidate.map(_.instancesThatFill(sourceInstance))
-      .foldRight(instances.toSet)(_ intersect _)
+    val toto = preconditionsToValidate.par.map(_.instancesThatFill(sourceInstance))
+    toto.foldRight(instances.toSet)(_ intersect _)
       .toList
       .map(_.toJson)
   }

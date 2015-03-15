@@ -33,10 +33,12 @@ case class Precondition(id: Long, label: String, subConditions: List[Preconditio
    */
   def isFilled(arguments: List[(Argument, Any)], map: WorldMap): Boolean = {
     val args = arguments.map(_._2).toArray
-    this.label match {
-      case "isNextTo" =>
+    this.id match {
+      case PreconditionManager._preconditionIsNextTo =>
         HardCodedPrecondition.isNextTo(args, map)
-      case "isAtWalkingDistance" =>
+      case PreconditionManager._preconditionIsOnSameTile =>
+        HardCodedPrecondition.isOnSameTile(args, map)
+      case PreconditionManager._preconditionIsAtWalkingDistance =>
         HardCodedPrecondition.isAtWalkingDistance(args, map)
       case _ =>
         this.subConditions
@@ -58,11 +60,12 @@ case class Precondition(id: Long, label: String, subConditions: List[Preconditio
   }
 
   def instancesThatFill(source: Instance): Set[Instance] = {
-    this.label match {
-      case "isNextTo" =>
+    this.id match {
+      case PreconditionManager._preconditionIsNextTo =>
         InstancesThatFillPrecondition.isNextTo(source).toSet
-      case "isAtWalkingDistance" =>
-        //println("Checking distance precondition")
+      case PreconditionManager._preconditionIsOnSameTile =>
+        InstancesThatFillPrecondition.isOnSameTile(source).toSet
+      case PreconditionManager._preconditionIsAtWalkingDistance =>
         InstancesThatFillPrecondition.isAtWalkingDistance(source).toSet
       case _ => this.subConditions
         .map(precondition => precondition.instancesThatFill(source))
@@ -74,6 +77,8 @@ case class Precondition(id: Long, label: String, subConditions: List[Preconditio
     "id" -> JsNumber(id),
     "label" -> JsString(label)
   )
+
+  def save: Long = PreconditionDAO.save(this)
 }
 
 object Precondition {
@@ -83,6 +88,7 @@ object Precondition {
   }
 
   def parse(id: Long, label: String, argumentsToParse: Array[String], subConditionsToIdentify: Array[String]): Precondition = {
+    println("TODO") // TODO
     val subConditions: List[Precondition] = List()
     val arguments: List[Argument] = List()
     Precondition(id, label, subConditions, arguments)
