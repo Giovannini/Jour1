@@ -78,6 +78,10 @@ case class Instance(id:             Int,
     Instance(id, newLabel, coordinates, properties, concept)
   }
 
+  def ofConcept(newconcept:Concept): Instance ={
+    Instance(id, label, coordinates, newconcept.properties.map(_.defaultValuedProperty),newconcept)
+  }
+
   /**
    * Method to give coordinates to the instance
    * @param newCoordinates to give to the instance

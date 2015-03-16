@@ -2,7 +2,7 @@ package controllers.ontology
 
 import controllers.Application
 import models.graph.custom_types.Coordinates
-import models.graph.ontology.{Instance, ValuedProperty}
+import models.graph.ontology.{Concept, Instance, ValuedProperty}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.validation.Constraints._
@@ -15,7 +15,8 @@ object InstanceManager extends Controller {
 
   val instanceForm = Form(
     tuple(
-      "id" -> number, //can't be modified
+      "idInstance" -> number, //can't be modified
+      "idConcept" -> number, //can't be modified
       "label" -> nonEmptyText,
       "coordinateX" -> number.verifying(min(0), max(Application.map.width)),
       "coordinateY" -> number.verifying(min(0), max(Application.map.height)),
@@ -27,7 +28,7 @@ object InstanceManager extends Controller {
    * Print errors contained in a form
    * @author Thomas GIOVANNINI
    */
-  def printErrors(form: Form[(Int, String, Int, Int, List[String])]) = {
+  def printErrors(form: Form[(Int, Int, String, Int, Int, List[String])]) = {
     form.errors.foreach(error => println("###Error:\n" + error.messages.mkString("\n")))
   }
 
@@ -42,10 +43,10 @@ object InstanceManager extends Controller {
      * Create the relation following a form with no errors in it.
      * @author Thomas GIOVANNINI
      */
-    def doCreate(form: (Int, String, Int, Int, List[String])) = {
+    def doCreate(form: (Int, Int, String, Int, Int, List[String])) = {
       val oldInstance = Application.map.getInstanceById(form._1)
-      val newInstance = getNewInstance(form, oldInstance)
-      Application.map.updateInstance(oldInstance, newInstance)
+      val newInstance = createNewInstance(form, oldInstance)
+      Application.map.addInstance(newInstance)
     }
 
     val newTodoForm = instanceForm.bindFromRequest()
@@ -66,7 +67,7 @@ object InstanceManager extends Controller {
      * @author Thomas GIOVANNINI
      * @return the updated instance
      */
-    def doUpdate(form: (Int, String, Int, Int, List[String])) = {
+    def doUpdate(form: (Int, Int, String, Int, Int, List[String])) = {
       val oldInstance = Application.map.getInstanceById(form._1)
       val newInstance = getNewInstance(form, oldInstance)
       Application.map.updateInstance(oldInstance, newInstance)
@@ -104,12 +105,15 @@ object InstanceManager extends Controller {
    * @param oldInstance from which he new one will be created
    * @return a new instance containing attributes from the form
    */
-  def getNewInstance(newInstanceForm: (Int, String, Int, Int, List[String]), oldInstance: Instance): Instance = {
-    //TODO secure properties here
-    val newProperties = getUpdatedProperties(newInstanceForm._5, oldInstance)
+  def getNewInstance(newInstanceForm: (Int, Int, String, Int, Int, List[String]), oldInstance: Instance): Instance = {
+    val newProperties = getUpdatedProperties(newInstanceForm._6, oldInstance)
     oldInstance
-      .withLabel(newInstanceForm._2)
-      .at(Coordinates(newInstanceForm._3, newInstanceForm._4))
+      .withLabel(newInstanceForm._3)
+      .at(Coordinates(newInstanceForm._4, newInstanceForm._5))
       .updateProperties(newProperties)
+  }
+
+  def createNewInstance(newInstanceForm: (Int, Int, String, Int, Int, List[String]), oldInstance: Instance): Instance = {
+    getNewInstance(newInstanceForm,oldInstance).ofConcept(Concept.getById(newInstanceForm._2))
   }
 }

@@ -11,8 +11,11 @@
   <h1>Edition of instance @instance.label @instance.id of concept @instance.concept</h1>
 
   @helper.form(action = call){
-    @helper.input(InstanceManager.instanceForm("id")) { (id, name, value, args) =>
+    @helper.input(InstanceManager.instanceForm("idInstance")) { (id, name, value, args) =>
       <input type="number" name="@name" id="@id" value="@instance.id" min="0" readonly>
+    }
+    @helper.input(InstanceManager.instanceForm("idConcept")) { (id, name, value, args) =>
+      <input type="number" name="@name" id="@id" value="@instance.concept.id" min="0" readonly>
     }
     @helper.input(InstanceManager.instanceForm("label")) { (id, name, value, args) =>
       <input type="text" name="@name" id="@id" value="@instance.label">
