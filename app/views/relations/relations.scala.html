@@ -1,0 +1,28 @@
+@()
+@import models.graph.ontology.relation.Relation
+
+
+<!DOCTYPE html>
+<html>
+    <head lang="en">
+        <meta charset="UTF-8">
+        <title>Liste des relations</title>
+    </head>
+    <body>
+
+        <h1>Relations enregistrées</h1>
+
+        <ul>
+        @for(relation <- Relation.DBList.getAll){
+            <li>
+                @relation.id - @relation.label
+                <a href="/relations/update/@relation.id">Editer</a>
+                <a href="/relations/delete/@relation.id">Supprimer</a>
+            </li>
+        }
+        </ul>
+
+        <a href="/relations/create">Ajouter une nouvelle relation</a>
+
+    </body>
+</html>

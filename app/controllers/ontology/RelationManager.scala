@@ -10,7 +10,6 @@ import play.api.mvc.{Action, Controller}
  * Object to create, delete and modify relations of the graph
  */
 object RelationManager extends Controller{
-
   /**
    * Form used to create a new relation between two concepts
    */
@@ -66,31 +65,6 @@ object RelationManager extends Controller{
   }
 
   /**
-   * Update a given instance from a received form.
-   * @author Thomas GIOVANNINI
-   * @return an action redirecting to the index page of the application
-   */
-  def update = Action { implicit request =>
-    /**
-     * Update the map following a form with no errors in it.
-     * @author Thomas GIOVANNINI
-     * @return the updated instance
-     */
-    def doUpdate(form: (Int, String, String, Int, Boolean)) = {
-      val concept1_id = form._1
-      val oldRelation = Relation(form._2)
-      val newRelation = Relation(form._3)
-      val concept2_id = form._4
-      NeoDAO.updateRelationInDB(concept1_id, oldRelation, newRelation, concept2_id)
-    }
-
-    val newTodoForm = relationForm.bindFromRequest()
-    newTodoForm.fold(hasErrors = { form => printErrors(form)},
-      success = { newInstanceForm => doUpdate(newInstanceForm)})
-    Redirect(controllers.routes.MapController.show())
-  }
-
-  /**
    * Delete a relation between two concepts
    * @author Aurélie LORGEOUX
    * @param src concept source
@@ -100,17 +74,6 @@ object RelationManager extends Controller{
    */
   def delete(src: Long, id: Long, dest: Long) = Action {
     NeoDAO.removeRelationFromDB(src, id, dest)
-    Ok("relation supprimée entre les deux concepts")
-  }
-
-  /**
-   * Delete entirely a relation
-   * @author Aurélie LORGEOUX
-   * @param id id of the relation
-   * @return an action
-   */
-  def deleteAll(id: Long) = Action {
-    Relation.DBList.delete(id)
-    Ok("relation supprimée complètement")
+    Redirect(controllers.routes.Application.index())
   }
 }

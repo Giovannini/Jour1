@@ -21,13 +21,21 @@ POST        /instances/create                                        controllers
 #Graph manipulation
 GET         /relation/create                                         controllers.ontology.RelationManager.createRelation
 POST        /relation/create                                         controllers.ontology.RelationManager.create
-GET         /relation/delete/:id                                     controllers.ontology.RelationManager.deleteAll(id: Long)
+GET         /relations/:conceptId/delete/:id/:dest                   controllers.ontology.RelationManager.delete(conceptId: Long, id: Long, dest: Long)
 
 # Graph visualisation
 GET         /graph                                                   controllers.graph.GraphVisualisation.index
 GET         /graph/property/:propertyId                              controllers.graph.GraphVisualisation.getProperty(propertyId: Int)
 GET         /graph/action/:actionLabel                               controllers.graph.GraphVisualisation.getAction(actionLabel: String)
 GET         /graph/:search/:deepness                                 controllers.graph.GraphVisualisation.searchNodes(search: String, deepness: Int)
+
+# Relations visualisation
+GET         /relations                                                controllers.rules.RelationVisualisation.index
+GET         /relations/create                                         controllers.rules.RelationVisualisation.createForm
+POST        /relations/create                                         controllers.rules.RelationVisualisation.createSubmit
+GET         /relations/update/:id                                     controllers.rules.RelationVisualisation.updateForm(id: Long)
+POST        /relations/update/:id                                     controllers.rules.RelationVisualisation.updateSubmit(id: Long)
+GET         /relations/delete/:id                                     controllers.rules.RelationVisualisation.delete(id: Long)
 
 # Rules visualisation
 GET         /rules                                                   controllers.rules.RulesVisualisation.index
@@ -41,7 +49,6 @@ GET         /preconditions                                           controllers
 GET         /map                                                     controllers.MapController.show
 POST        /action                                                  controllers.RestCall.executeAction
 GET         /relations/:conceptId                                    controllers.RestCall.getAllActionsOf(conceptId: Int)
-GET         /relations/:conceptId/delete/:id/:dest                   controllers.ontology.RelationManager.delete(conceptId: Long, id: Long, dest: Long)
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                                            controllers.Assets.at(path="/public", file)

@@ -139,9 +139,18 @@ object NeoDAO {
     statement.execute
   }
 
-  def updateRelationInDB(sourceId: Long, oldRelation: Relation, newRelation: Relation, destId: Long) = {
-    val statement = Statement.updateRelation(sourceId, oldRelation, newRelation, destId)
-    statement.execute
+  /**
+   * Update a relation into two existing concepts in the Neo4J DB
+   * @author Aurélie LORGEOUX
+   * @param sourceId the source of the link
+   * @param oldRelationId id of the relation to delete
+   * @param newRelationId id of the relation to add
+   * @param destId the destination of the link
+   * @return true if the relation was correctly updated
+   *         false else
+   */
+  def updateRelationInDB(sourceId: Long, oldRelationId: Long, newRelationId: Long, destId: Long) = {
+    removeRelationFromDB(sourceId, oldRelationId, destId) && addRelationToDB(sourceId, newRelationId, destId)
   }
 
 }

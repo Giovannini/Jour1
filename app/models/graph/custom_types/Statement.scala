@@ -172,8 +172,6 @@ object Statement {
     Cypher( "MATCH (n1)-[r:R_"+relationId.toString+"]-(n2) DELETE r")
   }
 
-  def updateRelation(sourceId: Long, oldRelation: Relation, newRelation: Relation, destId: Long): CypherStatement = ???
-
   def getAllRelations: CypherStatement = {
     Cypher("match n-[r]->m return distinct type(r) as rel_type")
   }
