@@ -152,12 +152,12 @@ object Statement {
    * Create a cypher statement to delete a relation in the Neo4J graph
    * @author Thomas GIOVANNINI
    * @param sourceNodeId the source concept of the relation to delete
-   * @param relation the relation to delete
+   * @param relationId the relation to delete
    * @param destNodeId the destination concept of the relation to delete
    * @return a cypher statement deleting the desired relation
    */
-  def deleteRelation(sourceNodeId: Long, relation: Relation, destNodeId: Long) : CypherStatement = {
-    Cypher( "MATCH (n1 {id: {id1}})-[r:"+relation.label+"]-(n2 {id:{id2}}) DELETE r")
+  def deleteRelation(sourceNodeId: Long, relationId: Long, destNodeId: Long) : CypherStatement = {
+    Cypher( "MATCH (n1 {id: {id1}})-[r:R_"+relationId.toString+"]-(n2 {id:{id2}}) DELETE r")
       .on("id1" -> sourceNodeId,
       "id2" -> destNodeId)
   }

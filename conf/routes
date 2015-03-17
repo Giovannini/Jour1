@@ -40,6 +40,7 @@ GET         /preconditions                                           controllers
 GET         /map                                                     controllers.MapController.show
 POST        /action                                                  controllers.RestCall.executeAction
 GET         /relations/:conceptId                                    controllers.RestCall.getAllActionsOf(conceptId: Int)
+GET         /relations/:conceptId/delete/:id/:dest                   controllers.ontology.RelationManager.delete(conceptId: Long, id: Long, dest: Long)
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                                            controllers.Assets.at(path="/public", file)

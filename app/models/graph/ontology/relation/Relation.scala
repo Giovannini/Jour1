@@ -31,9 +31,6 @@ case class Relation(id: Long, label: String){
 }
 
 object Relation {
-  //def apply(id: Long) = Relation.DBList.getById(id)
-
-  /* apply temporaire juste pour pas tout faire planter de suite */
   def apply(label: String) = {
     new Relation(0, label)
   }
@@ -146,6 +143,12 @@ object Relation {
       }
     }
 
+    /**
+     * Get id of action associated to a relation
+     * @author Thomas GIOVANNINI
+     * @param id id of the relation
+     * @return if of action
+     */
     def getActionIdFromId(id: Long): Long = {
       DB.withConnection { implicit connection =>
         val statement = RelationSQLStatement.getActionId(id)

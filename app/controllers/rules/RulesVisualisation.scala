@@ -5,7 +5,13 @@ import play.api.data.Forms._
 import play.api.mvc._
 import models.rules.action.InstanceAction
 
+/**
+ * Object to create and modify rules
+ */
 object RulesVisualisation extends Controller {
+  /**
+   * Form used to create a new rule
+   */
   val actionForm = Form(
     mapping(
       "id" -> number,
@@ -24,15 +30,29 @@ object RulesVisualisation extends Controller {
     Option((action.id.toInt, action.label, action.parameters.map(_.toString), action.preconditions.map(_.toString), action.subActions.map(_.toString)))
   }
 
+  /**
+   * Display all rules
+   * @return
+   */
   def index = Action {
     Ok(views.html.rules.rules())
   }
 
+  /**
+   * Delete a rule
+   * @param id id of rule
+   * @return
+   */
   def delete(id: Long) = Action {
     InstanceAction.delete(id)
     Ok(views.html.rules.rules())
   }
 
+  /**
+   * Get a rule by its id
+   * @param id id of rule
+   * @return
+   */
   def load(id: Long) = Action {
     InstanceAction.getById(id) match {
       case InstanceAction.error => Ok(views.html.rules.rules())
@@ -40,10 +60,18 @@ object RulesVisualisation extends Controller {
     }
   }
 
+  /**
+   * Display form to create a rule
+   * @return
+   */
   def form = Action {
     Ok(views.html.rules.form(actionForm))
   }
 
+  /**
+   * Create a new rule
+   * @return
+   */
   def submit = Action { implicit request =>
     val ruleData = actionForm.bindFromRequest.get
     InstanceAction.save(ruleData)

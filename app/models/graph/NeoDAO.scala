@@ -99,28 +99,30 @@ object NeoDAO {
   /**
    * Create a relation into two existing concepts in the Neo4J DB.
    * @author Thomas GIOVANNINI
-   * @param relationID the relation to add, containing the source concept, the relation name and the destination concept
+   * @param sourceId the source of the link
+   * @param relationId the relation to add, containing the source concept, the relation name and the destination concept
+   * @param destId the destination of the link
    * @return true if the relation was correctly added
    *         false else
    */
-  def addRelationToDB(sourceId: Long, relationID: Long, destId: Long): Boolean = {
+  def addRelationToDB(sourceId: Long, relationId: Long, destId: Long): Boolean = {
     /* TODO
       * Be careful when creating a relation SUBTYPE_OF not to insert loop.
       */
-    val statement = Statement.createRelation(sourceId, relationID, destId)
+    val statement = Statement.createRelation(sourceId, relationId, destId)
     statement.execute
   }
 
   /**
    * Remove a relation into two existing concepts in the Neo4J DB.
    * @param sourceId the source of the link
-   * @param relation the name of the relation
+   * @param relationId the id of the relation
    * @param destId the destination of the link
    * @return true if the relation was correctly removed
    *         false else
    */
-  def removeRelationFromDB(sourceId: Long, relation: Relation, destId: Long): Boolean = {
-    val statement = Statement.deleteRelation(sourceId, relation, destId)
+  def removeRelationFromDB(sourceId: Long, relationId: Long, destId: Long): Boolean = {
+    val statement = Statement.deleteRelation(sourceId, relationId, destId)
     statement.execute
   }
 

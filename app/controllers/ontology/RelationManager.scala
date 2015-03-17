@@ -89,4 +89,9 @@ object RelationManager extends Controller{
       success = { newInstanceForm => doUpdate(newInstanceForm)})
     Redirect(controllers.routes.MapController.show())
   }
+
+  def delete(src: Long, id: Long, dest: Long) = Action {
+    NeoDAO.removeRelationFromDB(src, id, dest)
+    Ok("relation supprimée")
+  }
 }
