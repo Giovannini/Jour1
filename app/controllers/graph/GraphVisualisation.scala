@@ -1,76 +1,78 @@
 package controllers.graph
 
-import models.graph.NeoDAO
-import models.graph.custom_types.Statement
-import models.graph.ontology.Concept
 import models.graph.ontology.property.{Property, PropertyDAO}
-import models.rules.action.InstanceAction
+import models.instance_action.action.InstanceAction
 import play.api.libs.json.Json
 import play.api.mvc._
 
+/**
+ * Controller that displays the concept graph to the user
+ */
 object GraphVisualisation extends Controller {
+  /**
+   * The graph displayed to the user allows him to entirely manage the graph with an user friendly interface
+   * @return
+   */
   def index = Action {
     Ok(views.html.graph.index())
   }
 
-  def searchNodes(search: String, deepness: Int) = Action {
-    def getRelationsAndLinkedConceptsFromNodes(nodes: List[Concept]): (List[(Long, String, Long)], List[Concept]) = {
-      nodes.flatMap(node => {
-        val relations = Concept.getRelationsFromAndTo(node.id)
-        (relations._1.map(link => ((node.id, link._1.label, link._2.id), link._2))
-          ::: relations._2.map(link => ((link._2.id, link._1.label, node.id), link._2))).toSet
-      }).unzip
+  /**
+   * Make sure that the request is in json
+   * Otherwise, it redirects to the graph index
+   * @param request request sent by the user
+   * @param action action to display if the request is correct
+   * @return redirects to the index or displays the information matching the request
+   */
+  def jsonOrRedirectToIndex(request: Request[AnyContent])(action: Result) = {
+    request.headers.get("Accept") match {
+      case Some(accept) if accept.contains("application/json") =>
+        action
+      case _ =>
+        Redirect("/graph")
     }
+  }
 
-    def getChildrenDeep(nodes: List[Concept], deepness: Int): (List[(Long, String, Long)], List[Concept]) = {
-      deepness match {
-        case 0 => (Nil, Nil)
-        case n =>
-          val children = getRelationsAndLinkedConceptsFromNodes(nodes)
-          val deeper = getChildrenDeep(children._2, n - 1)
-
-          val concepts = nodes:::children._2:::deeper._2
-          val relations = children._1 ::: deeper._1
-
-          (relations.toSet.toList, concepts.toSet.toList)
+  /**
+   * Gets a property
+   * @param propertyId property ID
+   * @return Property in json if it's found. 404 otherwise
+   */
+  def getProperty(propertyId: Int) = Action { request =>
+    jsonOrRedirectToIndex(request) {
+      val property = PropertyDAO.getById(propertyId)
+      if (property == Property.error) {
+        NotFound("Undefined property")
+      } else {
+        Ok(property.toJson)
       }
     }
+  }
 
-    val statement = Statement.getConceptByLabel(search)
-    val cypherResultRowStream = statement.apply()(NeoDAO.connection)
-    if(cypherResultRowStream.nonEmpty) {
-      val nodes = cypherResultRowStream.map(Concept.parseRow)
-      val res = getChildrenDeep(nodes.toList, deepness)
-      Ok(
-        Json.obj(
-          "nodes" -> res._2.map(_.toJson),
-          "edges" -> Json.toJson(res._1.map(relation => Json.obj(
-            "source" -> relation._1,
-            "label" -> relation._2,
-            "target" -> relation._3
-          )))
-        )
-      )
-    } else {
-      NotFound("\""+search+"\" not found")
+  /**
+   * Gets an action
+   * @param actionLabel action label
+   * @return Action in json if it's found. 404 otherwise
+   */
+  def getAction(actionLabel: String) = Action { request =>
+    jsonOrRedirectToIndex(request) {
+      val action = InstanceAction.getByName(actionLabel)
+      if(action == InstanceAction.error) {
+        NotFound("Undefined action")
+      } else {
+        Ok(action.toJson)
+      }
     }
   }
 
-  def getProperty(propertyId: Int) = Action {
-    val property = PropertyDAO.getById(propertyId)
-    if(property == Property.error) {
-      NotFound("Undefined property")
-    } else {
-      Ok(property.toJson)
+  /**
+   * Gets all the properties
+   * @return
+   */
+  def getProperties() = Action { request =>
+    jsonOrRedirectToIndex(request) {
+      val properties = PropertyDAO.getAll
+      Ok(Json.toJson(properties.map(_.toJson)))
     }
   }
-
-  def getAction(actionLabel: String) = Action {
-    val action = InstanceAction.getByName(actionLabel)
-    if(action == InstanceAction.error) {
-      NotFound("Undefined action")
-    } else {
-      Ok(action.toJson)
-    }
-  }
- }
+}

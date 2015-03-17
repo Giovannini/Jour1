@@ -1,12 +1,13 @@
-package models.rules.custom_types
+package models.instance_action.custom_types
 
 import anorm._
-import models.rules.action.InstanceAction
+import models.instance_action.action.InstanceAction
 
 /**
  * All values from this objects are SQLStatements
  */
-object RuleStatement {
+object InstanceActionStatement {
+
   /**
    * Request to clear the database
    * @author Aurélie LORGEOUX
@@ -40,9 +41,9 @@ object RuleStatement {
             VALUES({label}, {param}, {precond}, {content})
     """).on(
       'label -> action.label,
-      'param -> action.parameters.map(p => p.reference + ":" + p._type).mkString(";"),
-      'precond -> action.preconditions.map(_.id).mkString(";"),
-      'content-> action.subActions.map(tuple => tuple._1.id + ":" + tuple._2).mkString(";")
+      'param -> action.parameters.mkString(";"),
+      'precond -> action.preconditions.map(p => p.id + " -> " + p.parameters.mkString(",")).mkString(";"),
+      'content-> action.subActions.map(action => action.id + " -> " + action.parameters.mkString(",")).mkString(";")
     )
   }
 

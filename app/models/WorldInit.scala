@@ -31,12 +31,11 @@ object WorldInit {
    */
   def worldMapGeneration(): Unit = {
     val allGroundsConcepts = getGroundConcept(Concept.findAll).getDescendance
-    //println("allGroundsConcepts: " + allGroundsConcepts.length)
     val instanciableConcepts = getInstanciableConcepts diff allGroundsConcepts
-    //println("instanciableConcepts: " + instanciableConcepts.length)
     generateGround(allGroundsConcepts)
     //Take a lot of time
-    instanciableConcepts.foreach(fillWorldWithInstances(map, _))
+    // TODO: find a way to parallelize the process
+    instanciableConcepts.foreach(fillWorldWithInstances)
   }
 
   /**
@@ -166,7 +165,6 @@ object WorldInit {
    */
   // TODO: pas propre
   def getGroundConcept(concepts: List[Concept]): Concept = {
-    //println("Concepts: " + concepts.length)
     concepts.find(_.label == "Ground")
       .getOrElse(Concept.error)
   }
@@ -253,29 +251,25 @@ object WorldInit {
 
   /**
    * Fill the world with concepts
-   * @param worldMap map with instances fill yet
    * @param concept concept to instanciate
    */
-  def fillWorldWithInstances(worldMap: WorldMap, concept: Concept): Unit = {
+  def fillWorldWithInstances(concept: Concept): Unit = {
     //instanciate first concept
-    val instances = createInstances(worldMap, concept)
-    //println(concept.label + ": " + instances.length)
-    instances.foreach(worldMap.addInstance)
-    //instanciate rest
+    val instances = createInstances(concept)
+    instances.foreach(Application.map.addInstance)
 
   }
 
   /**
    * Instanciate a specific concept
-   * @param worldMap map with instances fill yet
    * @param conceptToInstanciate concept to instanciate
    * @return List of instances of the concept
    */
-  def createInstances(worldMap: WorldMap, conceptToInstanciate: Concept): List[Instance] = {
-    println("createInstances: " + conceptToInstanciate.label)
+  def createInstances(conceptToInstanciate: Concept): List[Instance] = {
+    println("Creating instances for concept " + conceptToInstanciate.label)
     val livingPlaces = getLivingPlacesIdsFor(conceptToInstanciate.id)
     livingPlaces.flatMap { livingPlaceConceptId =>
-      val instancesOfLivingPlace = worldMap.getInstancesOf(livingPlaceConceptId)
+      val instancesOfLivingPlace = Application.map.getInstancesOf(livingPlaceConceptId)
       val listConceptLivingOnSameGrounds = getConceptsLivingOn(livingPlaceConceptId)
       buildInstancesList(instancesOfLivingPlace, listConceptLivingOnSameGrounds, conceptToInstanciate)
     }
@@ -329,7 +323,8 @@ object WorldInit {
   def putInstanciesOfOneConcept(concept: Concept, instancesOfLivingPlace: List[Coordinates]): Instance = {
     // TODO shuffle take a lot of time and this is where the problem is
     val randomCoordinate = Random.shuffle(instancesOfLivingPlace).head
-      Instance.createRandomInstanceOf(concept).at(randomCoordinate)
+    val result = Instance.createRandomInstanceOf(concept).at(randomCoordinate)
+    result
   }
 
 

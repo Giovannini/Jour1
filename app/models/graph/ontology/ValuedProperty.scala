@@ -48,6 +48,29 @@ object ValuedProperty {
   }
 
   /**
+   * Apply method used in the Concept controller
+   * Allows to match a json to a form
+   * @param property of the valued property
+   * @param value of the valued property
+   * @return valued property object
+   */
+  def applyForm(property: Property, value: Any): ValuedProperty = {
+    ValuedProperty(property, value)
+  }
+
+  /**
+   * Apply method used in the Concept controller
+   * Allows to match a json to a form
+   * @param valuedProperty valued property object
+   * @return tuple of property and value
+   */
+  def unapplyForm(valuedProperty: ValuedProperty): Option[(Property, String)] = {
+    Some((
+      valuedProperty.property, valuedProperty.jsonValue.toString()
+      ))
+  }
+
+  /**
    * Method to parse a json to a ValuedProperty
    * @author Thomas GIOVANNINI
    * @param jsonVP the json value to parse

@@ -25,9 +25,11 @@ GET         /relations/:conceptId/delete/:id/:dest                   controllers
 
 # Graph visualisation
 GET         /graph                                                   controllers.graph.GraphVisualisation.index
-GET         /graph/property/:propertyId                              controllers.graph.GraphVisualisation.getProperty(propertyId: Int)
+GET         /graph/properties                                        controllers.graph.GraphVisualisation.getProperties
+GET         /graph/properties/:propertyId                            controllers.graph.GraphVisualisation.getProperty(propertyId: Int)
 GET         /graph/action/:actionLabel                               controllers.graph.GraphVisualisation.getAction(actionLabel: String)
-GET         /graph/:search/:deepness                                 controllers.graph.GraphVisualisation.searchNodes(search: String, deepness: Int)
+POST        /graph/node/new                                         controllers.graph.ConceptController.createConcept
+GET         /graph/:search/:deepness                                 controllers.graph.ConceptController.searchConcept(search: String, deepness: Int)
 
 # Relations visualisation
 GET         /relations                                                controllers.rules.RelationVisualisation.index

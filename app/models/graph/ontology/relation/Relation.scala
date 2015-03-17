@@ -5,7 +5,7 @@ import anorm.{RowParser, ~}
 import models.graph.NeoDAO
 import models.graph.custom_types.Statement
 import models.graph.ontology.Concept
-import models.rules.action.InstanceAction
+import models.instance_action.action.InstanceAction
 import org.anormcypher.CypherResultRow
 import play.api.Play.current
 import play.api.db.DB
@@ -152,8 +152,8 @@ object Relation {
     def getActionIdFromId(id: Long): Long = {
       DB.withConnection { implicit connection =>
         val statement = RelationSQLStatement.getActionId(id)
-        val result = statement.apply.map(row => row[Long]("actionId")).head
-        //println(result)
+        val optionResult = statement.apply.map(row => row[Long]("actionId")).headOption
+        val result = optionResult.getOrElse(-1L)
         result
       }
     }

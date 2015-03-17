@@ -1,8 +1,9 @@
-package models.rules.precondition
+package models.instance_action.precondition
 
 import anorm.SqlParser._
 import anorm._
-import models.rules.custom_types.PreconditionStatement
+import controllers.Application
+import models.instance_action.custom_types.PreconditionStatement
 import play.api.Play.current
 import play.api.db.DB
 
@@ -13,23 +14,24 @@ import scala.language.postfixOps
  * Model for rule.
  */
 object PreconditionDAO {
-  implicit val connection = DB.getConnection()
+
+  implicit val connection = Application.connection
 
   /**
-   * Parse rule to interact with database
+    * Parse rule to interact with database
    * @author Aurélie LORGEOUX
    */
   private val preconditionParser: RowParser[Precondition] = {
     get[Long]("id") ~
-      get[String]("label") ~
-      get[String]("parameters") ~
-      get[String]("subconditions")map {
-      case id ~ label ~ param ~ precond => Precondition.parse(id, label, param.split(";"), precond.split(";"))
+    get[String]("label") ~
+    get[String]("parameters") ~
+    get[String]("subconditions")map {
+      case id ~ label ~ param ~ precond => Precondition.parse(id, label, param, precond)
     }
   }
 
   /**
-   * Clear the database
+    * Clear the database
    * @author Thomas GIOVANNINI
    * @return number of preconditions deleted
    */
@@ -41,7 +43,7 @@ object PreconditionDAO {
   }
 
   /**
-   * Get all preconditions saved in database
+    * Get all preconditions saved in database
    * @author Thomas GIOVANNINI
    * @return a list of preconditions
    */
@@ -53,7 +55,7 @@ object PreconditionDAO {
   }
 
   /**
-   * Save precondition in database
+    * Save precondition in database
    * @author Thomas GIOVANNINI
    * @param precondition precondition to put in the database
    * @return true if the precondition saved
@@ -68,7 +70,7 @@ object PreconditionDAO {
   }
 
   /**
-   * Get one precondition saved in database with its id
+    * Get one precondition saved in database with its id
    * @author Thomas GIOVANNINI
    * @param id id of the precondition
    * @return precondition identified by id
@@ -82,7 +84,7 @@ object PreconditionDAO {
   }
 
   /**
-   * Update a precondition in database
+    * Update a precondition in database
    * @author Thomas GIOVANNINI
    * @param id id of the precondition
    * @param precondition precondition identified by id
