@@ -70,7 +70,7 @@ object RelationManager extends Controller{
    * @param src concept source
    * @param id id of the relation
    * @param dest concept destination
-   * @return an action
+   * @return an action redirecting to index of application
    */
   def delete(src: Long, id: Long, dest: Long) = Action {
     NeoDAO.removeRelationFromDB(src, id, dest)

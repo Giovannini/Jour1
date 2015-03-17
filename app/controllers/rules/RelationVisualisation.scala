@@ -3,6 +3,7 @@ package controllers.rules
 import models.graph.ontology.relation.Relation
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.data.validation.Constraints._
 import play.api.mvc.{Action, Controller}
 
 object RelationVisualisation extends Controller {
@@ -11,7 +12,7 @@ object RelationVisualisation extends Controller {
    */
   val relationForm = Form(
     mapping(
-      "label" -> text
+      "label" -> nonEmptyText.verifying("Invalid label", label => label.matches("^[A-Z][A-Z0-9_]*$"))
     )(relationApply)(relationUnapply)
   )
 
@@ -21,6 +22,14 @@ object RelationVisualisation extends Controller {
 
   def relationUnapply(relation: Relation): Option[(String)] = {
     Option(relation.label)
+  }
+
+  /**
+   * Print errors contained in a form
+   * @author Thhomas GIOVANNINI
+   */
+  def printErrors(form: Form[(Relation)]) = {
+    form.errors.foreach(error => println("###Error:\n" + error.messages.mkString("\n")))
   }
 
   /**
@@ -47,9 +56,31 @@ object RelationVisualisation extends Controller {
    * @return an action redirecting to the list of relations
    */
   def createSubmit = Action { implicit request =>
-    val relation = relationForm.bindFromRequest.get
-    Relation.DBList.save(relation.label)
-    Ok(views.html.relations.relations())
+    /**
+     * Create relation
+     * @author Aurélie LORGEOUX
+     * @return true if relation created
+     *         false else
+     */
+    def doCreate(relation: Relation): Boolean = {
+      Relation.DBList.save(relation.label) != -1L
+    }
+
+    val form = relationForm.bindFromRequest()
+    form.fold(
+      hasErrors = {
+        formWithErrors => BadRequest(formWithErrors.errorsAsJson)
+      },
+      success = {
+        relation => {
+          if (doCreate(relation)) {
+            Ok(views.html.relations.relations())
+          } else {
+            InternalServerError("Couldn't add relation to DB")
+          }
+        }
+      }
+    )
   }
 
   /**
@@ -71,9 +102,31 @@ object RelationVisualisation extends Controller {
    * @return an action redirecting to the list of relations
    */
   def updateSubmit(id: Long) = Action { implicit request =>
-    val relation = relationForm.bindFromRequest.get
-    Relation.DBList.update(id, relation.label)
-    Ok(views.html.relations.relations())
+    /**
+     * Update relation
+     * @author Aurélie LORGEOUX
+     * @return true if relation updated
+     *         false else
+     */
+    def doUpdate(relation: Relation): Boolean = {
+      Relation.DBList.update(id, relation.label) == 1
+    }
+
+    val form = relationForm.bindFromRequest()
+    form.fold(
+      hasErrors = {
+        formWithErrors => BadRequest(formWithErrors.errorsAsJson)
+      },
+      success = {
+        relation => {
+          if (doUpdate(relation)) {
+            Ok(views.html.relations.relations())
+          } else {
+            InternalServerError("Couldn't update relation in DB")
+          }
+        }
+      }
+    )
   }
 
   /**
