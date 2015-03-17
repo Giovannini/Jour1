@@ -4,6 +4,7 @@
   "dependencies": {
     "angular": "latest",
     "angular-resource": "latest",
+    "angular-route": "latest",
     "pixi.js": "https://github.com/GoodBoyDigital/pixi.js.git#~2.2.5",
     "alchemyjs": "latest"
   },

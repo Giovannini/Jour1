@@ -19,13 +19,14 @@
                     <form class="form" ng-submit="launchSearch()">
                         <div class="form-group">
                             <label for="search" class="form-label">Search :</label>
-                            <input class="form-input" id="search" type="text" ng-model="search" />
+                            <input autofocus="autofocus" class="form-input" id="search" type="text" ng-model="search" />
                         </div>
                     </form>
                     <div class="error">
                         <p>{{ error }}</p>
                     </div>
                 </div>
+                <div ng-view=""></div>
                 <div ng-controller="EditNodeController">
                     <div ng-hide="isShowingNode() || isShowingRelation()">
                         <h4>No node selected</h4>
@@ -51,7 +52,16 @@
                     <div ng-show="isShowingRelation()" class="table">
                         <h4>{{ relationSelected.label }}</h4>
                         <div>
-                            Property
+                            Preconditions :
+                            <ul>
+                                <li ng-repeat="precondition in relationSelected.preconditions">{{ precondition.label }}</li>
+                            </ul>
+                        </div>
+                        <div>
+                            Parameters :
+                            <ul>
+                                <li ng-repeat="parameter in relationSelected.parameters">{{ parameter }}</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -61,6 +71,7 @@
 
     <script src="@routes.Assets.at("components/angular/angular.min.js")" ></script>
     <script src="@routes.Assets.at("components/angular-resource/angular-resource.min.js")" ></script>
+    <script src="@routes.Assets.at("components/angular-route/angular-route.min.js")" ></script>
     <script src="@routes.Assets.at("components/lodash/dist/lodash.js")" ></script>
     <script src="@routes.Assets.at("components/d3/d3.js")" ></script>
     <script src="@routes.Assets.at("components/alchemyjs/dist/alchemy.js")" ></script>

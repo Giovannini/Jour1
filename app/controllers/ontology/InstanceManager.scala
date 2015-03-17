@@ -52,7 +52,8 @@ object InstanceManager extends Controller {
     val newTodoForm = instanceForm.bindFromRequest()
     newTodoForm.fold(
       hasErrors = { form => printErrors(form)},
-      success = { newInstanceForm => doCreate(newInstanceForm)})
+      success = { newInstanceForm => doCreate(newInstanceForm)}
+    )
     Redirect(controllers.routes.MapController.show())
   }
 

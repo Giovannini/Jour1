@@ -149,6 +149,26 @@ object Concept {
   def apply(label: String, properties: List[Property], rules: List[ValuedProperty]) = new Concept(label, properties, rules)
 
   /**
+   * Apply method used in the Concept controller
+   * Allows to match a json to a form
+   * @param label concept label
+   * @param properties concept properties
+   * @param rules concept rules
+   * @param displayProperty concept display properties
+   * @return a concept using these parameters
+   */
+  def applyForm(label: String, properties: List[Property], rules: List[ValuedProperty], displayProperty: DisplayProperty) = new Concept(label, properties, rules, displayProperty)
+
+  /**
+   * Unapply method used in the Concept controller
+   * Allows to match a json to a form
+   * @param concept concept
+   * @return the different parts of a concept
+   */
+  def unapplyForm(concept: Concept): Option[(String, List[Property], List[ValuedProperty], DisplayProperty)] = {
+    Some(concept.label, concept.properties, concept.rules, concept.displayProperty)
+  }
+  /**
    * Create a concept given a list of ids of properties instead of a list of properties directly.
    * @author Thomas GIOVANNINI
    * @param label of the concept

@@ -13,6 +13,7 @@ case class Property(id: Long, label: String, valueType: String, defaultValue: An
   override def toString = label + ": " + valueType + " = " + defaultValue
 
   def toJson : JsValue = Json.obj(
+    "id" -> JsNumber(id),
     "label" -> JsString(label),
     "valueType" -> JsString(valueType),
     "defaultValue" -> jsonDefaultValue
@@ -34,6 +35,18 @@ case class Property(id: Long, label: String, valueType: String, defaultValue: An
 object Property {
 
   val error = Property(-1L, "Error", "error", "error")
+
+  /**
+   * Apply method used in the Concept controller
+   * Allows to match a json to a form
+   * @param property property to unapply
+   * @return tuple of id, label, valueType and defaultValue
+   */
+  def unapplyForm(property: Property): Option[(Long, String, String, String)] = {
+    Some((
+      property.id, property.label, property.valueType, property.jsonDefaultValue.toString()
+    ))
+  }
 
   def parse(maybeId: Option[Long], label: String, valueType: String, defaultValueToParse: String): Property = {
     val id = maybeId.getOrElse(-1L)
