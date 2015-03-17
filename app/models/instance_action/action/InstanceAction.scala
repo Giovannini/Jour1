@@ -1,13 +1,13 @@
-package models.rules.action
+package models.instance_action.action
 
 import anorm.SqlParser._
 import anorm._
-import models.rules.Argument
-import models.rules.custom_types.RuleStatement
-import models.rules.precondition.{PreconditionDAO, Precondition}
+import controllers.Application
+import models.instance_action.Parameter
+import models.instance_action.custom_types.InstanceActionStatement
+import models.instance_action.precondition.{Precondition, PreconditionDAO}
 import play.api.Play.current
 import play.api.db.DB
-import play.api.libs.json.{JsArray, JsString, JsNumber, Json}
 
 import scala.language.postfixOps
 
@@ -21,25 +21,53 @@ import scala.language.postfixOps
  * @param parameters parameters for the function
  */
 case class InstanceAction(id: Long,
-                  label: String,
-                  preconditions: List[Precondition],
-                  subActions: List[(InstanceAction, String)],
-                  parameters: List[Argument]) {
+                          label: String,
+                          preconditions: List[Precondition],
+                          subActions: List[InstanceAction],
+                          parameters: List[Parameter]) {
   def withId(id: Long): InstanceAction = {
     InstanceAction(id, this.label, this.preconditions, this.subActions, this.parameters)
   }
 
-  def toJson = {
-    Json.obj(
-      "id" -> JsNumber(id),
-      "label" -> JsString(label),
-      "preconditions" -> JsArray(preconditions.map(_.toJson)),
-      "parameters" -> JsArray(parameters.map(_.toJson))
-    )
-  }
+  def toJson = ""
 
   def save: Long = {
     InstanceAction.save(this)
+  }
+
+  private def modifyParameter(oldParameter: Parameter, newParameter: Parameter): InstanceAction = {
+    def replaceParameterInList(parameters: List[Parameter]): List[Parameter] = {
+      parameters match {
+        case List() => List()
+        case head::tail =>
+          if (head == oldParameter) newParameter :: tail
+          else head :: replaceParameterInList(tail)
+      }
+    }
+    if (parameters.contains(oldParameter)) {
+      val newPreconditions: List[Precondition] = preconditions.map { precondition =>
+        precondition.modifyParameter(oldParameter, newParameter)
+      }
+      val newSubActions: List[InstanceAction] = subActions.map { action =>
+        action.modifyParameter(oldParameter, newParameter)
+      }
+      val newParameters: List[Parameter] = replaceParameterInList(this.parameters)
+      InstanceAction(id, label, newPreconditions, newSubActions, newParameters)
+    } else this
+  }
+
+  def withParameters(newParameters: List[Parameter]): InstanceAction = {
+    def modifyParametersRec(parameterTuples: List[(Parameter, Parameter)], action: InstanceAction): InstanceAction = {
+      parameterTuples match {
+        case List() => action
+        case head::tail =>
+          val newAction = action.modifyParameter(head._1, head._2)
+          modifyParametersRec(tail, newAction)
+      }
+    }
+    if (this.parameters.length == newParameters.length) {
+      modifyParametersRec(this.parameters.zip(newParameters), this)
+    }else this
   }
 }
 
@@ -47,11 +75,18 @@ case class InstanceAction(id: Long,
  * Model for rule
  */
 object InstanceAction {
-  implicit val connection = DB.getConnection()
+  implicit val connection = Application.connection
 
-  def identify(id: Long, label: String, preconditions: List[Long], subActions: List[(Long, String)], parameters: List[Argument]): InstanceAction = {
-    InstanceAction(id, label, preconditions.map(PreconditionDAO.getById),
-      subActions.map(tuple => (getById(tuple._1), tuple._2)),
+  def identify(id: Long, label: String, preconditions: List[(Long, List[Parameter])], subActions: List[(Long, List[Parameter])], parameters: List[Parameter]): InstanceAction = {
+    InstanceAction(id, label,
+      preconditions.map {
+        tuple =>
+          PreconditionDAO.getById(tuple._1).withParameters(tuple._2)
+      },
+      subActions.map {
+        tuple =>
+          getById(tuple._1).withParameters(tuple._2)
+      },
       parameters)
   }
 
@@ -64,54 +99,48 @@ object InstanceAction {
    * @param subActionsToParse to retrieve real sub-actions of the action
    * @return the corresponding action
    */
+  //TODO make it sexy
   def parse(id: Long, label: String, parametersToParse: String, preconditionsToParse: String, subActionsToParse: String): InstanceAction = {
     var error = false
-    def parseParameters(): List[Argument] = {
+    def parseParameters(): List[Parameter] = {
       if (parametersToParse == "") List()
-      else if (! parametersToParse.contains(":")){
+      else if (!parametersToParse.contains(":")) {
         error = true
         List()
       }
       else parametersToParse.split(";")
-        .map(_.split(":"))
-        .map(array => Argument(array(0), array(1)))
+        .map(Parameter.parseArgument)
         .toList
     }
     def parsePreconditions(): List[Precondition] = {
-      //println("Parsing preconditions from: " + preconditionsToParse)
-      //println(PreconditionDAO.getAll.mkString(", "))
-      if(preconditionsToParse == "") List()
-      else if(! preconditionsToParse.matches("[0-9;]*")){
-        InstanceAction.delete(id) // TODO: better than deleting, notifying that an error has occured
-        List()
-      }
-      else{
+      if (preconditionsToParse == "") List()
+      else {
         preconditionsToParse.split(";")
-          .map(_.toLong)
-          .map(PreconditionDAO.getById)
-          .toList
+          .map { string =>
+          val splitted = string.split(" -> ")
+          val precondition = PreconditionDAO.getById(splitted(0).toLong)
+          val parameters = splitted(1).split(",").map(Parameter.parseArgument).toList
+          precondition.withParameters(parameters)
+        }.toList
       }
     }
-    def parseSubActions(): List[(InstanceAction, String)] = {
+    def parseSubActions(): List[InstanceAction] = {
       if (subActionsToParse == "") List()
       else subActionsToParse.split(";").map { s =>
-        val splitted = s.split(":")
-        (getById(splitted(0).toLong), splitted(1))
+        val splitted = s.split(" -> ") //Subaction is ActionID:Parameters
+      val instanceAction = getById(splitted(0).toLong)
+        val parameters = splitted(1).split(",").map(Parameter.parseArgument).toList
+        instanceAction.withParameters(parameters)
       }.toList
     }
-    //println("Parsing action " + label + "...")
     val parameters = parseParameters()
-    //println("Parameters: " + parameters.map(_.reference).mkString(", "))
     val preconditions = parsePreconditions()
-    //println("Preconditions: " + preconditions.map(_.label).mkString(", "))
     val parsedSubActions = parseSubActions()
-    //println("Subactions: " + parsedSubActions.map(_._1.label).mkString(", "))
-    //println("Error? " + error)
-    if(error) InstanceAction.error
+    if (error) InstanceAction.error
     else InstanceAction(id, label, preconditions, parsedSubActions, parameters)
   }
-  
-  val error = InstanceAction(-1, "error", List[Precondition](), List[(InstanceAction, String)](), List[Argument]())
+
+  val error = InstanceAction(-1, "error", List[Precondition](), List[InstanceAction](), List[Parameter]())
 
   /**
    * Parse rule to interact with database
@@ -134,7 +163,7 @@ object InstanceAction {
    */
   def clearDB: Int = {
     DB.withConnection { implicit connection =>
-      val statement = RuleStatement.clearDB
+      val statement = InstanceActionStatement.clearDB
       statement.executeUpdate
     }
   }
@@ -146,7 +175,7 @@ object InstanceAction {
    */
   def getAll: List[InstanceAction] = {
     DB.withConnection { implicit connection =>
-      val statement = RuleStatement.getAll
+      val statement = InstanceActionStatement.getAll
       statement.as(actionParser *)
     }
   }
@@ -160,7 +189,7 @@ object InstanceAction {
    */
   def save(action: InstanceAction): Long = {
     DB.withConnection { implicit connection =>
-      val statement = RuleStatement.add(action)
+      val statement = InstanceActionStatement.add(action)
       val optionId: Option[Long] = statement.executeInsert()
       optionId.getOrElse(-1L)
     }
@@ -174,7 +203,7 @@ object InstanceAction {
    */
   def getById(id: Long): InstanceAction = {
     DB.withConnection { implicit connection =>
-      val statement = RuleStatement.get(id)
+      val statement = InstanceActionStatement.get(id)
       statement.as(actionParser.singleOpt).getOrElse(InstanceAction.error)
     }
   }
@@ -187,7 +216,7 @@ object InstanceAction {
    */
   def getByName(name: String): InstanceAction = {
     DB.withConnection { implicit connection =>
-      val statement = RuleStatement.getByName(name)
+      val statement = InstanceActionStatement.getByName(name)
       statement.as(actionParser.singleOpt).getOrElse(InstanceAction.error)
     }
   }
@@ -200,7 +229,7 @@ object InstanceAction {
    */
   def update(id: Long, action: InstanceAction): Int = {
     DB.withConnection { implicit connection =>
-      val statement = RuleStatement.set(id, action)
+      val statement = InstanceActionStatement.set(id, action)
       statement.executeUpdate
     }
   }
@@ -212,7 +241,7 @@ object InstanceAction {
    */
   def delete(id: Long): Int = {
     DB.withConnection { implicit connection =>
-      val statement = RuleStatement.remove(id)
+      val statement = InstanceActionStatement.remove(id)
       statement.executeUpdate
     }
   }

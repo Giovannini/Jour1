@@ -1,6 +1,6 @@
-package models.rules
+package models.instance_action
 
-import models.rules.action.InstanceAction$
+import models.instance_action.action.InstanceAction$
 import org.scalatest.FunSuite
 import play.api.test.FakeApplication
 import play.api.test.Helpers._

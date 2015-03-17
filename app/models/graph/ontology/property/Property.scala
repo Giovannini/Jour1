@@ -48,8 +48,7 @@ object Property {
     ))
   }
 
-  def parse(maybeId: Option[Long], label: String, valueType: String, defaultValueToParse: String): Property = {
-    val id = maybeId.getOrElse(-1L)
+  def parse(id: Long, label: String, valueType: String, defaultValueToParse: String): Property = {
     val defaultValue = valueType match {
       case "Int" => defaultValueToParse.toInt
       case "Double" => defaultValueToParse.toDouble
@@ -71,7 +70,8 @@ object Property {
       case "Boolean" => secondSplit(1).toBoolean
       case _ => secondSplit(1)
     }
-    Property(0L, label, valueType, defaultValue)
+    PropertyDAO.getByName(label)
+    //Property(0L, label, valueType, defaultValue)
   }
 
 }

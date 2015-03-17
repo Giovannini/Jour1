@@ -5,8 +5,8 @@ import models.graph.custom_types.DisplayProperty
 import models.graph.ontology._
 import models.graph.ontology.property.{Property, PropertyDAO}
 import models.graph.ontology.relation.Relation
-import models.rules.action.ActionManager
-import models.rules.precondition.PreconditionManager
+import models.instance_action.action.ActionManager
+import models.instance_action.precondition.PreconditionManager
 import models.{WorldInit, WorldMap}
 import play.api.mvc._
 
@@ -55,7 +55,7 @@ object WorldInitialisation extends Controller {
       }
       else Ok("Error while filling the graph")
     }else{
-      Ok("Error")
+      Ok("Connection error to the graph")
     }
   }
 
@@ -67,14 +67,14 @@ object WorldInitialisation extends Controller {
 
     PropertyDAO.clear
     Relation.DBList.clear
-    ActionManager.initialization
-    PreconditionManager.initialization
 
     /*Property declaration*/
     val propertyInstanciable      = PropertyDAO.save(Property(0, "Instanciable", "Boolean", false))
     val propertyDuplicationSpeed  = PropertyDAO.save(Property(0, "DuplicationSpeed", "Int", 5))
     val propertyStrength          = PropertyDAO.save(Property(0, "Strength", "Int", 0))
     val propertyWalkingDistance   = PropertyDAO.save(Property(0, "WalkingDistance", "Int", 3))
+    val propertyHunger            = PropertyDAO.save(Property(0, "Hunger", "Int", 5))
+    //TODO create a property to decrease hunger level when an eater eat
 
     println("Declaration of concepts...")
 
@@ -85,7 +85,7 @@ object WorldInitialisation extends Controller {
         ValuedProperty(propertyInstanciable,true)),
       DisplayProperty("#E3B494", 20))
     val conceptPredator   = Concept.create("Predator",
-        List(),
+        List(propertyHunger),
         List())
     val conceptWolf       = Concept.create("Wolf",
         List(),
@@ -93,12 +93,12 @@ object WorldInitialisation extends Controller {
           ValuedProperty(propertyInstanciable,true)),
       DisplayProperty("#1A1A22", 18))
     val conceptSheep      = Concept.create("Sheep",
-        List(propertyWalkingDistance),
+        List(),
         List(ValuedProperty(propertyStrength,2),
           ValuedProperty(propertyInstanciable,true)),
       DisplayProperty("#EEE9D6", 16))
     val conceptAnimal     = Concept.create("Animal",
-        List(propertyWalkingDistance),
+        List(propertyWalkingDistance, propertyHunger),
         List())
     val conceptGrass      = Concept.create("Grass",
         List(propertyDuplicationSpeed),
@@ -142,6 +142,9 @@ object WorldInitialisation extends Controller {
         List(ValuedProperty(propertyStrength,3),
           ValuedProperty(propertyInstanciable,true)),
         DisplayProperty("#878377", 1))
+
+    PreconditionManager.initialization
+    ActionManager.initialization()
 
     println("Relations declaration...")
 

@@ -1,7 +1,7 @@
-package models.rules.custom_types
+package models.instance_action.custom_types
 
 import anorm._
-import models.rules.precondition.Precondition
+import models.instance_action.precondition.Precondition
 
 /**
  * All values from this objects are SQLStatements
@@ -36,8 +36,8 @@ object PreconditionStatement {
     SQL("""INSERT INTO preconditions(label, parameters, subconditions)
            VALUES({label}, {parameters}, {subconditions})""").on(
       'label -> precondition.label,
-      'parameters -> precondition.arguments.mkString(";"),
-      'subconditions -> precondition.subConditions.mkString(";")
+      'parameters -> precondition.parameters.mkString("/"),
+      'subconditions -> precondition.subConditions.map(_.id).mkString(";")
     )
   }
 
@@ -66,7 +66,7 @@ object PreconditionStatement {
       WHERE id = {id}""").on(
         'id -> id,
         'label -> precondition.label,
-        'parameters -> precondition.arguments.mkString(";"),
+        'parameters -> precondition.parameters.mkString(";"),
         'subconditions -> precondition.subConditions.mkString(";")
       )
   }

@@ -132,7 +132,6 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
     val key = instance.concept.id
     val newInstance = instance.withId(getNewInstanceId)
     instances(key) = newInstance :: instances.getOrElse(key, List())
-    //println(instances(key).length)
     newInstance
   }
 
@@ -152,20 +151,9 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
   def updateInstance(oldInstance: Instance, newInstance: Instance) = {
     val key = oldInstance.concept.id
     removeInstance(oldInstance)
-    instances(key) = newInstance.withId(oldInstance.id) :: instances.getOrElse(key, List())
+    instances += key -> (newInstance.withId(oldInstance.id) :: instances.getOrElse(key, List()))
     newInstance
   }
-
-  /**
-   * Move an instance on the world map
-   * @author Thomas GIOVANNINI
-   */
-  /*def move(instance: Instance, xMove: Int, yMove: Int): Instance = {
-    val instanceCoordinates = instance.coordinates
-    val newCoordinates = instanceCoordinates + Coordinates(xMove, yMove)
-    this.removeInstanceAt(instance, instanceCoordinates)
-    this.addInstanceAt(instance, newCoordinates)
-  }*/
 
   /**
    * Return whether an instance of a particular concept is on it or not

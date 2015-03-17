@@ -4,7 +4,7 @@ import models.graph.ontology.relation.Relation
 import models.graph.ontology.{Concept, Instance}
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller, Request}
-import models.rules.action.{InstanceAction, ActionParser}
+import models.instance_action.action.{InstanceAction, ActionParser}
 
 /**
  * Controller to send Json data to client
@@ -60,7 +60,8 @@ object RestCall extends Controller {
       val actionReference = (jsonRequest \ "action").as[Long]
       val actionId = Relation.DBList.getActionIdFromId(actionReference)
       val actionArguments = (jsonRequest \ "instances").as[List[Long]]
-      ActionParser.parseAction(actionId, actionArguments)
+      val result = ActionParser.parseAction(actionId, actionArguments)
+      result
     }
 
     val result = execution(request)
@@ -76,7 +77,8 @@ object RestCall extends Controller {
    */
   def getPossibleDestinationOfAction(initInstanceId: Long, relationId: Long, conceptId: Long) = Action {
     val sourceInstance = Application.map.getInstanceById(initInstanceId)
-    val action = ActionParser.getAction(Relation.DBList.getActionIdFromId(relationId))
+    val actionID = Relation.DBList.getActionIdFromId(relationId)
+    val action = ActionParser.getAction(actionID)
     val destinationInstancesList = Application.map.getInstancesOf(conceptId)
     if (sourceInstance == Instance.error || action == InstanceAction.error){
       Ok(Json.arr())
@@ -95,10 +97,11 @@ object RestCall extends Controller {
    */
   def reduceDestinationList(sourceInstance: Instance, action: InstanceAction, instances: List[Instance]) = {
     val preconditionsToValidate = action.preconditions
-    val toto = preconditionsToValidate.par.map(_.instancesThatFill(sourceInstance))
-    toto.foldRight(instances.toSet)(_ intersect _)
-      .toList
+    preconditionsToValidate
+      .map(_.instancesThatFill(sourceInstance))
+      .foldRight(instances.toSet)(_ intersect _)
       .map(_.toJson)
+      .toList
   }
 
   def editInstance(instanceId: Int) = Action {

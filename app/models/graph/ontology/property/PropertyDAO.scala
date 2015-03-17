@@ -2,6 +2,7 @@ package models.graph.ontology.property
 
 import anorm.SqlParser._
 import anorm._
+import controllers.Application
 import play.api.Play.current
 import play.api.db.DB
 
@@ -12,14 +13,14 @@ import scala.language.postfixOps
  * Model for properties persistancy
  */
 object PropertyDAO {
-  implicit val connection = DB.getConnection()
+  implicit val connection = Application.connection
 
   /**
    * Parse property to interact with database
    * @author Thomas GIOVANNINI
    */
   private val propertyParser: RowParser[Property] = {
-    get[Option[Long]]("id") ~
+    get[Long]("id") ~
       get[String]("label") ~
       get[String]("type") ~
       get[String]("defaultValue") map {

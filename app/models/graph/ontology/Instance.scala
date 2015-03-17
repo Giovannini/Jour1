@@ -99,6 +99,10 @@ case class Instance(id:             Int,
   def withId(newId: Int): Instance = {
     Instance(newId, label, coordinates, properties, concept)
   }
+
+  def getValueForProperty(property: Property): Any = {
+    properties.find(_.property == property).get.value
+  }
 }
 
 object Instance {

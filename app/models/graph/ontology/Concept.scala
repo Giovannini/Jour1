@@ -11,15 +11,22 @@ import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
  * Model for a concept of an ontology
  * @author Thomas GIOVANNINI
  * @param label for the concept
- * @param properties of this concept
+ * @param _properties of this concept
  * @param rules of this concept
  * @param displayProperty for tis concept to be displayed
  */
 case class Concept(label: String,
-                   properties: List[Property],
+                   private val _properties: List[Property],
                    rules: List[ValuedProperty],
                    displayProperty: DisplayProperty) {
   require(label.matches("^[A-Z][A-Za-z0-9_ ]*$"))
+
+  /**
+   * Retrieve the properties of a Concept but also the one from its parents
+   * @author Thomas GIOVANNINI
+   */
+  // TODO while creating instances, all the properties are not taken...
+  lazy val properties: List[Property] = (_properties ::: getParents.flatMap(_.properties)).distinct
 
   /**
    * Constructor giving automatically the color #AAAAAA to the concept.
@@ -77,15 +84,6 @@ case class Concept(label: String,
   def createInstanceAt(coordinates: Coordinates): Instance = {
     Instance(0, label, coordinates, properties.map(_.defaultValuedProperty), this)
   }
-
-  /*
-   * Retrieve the properties of a Concept but also the one from its parents
-   * @author Thomas GIOVANNINI
-   * @return a list of properties
-   */
-  /*def getAllProperties: Set[Property] = {
-    properties.toSet ++ getParents.flatMap(_.getAllProperties).toSet
-  }*/
 
   /**
    * Retrieve the rules of a Concept but also the one from its parents
@@ -324,9 +322,7 @@ object Concept {
   def getChildren(conceptId: Long): List[Concept] = {
     val statement = Statement.getChildrenConcepts(conceptId)
     statement.apply
-      .map { row =>
-      Concept.parseRow(row)
-    }
+      .map(Concept.parseRow)
       .toList
   }
 
@@ -347,14 +343,10 @@ object Concept {
    * @return a list of tuple containing the relation and destination concept.
    */
   def getRelationsFrom(conceptId: Long): List[(Relation, Concept)] = {
-    val conceptLabel = Concept.getById(conceptId).label
-    Statement.getRelationsFrom(conceptId).apply
+    Statement.getRelationsFrom(conceptId).apply.view
       .filter(noInstance)
-      .map { row =>
-        val toto = (Relation.DBGraph.parseRow(row), Concept.parseRow(row))
-        //println(conceptLabel + " - " + toto._1.label + " - " + toto._2.label)
-        toto
-      }.toList
+      .map(row => (Relation.DBGraph.parseRow(row), Concept.parseRow(row)))
+      .toList
   }
 
   /**
@@ -409,9 +401,9 @@ object Concept {
    * @return a list of relations and concepts
    */
   def getParentsRelations(conceptId: Long): List[(Relation, Concept)] = {
-    getParents(conceptId).map {
+    getParents(conceptId).flatMap {
       parent => getReachableRelations(parent.id)
-    }.flatten
+    }
   }
 
   /**
