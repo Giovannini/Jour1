@@ -190,6 +190,8 @@ object Relation {
      * @param id id of the relation
      */
     def delete(id: Long): Int = {
+      // delete relations in Neo4J graph
+      NeoDAO.removeTypeRelationFromDB(id)
       DB.withConnection { implicit connection =>
         val statement = RelationSQLStatement.remove(id)
         statement.executeUpdate

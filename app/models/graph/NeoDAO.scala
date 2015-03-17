@@ -114,7 +114,8 @@ object NeoDAO {
   }
 
   /**
-   * Remove a relation into two existing concepts in the Neo4J DB.
+   * Remove a relation into two existing concepts in the Neo4J DB
+   * @author Thomas GIOVANNINI
    * @param sourceId the source of the link
    * @param relationId the id of the relation
    * @param destId the destination of the link
@@ -123,6 +124,18 @@ object NeoDAO {
    */
   def removeRelationFromDB(sourceId: Long, relationId: Long, destId: Long): Boolean = {
     val statement = Statement.deleteRelation(sourceId, relationId, destId)
+    statement.execute
+  }
+
+  /**
+   * Remove a relation everywhere in the Neo4J DB
+   * @author Aurélie LORGEOUX
+   * @param relationId the id of the relation
+   * @return true if the relation was correctly removed
+   *         false else
+   */
+  def removeTypeRelationFromDB(relationId: Long) = {
+    val statement = Statement.deleteRelation(relationId)
     statement.execute
   }
 

@@ -21,6 +21,7 @@ POST        /instances/create                                        controllers
 #Graph manipulation
 GET         /relation/create                                         controllers.ontology.RelationManager.createRelation
 POST        /relation/create                                         controllers.ontology.RelationManager.create
+GET         /relation/delete/:id                                     controllers.ontology.RelationManager.deleteAll(id: Long)
 
 # Graph visualisation
 GET         /graph                                                   controllers.graph.GraphVisualisation.index

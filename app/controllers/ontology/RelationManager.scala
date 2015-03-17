@@ -90,8 +90,27 @@ object RelationManager extends Controller{
     Redirect(controllers.routes.MapController.show())
   }
 
+  /**
+   * Delete a relation between two concepts
+   * @author Aurélie LORGEOUX
+   * @param src concept source
+   * @param id id of the relation
+   * @param dest concept destination
+   * @return an action
+   */
   def delete(src: Long, id: Long, dest: Long) = Action {
     NeoDAO.removeRelationFromDB(src, id, dest)
-    Ok("relation supprimée")
+    Ok("relation supprimée entre les deux concepts")
+  }
+
+  /**
+   * Delete entirely a relation
+   * @author Aurélie LORGEOUX
+   * @param id id of the relation
+   * @return an action
+   */
+  def deleteAll(id: Long) = Action {
+    Relation.DBList.delete(id)
+    Ok("relation supprimée complètement")
   }
 }

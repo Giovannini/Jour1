@@ -162,6 +162,16 @@ object Statement {
       "id2" -> destNodeId)
   }
 
+  /**
+   * Create a cypher statement to delete a relation everywhere in the Neo4J graph
+   * @author Aurélie LORGEOUX
+   * @param relationId the relation to delete
+   * @return a cypher statement deleting the desired relation
+   */
+  def deleteRelation(relationId: Long) : CypherStatement = {
+    Cypher( "MATCH (n1)-[r:R_"+relationId.toString+"]-(n2) DELETE r")
+  }
+
   def updateRelation(sourceId: Long, oldRelation: Relation, newRelation: Relation, destId: Long): CypherStatement = ???
 
   def getAllRelations: CypherStatement = {

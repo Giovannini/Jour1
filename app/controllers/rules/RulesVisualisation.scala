@@ -32,7 +32,8 @@ object RulesVisualisation extends Controller {
 
   /**
    * Display all rules
-   * @return
+   * @author Aurélie LORGEOUX
+   * @return an action for listing all rules
    */
   def index = Action {
     Ok(views.html.rules.rules())
@@ -40,8 +41,9 @@ object RulesVisualisation extends Controller {
 
   /**
    * Delete a rule
+   * @author Aurélie LORGEOUX
    * @param id id of rule
-   * @return
+   * @return an action redirecting to the listing of rules
    */
   def delete(id: Long) = Action {
     InstanceAction.delete(id)
@@ -50,8 +52,9 @@ object RulesVisualisation extends Controller {
 
   /**
    * Get a rule by its id
+   * @author Aurélie LORGEOUX
    * @param id id of rule
-   * @return
+   * @return an action displaying the rule
    */
   def load(id: Long) = Action {
     InstanceAction.getById(id) match {
@@ -62,7 +65,8 @@ object RulesVisualisation extends Controller {
 
   /**
    * Display form to create a rule
-   * @return
+   * @author Aurélie LORGEOUX
+   * @return an action displaying form to create a new rule
    */
   def form = Action {
     Ok(views.html.rules.form(actionForm))
@@ -70,7 +74,8 @@ object RulesVisualisation extends Controller {
 
   /**
    * Create a new rule
-   * @return
+   * @author Aurélie LORGEOUX
+   * @return an action redirecting to the listing of rules
    */
   def submit = Action { implicit request =>
     val ruleData = actionForm.bindFromRequest.get
