@@ -14,7 +14,7 @@ object InstanceActionStatement {
    * @return a sql statement
    */
   val clearDB = {
-    SQL("DELETE FROM rules;")
+    SQL("DELETE FROM rules")
   }
 
 
@@ -24,9 +24,7 @@ object InstanceActionStatement {
    * @return a sql statement
    */
   val getAll = {
-    SQL("""
-      SELECT * FROM rules
-    """)
+    SQL("SELECT * FROM rules")
   }
 
   /**
@@ -94,9 +92,7 @@ object InstanceActionStatement {
    * @return a sql statement
    */
   def remove(id: Long) = {
-    SQL("""
-      DELETE FROM rules where id = {id}
-    """).on(
+    SQL("DELETE FROM rules where id = {id}").on(
       'id -> id
     )
   }

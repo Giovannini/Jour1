@@ -12,22 +12,27 @@ import play.api.db.DB
 
 import scala.language.postfixOps
 
-/**TODO test
- * Model for a relation in an ontology
- * @param id id of the relation
- * @param label for the relation
- */
-case class Relation(id: Long, label: String){
-    require(label.matches("^[A-Z][A-Z0-9_]*$"))
+/** TODO test
+  * Model for a relation in an ontology
+  * @param id id of the relation
+  * @param label for the relation
+  */
+case class Relation(id: Long, label: String) {
+  require(label.matches("^[A-Z][A-Z0-9_]*$"))
 
-    override def toString = label
+  /**
+   * To string method for relations
+   * @author Thomas GIOVANNINI
+   * @return the label of the relation
+   */
+  override def toString = label
 
-    override def equals(obj:Any) = {
-      (obj.isInstanceOf[Relation]
-        && obj.asInstanceOf[Relation].id == this.id)
-    }
+  override def equals(obj: Any) = {
+    (obj.isInstanceOf[Relation]
+      && obj.asInstanceOf[Relation].id == this.id)
+  }
 
-    def isAnAction = label.startsWith("ACTION_")
+  def isAnAction = label.startsWith("ACTION_")
 }
 
 object Relation {
@@ -42,8 +47,8 @@ object Relation {
    */
   object DBGraph {
     implicit val connection = NeoDAO.connection
-    
-    /**TODO
+
+    /** TODO
       * Method to get the Scala function associated to the given relation
       * @param relation key of the Scala function's name in the DB
       * @return the Scala function associated to the given relation
@@ -185,12 +190,11 @@ object Relation {
     }
 
     /**
-     * Delete a relation in database
+     * Delete a relation in the Neo4J graph
      * @author Aurélie LORGEOUX
      * @param id id of the relation
      */
     def delete(id: Long): Int = {
-      // delete relations in Neo4J graph
       NeoDAO.removeTypeRelationFromDB(id)
       DB.withConnection { implicit connection =>
         val statement = RelationSQLStatement.remove(id)
@@ -198,4 +202,5 @@ object Relation {
       }
     }
   }
+
 }

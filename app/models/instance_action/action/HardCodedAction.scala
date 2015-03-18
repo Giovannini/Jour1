@@ -16,14 +16,19 @@ object HardCodedAction {
    * @author Thomas GIOVANNINI
    * @param args arguments containing the instance to add and the coordinates where to add it
    */
-  def addInstanceAt(args: Array[Any]) = {
+  def addInstanceAt(args: Array[Any]): Unit = {
     val instance = map.getInstanceById(args(0).asInstanceOf[Long])
     val groundInstance = map.getInstanceById(args(1).asInstanceOf[Long])
     val coordinates = groundInstance.coordinates
     map.addInstance(instance.at(coordinates))
   }
 
-  def createInstanceAt(args: Array[Any]) = {
+  /**
+   * Create an instance at given coordinates
+   * @author Thomas GIOVANNINI
+   * @param args arguments containing id of the instance to add and id of the ground instance where to add it
+   */
+  def createInstanceAt(args: Array[Any]): Unit = {
     val instance = map.getInstanceById(args(0).asInstanceOf[Long])
     val groundInstance = map.getInstanceById(args(1).asInstanceOf[Long])
     val coordinates = groundInstance.coordinates
@@ -44,7 +49,8 @@ object HardCodedAction {
     } else Instance.error
   }
 
-  def searchInstance(args: Array[Any]) = {
+  //NOT USED
+  def searchInstance(args: Array[Any]): Unit = {
     val instance = map.getInstanceById(args(0).asInstanceOf[Long])
     val xCoordinate = args(1).asInstanceOf[Int]
     val yCoordinate = args(2).asInstanceOf[Int]
@@ -52,6 +58,7 @@ object HardCodedAction {
     map.getInstancesAt(coordinates).contains(instance)
   }
 
+  //NOT USED
   def searchConcept(args: Array[Any]) = {
     val concept = Concept.getById(args(0).asInstanceOf[Long])
     val xCoordinate = args(1).asInstanceOf[Int]
@@ -60,28 +67,52 @@ object HardCodedAction {
     map.getInstancesAt(coordinates).map(_.concept).contains(concept)
   }
 
-  def modifyProperty(args: Array[Any]) = {
+  /**
+   * Modify value of a property
+   * @author Thomas GIOVANNINI
+   * @param args array containing id of the instance to update, property to string to modify and new value
+   */
+  def modifyProperty(args: Array[Any]): Unit = {
     val instance = Application.map.getInstanceById(args(0).asInstanceOf[Long])
     val property =  Property.parseString(args(1).asInstanceOf[String])
     val value = args(2)
-    val newInstance = instance.modifyProperty(property, value)
+    val newInstance = instance.modifyValueOfProperty(property, value)
     Application.map.updateInstance(instance, newInstance)
   }
 
-  def addOneToProperty(args: Array[Any]) = {
+  /**
+   * Add one to a number property
+   * @param args array containing id of the instance to update and property to string to modify
+   */
+  def addOneToProperty(args: Array[Any]): Unit = {
+    /**
+     * Parse a property value to Int if it should be
+     * @param value to maybe parse
+     * @param property from which the value may be modified
+     * @return the value that may have been parsed
+     */
     def parseMaybe(value: Double, property: Property): Any = {
       if(property.valueType == "Int") value.asInstanceOf[Int]
       else value
     }
-    val instance = Application.map.getInstanceById(args(0).asInstanceOf[Long])
-    val property = Property.parseString(args(1).asInstanceOf[String])
-    if (property.valueType == "Int" || property.valueType == "Double") {
+    /**
+     * Get value for an instance of a given property
+     * @author Thomas GIOVANNINI
+     * @param instance from which the property is taken
+     * @param property to look for
+     * @return the desired value
+     */
+    def getValueOfProperty(instance: Instance, property: Property): Double = {
       val _valueOfProperty = instance.getValueForProperty(property)
-      val valueOfProperty = {
-        if(property.valueType == "Int") _valueOfProperty.asInstanceOf[Int]
-        else _valueOfProperty.asInstanceOf[Double]
-      }
-      val newInstance = instance.modifyProperty(property, parseMaybe(valueOfProperty + 1, property))
+      if (property.valueType == "Int") _valueOfProperty.asInstanceOf[Int]
+      else _valueOfProperty.asInstanceOf[Double]
+    }
+    val instance = map.getInstanceById(args(0).asInstanceOf[Long])
+    val property = Property.parseString(args(1).asInstanceOf[String])
+
+    if (property.valueType == "Int" || property.valueType == "Double") {
+      val valueOfProperty: Double = getValueOfProperty(instance, property)
+      val newInstance = instance.modifyValueOfProperty(property, parseMaybe(valueOfProperty + 1, property))
       Application.map.updateInstance(instance, newInstance)
     }
   }

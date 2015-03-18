@@ -252,4 +252,3 @@ object Statement {
       .on("id" -> conceptId, "relationSubtype" -> ("R_" + relationSubtypeName.id))
   }
 }
-/* Relations */

@@ -52,13 +52,26 @@ case class Instance(id:             Int,
     Instance(id, label, coordinates, property.defaultValuedProperty :: properties, concept)
   }
 
-  def updateProperties(properties: List[ValuedProperty]): Instance = {
-    if(properties.map(_.property) == this.properties.map(_.property)){
-      Instance(id, label, coordinates, properties, concept)
+  /**
+   * Update the list of properties of a given instance
+   * @author Thomas GIOVANNINI
+   * @param newProperties for the instance
+   * @return a new instance looking like this one but with updated properties
+   */
+  def updateProperties(newProperties: List[ValuedProperty]): Instance = {
+    if(newProperties.map(_.property) == this.concept.properties){
+      Instance(id, label, coordinates, newProperties, concept)
     }else this
   }
 
-  def modifyProperty(property: Property, value: Any): Instance = {
+  /**
+   * Modify the value of a given property of the instance
+   * @author Thomas GIOVANNINI
+   * @param property to update
+   * @param newValue for this property
+   * @return a new instance looking like this one but with an updated property
+   */
+  def modifyValueOfProperty(property: Property, newValue: Any): Instance = {
     def modifyPropertyRec(vp: ValuedProperty, remainingProperties: List[ValuedProperty]): List[ValuedProperty] = {
       remainingProperties match {
         case List() => List()
@@ -68,16 +81,27 @@ case class Instance(id:             Int,
       }
     }
 
-    if (this.properties.map(_.property).contains(property)){
-      val modifiedProperties = modifyPropertyRec(ValuedProperty(property, value), this.properties)
-      this.updateProperties(modifiedProperties)
+    if (this.concept.properties.contains(property)){
+      val modifiedProperties = modifyPropertyRec(ValuedProperty(property, newValue), this.properties)
+      Instance(id, label, coordinates, modifiedProperties, concept)
     } else this
   }
 
+  /**
+   * Modify the label of an instance
+   * @param newLabel for the instance
+   * @return a new instance looking lke this one but with an updated label
+   */
   def withLabel(newLabel: String): Instance = {
     Instance(id, newLabel, coordinates, properties, concept)
   }
 
+  /**
+   * Modify the concept of an instance
+   * @author Thomas GIOVANNINI
+   * @param newconcept for the instance
+   * @return a new instance looking like this one but with an other concept
+   */
   def ofConcept(newconcept:Concept): Instance ={
     Instance(id, label, coordinates, newconcept.properties.map(_.defaultValuedProperty),newconcept)
   }
@@ -100,6 +124,12 @@ case class Instance(id:             Int,
     Instance(newId, label, coordinates, properties, concept)
   }
 
+  /**
+   * Get value for a given property
+   * @author Thomas GIOVANNINI
+   * @param property of which the value is desired
+   * @return the value of the property
+   */
   def getValueForProperty(property: Property): Any = {
     properties.find(_.property == property).get.value
   }

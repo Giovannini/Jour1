@@ -14,7 +14,7 @@ object PreconditionStatement {
    * @return a sql statement        
    */
   val clearDB = {
-    SQL("DELETE FROM preconditions;")
+    SQL("DELETE FROM preconditions")
   }
 
   /**

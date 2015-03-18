@@ -45,7 +45,7 @@ object InstanceManager extends Controller {
      */
     def doCreate(form: (Int, Int, String, Int, Int, List[String])) = {
       val oldInstance = Application.map.getInstanceById(form._1)
-      val newInstance = createNewInstance(form, oldInstance)
+      val newInstance = getNewInstance(form, oldInstance)
       Application.map.addInstance(newInstance)
     }
 
@@ -112,9 +112,6 @@ object InstanceManager extends Controller {
       .withLabel(newInstanceForm._3)
       .at(Coordinates(newInstanceForm._4, newInstanceForm._5))
       .updateProperties(newProperties)
-  }
-
-  def createNewInstance(newInstanceForm: (Int, Int, String, Int, Int, List[String]), oldInstance: Instance): Instance = {
-    getNewInstance(newInstanceForm,oldInstance).ofConcept(Concept.getById(newInstanceForm._2))
+      .ofConcept(Concept.getById(newInstanceForm._2))
   }
 }

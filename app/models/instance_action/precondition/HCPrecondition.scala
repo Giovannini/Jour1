@@ -7,12 +7,12 @@ import models.graph.ontology.property.{Property, PropertyDAO}
 /**
  * List of hard codded preconditions
  */
-object HardCodedPrecondition {
+object HCPrecondition {
 
   val map = Application.map
 
   /**
-   * Precondition to check if an instance is next to an other
+   * Check whether an instance is next to an other or not
    * @author Thomas GIOVANNINI
    * @param args an array containing the two instances ids
    * @return true if the two instances are next to each others
@@ -40,7 +40,7 @@ object HardCodedPrecondition {
   }
 
   /**
-   * Precondition to check if an instance is at walking distance of an other one
+   * Check whether an instance is at walking distance of an other one or not
    * @author Thomas GIOVANNINI
    * @param args an array containing the two instances ids
    * @return true if the first instance can reach the second one by walking
@@ -65,7 +65,7 @@ object HardCodedPrecondition {
   }
 
   /**
-   * Precondition to check whether an instance has a property or not.
+   * Check whether an instance has a property or not.
    * @param args array containing the instance id and the property name
    * @return true if the instance has the desired property
    *         false else

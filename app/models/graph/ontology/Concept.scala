@@ -25,7 +25,6 @@ case class Concept(label: String,
    * Retrieve the properties of a Concept but also the one from its parents
    * @author Thomas GIOVANNINI
    */
-  // TODO while creating instances, all the properties are not taken...
   lazy val properties: List[Property] = (_properties ::: getParents.flatMap(_.properties)).distinct
 
   /**
@@ -40,8 +39,18 @@ case class Concept(label: String,
 
   val id: Long = hashCode
 
+  /**
+   * Overriding method hashCode
+   * @author Tomas GIOVANNINI
+   * @return an hashcode for the concept
+   */
   override def hashCode = label.hashCode + "CONCEPT".hashCode()
 
+  /**
+   * Overriding method equals
+   * @param obj
+   * @return
+   */
   override def equals(obj: Any) = {
     obj.isInstanceOf[Concept] && obj.asInstanceOf[Concept].id == this.id
   }

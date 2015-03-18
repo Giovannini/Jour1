@@ -13,7 +13,11 @@ object ActionManager{
 
   val nameToId: collection.mutable.Map[String, Long] = collection.mutable.Map.empty[String, Long]
 
-  def initialization() = {
+  /**
+   * Initialize the action manager by creating basic actions.
+   * @author Thomas GIOVANNINI
+   */
+  def initialization(): Unit = {
     println("Initialization of Action Manager")
     InstanceAction.clearDB
     val _actionAddInstanceAt = {

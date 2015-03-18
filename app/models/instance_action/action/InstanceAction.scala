@@ -8,9 +8,11 @@ import models.instance_action.custom_types.InstanceActionStatement
 import models.instance_action.precondition.{Precondition, PreconditionDAO}
 import play.api.Play.current
 import play.api.db.DB
+import play.api.libs.json.{JsString, JsNumber, Json, JsValue}
 
 import scala.language.postfixOps
 
+//TODO comment
 /**
  * Model of rule for persistence
  * @author Aurélie LORGEOUX
@@ -25,37 +27,78 @@ case class InstanceAction(id: Long,
                           preconditions: List[Precondition],
                           subActions: List[InstanceAction],
                           parameters: List[Parameter]) {
-  def withId(id: Long): InstanceAction = {
-    InstanceAction(id, this.label, this.preconditions, this.subActions, this.parameters)
+
+  /**
+   * Modify ID of the action
+   * @author Thomas GIOVANNINI
+   * @param newId that will be given to the action
+   * @return a new InstanceAction looking like this one but with a new ID
+   */
+  def withId(newId: Long): InstanceAction = {
+    InstanceAction(newId, this.label, this.preconditions, this.subActions, this.parameters)
   }
 
-  def toJson = ""
+  /**
+   * Parse the instance action to a Json object
+   * @author Thomas GIOVANNINI
+   * @return a json object representing the instance action
+   */
+  def toJson: JsValue = {
+    Json.obj(
+      "id" -> JsNumber(id),
+      "label" -> JsString(label),
+      "preconditions" -> preconditions.map(_.toJson),
+      "subActions" -> subActions.map(_.toJson),
+      "parameters" -> parameters.map(_.toJson)
+    )
+  }
 
+  /**
+   * Save the action to database
+   * @author Thomas GIOVANNINI
+   * @return its ID
+   */
   def save: Long = {
     InstanceAction.save(this)
   }
 
+  /**
+   * Modify a parameter of the action and for all its subobjects
+   * @author Thomas GIOVANNINI
+   * @param oldParameter to modify
+   * @param newParameter to replace the old one
+   * @return an updated InstanceAction
+   */
   private def modifyParameter(oldParameter: Parameter, newParameter: Parameter): InstanceAction = {
-    def replaceParameterInList(parameters: List[Parameter]): List[Parameter] = {
-      parameters match {
+    /**
+     * Modify parameters of the action
+     * @author Thomas GIOVANNINI
+     * @param newParameters for the action
+     * @return updated list of parameters
+     */
+    def replaceParameterInList(newParameters: List[Parameter]): List[Parameter] = {
+      newParameters match {
         case List() => List()
         case head::tail =>
           if (head == oldParameter) newParameter :: tail
           else head :: replaceParameterInList(tail)
       }
     }
+
     if (parameters.contains(oldParameter)) {
-      val newPreconditions: List[Precondition] = preconditions.map { precondition =>
-        precondition.modifyParameter(oldParameter, newParameter)
-      }
-      val newSubActions: List[InstanceAction] = subActions.map { action =>
-        action.modifyParameter(oldParameter, newParameter)
-      }
+      val newPreconditions: List[Precondition] = preconditions.map(_.modifyParameter(oldParameter, newParameter))
+      val newSubActions: List[InstanceAction] = subActions.map(_.modifyParameter(oldParameter, newParameter))
       val newParameters: List[Parameter] = replaceParameterInList(this.parameters)
       InstanceAction(id, label, newPreconditions, newSubActions, newParameters)
     } else this
   }
 
+  /**
+   * The same instance action with given parameters
+   * @author Thomas GIOVANNINI
+   * @param newParameters to give to the instance
+   * @return an InstanceAction with those parameters
+   */
   def withParameters(newParameters: List[Parameter]): InstanceAction = {
     def modifyParametersRec(parameterTuples: List[(Parameter, Parameter)], action: InstanceAction): InstanceAction = {
       parameterTuples match {
@@ -77,16 +120,20 @@ case class InstanceAction(id: Long,
 object InstanceAction {
   implicit val connection = Application.connection
 
+  /**
+   * Identify an InstanceAction by finding preconditions and subactions by their IDs
+   * @author Thomas GIOVANNINI
+   * @param id of the desired InstanceAction
+   * @param label of the desired InstanceAction
+   * @param preconditions tuple containing ids of the precondition for the InstanceAction and custom parameters list
+   * @param subActions tuple containing ids of the subactions for the InstanceAction and custom parameters list
+   * @param parameters of the desired InstanceAction
+   * @return an InstanceAction with identified preconditions and subActions
+   */
   def identify(id: Long, label: String, preconditions: List[(Long, List[Parameter])], subActions: List[(Long, List[Parameter])], parameters: List[Parameter]): InstanceAction = {
     InstanceAction(id, label,
-      preconditions.map {
-        tuple =>
-          PreconditionDAO.getById(tuple._1).withParameters(tuple._2)
-      },
-      subActions.map {
-        tuple =>
-          getById(tuple._1).withParameters(tuple._2)
-      },
+      preconditions.map(tuple => PreconditionDAO.getById(tuple._1).withParameters(tuple._2)),
+      subActions.map(tuple => getById(tuple._1).withParameters(tuple._2)),
       parameters)
   }
 
@@ -99,12 +146,11 @@ object InstanceAction {
    * @param subActionsToParse to retrieve real sub-actions of the action
    * @return the corresponding action
    */
-  //TODO make it sexy
-  def parse(id: Long, label: String, parametersToParse: String, preconditionsToParse: String, subActionsToParse: String): InstanceAction = {
+  def parse(id: Long, label: String, preconditionsToParse: String, subActionsToParse: String, parametersToParse: String): InstanceAction = {
     var error = false
     def parseParameters(): List[Parameter] = {
-      if (parametersToParse == "") List()
-      else if (!parametersToParse.contains(":")) {
+      if (parametersToParse.isEmpty) List()
+      else if (! parametersToParse.contains(":")) {
         error = true
         List()
       }
@@ -133,6 +179,7 @@ object InstanceAction {
         instanceAction.withParameters(parameters)
       }.toList
     }
+
     val parameters = parseParameters()
     val preconditions = parsePreconditions()
     val parsedSubActions = parseSubActions()
@@ -152,7 +199,7 @@ object InstanceAction {
       get[String]("param") ~
       get[String]("precond") ~
       get[String]("content") map {
-      case id ~ label ~ param ~ precond ~ content => InstanceAction.parse(id, label, param, precond, content)
+      case id ~ label ~ param ~ precond ~ content => InstanceAction.parse(id, label, precond, content, param)
     }
   }
 

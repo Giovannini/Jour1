@@ -57,13 +57,13 @@ case class Precondition(id: Long, label: String, subConditions: List[Preconditio
     val args = getArgumentsList(parameters).map(_._2).toArray
     this.label match {
       case "isNextTo" =>
-        HardCodedPrecondition.isNextTo(args)
+        HCPrecondition.isNextTo(args)
       case "isOnSameTile" =>
-        HardCodedPrecondition.isOnSameTile(args)
+        HCPrecondition.isOnSameTile(args)
       case "isAtWalkingDistance" =>
-        HardCodedPrecondition.isAtWalkingDistance(args)
+        HCPrecondition.isAtWalkingDistance(args)
       case "hasProperty" =>
-        HardCodedPrecondition.hasProperty(args)
+        HCPrecondition.hasProperty(args)
       case _ =>
         this.subConditions
         .forall(precondition => precondition.isFilled(parameters))
@@ -97,11 +97,11 @@ case class Precondition(id: Long, label: String, subConditions: List[Preconditio
   def instancesThatFill(source: Instance): Set[Instance] = {
     this.label match {
       case "isNextTo" =>
-        InstancesThatFillPrecondition.isNextTo(source).toSet
+        PreconditionFiltering.isNextTo(source).toSet
       case "isOnSameTile" =>
-        InstancesThatFillPrecondition.isOnSameTile(source).toSet
+        PreconditionFiltering.isOnSameTile(source).toSet
       case "isAtWalkingDistance" =>
-        InstancesThatFillPrecondition.isAtWalkingDistance(source).toSet
+        PreconditionFiltering.isAtWalkingDistance(source).toSet
       case _ =>
         this.subConditions
           .map(precondition => precondition.instancesThatFill(source))
