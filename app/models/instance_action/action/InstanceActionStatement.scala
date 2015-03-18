@@ -1,7 +1,6 @@
-package models.instance_action.custom_types
+package models.instance_action.action
 
 import anorm._
-import models.instance_action.action.InstanceAction
 
 /**
  * All values from this objects are SQLStatements

@@ -41,11 +41,21 @@ object ActionManager{
       val p_instanceID = Parameter("instanceID", "Long")
       val p_propertyName = Parameter("propertyName", "String")
       InstanceAction.identify(0L, "addOneToProperty",
-        List((PreconditionManager.nameToId("hasProperty"), List(p_instanceID, p_propertyName))),
+        List((PreconditionManager.nameToId("hasProperty"), List(p_instanceID, p_propertyName)),
+          (PreconditionManager.nameToId("isANumberProperty"), List(p_propertyName))),
         List[(Long, List[Parameter])](),
         List(p_instanceID, p_propertyName)).save
     }
     nameToId += "_actionAddOneToProperty " -> _actionAddOneToProperty
+    val _actionRemoveOneFromProperty = {
+      val p_instanceID = Parameter("instanceID", "Long")
+      val p_propertyName = Parameter("propertyName", "String")
+      InstanceAction.identify(0L, "removeOneFromProperty",
+        List((PreconditionManager.nameToId("hasProperty"), List(p_instanceID, p_propertyName))),
+        List[(Long, List[Parameter])](),
+        List(p_instanceID, p_propertyName)).save
+    }
+    nameToId += "_actionRemoveOneFromProperty " -> _actionRemoveOneFromProperty
     /*Function to add to the BDD*/
     val _actionMoveInstanceAt = {
       val p_instanceToMove = Parameter("instanceToMove", "Long")
@@ -65,7 +75,7 @@ object ActionManager{
         List((PreconditionManager.nameToId("isOnSameTile"), List(p_instanceThatEat, p_instanceThatIsEaten)),
           (PreconditionManager.nameToId("hasProperty"), List(p_instanceThatEat, p_propertyHunger))),
         List((_actionRemoveInstanceAt, List(p_instanceThatIsEaten)),
-          (_actionAddOneToProperty, List(p_instanceThatEat, p_propertyHunger))),
+          (_actionRemoveOneFromProperty, List(p_instanceThatEat, p_propertyHunger))),
         List(p_instanceThatEat, p_instanceThatIsEaten, p_propertyHunger)).save
     }
     nameToId += "_actionEat " -> _actionEat
@@ -92,6 +102,9 @@ object ActionManager{
           true
         case "addOneToProperty" =>
           HardCodedAction.addOneToProperty(args)
+          true
+        case "removeOneFromProperty" =>
+          HardCodedAction.removeOneFromProperty(args)
           true
         case _ =>
           action.subActions

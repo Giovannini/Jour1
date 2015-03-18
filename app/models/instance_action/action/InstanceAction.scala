@@ -4,7 +4,6 @@ import anorm.SqlParser._
 import anorm._
 import controllers.Application
 import models.instance_action.Parameter
-import models.instance_action.custom_types.InstanceActionStatement
 import models.instance_action.precondition.{Precondition, PreconditionDAO}
 import play.api.Play.current
 import play.api.db.DB

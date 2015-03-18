@@ -3,7 +3,6 @@ package models.instance_action.precondition
 import anorm.SqlParser._
 import anorm._
 import controllers.Application
-import models.instance_action.custom_types.PreconditionStatement
 import play.api.Play.current
 import play.api.db.DB
 

@@ -56,14 +56,13 @@ case class Precondition(id: Long, label: String, subConditions: List[Preconditio
   def isFilled(parameters: List[(Parameter, Any)]): Boolean = {
     val args = getArgumentsList(parameters).map(_._2).toArray
     this.label match {
-      case "isNextTo" =>
-        HCPrecondition.isNextTo(args)
-      case "isOnSameTile" =>
-        HCPrecondition.isOnSameTile(args)
-      case "isAtWalkingDistance" =>
-        HCPrecondition.isAtWalkingDistance(args)
-      case "hasProperty" =>
-        HCPrecondition.hasProperty(args)
+      case "isNextTo" => HCPrecondition.isNextTo(args)
+      case "isOnSameTile" => HCPrecondition.isOnSameTile(args)
+      case "isAtWalkingDistance" => HCPrecondition.isAtWalkingDistance(args)
+      case "hasProperty" => HCPrecondition.hasProperty(args)
+      case "isANumberProperty" => HCPrecondition.isANumberProperty(args)
+      case "propertyIsHigherThan" => HCPrecondition.isHigherThan(args)
+      case "propertyIsLowerThan" => ! HCPrecondition.isHigherThan(args)
       case _ =>
         this.subConditions
         .forall(precondition => precondition.isFilled(parameters))

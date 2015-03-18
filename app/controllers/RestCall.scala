@@ -27,9 +27,12 @@ object RestCall extends Controller {
    * @param conceptId of the concept the relations are desired
    */
   def getAllActionsOf(conceptId: Int) = Action {
+    val t1 = System.currentTimeMillis()
     val relations = Concept.getReachableRelations(conceptId)
     val actions = relations.filter(_._1.isAnAction)
       .map(relationnedConceptToJson)
+    val t2 = System.currentTimeMillis()
+    println("Getting all actions took " + (t2 - t1) + "ms.")
     Ok(Json.toJson(actions))
   }
 
@@ -63,8 +66,10 @@ object RestCall extends Controller {
       val result = ActionParser.parseAction(actionId, actionArguments)
       result
     }
-
+    val t1 = System.currentTimeMillis()
     val result = execution(request)
+    val t2 = System.currentTimeMillis()
+    println("Executing action took " + (t2 - t1) + "ms.")
     if(result) Ok("Ok")
     else Ok("Error while executing this action")
   }
@@ -83,7 +88,10 @@ object RestCall extends Controller {
     if (sourceInstance == Instance.error || action == InstanceAction.error){
       Ok(Json.arr())
     }
+    val t1 = System.currentTimeMillis()
     val reducedList = reduceDestinationList(sourceInstance, action, destinationInstancesList)
+    val t2 = System.currentTimeMillis()
+    println("Getting destinations took " + (t2 - t1) + "ms.")
     Ok(Json.toJson(reducedList))
   }
 
@@ -97,7 +105,7 @@ object RestCall extends Controller {
    */
   def reduceDestinationList(sourceInstance: Instance, action: InstanceAction, instances: List[Instance]) = {
     val preconditionsToValidate = action.preconditions
-    preconditionsToValidate
+    preconditionsToValidate.view
       .map(_.instancesThatFill(sourceInstance))
       .foldRight(instances.toSet)(_ intersect _)
       .map(_.toJson)
