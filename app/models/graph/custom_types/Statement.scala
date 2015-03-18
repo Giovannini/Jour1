@@ -45,6 +45,13 @@ object Statement {
     Cypher("CREATE " + nodeToCreate)
   }
 
+  def updateConcept(originalConcept: Concept, concept: Concept): CypherStatement = {
+    val nodeToUpdate = concept.toNodePropertiesString
+    Cypher("MATCH (n {id: "+originalConcept.id+"}) "+
+      "SET n = "+nodeToUpdate+" " +
+      "RETURN n.label as concept_label, n.properties as concept_prop, n.rules as concept_rules, n.display as concept_display")
+  }
+
   /**
    * Generate a cypher statement to delete a concept and all its connected relations.
    * @author Thomas GIOVANNINI

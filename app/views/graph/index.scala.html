@@ -9,7 +9,7 @@
                     <form class="form">
                         <div class="form-group">
                             <label for="search" class="form-label">Profondeur :</label>
-                            <input class="form-input" id="search" type="number" ng-model="deepness" ng-change="updateDeepness()" value="1" min="1" max="3" />
+                            <input class="form-input" id="search" type="number" ng-model="deepness" ng-change="updateDeepness()" value="1" min="0" max="3" />
                         </div>
                     </form>
                 </div>
@@ -33,21 +33,6 @@
                         <ul>
                             <li ng-repeat="node in displayedNodes">{{ node.id }} : {{ node.label }}</li>
                         </ul>
-                    </div>
-                    <div ng-show="isShowingNode()" class="table">
-                        <h4>{{ nodeSelected.label }}</h4>
-                        <div>
-                            Properties :
-                            <ul>
-                                <li ng-repeat="property in nodeSelected.properties"><property property-id="{{ property }}" /></li>
-                            </ul>
-                        </div>
-                        <div>
-                            Rules :
-                            <ul>
-                                <li ng-repeat="element in nodeSelected.rules"><property property-id="{{ element.property }}"></property> : {{ element.value }}</li>
-                            </ul>
-                        </div>
                     </div>
                     <div ng-show="isShowingRelation()" class="table">
                         <h4>{{ relationSelected.label }}</h4>

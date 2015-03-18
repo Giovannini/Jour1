@@ -20,16 +20,117 @@ object NeoDAO {
     statement.execute()
   }
 
+  /* Methods to get informations from a concept */
+  /**
+   * Get a concept from its id
+   * @author Thomas GIOVANNINI
+   * @param conceptId concept id
+   * @return concept if it exists, error otherwise
+   */
+  def getConceptById(conceptId: Long): Concept = {
+    val statement = Statement.getConceptById(conceptId)
+    val cypherResultRowStream = statement.apply
+    if (cypherResultRowStream.nonEmpty) {
+      val row = statement.apply.head
+      Concept.parseRow(row)
+    } else Concept.error
+  }
+
+  /**
+   * Get all the concepts existing in the db
+   * @author Thomas GIOVANNINI
+   * @return a list of the existing concepts
+   */
+  def findAllConcepts(): List[Concept] = {
+    Statement.getAllConcepts.apply()
+      .map(Concept.parseRow)
+      .toList
+  }
+
+  /**
+   * Get all the parents of a given concept
+   * @author Thomas GIOVANNINI
+   * @param conceptId concept id of the concept child
+   * @return a list of the parents of the concept
+   */
+  def findParentConcepts(conceptId: Long): List[Concept] = {
+    val statement = Statement.getParentConcepts(conceptId)
+    statement.apply
+      .map(Concept.parseRow)
+      .toList
+  }
+
+  /**
+   * Method to retrieve all the children of a given concept
+   * @author Thomas GIOVANNINI
+   * @param conceptId the ID of the concept
+   * @return a list of relations and concepts
+   */
+  def findChildrenConcepts(conceptId: Long): List[Concept] = {
+    val statement = Statement.getChildrenConcepts(conceptId)
+    statement.apply
+      .map(Concept.parseRow)
+      .toList
+  }
+
+  /**
+   * Get all the relations from a given source concept
+   * @author Julien Pradet
+   * @param conceptId id of the source concept
+   * @return a list of tuple containing the relation and destination concept.
+   */
+  def getRelationsFrom(conceptId: Long): List[(Relation, Concept)] = {
+    Statement.getRelationsFrom(conceptId).apply
+      .filter(Concept.noInstance)
+      .map(row => (Relation.DBGraph.parseRow(row), Concept.parseRow(row)))
+      .toList
+  }
+
+  /**
+   * Get all the relations to a given destination concept
+   * @author Julien Pradet
+   * @param conceptId id of the source concept
+   * @return a list of tuple containing the relation and destination concept.
+   */
+  def getRelationsTo(conceptId: Long): List[(Relation, Concept)] = {
+    Statement.getRelationsTo(conceptId).apply
+      .toList
+      .filter(Concept.noInstance)
+      .map { row => (Relation.DBGraph.parseRow(row), Concept.parseRow(row))}
+  }
+
   /**
    * Add a concept into the DB.
    * @author Thomas GIOVANNINI
+   * @author Julien Pradet
    * @param concept concept to write into the DB
    * @return true if the concept was correctly added
    *         false else
+   *
+   * Edit JP : The function now checks if the concept already exists
    */
   def addConceptToDB(concept: Concept): Boolean = {
-    val statement = Statement.createConcept(concept)
-    statement.execute()
+    if(getConceptById(concept.id) == Concept.error) {
+      val statement = Statement.createConcept(concept)
+      statement.execute()
+    } else false
+  }
+
+  /**
+   * Update a concept with a full set of new properties
+   * @author Julien PRADET
+   * @param originalConcept the concept that is meant to be changed
+   * @param concept the new concept
+   * @return the new concept as it exists in the db
+   */
+  def updateConcept(originalConcept: Concept, concept: Concept): Concept = {
+    val statement = Statement.updateConcept(originalConcept, concept)
+    val cypherResultRowStream = statement.apply
+    if(cypherResultRowStream.nonEmpty) {
+      Concept.parseRow(cypherResultRowStream.head)
+    } else {
+      Concept.error
+    }
   }
 
   /**

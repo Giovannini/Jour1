@@ -50,7 +50,7 @@ object ConceptController extends Controller {
    * Creates a concept in DB from a JSON request
    * @return Satus of the request
    */
-  def createConcept = Action(parse.json) { request =>
+  def createConcept() = Action(parse.json) { request =>
     println(request.body)
     val newConceptForm = conceptForm.bind(request.body)
     newConceptForm.fold(
@@ -64,8 +64,30 @@ object ConceptController extends Controller {
         if(NeoDAO.addConceptToDB(newConcept)) {
           Ok(newConcept.toJson)
         } else {
-          InternalServerError("Couldn't add concept to DB")
+          InternalServerError(Json.obj("global" -> "Couldn't add concept to DB"))
         }
+      }
+    )
+  }
+  
+  def updateConcept(label: String) = Action(parse.json) { request =>
+    println(request.body)
+    val newConceptForm = conceptForm.bind(request.body)
+    newConceptForm.fold(
+      hasErrors = {
+        form => {
+          BadRequest(form.errorsAsJson)
+        }
+      },
+      success = {
+        newConcept => println(newConcept)
+          val conceptToUpdate = Concept(label, Nil, Nil)
+          val updatedConcept = NeoDAO.updateConcept(conceptToUpdate, newConcept)
+          if(updatedConcept == Concept.error) {
+            InternalServerError(Json.obj("global" -> "Couldn't update concept in DB"))
+          } else {
+            Ok(newConcept.toJson)
+          }
       }
     )
   }
@@ -77,8 +99,9 @@ object ConceptController extends Controller {
    * @return a json that contains each nodes in an array, and the list of edges to display on the graph
    *         This format is compatible with AlchemyJS as a data source
    */
-  def searchConcept(search: String, deepness: Int) = Action { request =>
+  def readConcept(search: String, deepness: Int) = Action { request =>
     GraphVisualisation.jsonOrRedirectToIndex(request) {
+      require(deepness >= 0)
 
       /**
        * Gets the concepts related to a list of concept
@@ -104,7 +127,7 @@ object ConceptController extends Controller {
        */
       def getChildrenDeep(nodes: List[Concept], deepness: Int): (List[(Long, String, Long)], List[Concept]) = {
         deepness match {
-          case 0 => (Nil, Nil)
+          case 0 => (Nil, nodes)
           case n =>
             val children = getRelationsAndLinkedConceptsFromNodes(nodes)
             val deeper = getChildrenDeep(children._2, n - 1)

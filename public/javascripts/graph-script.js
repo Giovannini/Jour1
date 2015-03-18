@@ -14,7 +14,7 @@ var Scopes = [function() {
     }
 }];
 
-var NodesFactory = ['$resource', function($resource) {
+var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $routeParams, Scopes) {
     var currentNode = -1;
     var _displayedNodes = [];
     var _edges = [];
@@ -22,6 +22,12 @@ var NodesFactory = ['$resource', function($resource) {
     var options = {
         deepness: 1
     };
+
+    var search = $resource(
+        baseUrl+'graph/:search/:deepness',
+        { 'search': $routeParams.label, 'deepness': options.deepness },
+        { 'get': { method: "GET", Accept: "application/json" } }
+    );
 
     var getCurrentNode = function() {
         for(var id in _displayedNodes) {
@@ -93,6 +99,60 @@ var NodesFactory = ['$resource', function($resource) {
         )
     };
 
+    /**
+     * Triggers a research to display a new set of nodes
+     */
+    var searchNodes = function(success, error) {
+        return function (searchLabel, displayLabel, deepness, updateGraph) {
+            search.get(
+                {'search': searchLabel, 'deepness': deepness},
+                function (res) {
+                    var root = null,
+                        display = null;
+
+                    var nodes = [];
+                    res.nodes.forEach(function (val) {
+                        if (nodes.filter(function (node) {
+                                return node.id === val.id;
+                            }).length <= 0) {
+                            if (val.label === searchLabel) {
+                                val.root = true;
+                                root = val;
+                            }
+                            if(val.label === displayLabel) {
+                                display = val;
+                            }
+                            nodes.push(val);
+                        }
+                    });
+
+                    var edges = [];
+                    res.edges.forEach(function (val) {
+                        edges.push(val);
+                    });
+
+                    if(updateGraph) {
+                        _edges = edges;
+                        _displayedNodes = nodes;
+                        currentNode = root.id;
+                        Scopes.get('viewer').$emit('Viewer_displayNodes');
+                    }
+
+                    success(root, display);
+                },
+                function (res) {
+                    var message;
+                    if (res.status === 404) {
+                        message = searchLabel + " est introuvable.";
+                    } else {
+                        message = "Erreur inconnue.";
+                    }
+                    error(message);
+                }
+            );
+        }
+    };
+
     return {
         getCurrentNode: getCurrentNode,
         setCurrentNode: function(nodeId) { currentNode = nodeId; },
@@ -103,11 +163,12 @@ var NodesFactory = ['$resource', function($resource) {
         getProperty: getProperty,
         getProperties: getProperties,
         getRelation: getRelation,
-        options: options
+        options: options,
+        searchNodes: searchNodes
     }
 }];
 
-var ViewerController = ['$scope', 'Scopes', 'NodesFactory', function($scope, Scopes, NodesFactory) {
+var ViewerController = ['$scope', '$location', '$rootScope', 'Scopes', 'NodesFactory', function($scope, $location, $rootScope, Scopes, NodesFactory) {
     Scopes.add('viewer', $scope);
     $scope.deepness = NodesFactory.options.deepness;
 
@@ -115,9 +176,9 @@ var ViewerController = ['$scope', 'Scopes', 'NodesFactory', function($scope, Sco
         NodesFactory.options.deepness = $scope.deepness;
     };
 
-    $scope.select = function(nodeId) {
-        NodesFactory.setCurrentNode(nodeId);
-        Scopes.get('editNode').$emit('EditNode_updateNode');
+    $scope.select = function(label) {
+        $location.path('/node/'+Scopes.get('search').search+'/'+label);
+        $rootScope.$apply();
     };
 
     var lastClick = 0;
@@ -135,14 +196,14 @@ var ViewerController = ['$scope', 'Scopes', 'NodesFactory', function($scope, Sco
     };
 
     var nodeClick = function(node) {
-        var id = node.getProperties().id;
-        if(lastClick === id) {
-            Scopes.get('search').$emit('Search_searchNode', node.getProperties().label);
+        var label = node.getProperties().label;
+        if(lastClick === label) {
+            Scopes.get('search').$emit('Search_searchNode', label);
             lastClick = 0;
         } else {
-            lastClick = id;
+            lastClick = label;
         }
-        $scope.select(id);
+        $scope.select(label);
     };
 
     var edgeClick = function(edge) {
@@ -235,57 +296,16 @@ var PropertyDirective = ['NodesFactory', function(NodesFactory) {
 
 var SearchController = [
     '$scope',
-    '$resource',
+    '$rootScope',
+    '$location',
     'Scopes',
-    'NodesFactory',
-    function($scope, $resource, Scopes, NodesFactory) {
+    function($scope, $rootScope, $location, Scopes) {
         Scopes.add('search', $scope);
-
-        var search = $resource(
-            baseUrl+'graph/:search/:deepness',
-            { 'search': "", 'deepness': NodesFactory.options.deepness },
-            { 'get': { method: "GET", Accept: "application/json" } }
-        );
-
-        $scope.launchSearch = function() {
-            search.get(
-                {"search": $scope.search, "deepness": NodesFactory.options.deepness},
-                function(res) {
-                    $scope.error = "";
-
-                    var nodes = [];
-                    res.nodes.forEach(function(val) {
-                        if(nodes.filter(function(node) { return node.id === val.id; }).length <= 0) {
-                            if(val.label === $scope.search) {
-                                val.root = true;
-                            }
-                            nodes.push(val);
-                        }
-                    });
-                    NodesFactory.setDisplayedNodes(nodes);
-
-                    var edges = [];
-                    res.edges.forEach(function(val) {
-                        edges.push(val);
-                    });
-                    NodesFactory.setEdges(edges);
-
-                    Scopes.get('viewer').$emit('Viewer_displayNodes');
-                    Scopes.get('editNode').$emit('EditNode_init');
-                },
-                function(res) {
-                    if(res.status === 404) {
-                        $scope.error = $scope.search +" est introuvable.";
-                    } else {
-                        $scope.error = "Erreur inconnue.";
-                    }
-                }
-            );
-        };
 
         Scopes.get('search').$on('Search_searchNode', function(event, search) {
             $scope.search = search;
-            $scope.launchSearch();
+            $location.path("/node/"+$scope.search);
+            $rootScope.$apply();
         });
     }
 ];
@@ -426,13 +446,123 @@ var NewNodeCtrl = ['$scope', '$routeParams', '$resource', 'NodesFactory', functi
     };
 }];
 
-var ShowNodeCtrl = ['$scope', '$routeParams', 'NodesFactory', function($scope, $routeParams, NodesFactory) {
+var ShowNodeCtrl = ['$scope', '$rootScope', '$location', '$routeParams', '$resource', 'Scopes', 'NodesFactory', function($scope, $rootScope, $location, $routeParams, $resource, Scopes, NodesFactory) {
+    $scope.node = NodesFactory.getCurrentNode();
+    $scope.message = "Loading...";
 
+    Scopes.get('search').search = $routeParams.label;
+
+    $scope.isShowingNode = function() {
+        return $scope.node != null;
+    };
+
+    var success = function(root, display) {
+        $scope.node = display;
+    };
+
+    var error = function(message) {
+        $scope.message = message;
+    };
+
+    if($routeParams.hasOwnProperty('display')) {
+        if($scope.node == null) {
+            NodesFactory.searchNodes(success, error)($routeParams.label, $routeParams.display, NodesFactory.options.deepness, true);
+        } else {
+            NodesFactory.searchNodes(success, error)($routeParams.display, $routeParams.display, 0, false);
+        }
+    } else {
+        NodesFactory.searchNodes(success, error)($routeParams.label, $routeParams.label, NodesFactory.options.deepness, true);
+    }
 }];
 
-var EditNodeCtrl = ['$scope', '$routeParams', 'NodesFactory', function($scope, $routeParams, NodesFactory) {
+var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', '$resource', 'NodesFactory', function($scope, $routeParams, Scopes, $resource, NodesFactory) {
+    Scopes.get('search').search = $routeParams.label;
 
+    NodesFactory.getProperties(
+        function(properties) {
+            $scope.properties = properties;
+
+            NodesFactory.searchNodes(
+                function(root, display) {
+                    for(var ruleIndex in display.rules) {
+                        for(var i = 0; i < $scope.properties.length; i++) {
+                            if(display.rules[ruleIndex].property === $scope.properties[i].id) {
+                                display.rules[ruleIndex].property = $scope.properties[i];
+                            }
+                        }
+                    }
+
+                    for(var propertyIndex in display.properties) {
+                        for(var i = 0; i < $scope.properties.length; i++) {
+                            if(display.properties[propertyIndex] === $scope.properties[i].id) {
+                                display.properties[propertyIndex] = $scope.properties[i];
+                            }
+                        }
+                    }
+
+                    display.displayProperty = display.display;
+                    delete display.display;
+
+                    $scope.node = display;
+                },
+                function(error) {
+
+                }
+            )($routeParams.label, $routeParams.label, NodesFactory.options.deepness, true);
+        },
+        function(failure) {
+
+        }
+    );
+
+    var submit = $resource(
+        baseUrl+'graph/node/'+$routeParams.label+'/edit',
+        {},
+        {
+            'save': {
+                method: "POST",
+                headers: [{'Content-Type': 'application/json'}]
+            }
+        }
+    );
+
+    $scope.addProperty = function() {
+        $scope.node.properties.push({});
+    };
+
+    $scope.removeProperty = function(propertyId) {
+        $scope.node.properties.splice(propertyId, 1);
+    };
+
+    $scope.addRule = function() {
+        $scope.node.rules.push({
+            property: $scope.properties[0],
+            value: ""
+        });
+        $scope.newRuleType($scope.node.rules.length - 1);
+    };
+
+    $scope.removeRule = function(ruleId) {
+        $scope.node.rules.splice(ruleId, 1);
+    };
+
+    $scope.newRuleType = function(ruleId) {
+        $scope.node.rules[ruleId].value = $scope.node.rules[ruleId].property.defaultValue;
+    };
+
+    $scope.submitNode = function() {
+        submit.save(
+            {},
+            $scope.node,
+            function(response) {
+                console.log(response);
+            }, function(response) {
+                console.log(response);
+            }
+        )
+    };
 }];
+
 
 angular.module('graphEditor', ["ngResource", "ngRoute"])
     .config(['$routeProvider', function($routeProvider) {
@@ -454,7 +584,7 @@ angular.module('graphEditor', ["ngResource", "ngRoute"])
                 controller: 'EditRelationCtrl'
             }).
             when(baseUrl+'node/new', {
-                templateUrl: 'assets/templates/graph/node/new_node.html',
+                templateUrl: 'assets/templates/graph/node/edit_node.html',
                 controller: 'NewNodeCtrl'
             }).
             when(baseUrl+'node/:label', {
@@ -464,6 +594,10 @@ angular.module('graphEditor', ["ngResource", "ngRoute"])
             when(baseUrl+'node/:label/edit', {
                 templateUrl: 'assets/templates/graph/node/edit_node.html',
                 controller: 'EditNodeCtrl'
+            }).
+            when(baseUrl+'node/:label/:display', {
+                templateUrl: 'assets/templates/graph/node/show_node.html',
+                controller: 'ShowNodeCtrl'
             }).
             otherwise({
                 redirectTo: baseUrl+''

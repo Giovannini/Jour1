@@ -1,1 +1,67 @@
-Edit node
+<form class="form">
+    <fieldset class="form-field">
+        <legend>General</legend>
+        <div class="form-group">
+            <label for="node_name">Name:</label>
+            <input type="text" id="node_name" name="node_name" ng-model="node.label" />
+        </div>
+    </fieldset>
+
+    <fieldset class="form-field">
+        <legend>Properties</legend>
+        <p>Information that needs to be provided to its instance</p>
+        <div class="form-group" ng-repeat="property in node.properties track by $index">
+            <label for="node_{{$index}}_property">Property:</label>
+            <select
+                    id="node_{{$index}}_property"
+                    name="node_{{$index}}_property"
+                    ng-model="node.properties[$index]"
+                    ng-options="prop as prop.label for prop in properties">
+            </select>
+            <button ng-click="removeProperty($index)">Remove</button>
+        </div>
+        <button ng-click="addProperty()">Add one</button>
+    </fieldset>
+
+    <fieldset class="form-field">
+        <legend>Rules</legend>
+        <p>Information that needs to be provided to its instance</p>
+        <div class="form-group" ng-repeat="rule in node.rules track by $index">
+            <div class="form-group">
+                <label for="rules_{{$index}}_property">Property:</label>
+                <select
+                        id="rules_{{$index}}_property"
+                        name="rules_{{$index}}_property"
+                        ng-model="node.rules[$index].property"
+                        ng-change="newRuleType($index)"
+                        ng-options="prop as prop.label for prop in properties">
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="rules_{{$index}}_value">Value:</label>
+                <input ng-if="node.rules[$index].property.valueType == 'Boolean'" ng-true-value="'1'" ng-false-value="'0'" type="checkbox" id="rules_{{$index}}_value" name="rules_{{$index}}_value" ng-model="node.rules[$index].value" />
+                <input ng-if="node.rules[$index].property.valueType == 'String'" type="text" id="rules_{{$index}}_value" name="rules_{{$index}}_value" ng-model="node.rules[$index].value" />
+                <input ng-if="node.rules[$index].property.valueType == 'Int'" type="number" id="rules_{{$index}}_value" name="rules_{{$index}}_value" ng-model="node.rules[$index].value" />
+                <input ng-if="node.rules[$index].property.valueType == 'Double'" type="number" id="rules_{{$index}}_value" name="rules_{{$index}}_value" ng-model="node.rules[$index].value" />
+            </div>
+            <button ng-click="removeRule($index)">Remove</button>
+        </div>
+        <button ng-click="addRule()">Add one</button>
+    </fieldset>
+
+    <fieldset class="form-field">
+        <legend class="form-field__title">Display</legend>
+        <p class="form-field__description">Information that needs to be provided to its instance</p>
+        <div class="form-group">
+            <label class="form-group__label" for="node_color">Color:</label>
+            <input class="form-group__input" type="text" id="node_color" name="node_color" ng-model="node.displayProperty.color" />
+        </div>
+        <div class="form-group">
+            <label class="form-group__label" for="node_zindex">Zindex:</label>
+            <input class="form-group__input" type="number" id="node_zindex" name="node_zindex" ng-model="node.displayProperty.zindex" />
+        </div>
+    </fieldset>
+
+    <button ng-click="submitNode()">Create</button>
+</form>

@@ -1,7 +1,7 @@
 package models.graph.ontology
 
 import models.graph.NeoDAO
-import models.graph.custom_types.{Coordinates, DisplayProperty, Statement}
+import models.graph.custom_types.{Coordinates, DisplayProperty}
 import models.graph.ontology.property.{Property, PropertyDAO}
 import models.graph.ontology.relation.Relation
 import org.anormcypher.CypherResultRow
@@ -75,13 +75,16 @@ case class Concept(label: String,
    * @return a cypher statement compatible string representing the concept
    */
   def toNodeString = {
-    "(" + label.toLowerCase +
-      " { label: \"" + label + "\"," +
+    "(" + label.toLowerCase + toNodePropertiesString +")"
+  }
+
+  def toNodePropertiesString = {
+    "{ label: \"" + label + "\"," +
       " properties: [" + properties.map(_.id).mkString(",") + "]," +
       " rules: [" + rules.map(p => "\"" + p + "\"").mkString(",") + "]," +
       " display: \"" + displayProperty + "\"," +
       " type: \"CONCEPT\"," +
-      " id:" + id + "})"
+      " id:" + id + "}"
   }
 
   /**
@@ -227,8 +230,7 @@ object Concept {
     val properties = row[Seq[Long]]("concept_prop").map(PropertyDAO.getById).toList
     val rulesProperty = ValuedProperty.rowToPropertiesList(row, "concept_rules")
     val display = DisplayProperty.parseString(row[String]("concept_display"))
-    val result = Concept(label, properties, rulesProperty, display)
-    result
+    Concept(label, properties, rulesProperty, display)
   }
 
   /**
@@ -285,54 +287,41 @@ object Concept {
 
   /**
    * Method to get a concept from the graph by its ID
-   * @author Thomas GIOVANNINI
+   * @author Julien Pradet
    * @param conceptId the ID of the desired concept
    * @return the desired concept if exists
    */
   def getById(conceptId: Long): Concept = {
-    val statement = Statement.getConceptById(conceptId)
-    val cypherResultRowStream = statement.apply
-    if (cypherResultRowStream.nonEmpty) {
-      val row: CypherResultRow = statement.apply.head
-      parseRow(row)
-    } else error
+    NeoDAO.getConceptById(conceptId)
   }
 
   /**
    * Method to get all the concepts in the graph database
-   * @author Thomas GIOVANNINI
+   * @author Julien Pradet
    * @return a list of concepts
    */
   def findAll: List[Concept] = {
-    Statement.getAllConcepts.apply()
-      .toList
-      .map(parseRow)
+    NeoDAO.findAllConcepts()
   }
 
   /**
    * Method to retrieve all the parents of a given concept
-   * @author Thomas GIOVANNINI
+   * @author Julien Pradet
    * @param conceptId the ID of the concept
    * @return a list of relations and concepts
    */
   def getParents(conceptId: Long): List[Concept] = {
-    val statement = Statement.getParentConcepts(conceptId)
-    statement.apply
-      .toList
-      .map(Concept.parseRow)
+    NeoDAO.findParentConcepts(conceptId)
   }
 
   /**
    * Method to retrieve all the children of a given concept
-   * @author Thomas GIOVANNINI
+   * @author Julien Pradet
    * @param conceptId the ID of the concept
    * @return a list of relations and concepts
    */
   def getChildren(conceptId: Long): List[Concept] = {
-    val statement = Statement.getChildrenConcepts(conceptId)
-    statement.apply
-      .map(Concept.parseRow)
-      .toList
+    NeoDAO.findChildrenConcepts(conceptId)
   }
 
   /**
@@ -347,32 +336,27 @@ object Concept {
 
   /**
    * Get all the relations from a given source concept
-   * @author Thomas GIOVANNINI
+   * @author Julien Pradet
    * @param conceptId id of the source concept
    * @return a list of tuple containing the relation and destination concept.
    */
   def getRelationsFrom(conceptId: Long): List[(Relation, Concept)] = {
-    Statement.getRelationsFrom(conceptId).apply.view
-      .filter(noInstance)
-      .map(row => (Relation.DBGraph.parseRow(row), Concept.parseRow(row)))
-      .toList
+    NeoDAO.getRelationsFrom(conceptId)
   }
 
   /**
    * Get all the relations to a given destination concept
-   * @author Thomas GIOVANNINI
+   * @author Julien Pradet
    * @param conceptId id of the source concept
    * @return a list of tuple containing the relation and destination concept.
    */
   def getRelationsTo(conceptId: Long): List[(Relation, Concept)] = {
-    Statement.getRelationsTo(conceptId).apply
-      .toList
-      .filter(noInstance)
-      .map { row => (Relation.DBGraph.parseRow(row), Concept.parseRow(row))}
+    NeoDAO.getRelationsTo(conceptId)
   }
 
   /**
    * Get all the relations given a concept
+   * @author Thomas GIOVANNINI
    * @param conceptId id of the concept
    * @return (relations from, relations to)
    */
@@ -387,7 +371,7 @@ object Concept {
    * @return true if the row doesn't represent an instance
    *         false else
    */
-  private def noInstance(row: CypherResultRow): Boolean = {
+  def noInstance(row: CypherResultRow): Boolean = {
     row[String]("node_type") != "INSTANCE"
   }
 

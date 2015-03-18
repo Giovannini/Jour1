@@ -1,1 +1,25 @@
-Show node
+<div ng-show="!isShowingNode()">
+    <h4>{{ message }}</h4>
+</div>
+<div ng-show="isShowingNode()" class="table">
+    <h4>{{ node.label }} - <a href="#/node/{{node.label}}/edit">Edit</a></h4>
+    <div>
+        Properties :
+        <ul>
+            <li ng-repeat="property in node.properties"><property property-id="{{ property }}" /></li>
+        </ul>
+    </div>
+    <div>
+        Rules :
+        <ul>
+            <li ng-repeat="element in node.rules"><property property-id="{{ element.property }}"></property> : {{ element.value }}</li>
+        </ul>
+    </div>
+    <div>
+        Display :
+        <ul>
+            <li>Color: <span style="color: {{node.display.color}}">{{ node.display.color }}</span></li>
+            <li>ZIndex: {{ node.display.zindex }}</li>
+        </ul>
+    </div>
+</div>
