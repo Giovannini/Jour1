@@ -2,6 +2,7 @@ package models.graph.ontology.relation
 
 import anorm.SqlParser._
 import anorm.{RowParser, ~}
+import controllers.Application
 import models.graph.NeoDAO
 import models.graph.custom_types.Statement
 import models.graph.ontology.Concept
@@ -82,7 +83,7 @@ object Relation {
    * Object for connection with the relational database
    */
   object DBList {
-    implicit val connection = DB.getConnection()
+    implicit val connection = Application.connection
 
     /**
      * Parse relation to interact with database
