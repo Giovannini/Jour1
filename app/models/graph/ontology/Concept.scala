@@ -296,6 +296,16 @@ object Concept {
   }
 
   /**
+   * Method to get a concept from the graph by its label
+   * @author Aurélie LORGEOUX
+   * @param label the label of the desired concept
+   * @return the desired concept if exists
+   */
+  def getByLabel(label: String): Concept = {
+    NeoDAO.getConceptByLabel(label)
+  }
+
+  /**
    * Method to get all the concepts in the graph database
    * @author Julien Pradet
    * @return a list of concepts

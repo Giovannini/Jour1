@@ -134,6 +134,12 @@ object Statement {
       .on("id1" -> conceptId)
   }
 
+  /**
+   * Create a cypher statement returning a concept from its label
+   * @author Thomas GIOVANNINI
+   * @param label lbal of the concept to get
+   * @return a cypher statement to execute
+   */
   def getConceptByLabel(label: String): CypherStatement = {
     Cypher("MATCH (n {label: {label1}}) " +
       "RETURN n.label as concept_label, n.properties as concept_prop, n.rules as concept_rules, n.display as concept_display")

@@ -37,6 +37,21 @@ object NeoDAO {
   }
 
   /**
+   * Get a concept from its label
+   * @author Aurélie LORGEOUX
+   * @param label concept label
+   * @return concept if it exists, error otherwise
+   */
+  def getConceptByLabel(label: String): Concept = {
+    val statement = Statement.getConceptByLabel(label)
+    val cypherResultRowStream = statement.apply
+    if (cypherResultRowStream.nonEmpty) {
+      val row = statement.apply.head
+      Concept.parseRow(row)
+    } else Concept.error
+  }
+
+  /**
    * Get all the concepts existing in the db
    * @author Thomas GIOVANNINI
    * @return a list of the existing concepts

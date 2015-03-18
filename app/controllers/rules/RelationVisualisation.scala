@@ -3,7 +3,6 @@ package controllers.rules
 import models.graph.ontology.relation.Relation
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.data.validation.Constraints._
 import play.api.mvc.{Action, Controller}
 
 object RelationVisualisation extends Controller {

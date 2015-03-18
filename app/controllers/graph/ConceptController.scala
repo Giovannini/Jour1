@@ -164,4 +164,17 @@ object ConceptController extends Controller {
       }
     }
   }
+
+  /**
+   * Remove a concept from DB (and its relations)
+   * @author Aurélie LORGEOUX
+   * @param label label of concept to remove
+   * @return an action redirecting to the main page of application
+   */
+  def deleteConcept(label: String) = Action {
+    val concept = Concept.getByLabel(label)
+    println(concept.id)
+    println(NeoDAO.removeConceptFromDB(concept))
+    Redirect(controllers.routes.Application.index())
+  }
 }

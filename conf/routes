@@ -31,14 +31,15 @@ GET         /graph/action/:actionLabel                               controllers
 POST        /graph/node/new                                          controllers.graph.ConceptController.createConcept
 POST        /graph/node/:label/edit                                  controllers.graph.ConceptController.updateConcept(label: String)
 GET         /graph/:search/:deepness                                 controllers.graph.ConceptController.readConcept(search: String, deepness: Int)
+GET         /graph/node/delete/:label                                controllers.graph.ConceptController.deleteConcept(label: String)
 
 # Relations visualisation
-GET         /relations                                                controllers.rules.RelationVisualisation.index
-GET         /relations/create                                         controllers.rules.RelationVisualisation.createForm
-POST        /relations/create                                         controllers.rules.RelationVisualisation.createSubmit
-GET         /relations/update/:id                                     controllers.rules.RelationVisualisation.updateForm(id: Long)
-POST        /relations/update/:id                                     controllers.rules.RelationVisualisation.updateSubmit(id: Long)
-GET         /relations/delete/:id                                     controllers.rules.RelationVisualisation.delete(id: Long)
+GET         /relations                                               controllers.rules.RelationVisualisation.index
+GET         /relations/create                                        controllers.rules.RelationVisualisation.createForm
+POST        /relations/create                                        controllers.rules.RelationVisualisation.createSubmit
+GET         /relations/update/:id                                    controllers.rules.RelationVisualisation.updateForm(id: Long)
+POST        /relations/update/:id                                    controllers.rules.RelationVisualisation.updateSubmit(id: Long)
+GET         /relations/delete/:id                                    controllers.rules.RelationVisualisation.delete(id: Long)
 
 # Rules visualisation
 GET         /rules                                                   controllers.rules.RulesVisualisation.index
