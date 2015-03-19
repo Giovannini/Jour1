@@ -1,7 +1,8 @@
 package models
 
 import models.graph.custom_types.{Label, Coordinates}
-import models.graph.ontology.{Concept, Instance}
+import models.graph.ontology.Instance
+import models.graph.ontology.concept.Concept
 import org.scalatest.FunSuite
 import org.scalatest.BeforeAndAfter
 

@@ -2,7 +2,8 @@ package controllers.ontology
 
 import controllers.Application
 import models.graph.custom_types.Coordinates
-import models.graph.ontology.{Concept, Instance, ValuedProperty}
+import models.graph.ontology.concept.ConceptDAO
+import models.graph.ontology.{Instance, ValuedProperty}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.validation.Constraints._
@@ -112,6 +113,6 @@ object InstanceManager extends Controller {
       .withLabel(newInstanceForm._3)
       .at(Coordinates(newInstanceForm._4, newInstanceForm._5))
       .updateProperties(newProperties)
-      .ofConcept(Concept.getById(newInstanceForm._2))
+      .ofConcept(ConceptDAO.getById(newInstanceForm._2))
   }
 }

@@ -2,7 +2,8 @@ package controllers.graph
 
 import models.graph.NeoDAO
 import models.graph.custom_types.{DisplayProperty, Statement}
-import models.graph.ontology.{ValuedProperty, Concept}
+import models.graph.ontology.concept.{ConceptDAO, Concept}
+import models.graph.ontology.ValuedProperty
 import models.graph.ontology.property.Property
 import play.api.data.Form
 import play.api.data.Forms._
@@ -81,7 +82,7 @@ object ConceptController extends Controller {
       },
       success = {
         newConcept => println(newConcept)
-          val conceptToUpdate = Concept(label, Nil, Nil)
+          val conceptToUpdate = Concept(label, Nil, Nil, DisplayProperty())
           val updatedConcept = NeoDAO.updateConcept(conceptToUpdate, newConcept)
           if(updatedConcept == Concept.error) {
             InternalServerError(Json.obj("global" -> "Couldn't update concept in DB"))
@@ -112,7 +113,7 @@ object ConceptController extends Controller {
        */
       def getRelationsAndLinkedConceptsFromNodes(nodes: List[Concept]): (List[(Long, String, Long)], List[Concept]) = {
         nodes.flatMap(node => {
-          val relations = Concept.getRelationsFromAndTo(node.id)
+          val relations = ConceptDAO.getRelationsFromAndTo(node.id)
           (relations._1.map(link => ((node.id, link._1.label, link._2.id), link._2))
             ::: relations._2.map(link => ((link._2.id, link._1.label, node.id), link._2))).toSet
         }).unzip
@@ -144,7 +145,7 @@ object ConceptController extends Controller {
       val cypherResultRowStream = statement.apply()(NeoDAO.connection)
       if(cypherResultRowStream.nonEmpty) {
         // A concept has been found
-        val nodes = cypherResultRowStream.map(Concept.parseRow)
+        val nodes = cypherResultRowStream.map(ConceptDAO.parseRow)
         // Look for its relations
         val res = getChildrenDeep(nodes.toList, deepness)
         // Return the concept and his children in a format that is compatible with AlchemyJS data source
@@ -172,7 +173,7 @@ object ConceptController extends Controller {
    * @return an action redirecting to the main page of application
    */
   def deleteConcept(label: String) = Action {
-    val concept = Concept.getByLabel(label)
+    val concept = ConceptDAO.getByLabel(label)
     println(concept.id)
     println(NeoDAO.removeConceptFromDB(concept))
     Redirect(controllers.routes.Application.index())

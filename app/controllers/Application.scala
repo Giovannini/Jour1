@@ -10,7 +10,7 @@ import play.api.mvc._
 
 object Application extends Controller {
 
-  val map = WorldMap(Label("MapOfTheWorld"), "description", 100, 100)
+  val map = WorldMap(Label("MapOfTheWorld"), "description", 30, 30)
   lazy val connection = DB.getConnection()
 
   /**

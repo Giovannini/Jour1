@@ -1,5 +1,6 @@
 package models.graph.ontology
 
+import models.graph.ontology.concept.Concept
 import models.graph.ontology.property.Property
 import org.anormcypher.Neo4jREST
 import org.scalatest.FunSuite

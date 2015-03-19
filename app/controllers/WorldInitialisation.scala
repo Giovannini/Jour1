@@ -3,6 +3,7 @@ package controllers
 import models.graph.NeoDAO
 import models.graph.custom_types.DisplayProperty
 import models.graph.ontology._
+import models.graph.ontology.concept.Concept
 import models.graph.ontology.property.{Property, PropertyDAO}
 import models.graph.ontology.relation.Relation
 import models.instance_action.action.ActionManager
@@ -79,65 +80,65 @@ object WorldInitialisation extends Controller {
     println("Declaration of concepts...")
 
     /*Concepts declaration*/
-    val conceptMan        = Concept.create("Man",
+    val conceptMan        = Concept.identify("Man",
       List(),
       List(ValuedProperty(propertyStrength,2),
         ValuedProperty(propertyInstanciable,true)),
       DisplayProperty("#E3B494", 20))
-    val conceptPredator   = Concept.create("Predator",
+    val conceptPredator   = Concept.identify("Predator",
         List(propertyHunger),
         List())
-    val conceptWolf       = Concept.create("Wolf",
+    val conceptWolf       = Concept.identify("Wolf",
         List(),
         List(ValuedProperty(propertyStrength,2),
           ValuedProperty(propertyInstanciable,true)),
       DisplayProperty("#1A1A22", 18))
-    val conceptSheep      = Concept.create("Sheep",
+    val conceptSheep      = Concept.identify("Sheep",
         List(),
         List(ValuedProperty(propertyStrength,2),
           ValuedProperty(propertyInstanciable,true)),
       DisplayProperty("#EEE9D6", 16))
-    val conceptAnimal     = Concept.create("Animal",
+    val conceptAnimal     = Concept.identify("Animal",
         List(propertyWalkingDistance, propertyHunger),
         List())
-    val conceptGrass      = Concept.create("Grass",
+    val conceptGrass      = Concept.identify("Grass",
         List(propertyDuplicationSpeed),
         List(ValuedProperty(propertyStrength,40),
           ValuedProperty(propertyInstanciable,true)),
       DisplayProperty("#62A663", 8))
-    val conceptEdible     = Concept.create("Edible", List(), List())
-    val conceptApple      = Concept.create("Apple",
+    val conceptEdible     = Concept.identify("Edible", List(), List())
+    val conceptApple      = Concept.identify("Apple",
         List(),
         List(ValuedProperty(propertyStrength,2),
           ValuedProperty(propertyInstanciable,true)),
       DisplayProperty("#A83B36", 20))
-    val conceptBush       = Concept.create("Bush",
+    val conceptBush       = Concept.identify("Bush",
         List(),
         List(ValuedProperty(propertyStrength,2),
           ValuedProperty(propertyInstanciable,true)),
       DisplayProperty("#2A6E37", 4))
-    val conceptAppleTree  = Concept.create("AppleTree",
+    val conceptAppleTree  = Concept.identify("AppleTree",
         List(),
         List(ValuedProperty(propertyStrength,2),
           ValuedProperty(propertyInstanciable,true)),
       DisplayProperty("#2F1C13", 9))
-    val conceptTree       = Concept.create("Tree",
+    val conceptTree       = Concept.identify("Tree",
         List(),
         List(ValuedProperty(propertyStrength,4),
           ValuedProperty(propertyInstanciable,true)),
       DisplayProperty("#483431", 7))
-    val conceptFir        = Concept.create("Fir",
+    val conceptFir        = Concept.identify("Fir",
         List(),
         List(ValuedProperty(propertyStrength,4)),
         DisplayProperty("#221D1D", 8))
-    val conceptVegetable  = Concept.create("Vegetable", List(), List())
-    val conceptGround     = Concept.create("Ground", List(), List())
-    val conceptWater      = Concept.create("Water",
+    val conceptVegetable  = Concept.identify("Vegetable", List(), List())
+    val conceptGround     = Concept.identify("Ground", List(), List())
+    val conceptWater      = Concept.identify("Water",
         List(),
         List(ValuedProperty(propertyStrength,2),
           ValuedProperty(propertyInstanciable,true)),
         DisplayProperty("#86B6B6", 0))
-    val conceptEarth      = Concept.create("Earth",
+    val conceptEarth      = Concept.identify("Earth",
         List(),
         List(ValuedProperty(propertyStrength,3),
           ValuedProperty(propertyInstanciable,true)),

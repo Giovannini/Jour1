@@ -1,8 +1,9 @@
 package models
 
 import models.graph.custom_types.{Label, Coordinates}
+import models.graph.ontology.concept.{ConceptDAO, Concept}
 import models.graph.ontology.property.Property
-import models.graph.ontology.{Concept, Instance}
+import models.graph.ontology.Instance
 import play.api.libs.json.{JsValue, Json}
 
 
@@ -45,7 +46,7 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
    */
   def getInstancesOf(conceptId: Long): List[Instance] = {
     val conceptInstances = instances.getOrElse(conceptId, List())
-    val childrenInstances = Concept.getChildren(conceptId)
+    val childrenInstances = ConceptDAO.getChildren(conceptId)
       .flatMap {
       concept => instances.getOrElse(concept.id, List())
     }

@@ -2,6 +2,7 @@ package models.graph
 
 import models.graph.custom_types.Statement
 import models.graph.ontology._
+import models.graph.ontology.concept.{ConceptDAO, Concept}
 import models.graph.ontology.property.Property
 import models.graph.ontology.relation.Relation
 import org.anormcypher._
@@ -32,7 +33,7 @@ object NeoDAO {
     val cypherResultRowStream = statement.apply
     if (cypherResultRowStream.nonEmpty) {
       val row = statement.apply.head
-      Concept.parseRow(row)
+      ConceptDAO.parseRow(row)
     } else Concept.error
   }
 
@@ -47,7 +48,7 @@ object NeoDAO {
     val cypherResultRowStream = statement.apply
     if (cypherResultRowStream.nonEmpty) {
       val row = statement.apply.head
-      Concept.parseRow(row)
+      ConceptDAO.parseRow(row)
     } else Concept.error
   }
 
@@ -58,7 +59,7 @@ object NeoDAO {
    */
   def findAllConcepts(): List[Concept] = {
     Statement.getAllConcepts.apply()
-      .map(Concept.parseRow)
+      .map(ConceptDAO.parseRow)
       .toList
   }
 
@@ -71,7 +72,7 @@ object NeoDAO {
   def findParentConcepts(conceptId: Long): List[Concept] = {
     val statement = Statement.getParentConcepts(conceptId)
     statement.apply
-      .map(Concept.parseRow)
+      .map(ConceptDAO.parseRow)
       .toList
   }
 
@@ -84,7 +85,7 @@ object NeoDAO {
   def findChildrenConcepts(conceptId: Long): List[Concept] = {
     val statement = Statement.getChildrenConcepts(conceptId)
     statement.apply
-      .map(Concept.parseRow)
+      .map(ConceptDAO.parseRow)
       .toList
   }
 
@@ -96,8 +97,8 @@ object NeoDAO {
    */
   def getRelationsFrom(conceptId: Long): List[(Relation, Concept)] = {
     Statement.getRelationsFrom(conceptId).apply
-      .filter(Concept.noInstance)
-      .map(row => (Relation.DBGraph.parseRow(row), Concept.parseRow(row)))
+      .filter(ConceptDAO.noInstance)
+      .map(row => (Relation.DBGraph.parseRow(row), ConceptDAO.parseRow(row)))
       .toList
   }
 
@@ -110,8 +111,8 @@ object NeoDAO {
   def getRelationsTo(conceptId: Long): List[(Relation, Concept)] = {
     Statement.getRelationsTo(conceptId).apply
       .toList
-      .filter(Concept.noInstance)
-      .map { row => (Relation.DBGraph.parseRow(row), Concept.parseRow(row))}
+      .filter(ConceptDAO.noInstance)
+      .map { row => (Relation.DBGraph.parseRow(row), ConceptDAO.parseRow(row))}
   }
 
   /**
@@ -142,7 +143,7 @@ object NeoDAO {
     val statement = Statement.updateConcept(originalConcept, concept)
     val cypherResultRowStream = statement.apply
     if(cypherResultRowStream.nonEmpty) {
-      Concept.parseRow(cypherResultRowStream.head)
+      ConceptDAO.parseRow(cypherResultRowStream.head)
     } else {
       Concept.error
     }

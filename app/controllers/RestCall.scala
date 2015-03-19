@@ -1,7 +1,8 @@
 package controllers
 
+import models.graph.ontology.concept.{ConceptDAO, Concept}
 import models.graph.ontology.relation.Relation
-import models.graph.ontology.{Concept, Instance}
+import models.graph.ontology.Instance
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller, Request}
 import models.instance_action.action.{InstanceAction, ActionParser}
@@ -16,7 +17,7 @@ object RestCall extends Controller {
    * @author Thomas GIOVANNINI
    */
   def getAllConcepts = Action {
-    val concepts = Concept.findAll
+    val concepts = ConceptDAO.findAll
       .map(_.toJson)
     Ok(Json.toJson(concepts))
   }
@@ -28,7 +29,7 @@ object RestCall extends Controller {
    */
   def getAllActionsOf(conceptId: Int) = Action {
     val t1 = System.currentTimeMillis()
-    val relations = Concept.getReachableRelations(conceptId)
+    val relations = ConceptDAO.getReachableRelations(conceptId)
     val actions = relations.filter(_._1.isAnAction)
       .map(relationnedConceptToJson)
     val t2 = System.currentTimeMillis()
@@ -118,8 +119,8 @@ object RestCall extends Controller {
   }
 
   def createInstance(conceptId: Int) = Action {
-    val concept = Concept.getById(conceptId)
+    val concept = ConceptDAO.getById(conceptId)
     val instance = Instance.createRandomInstanceOf(concept)
-    Ok(views.html.manager.instance.instanceEditor(instance, controllers.ontology.routes.InstanceManager.create))
+    Ok(views.html.manager.instance.instanceEditor(instance, controllers.ontology.routes.InstanceManager.create()))
   }
 }

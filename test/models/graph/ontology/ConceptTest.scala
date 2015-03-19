@@ -1,7 +1,8 @@
 package models.graph.ontology
 
 import models.graph.NeoDAO
-import models.graph.custom_types.{Coordinates, Statement}
+import models.graph.custom_types.{DisplayProperty, Coordinates, Statement}
+import models.graph.ontology.concept.{ConceptDAO, Concept}
 import models.graph.ontology.property.Property
 import models.graph.ontology.relation.Relation
 import org.anormcypher.Neo4jREST
@@ -22,9 +23,9 @@ class ConceptTest extends FunSuite {
   val rule2 = prop3.defaultValuedProperty
   val rule3 = prop1.defaultValuedProperty
   val rule4 = prop2.defaultValuedProperty
-  val concept1 = Concept("C1", List(prop1, prop2), List(rule1, rule2))
-  val concept2 = Concept("C2", List(prop1, prop3), List(rule3, rule4))
-  val concept3 = Concept("C3", List(prop1), List())
+  val concept1 = Concept("C1", List(prop1, prop2), List(rule1, rule2), DisplayProperty())
+  val concept2 = Concept("C2", List(prop1, prop3), List(rule3, rule4), DisplayProperty())
+  val concept3 = Concept("C3", List(prop1), List(), DisplayProperty())
   val relation1 = Relation("R1")
   val relation2 = Relation("R2")
   val relSubtype = Relation("SUBTYPE_OF")
@@ -64,13 +65,6 @@ class ConceptTest extends FunSuite {
     val desiredString = "(c1 { label: \"C1\", properties: [\"P1%Int%0\",\"P2%String%Hello\"], rules: [" +
       concept1.rules.map(p => "\"" + p + "\"").mkString(",") + "], color: \"#AAAAAA\", type: \"CONCEPT\", id:" + concept1.id + "})"
     assert(concept1.toNodeString == desiredString)
-  }
-
-  test("method createInstanceAt") {
-    val coords = Coordinates(5, 7)
-    val createdInstance = concept1.createInstanceAt(coords)
-    assert(createdInstance ==
-      Instance(0, concept1.label, coords, concept1.properties.map(_.defaultValuedProperty), concept1))
   }
 
   /*test("method getAllProperties") {
@@ -114,14 +108,14 @@ class ConceptTest extends FunSuite {
     NeoDAO.addConceptToDB(concept1)
     val statement = Statement.getConceptById(concept1.id)
     val row = statement.apply.head
-    assert(Concept.parseRow(row) == concept1)
+    assert(ConceptDAO.parseRow(row) == concept1)
     NeoDAO.removeConceptFromDB(concept1)
   }
 
   test("method addPropertyToConcept") {
     assert(NeoDAO.addConceptToDB(concept1))
     assert(!concept1.properties.contains(prop3))
-    val conceptWithProperty = Concept.addPropertyToConcept(concept1, prop3)
+    val conceptWithProperty = ConceptDAO.addPropertyToConcept(concept1, prop3)
     assert(conceptWithProperty.properties.contains(prop3))
     assert(NeoDAO.removeConceptFromDB(concept1))
   }
@@ -129,7 +123,7 @@ class ConceptTest extends FunSuite {
   test("method removePropertyFromConcept") {
     assert(NeoDAO.addConceptToDB(concept1))
     assert(concept1.properties.contains(prop2))
-    val conceptWithProperty = Concept.removePropertyFromConcept(concept1, prop2)
+    val conceptWithProperty = ConceptDAO.removePropertyFromConcept(concept1, prop2)
     assert(!conceptWithProperty.properties.contains(prop2))
     assert(NeoDAO.removeConceptFromDB(concept1))
   }
@@ -137,7 +131,7 @@ class ConceptTest extends FunSuite {
   test("method addRuleToConcept") {
     assert(NeoDAO.addConceptToDB(concept1))
     assert(!concept1.rules.contains(rule3))
-    val conceptWithProperty = Concept.addRuleToConcept(concept1, rule3)
+    val conceptWithProperty = ConceptDAO.addRuleToConcept(concept1, rule3)
     assert(conceptWithProperty.rules.contains(rule3))
     assert(NeoDAO.removeConceptFromDB(conceptWithProperty))
   }
@@ -145,7 +139,7 @@ class ConceptTest extends FunSuite {
   test("method removeRuleFromConcept") {
     assert(NeoDAO.addConceptToDB(concept1))
     assert(concept1.rules.contains(rule2))
-    val conceptWithProperty = Concept.removeRuleFromConcept(concept1, rule2)
+    val conceptWithProperty = ConceptDAO.removeRuleFromConcept(concept1, rule2)
     assert(!conceptWithProperty.rules.contains(rule2))
     assert(NeoDAO.removeConceptFromDB(concept1))
   }
@@ -153,7 +147,7 @@ class ConceptTest extends FunSuite {
   /* Getters */
   test("method getById") {
     assert(NeoDAO.addConceptToDB(concept1))
-    assert(Concept.getById(concept1.id) == concept1)
+    assert(ConceptDAO.getById(concept1.id) == concept1)
     assert(NeoDAO.removeConceptFromDB(concept1))
   }
 

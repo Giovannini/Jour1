@@ -43,9 +43,7 @@ object Property {
    * @return tuple of id, label, valueType and defaultValue
    */
   def unapplyForm(property: Property): Option[(Long, String, String, String)] = {
-    Some((
-      property.id, property.label, property.valueType, property.jsonDefaultValue.toString()
-    ))
+    Some((property.id, property.label, property.valueType, property.jsonDefaultValue.toString()))
   }
 
   def parse(id: Long, label: String, valueType: String, defaultValueToParse: String): Property = {
@@ -61,17 +59,8 @@ object Property {
 
   def parseString(stringProperty: String): Property = {
     val firstSplit = stringProperty.split(": ")
-    val secondSplit = firstSplit(1).split(" = ")
     val label = firstSplit(0)
-    val valueType = secondSplit(0)
-    val defaultValue = valueType match{
-      case "Int" => secondSplit(1).toInt
-      case "Double" => secondSplit(1).toDouble
-      case "Boolean" => secondSplit(1).toBoolean
-      case _ => secondSplit(1)
-    }
     PropertyDAO.getByName(label)
-    //Property(0L, label, valueType, defaultValue)
   }
 
 }

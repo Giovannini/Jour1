@@ -1,6 +1,7 @@
 package models.graph.ontology
 
 import models.graph.custom_types.Coordinates
+import models.graph.ontology.concept.{ConceptDAO, Concept}
 import models.graph.ontology.property.Property
 import play.api.libs.json._
 
@@ -15,7 +16,8 @@ case class Instance(id:             Int,
                     coordinates:    Coordinates,
                     properties:     List[ValuedProperty],
                     concept:        Concept) {
-  require(label.matches("^[A-Z][A-Za-z0-9_ ]*$") && isValid)
+  require(label.matches("^[A-Z][A-Za-z0-9_ ]*$") &&
+          concept.properties.toSeq == properties.map(_.property).toSeq)
 
   /**
    * Parse an Instance to Json
@@ -31,16 +33,6 @@ case class Instance(id:             Int,
   )
 
   override def hashCode = label.hashCode + concept.hashCode
-
-  /**
-   * Method to see if the instance matches its concept properties
-   * @author Thomas GIOVANNINI
-   * @return true if it does
-   *         false else
-   */
-  def isValid = {
-    concept.properties.toSeq == properties.map(_.property).toSeq
-  }
 
   /**
    * Method to add a property to the instance
@@ -151,7 +143,7 @@ object Instance {
     val coordinates = Coordinates.parseJson(jsonInstance \ "coordinates")
     val properties = (jsonInstance \ "properties").as[List[JsValue]].map(ValuedProperty.parseJson)
     val conceptId = (jsonInstance \ "concept").as[Int]
-    Concept.getById(conceptId) match { // TODO better verification
+    ConceptDAO.getById(conceptId) match { // TODO better verification
       case Concept.error => error
       case concept => Instance(id, label, coordinates, properties, concept)
     }

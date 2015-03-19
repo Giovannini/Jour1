@@ -1,6 +1,7 @@
 package models.graph.custom_types
 
 import models.graph.ontology._
+import models.graph.ontology.concept.Concept
 import models.graph.ontology.property.Property
 import models.graph.ontology.relation.Relation
 import org.anormcypher.{Cypher, CypherStatement}

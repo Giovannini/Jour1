@@ -31,7 +31,6 @@ case class ValuedProperty(property: Property, value: Any){
       case "Double" => JsNumber(value.toString.toDouble)
       case "String" => JsString(value.toString)
       case "Boolean" => JsBoolean(value.toString.toBoolean)
-      //case list: List[Any] => JsArray(list.map(toJson(_)))
       case _ => JsString(value.toString)
     }
   }
@@ -68,9 +67,7 @@ object ValuedProperty {
    * @return tuple of property and value
    */
   def unapplyForm(valuedProperty: ValuedProperty): Option[(Property, String)] = {
-    Some((
-      valuedProperty.property, valuedProperty.jsonValue.toString()
-      ))
+    Some((valuedProperty.property, valuedProperty.jsonValue.toString()))
   }
 
   /**
@@ -96,7 +93,6 @@ object ValuedProperty {
       case "Double" => jsonValue.as[Double]
       case "String" => jsonValue.as[String]
       case "Boolean" => jsonValue.as[Boolean]
-      //case "Array" => jsonValue.as[List[JsValue]].map(parseValue(_))
       case _ => jsonValue.as[String]
     }
   }
@@ -150,13 +146,11 @@ object ValuedProperty {
     ValuedProperty(prop, value)
   }
 
-  //TODO: cheum
-  def updateList(vpList: List[ValuedProperty], vp: ValuedProperty): List[ValuedProperty] = {
-    vpList match{
-      case h::t if h.property == vp.property => vp :: t
-      case h::t => h :: updateList(t, vp)
-      case _ => List()
-    }
+  def updateList(vpList: List[ValuedProperty], vp: ValuedProperty): List[ValuedProperty] = vpList match{
+    case head::tail =>
+      if (head.property == vp.property) vp :: tail
+      else head :: updateList(tail, vp)
+    case _ => List()
   }
 
   /**
@@ -166,11 +160,11 @@ object ValuedProperty {
    * @param matchedProperties the already matched properties that shouldn't be added
    * @return a shorter rules list
    */
-  def keepHighestLevelRules(rulesList: List[ValuedProperty], matchedProperties: List[Property]): List[ValuedProperty] = {
-    rulesList match {
-      case head :: tail if matchedProperties.contains(head.property) => keepHighestLevelRules(tail, matchedProperties)
-      case head :: tail => head :: keepHighestLevelRules(tail, head.property :: matchedProperties)
-      case _ => List()
-    }
+  def keepHighestLevelRules(rulesList: List[ValuedProperty], matchedProperties: List[Property])
+    : List[ValuedProperty] = rulesList match {
+    case head :: tail =>
+      if (matchedProperties.contains(head.property)) keepHighestLevelRules(tail, matchedProperties)
+      else head :: keepHighestLevelRules(tail, head.property :: matchedProperties)
+    case _ => List()
   }
 }

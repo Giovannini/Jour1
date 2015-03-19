@@ -5,7 +5,7 @@ import anorm.{RowParser, ~}
 import controllers.Application
 import models.graph.NeoDAO
 import models.graph.custom_types.Statement
-import models.graph.ontology.Concept
+import models.graph.ontology.concept.Concept
 import models.instance_action.action.InstanceAction
 import org.anormcypher.CypherResultRow
 import play.api.Play.current

@@ -2,8 +2,9 @@ package models.instance_action.action
 
 import controllers.Application
 import models.graph.custom_types.Coordinates
+import models.graph.ontology.Instance
+import models.graph.ontology.concept.ConceptDAO
 import models.graph.ontology.property.Property
-import models.graph.ontology.{Concept, Instance}
 
 /**
  * Hard coded actions that user can make instances do.
@@ -60,7 +61,7 @@ object HardCodedAction {
 
   //NOT USED
   def searchConcept(args: Array[Any]) = {
-    val concept = Concept.getById(args(0).asInstanceOf[Long])
+    val concept = ConceptDAO.getById(args(0).asInstanceOf[Long])
     val xCoordinate = args(1).asInstanceOf[Int]
     val yCoordinate = args(2).asInstanceOf[Int]
     val coordinates = Coordinates(xCoordinate, yCoordinate)

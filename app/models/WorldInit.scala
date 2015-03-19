@@ -3,6 +3,7 @@ package models
 import controllers.Application
 import models.graph.custom_types.Coordinates
 import models.graph.ontology._
+import models.graph.ontology.concept.{ConceptDAO, Concept}
 import models.graph.ontology.property.PropertyDAO
 import models.graph.ontology.relation.Relation
 
@@ -24,13 +25,16 @@ object WorldInit {
 
   val parameterOfEmptiness = 1
 
+  private lazy val propertyStrength = PropertyDAO.getByName("Strength")
+  private lazy val propertyInstanciable = PropertyDAO.getByName("Instanciable")
+
   /**
    * Generate the world map
    * @author Simon Roncière
    * @return List of Instances of the world
    */
   def worldMapGeneration(): Unit = {
-    val allGroundsConcepts = getGroundConcept(Concept.findAll).getDescendance
+    val allGroundsConcepts = getGroundConcept(ConceptDAO.findAll).getDescendance
     val instanciableConcepts = getInstanciableConcepts diff allGroundsConcepts
     generateGround(allGroundsConcepts)
     //Take a lot of time
@@ -59,7 +63,6 @@ object WorldInit {
    *         0 else
    */
   def getStrengthOf(concept: Concept): Int = {
-    val propertyStrength = PropertyDAO.getByName("Strength")
     concept.getRuleValue(propertyStrength).asInstanceOf[Int]
   }
 
@@ -178,7 +181,6 @@ object WorldInit {
    * @return
    */
   def getInstanciableConceptsInList(listConcepts: List[Concept]): List[Concept] = {
-    val propertyInstanciable = PropertyDAO.getByName("Instanciable")
     listConcepts.filter {
       _.rules.contains(ValuedProperty(propertyInstanciable, true))
     }
@@ -222,7 +224,7 @@ object WorldInit {
    */
   def randomObjectInstanciation(grounds: List[Concept], height: Int, width: Int): List[Instance] = {
     val nbTile = height * width
-    val instanciableConcepts = Concept.findAll diff grounds
+    val instanciableConcepts = ConceptDAO.findAll diff grounds
     val sumStr = computeSumStrength(instanciableConcepts)
     getNumberOfInstancesForEachConcept(instanciableConcepts, sumStr * 2, nbTile)
       .map(tuple => randomlyPutInstancesOfOneConcept(tuple._1, tuple._2, height, width))
@@ -298,7 +300,7 @@ object WorldInit {
    * @return list of Concept Id's life place of a concept
    */
   def getLivingPlacesIdsFor(conceptId: Long): List[Long] = {
-    Concept.getRelationsFrom(conceptId)
+    ConceptDAO.getRelationsFrom(conceptId)
       .filter(tuple => tuple._1.id == Relation.DBList.getByName("LIVE_ON").id)
       .map(_._2.id)
   }
@@ -309,7 +311,7 @@ object WorldInit {
    * @return list of Concept Id's living on
    */
   def getConceptsLivingOn(conceptId: Long): List[Concept] = {
-    Concept.getRelationsTo(conceptId)
+    ConceptDAO.getRelationsTo(conceptId)
       .filter(tuple => tuple._1.label == "LIVE_ON")
       .map(tuple => tuple._2)
   }
@@ -335,7 +337,7 @@ object WorldInit {
    * @return list of Object instanciables in the world, sort by order of appearance
    */
   def getInstanciableConcepts: List[Concept] = {
-    val instanciableConcepts = getInstanciableConceptsInList(Concept.findAll)
+    val instanciableConcepts = getInstanciableConceptsInList(ConceptDAO.findAll)
     val listLiveOnRelationTriplets = getLiveOnRelationTriplets(instanciableConcepts)
     getConceptsByAppearanceOrder(listLiveOnRelationTriplets, instanciableConcepts)
   }
@@ -347,7 +349,7 @@ object WorldInit {
    * @return list of tuplet (Concept, (relation,Concept))
    */
   def getLiveOnRelationTriplets(listOfInstanciable: List[Concept]): List[(Concept, List[(Relation, Concept)])] = {
-    listOfInstanciable.map(c => (c, Concept.getRelationsFrom(c.id)))
+    listOfInstanciable.map(c => (c, ConceptDAO.getRelationsFrom(c.id)))
       .map(tuple => (tuple._1, tuple._2.filter(tuple => tuple._1.label == "LIVE_ON")))
   }
 

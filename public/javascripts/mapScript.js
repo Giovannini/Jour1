@@ -329,8 +329,8 @@ var DrawerFactory = function() {
         tiledMap = null,
         conceptContainers = {},
         map = [],
-        tileWidth = 8,
-        tileHeight = 8;
+        tileWidth = 20,
+        tileHeight = 20;
     
     ConceptContainer.prototype = new PIXI.DisplayObjectContainer();
     ConceptContainer.prototype.constructor = ConceptContainer;
