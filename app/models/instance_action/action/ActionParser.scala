@@ -8,6 +8,7 @@ import models.instance_action.Parameter
  */
 object ActionParser {
 
+
   /**
    * Parse an action from client-side and execute it.
    * @author Thomas GIOVANNINI

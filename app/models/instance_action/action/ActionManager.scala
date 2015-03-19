@@ -9,6 +9,12 @@ import models.instance_action.precondition.{Precondition, PreconditionManager}
  */
 object ActionManager{
 
+  /* TODO: actions to implement
+   * Eat do not remove the object but only a part of it [Simon]
+   * Kill -> an action that is killed can't act anymore
+   * Procreate: isProcreationLevelSufficient
+   */
+
   val map = Application.map
 
   val nameToId: collection.mutable.Map[String, Long] = collection.mutable.Map.empty[String, Long]

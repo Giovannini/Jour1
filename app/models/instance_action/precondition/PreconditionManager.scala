@@ -7,6 +7,11 @@ import models.instance_action.Parameter
  */
 object PreconditionManager {
 
+  /* TODO: preconditions to implement
+   * See [Thomas]
+   * Search "Can I see an apple from there?"
+   */
+
   val nameToId: collection.mutable.Map[String, Long] = collection.mutable.Map.empty[String, Long]
 
   def initialization = {
