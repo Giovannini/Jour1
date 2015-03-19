@@ -423,13 +423,6 @@ var EditRelationFactory = ['NodesFactory', function(NodesFactory) {
         }
     );
 
-    _relation = {
-        label: "",
-        preconditions: [],
-        parameters: [],
-        actions: []
-    };
-
     var parametersFilteredByType = function(type) {
         return _relation.parameters.filter(function(param) {
             return param.type == type;
@@ -492,25 +485,28 @@ var EditRelationFactory = ['NodesFactory', function(NodesFactory) {
             notifyError,
             updateProperties,
             updatePreconditions,
-            updateActions,
-            relation
+            updateActions
     ) {
+        _relation = {
+            label: "",
+            preconditions: [],
+            parameters: [],
+            actions: []
+        };
+
         _notifyError = notifyError;
         _updateProperties = updateProperties;
         _updatePreconditions = updatePreconditions;
         _updateActions = updateActions;
-        if(typeof relation !== "undefined" && relation !== null) {
-            _relation = relation;
-        }
     };
 
     return {
-        relation: _relation,
+        relation: function() { return _relation; },
         setRelation: function(relation) { _relation = relation; },
-        properties: _properties,
-        preconditions: _preconditions,
-        actions: _actions,
-        paramTypes: _paramTypes,
+        properties: function() { return _properties; },
+        preconditions: function() { return _preconditions; },
+        actions: function() { return _actions; },
+        paramTypes: function() { return _paramTypes; },
         init: init,
         parametersFilteredByType: parametersFilteredByType,
         removeParameter: removeParameter,
@@ -543,11 +539,11 @@ var NewRelationCtrl = ['$scope', 'EditRelationFactory', function($scope, EditRel
         }
     );
 
-    $scope.relation = EditRelationFactory.relation;
-    $scope.properties = [];
-    $scope.preconditions = [];
-    $scope.actions = [];
-    $scope.paramTypes = EditRelationFactory.paramTypes;
+    $scope.relation = EditRelationFactory.relation();
+    $scope.properties = EditRelationFactory.properties();
+    $scope.preconditions = EditRelationFactory.preconditions();
+    $scope.actions = EditRelationFactory.actions();
+    $scope.paramTypes = EditRelationFactory.paramTypes();
     $scope.parametersFilteredByType = EditRelationFactory.parametersFilteredByType;
     $scope.removeParameter = EditRelationFactory.removeParameter;
     $scope.addParameter = EditRelationFactory.addParameter;
@@ -562,29 +558,9 @@ var NewRelationCtrl = ['$scope', 'EditRelationFactory', function($scope, EditRel
     }
 }];
 
-var ShowRelationCtrl = ['$scope', '$routeParams', 'NodesFactory', function($scope, $routeParams, NodesFactory) {
-    $scope.relation = null;
-    $scope.message = "Loading...";
-
-    $scope.isShowingRelation = function() {
-        return $scope.relation !== null;
-    };
-
-    var success = function(relation) {
-        $scope.relation = relation;
-        console.log($scope.relation);
-    };
-
-    var error = function(response) {
-        $scope.message = "Error loading";
-    };
-
-    NodesFactory.getRelation($routeParams.label, success, error);
-}];
-
 var EditRelationCtrl = ['$scope', '$routeParams', 'NodesFactory', 'EditRelationFactory', function($scope, $routeParams, NodesFactory, EditRelationFactory) {
     $scope.submit_button = "Edit";
-    $scope.back_url = "#/relation"+$routeParams.label;
+    $scope.back_url = "#/relation/"+$routeParams.label;
     $scope.relation  = {};
 
     EditRelationFactory.init(
@@ -717,7 +693,6 @@ var EditRelationCtrl = ['$scope', '$routeParams', 'NodesFactory', 'EditRelationF
                     relation.actions = newActions;
 
                     $scope.relation = relation;
-                    console.log(relation);
                     EditRelationFactory.setRelation(relation);
                 },
                 function(failure) {
@@ -728,10 +703,10 @@ var EditRelationCtrl = ['$scope', '$routeParams', 'NodesFactory', 'EditRelationF
     }
 
     $scope.relation = EditRelationFactory.relation;
-    $scope.properties = [];
-    $scope.preconditions = [];
-    $scope.actions = [];
-    $scope.paramTypes = EditRelationFactory.paramTypes;
+    $scope.properties = EditRelationFactory.properties();
+    $scope.preconditions = EditRelationFactory.preconditions();
+    $scope.actions = EditRelationFactory.actions();
+    $scope.paramTypes = EditRelationFactory.paramTypes();
     $scope.parametersFilteredByType = EditRelationFactory.parametersFilteredByType;
     $scope.removeParameter = EditRelationFactory.removeParameter;
     $scope.addParameter = EditRelationFactory.addParameter;
@@ -743,81 +718,221 @@ var EditRelationCtrl = ['$scope', '$routeParams', 'NodesFactory', 'EditRelationF
         EditRelationFactory.setRelation($scope.relation);
         EditRelationFactory.submitRelation();
     };
+
+    initRelation();
 }];
 
-var NewNodeCtrl = ['$scope', '$routeParams', '$resource', 'NodesFactory', function($scope, $routeParams, $resource, NodesFactory) {
-    $scope.node = {
-        label: "",
-        properties: [],
-        rules: [],
-        displayProperty: {
-            color: "",
-            zindex: ""
+var ShowRelationCtrl = ['$scope', '$routeParams', 'NodesFactory', function($scope, $routeParams, NodesFactory) {
+    $scope.relation = null;
+    $scope.message = "Loading...";
+
+    $scope.isShowingRelation = function() {
+        return $scope.relation !== null;
+    };
+
+    var success = function(relation) {
+        $scope.relation = relation;
+        console.log($scope.relation);
+    };
+
+    var error = function(response) {
+        $scope.message = "Error loading";
+    };
+
+    NodesFactory.getRelation($routeParams.label, success, error);
+}];
+
+var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($routeParams, $resource, NodesFactory) {
+    var _node,
+        _properties,
+        _notifyError,
+        _updateProperties,
+        _submitUrl;
+
+    _properties = null;
+    NodesFactory.getProperties(
+        function(properties) {
+            _properties = properties;
+            _updateProperties(_properties);
+        },
+        function(failure) {
+            _notifyError("Impossible to load properties")
+        }
+    );
+
+    var init = function(notifyError, updateProperties) {
+        _node = {
+            label: "",
+            properties: [],
+            rules: [],
+            displayProperty: {
+                color: "",
+                zindex: ""
+            }
+        };
+
+        _notifyError = notifyError;
+        _updateProperties = updateProperties;
+        if(_properties != null) {
+            _updateProperties(_properties);
         }
     };
+
+    var setNode = function(node) {
+        _node = node;
+    };
+
+    var addProperty = function() {
+        _node.properties.push({});
+    };
+
+    var removeProperty = function(propertyId) {
+        _node.properties.splice(propertyId, 1);
+    };
+
+    var newRuleType = function(ruleId) {
+        _node.rules[ruleId].value = _node.rules[ruleId].property.defaultValue;
+    };
+
+    var addRule = function() {
+        _node.rules.push({
+            property: _properties[0],
+            value: ""
+        });
+        newRuleType(_node.rules.length - 1);
+    };
+
+    var removeRule = function(ruleId) {
+        _node.rules.splice(ruleId, 1);
+    };
+
+    var submitNode = function(url) {
+        return function() {
+            var submit = $resource(
+                url,
+                {},
+                {
+                    'save': {
+                        method: "POST",
+                        headers: [{'Content-Type': 'application/json'}]
+                    }
+                }
+            );
+            submit.save(
+                {},
+                _node,
+                function (response) {
+                    console.log(response);
+                }, function (response) {
+                    _notifyError("Impossible to save node");
+                }
+            )
+        }
+    };
+
+    return {
+        node: function() { return _node; },
+        properties: function() { return _properties; },
+        init: init,
+        setNode: setNode,
+        addProperty: addProperty,
+        removeProperty: removeProperty,
+        addRule: addRule,
+        removeRule: removeRule,
+        submitNode: submitNode
+    };
+}];
+
+var NewNodeCtrl = ['$scope', '$routeParams', 'EditNodeFactory', function($scope, $routeParams, EditNodeFactory) {
     $scope.submit_button = "Edit";
     $scope.back_url = "#/";
 
-    NodesFactory.getProperties(
+    EditNodeFactory.init(
+        function(error) {
+            $scope.error = error;
+        },
         function(properties) {
             $scope.properties = properties;
-        },
-        function(failure) {
-
         }
     );
 
-    var submit = $resource(
-        baseUrl+'graph/node/new',
-        {},
-        {
-            'save': {
-                method: "POST",
-                headers: [{'Content-Type': 'application/json'}]
-            }
-        }
-    );
+    $scope.node = EditNodeFactory.node();
+    $scope.properties = EditNodeFactory.properties();
 
-    $scope.addProperty = function() {
-        $scope.node.properties.push({});
-    };
-
-    $scope.removeProperty = function(propertyId) {
-        $scope.node.properties.splice(propertyId, 1);
-    };
-
-    $scope.addRule = function() {
-        $scope.node.rules.push({
-            property: $scope.properties[0],
-            value: ""
-        });
-        $scope.newRuleType($scope.node.rules.length - 1);
-    };
-
-    $scope.removeRule = function(ruleId) {
-        $scope.node.rules.splice(ruleId, 1);
-    };
-
-    $scope.newRuleType = function(ruleId) {
-        $scope.node.rules[ruleId].value = $scope.node.rules[ruleId].property.defaultValue;
-    };
+    $scope.addProperty = EditNodeFactory.addProperty;
+    $scope.removeProperty = EditNodeFactory.removeProperty;
+    $scope.addRule = EditNodeFactory.addRule;
+    $scope.removeRule = EditNodeFactory.removeRule;
 
     $scope.submitNode = function() {
-        submit.save(
-            {},
-            $scope.node,
-            function(response) {
-                console.log(response);
-            }, function(response) {
-                console.log(response);
+        EditNodeFactory.setNode($scope.node);
+        EditNodeFactory.submitNode(baseUrl+'graph/node/new');
+    }
+}];
+
+var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', 'NodesFactory', 'EditNodeFactory', function($scope, $routeParams, Scopes, NodesFactory, EditNodeFactory) {
+    Scopes.get('search').search = $routeParams.label;
+    $scope.submit_button = "Edit";
+    $scope.back_url = "#/node/"+$routeParams.label;
+
+    var searchNode = function() {
+        NodesFactory.searchNodes(
+            function (root, display) {
+                for (var ruleIndex in display.rules) {
+                    for (var i = 0; i < $scope.properties.length; i++) {
+                        if (display.rules[ruleIndex].property === $scope.properties[i].id) {
+                            display.rules[ruleIndex].property = $scope.properties[i];
+                        }
+                    }
+                }
+
+                for (var propertyIndex in display.properties) {
+                    for (var i = 0; i < $scope.properties.length; i++) {
+                        if (display.properties[propertyIndex] === $scope.properties[i].id) {
+                            display.properties[propertyIndex] = $scope.properties[i];
+                        }
+                    }
+                }
+
+                display.displayProperty = display.display;
+                delete display.display;
+
+                $scope.node = display;
+                EditNodeFactory.setNode(display);
+            },
+            function (error) {
+                $scope.error = error;
             }
-        )
+        )($routeParams.label, $routeParams.label, NodesFactory.options.deepness, true);
     };
+
+    EditNodeFactory.init(
+        function(error) {
+            $scope.error = error;
+        },
+        function(properties) {
+            $scope.properties = properties;
+            searchNode();
+        }
+    );
+
+    $scope.properties = EditNodeFactory.properties();
+    $scope.addProperty = EditNodeFactory.addProperty;
+    $scope.removeProperty = EditNodeFactory.removeProperty;
+    $scope.addRule = EditNodeFactory.addRule;
+    $scope.removeRule = EditNodeFactory.removeRule;
+
+    $scope.submitNode = function() {
+        EditNodeFactory.setNode($scope.node);
+        EditNodeFactory.submitNode(baseUrl+'graph/node/'+$routeParams.label+'/edit');
+    }
 }];
 
 var ShowNodeCtrl = ['$scope', '$rootScope', '$location', '$routeParams', '$resource', 'Scopes', 'NodesFactory', function($scope, $rootScope, $location, $routeParams, $resource, Scopes, NodesFactory) {
     $scope.node = NodesFactory.getCurrentNode();
     $scope.message = "Loading...";
+    $scope.back_url = "#/";
+
 
     Scopes.get('search').search = $routeParams.label;
 
@@ -843,98 +958,6 @@ var ShowNodeCtrl = ['$scope', '$rootScope', '$location', '$routeParams', '$resou
         NodesFactory.searchNodes(success, error)($routeParams.label, $routeParams.label, NodesFactory.options.deepness, true);
     }
 }];
-
-var EditNodeCtrl = ['$scope', '$location', '$rootScope', '$routeParams', 'Scopes', '$resource', 'NodesFactory', function($scope, $location, $rootScope, $routeParams, Scopes, $resource, NodesFactory) {
-    Scopes.get('search').search = $routeParams.label;
-    $scope.submit_button = "Edit";
-    $scope.back_url = "#/node/"+$routeParams.label;
-
-    NodesFactory.getProperties(
-        function(properties) {
-            $scope.properties = properties;
-
-            NodesFactory.searchNodes(
-                function(root, display) {
-                    for(var ruleIndex in display.rules) {
-                        for(var i = 0; i < $scope.properties.length; i++) {
-                            if(display.rules[ruleIndex].property === $scope.properties[i].id) {
-                                display.rules[ruleIndex].property = $scope.properties[i];
-                            }
-                        }
-                    }
-
-                    for(var propertyIndex in display.properties) {
-                        for(var i = 0; i < $scope.properties.length; i++) {
-                            if(display.properties[propertyIndex] === $scope.properties[i].id) {
-                                display.properties[propertyIndex] = $scope.properties[i];
-                            }
-                        }
-                    }
-
-                    display.displayProperty = display.display;
-                    delete display.display;
-
-                    $scope.node = display;
-                },
-                function(error) {
-
-                }
-            )($routeParams.label, $routeParams.label, NodesFactory.options.deepness, true);
-        },
-        function(failure) {
-
-        }
-    );
-
-    var submit = $resource(
-        baseUrl+'graph/node/'+$routeParams.label+'/edit',
-        {},
-        {
-            'save': {
-                method: "POST",
-                headers: [{'Content-Type': 'application/json'}]
-            }
-        }
-    );
-
-    $scope.addProperty = function() {
-        $scope.node.properties.push({});
-    };
-
-    $scope.removeProperty = function(propertyId) {
-        $scope.node.properties.splice(propertyId, 1);
-    };
-
-    $scope.addRule = function() {
-        $scope.node.rules.push({
-            property: $scope.properties[0],
-            value: ""
-        });
-        $scope.newRuleType($scope.node.rules.length - 1);
-    };
-
-    $scope.removeRule = function(ruleId) {
-        $scope.node.rules.splice(ruleId, 1);
-    };
-
-    $scope.newRuleType = function(ruleId) {
-        $scope.node.rules[ruleId].value = $scope.node.rules[ruleId].property.defaultValue;
-    };
-
-    $scope.submitNode = function() {
-        submit.save(
-            {},
-            $scope.node,
-            function(response) {
-                $location.path("#/node/"+response.label);
-                $rootScope.$apply();
-            }, function(response) {
-                console.log(response);
-            }
-        )
-    };
-}];
-
 
 angular.module('graphEditor', ["ngResource", "ngRoute"])
     .config(['$routeProvider', function($routeProvider) {
@@ -978,6 +1001,15 @@ angular.module('graphEditor', ["ngResource", "ngRoute"])
     .factory('Scopes', Scopes)
     .factory('NodesFactory', NodesFactory)
     .directive('property', PropertyDirective)
+    .filter('displayListParameter', function() {
+        return function(input) {
+            return input
+                .map(function(parameter) {
+                    return parameter.reference;
+                })
+                .join(", ");
+        };
+    })
     .controller('ViewerController', ViewerController)
     .controller('SearchController', SearchController)
     .controller('OverviewCtrl', OverviewCtrl)
@@ -986,5 +1018,6 @@ angular.module('graphEditor', ["ngResource", "ngRoute"])
     .controller('NewRelationCtrl', NewRelationCtrl)
     .controller('EditRelationCtrl', EditRelationCtrl)
     .controller('ShowNodeCtrl', ShowNodeCtrl)
+    .factory('EditNodeFactory', EditNodeFactory)
     .controller('NewNodeCtrl', NewNodeCtrl)
     .controller('EditNodeCtrl', EditNodeCtrl);

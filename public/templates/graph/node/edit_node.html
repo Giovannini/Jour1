@@ -1,3 +1,5 @@
+<a href="{{ back_url }}">Go back</a>
+
 <form class="form">
     <fieldset class="form-field">
         <div class="form-group">
@@ -30,12 +32,12 @@
             </div>
             <div class="form-group">
                 <div class="form-group__input remove">
-                    <button ng-click="removeProperty($index)">Remove</button>
+                    <button type="button" ng-click="removeProperty($index)">Remove</button>
                 </div>
             </div>
         </div>
         <div class="form-group form-add">
-            <button ng-click="addProperty()">Add a property</button>
+            <button type="button" ng-click="addProperty()">Add a property</button>
         </div>
     </fieldset>
 
@@ -70,12 +72,12 @@
             </div>
             <div class="form-group">
                 <div class="form-group__input remove">
-                    <button ng-click="removeRule($index)">Remove</button>
+                    <button type="button" ng-click="removeRule($index)">Remove</button>
                 </div>
             </div>
         </div>
         <div class="form-group form-add">
-            <button ng-click="addRule()">Add a rule</button>
+            <button type="button" ng-click="addRule()">Add a rule</button>
         </div>
     </fieldset>
 
@@ -100,5 +102,5 @@
         </div>
     </fieldset>
 
-    <button class="form-submit" ng-click="submitNode()">{{ submit_button }}</button>
+    <button type="submit" class="form-submit" ng-click="submitNode()">{{ submit_button }}</button>
 </form>
