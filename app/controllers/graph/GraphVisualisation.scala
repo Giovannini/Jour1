@@ -2,6 +2,7 @@ package controllers.graph
 
 import models.graph.ontology.property.{Property, PropertyDAO}
 import models.instance_action.action.InstanceAction
+import models.instance_action.precondition.PreconditionDAO
 import play.api.libs.json.Json
 import play.api.mvc._
 
@@ -73,6 +74,20 @@ object GraphVisualisation extends Controller {
     jsonOrRedirectToIndex(request) {
       val properties = PropertyDAO.getAll
       Ok(Json.toJson(properties.map(_.toJson)))
+    }
+  }
+
+  def getPreconditions() = Action { request =>
+    jsonOrRedirectToIndex(request) {
+      val preconditions = PreconditionDAO.getAll
+      Ok(Json.toJson(preconditions.map(_.toJson)))
+    }
+  }
+
+  def getActions() = Action { request =>
+    jsonOrRedirectToIndex(request) {
+      val preconditions = InstanceAction.getAll
+      Ok(Json.toJson(preconditions.map(_.toJson)))
     }
   }
 }

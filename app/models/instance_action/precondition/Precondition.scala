@@ -110,7 +110,8 @@ case class Precondition(id: Long, label: String, subConditions: List[Preconditio
 
   def toJson = Json.obj(
     "id" -> JsNumber(id),
-    "label" -> JsString(label)
+    "label" -> JsString(label),
+    "parameters" -> parameters.map(_.toJson)
   )
 
   def save: Long = PreconditionDAO.save(this)

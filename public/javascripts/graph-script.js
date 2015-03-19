@@ -19,6 +19,7 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
     var _displayedNodes = [];
     var _edges = [];
     var _properties = {};
+    var _preconditions = {};
     var options = {
         deepness: 1
     };
@@ -68,7 +69,7 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
                 method: "GET",
                 isArray: true,
                 Accept: "application/json"
-            } }
+            }}
         );
         request.get(
             {},
@@ -80,6 +81,50 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
                 failure(response);
             }
         )
+    };
+
+    var getPreconditions = function getPreconditions(success, failure) {
+        var request = $resource(
+            baseUrl+'graph/preconditions',
+            {},
+            { 'get': {
+                method: "GET",
+                isArray: true,
+                Accept: "application/json"
+            }}
+        );
+        request.get(
+            {},
+            function(response) {
+                _preconditions = response;
+                success(response);
+            },
+            function(response) {
+                failure(response);
+            }
+        );
+    };
+
+    var getActions = function getActions(success, failure) {
+        var request = $resource(
+            baseUrl+'graph/actions',
+            {},
+            { 'get': {
+                method: "GET",
+                isArray: true,
+                Accept: "application/json"
+            }}
+        );
+        request.get(
+            {},
+            function(response) {
+                _preconditions = response;
+                success(response);
+            },
+            function(response) {
+                failure(response);
+            }
+        );
     };
 
     var getRelation = function(label, success, failure) {
@@ -162,6 +207,8 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
         getDisplayedNodes: function() { return _displayedNodes; },
         getProperty: getProperty,
         getProperties: getProperties,
+        getPreconditions: getPreconditions,
+        getActions: getActions,
         getRelation: getRelation,
         options: options,
         searchNodes: searchNodes
@@ -176,8 +223,13 @@ var ViewerController = ['$scope', '$location', '$rootScope', 'Scopes', 'NodesFac
         NodesFactory.options.deepness = $scope.deepness;
     };
 
-    $scope.select = function(label) {
+    var selectNode = function(label) {
         $location.path('/node/'+Scopes.get('search').search+'/'+label);
+        $rootScope.$apply();
+    };
+
+    var selectEdge = function(label) {
+        $location.path('/relation/'+label);
         $rootScope.$apply();
     };
 
@@ -203,12 +255,12 @@ var ViewerController = ['$scope', '$location', '$rootScope', 'Scopes', 'NodesFac
         } else {
             lastClick = label;
         }
-        $scope.select(label);
+        selectNode(label);
     };
 
     var edgeClick = function(edge) {
         var label = edge.getProperties().label;
-        Scopes.get('editNode').$emit('EditNode_searchEdge', label);
+        selectEdge(label);
     };
 
     var displayNodes = function() {
@@ -302,80 +354,314 @@ var SearchController = [
     function($scope, $rootScope, $location, Scopes) {
         Scopes.add('search', $scope);
 
-        Scopes.get('search').$on('Search_searchNode', function(event, search) {
-            $scope.search = search;
+        $scope.launchSearch = function() {
             $location.path("/node/"+$scope.search);
             $rootScope.$apply();
+        };
+
+        Scopes.get('search').$on('Search_searchNode', function(event, search) {
+            $scope.search = search;
+            $scope.launchSearch();
         });
     }
 ];
-
-var EditNodeController = ['$scope', 'Scopes', 'NodesFactory', function($scope, Scopes, NodesFactory) {
-    Scopes.add('editNode', $scope);
-    //$scope.NodesFactory = NodesFactory;
-    $scope.displayedNodes = [];
-    $scope.nodeSelected = null;
-    $scope.relationSelected = null;
-
-    $scope.isShowingNode = function() {
-        return $scope.nodeSelected != null;
-    };
-
-    $scope.isShowingRelation = function() {
-        return $scope.relationSelected != null;
-    };
-
-    var init = function() {
-        $scope.nodeSelected = null;
-        $scope.displayedNodes = NodesFactory.getDisplayedNodes();
-    };
-
-    var updateNode = function() {
-        $scope.relationSelected = null;
-        $scope.nodeSelected = NodesFactory.getCurrentNode();
-        $scope.$apply();
-    };
-
-    var updateRelation = function(relationLabel) {
-        NodesFactory.getRelation(
-            relationLabel,
-            function(relation) {
-                $scope.nodeSelected = null;
-                $scope.relationSelected = relation;
-            },
-            function(response) {
-
-            }
-        );
-    };
-
-    $scope.$on('EditNode_init', function(event) {
-        init();
-    });
-
-    $scope.$on('EditNode_updateNode', function(event) {
-        updateNode();
-    });
-
-    $scope.$on('EditNode_searchEdge', function(event, relationLabel) {
-        updateRelation(relationLabel);
-    });
-}];
 
 var OverviewCtrl = ['$scope', 'NodesFactory', function($scope, NodesFactory) {
 
 }];
 
-var NewRelationCtrl = ['$scope', 'NodesFactory', function($scope, NodesFactory) {
+var EditRelationFactory = ['NodesFactory', function(NodesFactory) {
+    var _paramTypes,
+        _properties,
+        _preconditions,
+        _actions,
+        _relation,
+        _notifyError,
+        _updateProperties,
+        _updatePreconditions,
+        _updateActions;
 
+    /* Types of parameters */
+    _paramTypes = [
+        {value: "Int", label: "Int"},
+        {value: "Long", label: "Id"},
+        {value: "Property", label: "Property"}
+    ];
+
+    /* Gets all kind of properties */
+    _properties = [];
+    NodesFactory.getProperties(
+        function(properties) {
+            _properties = properties;
+            _updateProperties(_properties);
+        },
+        function(failure) {
+            _notifyError("Impossible to load properties");
+        }
+    );
+
+    /* Get all actions */
+    _actions = [];
+    NodesFactory.getActions(
+        function(actions) {
+            _actions = actions;
+            _updateActions(_actions);
+        },
+        function(failure) {
+            _notifyError("Impossible to load actions");
+        }
+    );
+
+    _preconditions = [];
+    NodesFactory.getPreconditions(
+        function(preconditions) {
+            _preconditions = preconditions;
+            _updatePreconditions(_preconditions);
+        },
+        function(failure) {
+            _notifyError("Impossible to load preconditions");
+        }
+    );
+
+    _relation = {
+        label: "",
+        preconditions: [],
+        parameters: [],
+        actions: []
+    };
+
+    var parametersFilteredByType = function(type) {
+        return _relation.parameters.filter(function(param) {
+            return param.type == type;
+        });
+    };
+
+    var removeParameter = function(parameterIndex) {
+        _relation.parameters.splice(parameterIndex, 1);
+    };
+
+    var addParameter = function() {
+        _relation.parameters.push({
+            reference: "",
+            type: _paramTypes[0]
+        });
+    };
+
+    var removePrecondition = function(preconditionIndex) {
+        _relation.preconditions.splice(preconditionIndex, 1);
+    };
+
+    var addPrecondition = function() {
+        _relation.preconditions.push({
+            precondition: _preconditions[0],
+            arguments: []
+        });
+        initPrecondition(_relation.preconditions.length - 1);
+    };
+
+    var removeAction = function(actionIndex) {
+        _relation.actions.splice(actionIndex, 1);
+    };
+
+    var addAction = function() {
+        _relation.actions.push({
+            action: _actions[0],
+            arguments: ""
+        });
+    };
+
+    var submitRelation = function() {
+        console.log(_relation);
+    };
+
+    var initPrecondition = function(index) {
+        if(_relation.preconditions[index].arguments.length <= 0) {
+            var arguments = [];
+            for (var param in _relation.preconditions[index].precondition.parameters) {
+                arguments.push({
+                    isParam: false,
+                    value: 0
+                });
+            }
+            _relation.preconditions[index].arguments = arguments;
+        }
+    };
+
+    var init = function init(
+            notifyError,
+            updateProperties,
+            updatePreconditions,
+            updateActions,
+            relation
+    ) {
+        _notifyError = notifyError;
+        _updateProperties = updateProperties;
+        _updatePreconditions = updatePreconditions;
+        _updateActions = updateActions;
+        if(typeof relation !== "undefined" && relation !== null) {
+            _relation = relation;
+        }
+    };
+
+    return {
+        relation: _relation,
+        setRelation: function(relation) { _relation = relation; },
+        properties: _properties,
+        preconditions: _preconditions,
+        actions: _actions,
+        paramTypes: _paramTypes,
+        init: init,
+        parametersFilteredByType: parametersFilteredByType,
+        removeParameter: removeParameter,
+        addParameter: addParameter,
+        removePrecondition: removePrecondition,
+        addPrecondition: addPrecondition,
+        initPrecondition: initPrecondition,
+        removeAction: removeAction,
+        addAction: addAction,
+        submitRelation: submitRelation
+    };
+}];
+
+var NewRelationCtrl = ['$scope', 'EditRelationFactory', function($scope, EditRelationFactory) {
+    $scope.submit_button = "Edit";
+    $scope.back_url = "#/";
+
+    EditRelationFactory.init(
+        function(error) {
+            $scope.error = error;
+        },
+        function updateProperties(properties) {
+            $scope.properties = properties;
+        },
+        function updatePreconditions(preconditions) {
+            $scope.preconditions = preconditions;
+        },
+        function updateActions(actions) {
+            $scope.actions = actions;
+        }
+    );
+
+    $scope.relation = EditRelationFactory.relation;
+    $scope.properties = [];
+    $scope.preconditions = [];
+    $scope.actions = [];
+    $scope.paramTypes = EditRelationFactory.paramTypes;
+    $scope.parametersFilteredByType = EditRelationFactory.parametersFilteredByType;
+    $scope.removeParameter = EditRelationFactory.removeParameter;
+    $scope.addParameter = EditRelationFactory.addParameter;
+    $scope.removePrecondition = EditRelationFactory.removePrecondition;
+    $scope.initPrecondition = EditRelationFactory.initPrecondition;
+    $scope.addPrecondition = EditRelationFactory.addPrecondition;
+    $scope.removeAction = EditRelationFactory.removeAction;
+    $scope.addAction = EditRelationFactory.addAction;
+    $scope.submitRelation = function() {
+        EditRelationFactory.setRelation($scope.relation);
+        EditRelationFactory.submitRelation();
+    }
 }];
 
 var ShowRelationCtrl = ['$scope', '$routeParams', 'NodesFactory', function($scope, $routeParams, NodesFactory) {
+    $scope.relation = null;
+    $scope.message = "Loading...";
 
+    $scope.isShowingRelation = function() {
+        return $scope.relation !== null;
+    };
+
+    var success = function(relation) {
+        $scope.relation = relation;
+        console.log($scope.relation);
+    };
+
+    var error = function(response) {
+        $scope.message = "Error loading";
+    };
+
+    NodesFactory.getRelation($routeParams.label, success, error);
 }];
 
-var EditRelationCtrl = ['$scope', '$routeParams', 'NodesFactory', function($scope, $routeParams, NodesFactory) {
+var EditRelationCtrl = ['$scope', '$routeParams', 'NodesFactory', 'EditRelationFactory', function($scope, $routeParams, NodesFactory, EditRelationFactory) {
+    $scope.submit_button = "Edit";
+    $scope.back_url = "#/relation"+$routeParams.label;
+    $scope.relation  = {};
 
+    EditRelationFactory.init(
+        function(error) {
+            $scope.error = error;
+        },
+        function updateProperties(properties) {
+            $scope.properties = properties;
+        },
+        function updatePreconditions(preconditions) {
+            $scope.preconditions = preconditions;
+        },
+        function updateActions(actions) {
+            $scope.actions = actions;
+        }
+    );
+
+    NodesFactory.getRelation(
+        $routeParams.label,
+        function(relation) {
+            console.log(relation);
+            /* Make sur that the objects used the object relations are the same as the ones used for ng-repeats
+             * For preconditions we need to :
+             *      change the precondition to one in $scope.preconditions
+             *      change the parameters to one in relation.parameters
+             */
+            var newPreconditions = {};
+            for(var preconditionIndex in relation.preconditions) {
+                /* Find a precondition matching */
+                for(var id in $scope.preconditions) {
+                    if(relation.preconditions[preconditionIndex].id === $scope.preconditions[id].id) {
+                        var newPrecond = {
+                            id: $scope.preconditions[id].id,
+                            precondition: $scope.preconditions[id],
+                            arguments: {}
+                        };
+
+                        /* Find a parameter matching for each parameters */
+                        for(var parameterIndex in relation.preconditions[preconditionIndex].parameters) {
+                            for (var j = 0; j < relation.parameters.length; j++) {
+                                if (relation.preconditions[preconditionIndex].parameters[parameterIndex].reference == relation.parameters[j].reference) {
+                                    newPrecond.arguments[newPrecond.precondition.parameters[parameterIndex].reference] = relation.parameters[j];
+                                    break;
+                                }
+                            }
+                        }
+
+                        newPreconditions[newPrecond.id] = newPrecond;
+                        break;
+                    }
+                }
+            }
+            relation.preconditions = newPreconditions;
+
+            $scope.relation = relation;
+            EditRelationFactory.setRelation(relation);
+        },
+        function(failure) {
+            console.log(failure);
+        }
+    );
+
+    $scope.relation = EditRelationFactory.relation;
+    $scope.properties = [];
+    $scope.preconditions = [];
+    $scope.actions = [];
+    $scope.paramTypes = EditRelationFactory.paramTypes;
+    $scope.parametersFilteredByType = EditRelationFactory.parametersFilteredByType;
+    $scope.removeParameter = EditRelationFactory.removeParameter;
+    $scope.addParameter = EditRelationFactory.addParameter;
+    $scope.removePrecondition = EditRelationFactory.removePrecondition;
+    $scope.addPrecondition = EditRelationFactory.addPrecondition;
+    $scope.removeAction = EditRelationFactory.removeAction;
+    $scope.addAction = EditRelationFactory.addAction;
+    $scope.submitRelation = function() {
+        EditRelationFactory.setRelation($scope.relation);
+        EditRelationFactory.submitRelation();
+    };
 }];
 
 var NewNodeCtrl = ['$scope', '$routeParams', '$resource', 'NodesFactory', function($scope, $routeParams, $resource, NodesFactory) {
@@ -388,6 +674,8 @@ var NewNodeCtrl = ['$scope', '$routeParams', '$resource', 'NodesFactory', functi
             zindex: ""
         }
     };
+    $scope.submit_button = "Edit";
+    $scope.back_url = "#/";
 
     NodesFactory.getProperties(
         function(properties) {
@@ -475,8 +763,10 @@ var ShowNodeCtrl = ['$scope', '$rootScope', '$location', '$routeParams', '$resou
     }
 }];
 
-var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', '$resource', 'NodesFactory', function($scope, $routeParams, Scopes, $resource, NodesFactory) {
+var EditNodeCtrl = ['$scope', '$location', '$rootScope', '$routeParams', 'Scopes', '$resource', 'NodesFactory', function($scope, $location, $rootScope, $routeParams, Scopes, $resource, NodesFactory) {
     Scopes.get('search').search = $routeParams.label;
+    $scope.submit_button = "Edit";
+    $scope.back_url = "#/node/"+$routeParams.label;
 
     NodesFactory.getProperties(
         function(properties) {
@@ -555,7 +845,8 @@ var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', '$resource', 'NodesFacto
             {},
             $scope.node,
             function(response) {
-                console.log(response);
+                $location.path("#/node/"+response.label);
+                $rootScope.$apply();
             }, function(response) {
                 console.log(response);
             }
@@ -572,7 +863,7 @@ angular.module('graphEditor', ["ngResource", "ngRoute"])
                 controller: 'OverviewCtrl'
             }).
             when(baseUrl+'relation/new', {
-                templateUrl: 'assets/templates/graph/relation/new_relation.html',
+                templateUrl: 'assets/templates/graph/relation/edit_relation.html',
                 controller: 'NewRelationCtrl'
             }).
             when(baseUrl+'relation/:label', {
@@ -607,12 +898,12 @@ angular.module('graphEditor', ["ngResource", "ngRoute"])
     .factory('NodesFactory', NodesFactory)
     .directive('property', PropertyDirective)
     .controller('ViewerController', ViewerController)
-    .controller('EditNodeController', EditNodeController)
     .controller('SearchController', SearchController)
     .controller('OverviewCtrl', OverviewCtrl)
-    .controller('NewRelationCtrl', NewRelationCtrl)
     .controller('ShowRelationCtrl', ShowRelationCtrl)
+    .factory('EditRelationFactory', EditRelationFactory)
+    .controller('NewRelationCtrl', NewRelationCtrl)
     .controller('EditRelationCtrl', EditRelationCtrl)
-    .controller('NewNodeCtrl', NewNodeCtrl)
     .controller('ShowNodeCtrl', ShowNodeCtrl)
+    .controller('NewNodeCtrl', NewNodeCtrl)
     .controller('EditNodeCtrl', EditNodeCtrl);

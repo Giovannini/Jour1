@@ -15,7 +15,10 @@ case class ValuedProperty(property: Property, value: Any){
    * @author Thomas GIOVANNINI
    * @return the parsed valued property to json format
    */
-  def toJson : JsValue = Json.obj("property" -> JsNumber(property.id), "value" -> jsonValue)
+  def toJson : JsValue = Json.obj(
+    "property" -> JsNumber(property.id),
+    "value" -> jsonValue
+  )
 
   /**
    * Convert a value with an unknown type to the correct JsValue
@@ -24,10 +27,10 @@ case class ValuedProperty(property: Property, value: Any){
    */
   private def jsonValue: JsValue = {
     property.valueType match {
-      case "Int" => JsNumber(value.asInstanceOf[Int])
-      case "Double" => JsNumber(value.asInstanceOf[Double])
-      case "String" => JsString(value.asInstanceOf[String])
-      case "Boolean" => JsBoolean(value.asInstanceOf[Boolean])
+      case "Int" => JsNumber(value.toString.toInt)
+      case "Double" => JsNumber(value.toString.toDouble)
+      case "String" => JsString(value.toString)
+      case "Boolean" => JsBoolean(value.toString.toBoolean)
       //case list: List[Any] => JsArray(list.map(toJson(_)))
       case _ => JsString(value.toString)
     }

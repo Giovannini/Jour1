@@ -1,25 +1,59 @@
 <div ng-show="!isShowingNode()">
-    <h4>{{ message }}</h4>
+    <h2>{{ message }}</h2>
 </div>
-<div ng-show="isShowingNode()" class="table">
-    <h4>{{ node.label }} - <a href="#/node/{{node.label}}/edit">Edit</a></h4>
-    <div>
-        Properties :
-        <ul>
-            <li ng-repeat="property in node.properties"><property property-id="{{ property }}" /></li>
-        </ul>
+<div ng-show="isShowingNode()" class="form">
+    <a href="{{ back_url }}">Go back</a>
+
+    <div class="form-field">
+        <div class="form-field__legend--single">
+            <h2>{{ node.label }}</h2>
+            - <a href="#/node/{{node.label}}/edit">Edit</a>
+            - <a href="#/node/{{node.label}}/delete">Delete</a>
+        </div>
     </div>
-    <div>
-        Rules :
-        <ul>
-            <li ng-repeat="element in node.rules"><property property-id="{{ element.property }}"></property> : {{ element.value }}</li>
-        </ul>
+
+    <div class="form-field">
+        <div class="form-group">
+            <h3 class="form-field__legend--single">Properties :</h3>
+        </div>
+        <div ng-repeat="property in node.properties" class="form-group highlight">
+            <div class="form-field__legend--single">
+                <property property-id="{{ property }}" />
+            </div>
+        </div>
     </div>
-    <div>
-        Display :
-        <ul>
-            <li>Color: <span style="color: {{node.display.color}}">{{ node.display.color }}</span></li>
-            <li>ZIndex: {{ node.display.zindex }}</li>
-        </ul>
+    <div class="form-field">
+        <div class="form-group">
+            <h3 class="form-field__legend--single">Rules :</h3>
+        </div>
+        <div ng-repeat="element in node.rules" class="form-group highlight">
+            <div class="form-group__label">
+                <property property-id="{{ element.property }}"></property> :
+            </div>
+            <div class="form-group__input">
+                {{ element.value }}
+            </div>
+        </div>
+    </div>
+    <div class="form-field">
+        <div class="form-group">
+            <h3 class="form-field__legend--single">Display :</h3>
+        </div>
+        <div class="form-group highlight">
+            <div class="form-group__label">
+                Color:
+            </div>
+            <div class="form-group__input">
+                <span style="color: {{node.display.color}}">{{ node.display.color }}</span>
+            </div>
+        </div>
+        <div class="form-group highlight">
+            <div class="form-group__label">
+                ZIndex:
+            </div>
+            <div class="form-group__input">
+                {{ node.display.zindex }}
+            </div>
+        </div>
     </div>
 </div>

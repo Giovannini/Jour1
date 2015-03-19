@@ -27,6 +27,8 @@ GET         /relations/:conceptId/delete/:id/:dest                   controllers
 GET         /graph                                                   controllers.graph.GraphVisualisation.index
 GET         /graph/properties                                        controllers.graph.GraphVisualisation.getProperties
 GET         /graph/properties/:propertyId                            controllers.graph.GraphVisualisation.getProperty(propertyId: Int)
+GET         /graph/preconditions                                     controllers.graph.GraphVisualisation.getPreconditions
+GET         /graph/actions                                           controllers.graph.GraphVisualisation.getActions
 GET         /graph/action/:actionLabel                               controllers.graph.GraphVisualisation.getAction(actionLabel: String)
 POST        /graph/node/new                                          controllers.graph.ConceptController.createConcept
 POST        /graph/node/:label/edit                                  controllers.graph.ConceptController.updateConcept(label: String)

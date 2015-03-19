@@ -27,29 +27,6 @@
                     </div>
                 </div>
                 <div ng-view=""></div>
-                <div ng-controller="EditNodeController">
-                    <div ng-hide="isShowingNode() || isShowingRelation()">
-                        <h4>No node selected</h4>
-                        <ul>
-                            <li ng-repeat="node in displayedNodes">{{ node.id }} : {{ node.label }}</li>
-                        </ul>
-                    </div>
-                    <div ng-show="isShowingRelation()" class="table">
-                        <h4>{{ relationSelected.label }}</h4>
-                        <div>
-                            Preconditions :
-                            <ul>
-                                <li ng-repeat="precondition in relationSelected.preconditions">{{ precondition.label }}</li>
-                            </ul>
-                        </div>
-                        <div>
-                            Parameters :
-                            <ul>
-                                <li ng-repeat="parameter in relationSelected.parameters">{{ parameter }}</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>

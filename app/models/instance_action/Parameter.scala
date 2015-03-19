@@ -1,12 +1,15 @@
 package models.instance_action
 
-import play.api.libs.json.JsString
+import play.api.libs.json.{Json, JsString}
 
 
 case class Parameter(reference: String, _type: String){
   require(reference.matches("[A-Za-z0-9_]*"))
 
-  def toJson = JsString(reference)
+  def toJson = Json.obj(
+    "reference" -> JsString(reference),
+    "type" -> JsString(_type)
+  )
 
   override def toString = reference + ": " + _type
 }

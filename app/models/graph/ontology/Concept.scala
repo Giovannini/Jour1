@@ -61,6 +61,11 @@ case class Concept(label: String,
    * @return the Json form of the concept
    */
   def toJson: JsValue = {
+    rules.map(valuedProperty => {
+      println(valuedProperty.property.label)
+      println(valuedProperty.property.valueType)
+      println(valuedProperty.value)
+    })
     Json.obj("label" -> JsString(label),
       "properties" -> properties.map(p => JsNumber(p.id)),
       "rules" -> rules.map(_.toJson),
