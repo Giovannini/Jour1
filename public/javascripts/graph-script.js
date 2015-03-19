@@ -472,6 +472,7 @@ var EditRelationFactory = ['NodesFactory', function(NodesFactory) {
 
     var submitRelation = function() {
         console.log(_relation);
+        console.log(_relation.stringify());
     };
 
     var initPrecondition = function(index) {
@@ -592,59 +593,139 @@ var EditRelationCtrl = ['$scope', '$routeParams', 'NodesFactory', 'EditRelationF
         },
         function updateProperties(properties) {
             $scope.properties = properties;
+            initRelation();
         },
         function updatePreconditions(preconditions) {
             $scope.preconditions = preconditions;
+            initRelation();
         },
         function updateActions(actions) {
             $scope.actions = actions;
+            initRelation();
         }
     );
 
-    NodesFactory.getRelation(
-        $routeParams.label,
-        function(relation) {
-            console.log(relation);
-            /* Make sur that the objects used the object relations are the same as the ones used for ng-repeats
-             * For preconditions we need to :
-             *      change the precondition to one in $scope.preconditions
-             *      change the parameters to one in relation.parameters
-             */
-            var newPreconditions = {};
-            for(var preconditionIndex in relation.preconditions) {
-                /* Find a precondition matching */
-                for(var id in $scope.preconditions) {
-                    if(relation.preconditions[preconditionIndex].id === $scope.preconditions[id].id) {
-                        var newPrecond = {
-                            id: $scope.preconditions[id].id,
-                            precondition: $scope.preconditions[id],
-                            arguments: {}
-                        };
+    function initRelation() {
+        if($scope.properties != null
+                && $scope.preconditions != null
+                && $scope.actions != null) {
+            NodesFactory.getRelation(
+                $routeParams.label,
+                function(relation) {
+                    /* Transform the relation to an object with the form :
+                     *      {
+                     *          label: relation_label,
+                     *          actions: [
+                     *              { // the original object is from $scope.actions
+                     *                  action: $scope.actions[i],
+                     *                  arguments: [{
+                     *                      isParam: boolean,
+                     *                      value: {
+                     *
+                     *                      }
+                     *                  }]
+                     *              }
+                     *          ],
+                     *          preconditions: [
+                     *              { // the original object is from $scope.actions
+                     *                  precondition: $scope.actions[i],
+                     *                  arguments: [{
+                     *                      isParam: boolean,
+                     *                      value: {
+                     *
+                     *                      }
+                     *                  }]
+                     *              }
+                     *          ],
+                     *          parameters: [
+                     *              {
+                     *                  reference: string,
+                     *                  type: string
+                     *              }
+                     *          ]
+                     */
 
+
+
+                    /* match parameters to arguments */
+                    function matchParameters(currentParameters) {
                         /* Find a parameter matching for each parameters */
-                        for(var parameterIndex in relation.preconditions[preconditionIndex].parameters) {
-                            for (var j = 0; j < relation.parameters.length; j++) {
-                                if (relation.preconditions[preconditionIndex].parameters[parameterIndex].reference == relation.parameters[j].reference) {
-                                    newPrecond.arguments[newPrecond.precondition.parameters[parameterIndex].reference] = relation.parameters[j];
-                                    break;
+                        var arguments = [];
+                        for (var parameterIndex in currentParameters) {
+                            var parameterInitialized = false;
+                            /* First look in the parameters of the relation */
+                            for (var j = 0; j < relation.parameters.length && !parameterInitialized; j++) {
+                                if (currentParameters[parameterIndex].reference == relation.parameters[j].reference) {
+                                    arguments[parameterIndex] = {
+                                        isParam: true,
+                                        value: relation.parameters[j]
+                                    };
+                                    parameterInitialized = true;
+                                }
+                            }
+
+                            /* if it hasn't been found, set the value directly */
+                            if (!parameterInitialized) {
+                                arguments[parameterIndex] = {
+                                    isParam: false,
+                                    value: relation.parameters[j]
                                 }
                             }
                         }
-
-                        newPreconditions[newPrecond.id] = newPrecond;
-                        break;
+                        return arguments;
                     }
-                }
-            }
-            relation.preconditions = newPreconditions;
 
-            $scope.relation = relation;
-            EditRelationFactory.setRelation(relation);
-        },
-        function(failure) {
-            console.log(failure);
+                    /* Treating preconditions */
+                    var newPreconditions = [];
+                    for(var preconditionIndex in relation.preconditions) {
+                        for(var id in $scope.preconditions) {
+                            if(relation.preconditions[preconditionIndex].id === $scope.preconditions[id].id) {
+                                var currentPrecondition = relation.preconditions[preconditionIndex];
+
+                                arguments = matchParameters(currentPrecondition.parameters);
+
+                                newPreconditions[preconditionIndex] = {
+                                    id: $scope.preconditions[id].id,
+                                    precondition: $scope.preconditions[id],
+                                    arguments: arguments
+                                };
+                                break;
+                            }
+                        }
+                    }
+                    relation.preconditions = newPreconditions;
+
+                    /* Treating actions */
+                    var newActions = [];
+                    for(var actionIndex in relation.subActions) {
+                        for(var id in $scope.actions) {
+                            if(relation.subActions[actionIndex].id == $scope.actions[id].id) {
+                                var currentAction = relation.subActions[actionIndex];
+
+                                arguments = matchParameters(currentAction.parameters);
+
+                                newActions[actionIndex] = {
+                                    id: $scope.actions[id].id,
+                                    action: $scope.actions[id],
+                                    arguments: arguments
+                                };
+
+                                break;
+                            }
+                        }
+                    }
+                    relation.actions = newActions;
+
+                    $scope.relation = relation;
+                    console.log(relation);
+                    EditRelationFactory.setRelation(relation);
+                },
+                function(failure) {
+                    console.log(failure);
+                }
+            );
         }
-    );
+    }
 
     $scope.relation = EditRelationFactory.relation;
     $scope.properties = [];

@@ -30,7 +30,7 @@ object ActionManager{
     }
     nameToId += "_actionAddInstanceAt " -> _actionAddInstanceAt
     val _actionRemoveInstanceAt = {
-      val p_instanceToRemove = Parameter("instanceToRemove", "Int")
+      val p_instanceToRemove = Parameter("instanceToRemove", "Long")
       InstanceAction(0L, "removeInstanceAt",
         List[Precondition](),
         List[InstanceAction](),
@@ -39,7 +39,7 @@ object ActionManager{
     nameToId += "_actionRemoveInstanceAt " -> _actionRemoveInstanceAt
     val _actionAddOneToProperty = {
       val p_instanceID = Parameter("instanceID", "Long")
-      val p_propertyName = Parameter("propertyName", "String")
+      val p_propertyName = Parameter("propertyName", "Property")
       InstanceAction.identify(0L, "addOneToProperty",
         List((PreconditionManager.nameToId("hasProperty"), List(p_instanceID, p_propertyName)),
           (PreconditionManager.nameToId("isANumberProperty"), List(p_propertyName))),
@@ -49,7 +49,7 @@ object ActionManager{
     nameToId += "_actionAddOneToProperty " -> _actionAddOneToProperty
     val _actionRemoveOneFromProperty = {
       val p_instanceID = Parameter("instanceID", "Long")
-      val p_propertyName = Parameter("propertyName", "String")
+      val p_propertyName = Parameter("propertyName", "Property")
       InstanceAction.identify(0L, "removeOneFromProperty",
         List((PreconditionManager.nameToId("hasProperty"), List(p_instanceID, p_propertyName))),
         List[(Long, List[Parameter])](),

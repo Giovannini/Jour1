@@ -100,9 +100,9 @@
                     <div class="form-group__input">
                         <select
                                 ng-if="relation.preconditions[$parent.$index].arguments[$index].isParam"
-                                id="preconditions_{{$parent.$index}}_arguments_{{ $index }}"
-                                name="preconditions_{{$parent.$index}}_arguments_{{ $index }}"
-                                ng-model="relation.preconditions[$parent.$index].arguments[$index].value"
+                                id="preconditions_{{$parent.$parent.$index}}_arguments_{{ $index }}"
+                                name="preconditions_{{$parent.$parent.$index}}_arguments_{{ $index }}"
+                                ng-model="relation.preconditions[$parent.$parent.$index].arguments[$index].value"
                                 ng-options="param as param.reference for param in parametersFilteredByType(param.type)"></select>
 
                         <div ng-if="!relation.preconditions[$parent.$index].arguments[$index].isParam">
@@ -158,7 +158,6 @@
             <!-- arguments -->
             <div class="form-group">
                 <div class="form-group"  ng-repeat="param in relation.actions[$index].action.parameters">
-                    {{ param }}
                     <label class="form-group__label" for="actions_{{$parent.$index}}_arguments_{{ $index }}">
                         {{ param.reference }}
                         <input
@@ -166,15 +165,15 @@
                                 type="checkbox"
                                 id="actions_{{$parent.$index}}_arguments_{{ $index }}_isParam"
                                 name="actions_{{$parent.$index}}_arguments_{{ $index }}_isParam"
-                                ng-model="relation.actions_[$parent.$index].arguments[$index].isParam"/>
+                                ng-model="relation.actions[$parent.$index].arguments[$index].isParam"/>
                         :
                     </label>
                     <div class="form-group__input">
                         <select
-                                ng-if="relation.preconditions[$parent.$index].arguments[$index].isParam"
-                                id="actions_{{$parent.$index}}_arguments_{{ $index }}"
-                                name="actions_{{$parent.$index}}_arguments_{{ $index }}"
-                                ng-model="relation.actions[$parent.$index].arguments[$index].value"
+                                ng-if="relation.actions[$parent.$index].arguments[$index].isParam"
+                                id="actions_{{$parent.$parent.$index}}_arguments_{{ $index }}"
+                                name="actions_{{$parent.$parent.$index}}_arguments_{{ $index }}"
+                                ng-model="relation.actions[$parent.$parent.$index].arguments[$index].value"
                                 ng-options="param as param.reference for param in parametersFilteredByType(param.type)"></select>
 
                         <div ng-if="!relation.actions[$parent.$index].arguments[$index].isParam">
@@ -188,7 +187,7 @@
                             <select
                                     ng-if="param.type == 'Property'"
                                     id="actions_{{ $parent.$parent.$parent.$index }}_arguments_{{ $index }}"
-                                    name="actions_{{ $parent.$parent.$parent.$index }}_arguments_{{ $index }}"
+                                    name="actions_{{ $parent.$parent.$parent.$parent.$index }}_arguments_{{ $index }}"
                                     ng-model="relation.actions[$parent.$parent.$parent.$index].arguments[$index].value"
                                     ng-options="property.id as property.label for property in properties"></select>
                         </div>
@@ -197,7 +196,7 @@
             </div>
             <div class="form-group">
                 <div class="form-group__input remove">
-                    <button type="button" ng-click="removeAction($actionIndex)">Remove</button>
+                    <button type="button" ng-click="removeAction($index)">Remove</button>
                 </div>
             </div>
         </div>
