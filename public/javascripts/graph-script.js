@@ -366,8 +366,14 @@ var SearchController = [
     }
 ];
 
-var OverviewCtrl = ['$scope', 'NodesFactory', function($scope, NodesFactory) {
+var OverviewCtrl = ['$scope', '$location', function($scope, $location) {
+    $scope.search_relation = function() {
+        $location.path("/relation/"+$scope.relation_search);
+    };
 
+    $scope.search_node = function() {
+        $location.path("/node/"+$scope.node_search);
+    };
 }];
 
 var EditRelationFactory = ['NodesFactory', function(NodesFactory) {
@@ -962,40 +968,40 @@ var ShowNodeCtrl = ['$scope', '$rootScope', '$location', '$routeParams', '$resou
 angular.module('graphEditor', ["ngResource", "ngRoute"])
     .config(['$routeProvider', function($routeProvider) {
         $routeProvider.
-            when(baseUrl+'', {
+            when('/overview', {
                 templateUrl: 'assets/templates/graph/overview.html',
                 controller: 'OverviewCtrl'
             }).
-            when(baseUrl+'relation/new', {
+            when('/relation/new', {
                 templateUrl: 'assets/templates/graph/relation/edit_relation.html',
                 controller: 'NewRelationCtrl'
             }).
-            when(baseUrl+'relation/:label', {
+            when('/relation/:label', {
                 templateUrl: 'assets/templates/graph/relation/show_relation.html',
                 controller: 'ShowRelationCtrl'
             }).
-            when(baseUrl+'relation/:label/edit', {
+            when('/relation/:label/edit', {
                 templateUrl: 'assets/templates/graph/relation/edit_relation.html',
                 controller: 'EditRelationCtrl'
             }).
-            when(baseUrl+'node/new', {
+            when('/node/new', {
                 templateUrl: 'assets/templates/graph/node/edit_node.html',
                 controller: 'NewNodeCtrl'
             }).
-            when(baseUrl+'node/:label', {
+            when('/node/:label', {
                 templateUrl: 'assets/templates/graph/node/show_node.html',
                 controller: 'ShowNodeCtrl'
             }).
-            when(baseUrl+'node/:label/edit', {
+            when('/node/:label/edit', {
                 templateUrl: 'assets/templates/graph/node/edit_node.html',
                 controller: 'EditNodeCtrl'
             }).
-            when(baseUrl+'node/:label/:display', {
+            when('/node/:label/:display', {
                 templateUrl: 'assets/templates/graph/node/show_node.html',
                 controller: 'ShowNodeCtrl'
             }).
             otherwise({
-                redirectTo: baseUrl+''
+                redirectTo: '/overview'
             });
     }])
     .factory('Scopes', Scopes)
