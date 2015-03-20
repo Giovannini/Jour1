@@ -19,7 +19,7 @@
                 </p>
             </div>
             <div class="form-group">
-                <form>
+                <form ng-submit="search_node()">
                     <div class="form-group__label">
                         <button>Search</button>
                     </div>
@@ -27,7 +27,8 @@
                         <input
                                 type="text"
                                 id="node_search"
-                                name="node_search" />
+                                name="node_search"
+                                ng-model="node_search"/>
                     </div>
                 </form>
             </div>
