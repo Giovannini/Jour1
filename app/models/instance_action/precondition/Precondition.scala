@@ -4,7 +4,9 @@ import controllers.Application
 import models.WorldMap
 import models.graph.ontology.Instance
 import models.instance_action.Parameter
-import play.api.libs.json.{JsString, JsNumber, Json}
+import play.api.data.Form
+import play.api.data.Forms._
+import play.api.libs.json.{JsNumber, JsString, Json}
 
 /**
  * Model for preconditions
@@ -35,7 +37,7 @@ case class Precondition(id: Long, label: String, subConditions: List[Preconditio
     }
     if (parameters.contains(oldParameter)) {
       val newSubConditions: List[Precondition] = subConditions.map {
-        subSondition => subSondition.modifyParameter(oldParameter, newParameter)
+        subCondition => subCondition.modifyParameter(oldParameter, newParameter)
       }
       val newParameters: List[Parameter] = replaceParameterInList(parameters)
       Precondition(id, label, newSubConditions, newParameters)
@@ -118,6 +120,13 @@ case class Precondition(id: Long, label: String, subConditions: List[Preconditio
 }
 
 object Precondition {
+
+  lazy val form: Form[Precondition] = Form(mapping(
+   "id" -> longNumber,
+   "label" -> text,
+   "preconditions" -> list(Precondition.form.mapping),
+   "parameters" -> list(Parameter.form.mapping)
+ )(Precondition.apply)(Precondition.unapply))
 
   def identify(id: Long, label: String, subConditions: List[(Long, List[Parameter])], arguments: List[Parameter]): Precondition = {
     def parseSubConditionsTuple(tuple: (Long, List[Parameter])) = {

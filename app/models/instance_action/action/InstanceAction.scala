@@ -6,8 +6,10 @@ import controllers.Application
 import models.instance_action.Parameter
 import models.instance_action.precondition.{Precondition, PreconditionDAO}
 import play.api.Play.current
+import play.api.data.Form
+import play.api.data.Forms._
 import play.api.db.DB
-import play.api.libs.json.{JsString, JsNumber, Json, JsValue}
+import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
 import scala.language.postfixOps
 
@@ -118,6 +120,14 @@ case class InstanceAction(id: Long,
  */
 object InstanceAction {
   implicit val connection = Application.connection
+
+  lazy val form: Form[InstanceAction] = Form(mapping(
+    "id" -> longNumber,
+    "label" -> text,
+    "preconditions" -> list(Precondition.form.mapping),
+    "subactions" -> list(InstanceAction.form.mapping),
+    "parameters" -> list(Parameter.form.mapping)
+  )(InstanceAction.apply)(InstanceAction.unapply))
 
   /**
    * Identify an InstanceAction by finding preconditions and subactions by their IDs

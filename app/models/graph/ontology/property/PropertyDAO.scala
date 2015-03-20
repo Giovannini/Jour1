@@ -60,11 +60,12 @@ object PropertyDAO {
    * @return true if the property was saved
    *         false else
    */
-  def save(property: Property): Long = {
+  def save(property: Property): Property = {
     DB.withConnection { implicit connection =>
       val statement = PropertyStatement.add(property)
       val optionId: Option[Long] = statement.executeInsert()
-      optionId.getOrElse(-1L)
+      val id = optionId.getOrElse(-1L)
+      Property(id, property.label, property.valueType, property.defaultValue)
     }
   }
 

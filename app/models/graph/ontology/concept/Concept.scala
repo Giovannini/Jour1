@@ -3,6 +3,7 @@ package models.graph.ontology.concept
 import models.graph.NeoDAO
 import models.graph.custom_types.DisplayProperty
 import models.graph.ontology.ValuedProperty
+import models.graph.ontology.concept.need.{NeedDAO, Need}
 import models.graph.ontology.property.{Property, PropertyDAO}
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
@@ -17,6 +18,7 @@ import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 case class Concept(label: String,
                    private val _properties: List[Property],
                    private val _rules: List[ValuedProperty],
+                   needs: List[Need],
                    displayProperty: DisplayProperty) {
   require(label.matches("^[A-Z][A-Za-z0-9_ ]*$"))
 
@@ -45,6 +47,7 @@ case class Concept(label: String,
     Json.obj("label" -> JsString(label),
       "properties" -> properties.map(p => JsNumber(p.id)),
       "rules" -> rules.map(_.toJson),
+      "needs" -> needs.map(need => JsNumber(need.id)),
       "type" -> JsString("CONCEPT"),
       "id" -> JsNumber(hashCode()),
       "display" -> displayProperty.toJson)
@@ -62,7 +65,8 @@ case class Concept(label: String,
   def toNodePropertiesString = {
     "{ label: \"" + label + "\"," +
       " properties: [" + properties.map(_.id).mkString(",") + "]," +
-      " rules: [" + rules.map(p => "\"" + p + "\"").mkString(",") + "]," +
+      " rules: [" + rules.map("\"" + _ + "\"").mkString(",") + "]," +
+      " needs: [" + needs.map("\"" + _.id + "\"").mkString(",") + "]," +
       " display: \"" + displayProperty + "\"," +
       " type: \"CONCEPT\"," +
       " id:" + id + "}"
@@ -110,7 +114,7 @@ object Concept {
 
   implicit val connection = NeoDAO.connection
 
-  val error = Concept("XXX", List(), List(), DisplayProperty())
+  val error = Concept("XXX", List(), List(), List(), DisplayProperty())
 
   /**
    * Apply method used in the Concept controller
@@ -125,9 +129,10 @@ object Concept {
       label: String,
       properties: List[Property],
       rules: List[ValuedProperty],
+      needs: List[Need],
       displayProperty: DisplayProperty)
     : Concept = {
-    Concept(label, properties, rules, displayProperty)
+    Concept(label, properties, rules, needs, displayProperty)
   }
 
   /**
@@ -136,8 +141,9 @@ object Concept {
    * @param concept concept
    * @return the different parts of a concept
    */
-  def unapplyForm(concept: Concept): Option[(String, List[Property], List[ValuedProperty], DisplayProperty)] = {
-    Some(concept.label, concept.properties, concept.rules, concept.displayProperty)
+  def unapplyForm(concept: Concept)
+    : Option[(String, List[Property], List[ValuedProperty], List[Need], DisplayProperty)] = {
+    Some(concept.label, concept.properties, concept.rules, concept.needs, concept.displayProperty)
   }
 
   /**
@@ -149,21 +155,13 @@ object Concept {
    * @param displayProperty of the concept
    * @return a concept
    */
-  def identify(label: String, properties: List[Long], rules: List[ValuedProperty], displayProperty: DisplayProperty)
-    : Concept = {
-    Concept(label, properties.map(PropertyDAO.getById), rules, displayProperty)
-  }
-
-  /**
-   * Create a concept given a list of ids of properties instead of a list of properties directly.
-   * @author Thomas GIOVANNINI
-   * @param label of the concept
-   * @param properties id for the concept
-   * @param rules of the concept
-   * @return a concept
-   */
-  def identify(label: String, properties: List[Long], rules: List[ValuedProperty]): Concept = {
-    identify(label, properties, rules, DisplayProperty())
+  def identify(
+      label: String,
+      properties: List[Long],
+      rules: List[ValuedProperty],
+      needs: List[Long],
+      displayProperty: DisplayProperty): Concept = {
+    Concept(label, properties.map(PropertyDAO.getById), rules, needs.map(NeedDAO.getById), displayProperty)
   }
 
   /**
@@ -173,11 +171,12 @@ object Concept {
    * @return the proper concept
    */
   def parseJson(jsonConcept: JsValue): Concept = {
-    val label = (jsonConcept \ "label").as[String]
-    val properties = (jsonConcept \ "properties").as[List[Long]].map(PropertyDAO.getById)
-    val rulesProperties = (jsonConcept \ "rules").as[List[JsValue]].map(ValuedProperty.parseJson)
+    val label       = (jsonConcept \ "label").as[String]
+    val properties  = (jsonConcept \ "properties").as[List[Long]].map(PropertyDAO.getById)
+    val rules       = (jsonConcept \ "rules").as[List[JsValue]].map(ValuedProperty.parseJson)
+    val needs       = (jsonConcept \ "needs").as[List[Long]].map(NeedDAO.getById)
     val displayProperty = DisplayProperty.parseJson(jsonConcept \ "displayProperty")
-    Concept(label, properties, rulesProperties, displayProperty)
+    Concept(label, properties, rules, needs, displayProperty)
   }
   
 }

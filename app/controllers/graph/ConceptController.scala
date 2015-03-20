@@ -2,6 +2,7 @@ package controllers.graph
 
 import models.graph.NeoDAO
 import models.graph.custom_types.{DisplayProperty, Statement}
+import models.graph.ontology.concept.need.Need
 import models.graph.ontology.concept.{ConceptDAO, Concept}
 import models.graph.ontology.ValuedProperty
 import models.graph.ontology.property.Property
@@ -21,31 +22,14 @@ object ConceptController extends Controller {
   val conceptForm = Form(
     mapping(
       "label" -> nonEmptyText, //can't be modified
-      "properties" -> list(
-        mapping(
-          "id" -> longNumber,
-          "label" -> nonEmptyText,
-          "valueType" -> nonEmptyText,
-          "defaultValue" -> text
-        )(Property.apply)(Property.unapplyForm)
-      ),
-      "rules" -> list(
-        mapping(
-          "property" -> mapping(
-            "id" -> longNumber,
-            "label" -> nonEmptyText,
-            "valueType" -> nonEmptyText,
-            "defaultValue" -> text
-          )(Property.apply)(Property.unapplyForm),
-          "value" -> text
-        )(ValuedProperty.applyForm)(ValuedProperty.unapplyForm)
-      ),
-      "displayProperty" -> mapping(
-        "color" -> text,
-        "zindex" -> number
-      )(DisplayProperty.apply)(DisplayProperty.unapply)
+      "properties" -> list(Property.form.mapping),
+      "rules" -> list(ValuedProperty.form.mapping),
+      "needs" -> list(Need.form.mapping),
+      "displayProperty" -> DisplayProperty.form.mapping
     )(Concept.applyForm)(Concept.unapplyForm)
   )
+
+
 
   /**
    * Creates a concept in DB from a JSON request
@@ -82,7 +66,7 @@ object ConceptController extends Controller {
       },
       success = {
         newConcept => println(newConcept)
-          val conceptToUpdate = Concept(label, Nil, Nil, DisplayProperty())
+          val conceptToUpdate = Concept(label, Nil, Nil, Nil, DisplayProperty())
           val updatedConcept = ConceptDAO.updateConcept(conceptToUpdate, newConcept)
           if(updatedConcept == Concept.error) {
             InternalServerError(Json.obj("global" -> "Couldn't update concept in DB"))

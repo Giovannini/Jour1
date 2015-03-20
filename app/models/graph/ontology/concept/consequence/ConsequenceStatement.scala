@@ -1,4 +1,4 @@
-package models.graph.custom_types.consequence
+package models.graph.ontology.concept.consequence
 
 import anorm._
 

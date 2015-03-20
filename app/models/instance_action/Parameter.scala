@@ -1,6 +1,8 @@
 package models.instance_action
 
-import play.api.libs.json.{Json, JsString}
+import play.api.data.Form
+import play.api.data.Forms._
+import play.api.libs.json.{JsString, Json}
 
 
 case class Parameter(reference: String, _type: String){
@@ -15,6 +17,11 @@ case class Parameter(reference: String, _type: String){
 }
 
 object Parameter {
+
+  val form: Form[Parameter] = Form(mapping(
+     "reference" -> text,
+     "_type" -> text
+   )(Parameter.apply)(Parameter.unapply))
 
   val error = Parameter("error", "error")
 

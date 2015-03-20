@@ -1,6 +1,8 @@
 package models.graph.ontology.property
 
 import models.graph.ontology.ValuedProperty
+import play.api.data.Form
+import play.api.data.Forms._
 import play.api.libs.json._
 
 /**
@@ -35,6 +37,13 @@ case class Property(id: Long, label: String, valueType: String, defaultValue: An
 object Property {
 
   val error = Property(-1L, "Error", "error", "error")
+
+  val form = Form(mapping(
+      "id" -> longNumber,
+      "label" -> nonEmptyText,
+      "valueType" -> nonEmptyText,
+      "defaultValue" -> text
+    )(Property.apply)(Property.unapplyForm))
 
   /**
    * Apply method used in the Concept controller

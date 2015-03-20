@@ -1,9 +1,9 @@
-package models.graph.custom_types.need
+package models.graph.ontology.concept.need
 
 import anorm.SqlParser._
 import anorm._
 import controllers.Application
-import models.graph.custom_types.consequence.ConsequenceStep
+import models.graph.ontology.concept.consequence.ConsequenceStep
 
 import scala.language.postfixOps
 

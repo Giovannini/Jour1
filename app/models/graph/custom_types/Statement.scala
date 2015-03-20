@@ -19,7 +19,11 @@ object Statement {
     """
     MATCH n
     WHERE n.type = "CONCEPT"
-    RETURN n.label as concept_label, n.properties as concept_prop, n.rules as concept_rules, n.display as concept_display
+    RETURN  n.label as concept_label,
+            n.properties as concept_prop,
+            n.rules as concept_rules,
+            n.needs as concept_needs,
+            n.display as concept_display
     """
   )
 
@@ -48,9 +52,17 @@ object Statement {
 
   def updateConcept(originalConcept: Concept, concept: Concept): CypherStatement = {
     val nodeToUpdate = concept.toNodePropertiesString
-    Cypher("MATCH (n {id: "+originalConcept.id+"}) "+
-      "SET n = "+nodeToUpdate+" " +
-      "RETURN n.label as concept_label, n.properties as concept_prop, n.rules as concept_rules, n.display as concept_display")
+    Cypher("""
+             |MATCH (n {id: {conceptId}})
+             |SET n = {nodeToUpdate}
+             |RETURN  n.label as concept_label,
+             |        n.properties as concept_prop,
+             |        n.rules as concept_rules,
+             |        n.needs as concept_needs,
+             |        n.display as concept_display
+           """.stripMargin)
+      .on("conceptId" -> originalConcept.id.toString,
+          "nodeToUpdate" -> nodeToUpdate)
   }
 
   /**
@@ -130,8 +142,14 @@ object Statement {
    * @return a cypher statement to execute
    */
   def getConceptById(conceptId: Long): CypherStatement = {
-    Cypher("MATCH (n {id: {id1} }) " +
-      "RETURN n.label as concept_label, n.properties as concept_prop, n.rules as concept_rules, n.display as concept_display")
+    Cypher("""
+            |MATCH (n {id: {id1} })
+            |RETURN n.label as concept_label,
+            |       n.properties as concept_prop,
+            |       n.rules as concept_rules,
+            |       n.needs as concept_needs,
+            |       n.display as concept_display
+           """.stripMargin)
       .on("id1" -> conceptId)
   }
 
@@ -142,8 +160,14 @@ object Statement {
    * @return a cypher statement to execute
    */
   def getConceptByLabel(label: String): CypherStatement = {
-    Cypher("MATCH (n {label: {label1}}) " +
-      "RETURN n.label as concept_label, n.properties as concept_prop, n.rules as concept_rules, n.display as concept_display")
+    Cypher("""
+             |MATCH (n {label: {label1}})
+             |RETURN n.label as concept_label,
+             |       n.properties as concept_prop,
+             |       n.rules as concept_rules,
+             |       n.needs as concept_needs,
+             |       n.display as concept_display
+           """.stripMargin)
       .on("label1" -> label)
   }
 
@@ -203,6 +227,7 @@ object Statement {
              |       n2.label as concept_label,
              |       n2.properties as concept_prop,
              |       n2.type as node_type,
+             |       n2.needs as concept_needs,
              |       n2.rules as concept_rules,
              |       n2.display as concept_display
            """.stripMargin)
@@ -223,6 +248,7 @@ object Statement {
              |       n2.properties as concept_prop,
              |       n2.type as node_type,
              |       n2.rules as concept_rules,
+             |       n2.needs as concept_needs,
              |       n2.display as concept_display
            """.stripMargin)
       .on("id" -> conceptId)
@@ -242,6 +268,7 @@ object Statement {
         |RETURN n2.label as concept_label,
         |       n2.properties as concept_prop,
         |       n2.rules as concept_rules,
+        |       n2.needs as concept_needs,
         |       n2.display as concept_display
       """.stripMargin)
       .on("id" -> conceptId, "relationSubtype" -> ("R_" + relationSubtypeName.id))
@@ -261,6 +288,7 @@ object Statement {
         |RETURN n2.label as concept_label,
         |       n2.properties as concept_prop,
         |       n2.rules as concept_rules,
+        |       n2.needs as concept_needs,
         |       n2.display as concept_display
       """.stripMargin)
       .on("id" -> conceptId, "relationSubtype" -> ("R_" + relationSubtypeName.id))

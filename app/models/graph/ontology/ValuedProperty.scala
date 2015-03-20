@@ -1,7 +1,9 @@
 package models.graph.ontology
 
-import models.graph.ontology.property.{PropertyDAO, Property}
+import models.graph.ontology.property.{Property, PropertyDAO}
 import org.anormcypher.CypherResultRow
+import play.api.data.Form
+import play.api.data.Forms._
 import play.api.libs.json._
 
 /**
@@ -44,6 +46,11 @@ case class ValuedProperty(property: Property, value: Any){
 }
 
 object ValuedProperty {
+
+  val form = Form(mapping(
+    "property" -> Property.form.mapping,
+    "value" -> text
+  )(ValuedProperty.applyForm)(ValuedProperty.unapplyForm))
 
   def apply(id: Long, value: Any): ValuedProperty = {
     ValuedProperty(PropertyDAO.getById(id), value)

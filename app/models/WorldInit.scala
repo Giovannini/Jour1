@@ -36,6 +36,7 @@ object WorldInit {
   def worldMapGeneration(): Unit = {
     val allGroundsConcepts = getGroundConcept(ConceptDAO.getAll).getDescendance
     val instanciableConcepts = getInstanciableConcepts diff allGroundsConcepts
+    println("Number of instanciableConcepts: " + instanciableConcepts.length)
     Try {
       generateGround(allGroundsConcepts)
       //Take a lot of time
@@ -43,7 +44,9 @@ object WorldInit {
       instanciableConcepts.foreach(fillWorldWithInstances)
     } match {
       case Success(_) => println("World is generated")
-      case Failure(_) => println("Problem while generating the world...")
+      case Failure(e) =>
+        println("Problem while generating the world...")
+        println(e)
     }
   }
 
@@ -182,12 +185,13 @@ object WorldInit {
   /**
    * Get id list of concept instanciable
    * @author Simon Roncière
-   * @param listConcepts list concept where we get instanciables
    * @return
    */
-  def getInstanciableConceptsInList(listConcepts: List[Concept]): List[Concept] = {
-    listConcepts.filter {
-      _.rules.contains(ValuedProperty(propertyInstanciable, true))
+  def getInstanciableConceptsInList: List[Concept] = {
+    println("Property instanciable = " + propertyInstanciable)
+    ConceptDAO.getAll.filter { concept =>
+      println(concept.label + ": " + concept.rules.mkString(", "))
+      concept.rules.contains(ValuedProperty(propertyInstanciable, true))
     }
   }
 
@@ -342,7 +346,7 @@ object WorldInit {
    * @return list of Object instanciables in the world, sort by order of appearance
    */
   def getInstanciableConcepts: List[Concept] = {
-    val instanciableConcepts = getInstanciableConceptsInList(ConceptDAO.getAll)
+    val instanciableConcepts = getInstanciableConceptsInList
     val listLiveOnRelationTriplets = getLiveOnRelationTriplets(instanciableConcepts)
     getConceptsByAppearanceOrder(listLiveOnRelationTriplets, instanciableConcepts)
   }

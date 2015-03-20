@@ -1,4 +1,4 @@
-package models.graph.custom_types.need
+package models.graph.ontology.concept.need
 
 import anorm._
 

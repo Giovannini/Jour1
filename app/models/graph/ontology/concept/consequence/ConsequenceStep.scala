@@ -1,4 +1,8 @@
-package models.graph.custom_types.consequence
+package models.graph.ontology.concept.consequence
+
+import play.api.data.Form
+import play.api.data.Forms._
+import play.api.data.format.Formats._
 
 import scala.util.{Failure, Success, Try}
 
@@ -12,6 +16,11 @@ case class ConsequenceStep(value: Double, consequence: Consequence) {
 }
 
 object ConsequenceStep{
+
+  val form = Form(mapping(
+     "value" -> of[Double],
+     "consequence" -> Consequence.form.mapping
+   )(ConsequenceStep.apply)(ConsequenceStep.unapply))
 
   val error = ConsequenceStep(-1L, Consequence.error)
 

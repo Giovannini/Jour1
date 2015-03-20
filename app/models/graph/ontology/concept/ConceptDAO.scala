@@ -3,9 +3,12 @@ package models.graph.ontology.concept
 import models.graph.NeoDAO
 import models.graph.custom_types.{DisplayProperty, Statement}
 import models.graph.ontology.ValuedProperty
+import models.graph.ontology.concept.need.NeedDAO
 import models.graph.ontology.property.{Property, PropertyDAO}
 import models.graph.ontology.relation.Relation
 import org.anormcypher.CypherResultRow
+
+import scala.util.{Failure, Success, Try}
 
 /**
  * Distance Access Object for accessing Concept objects in Neo4J DB
@@ -23,11 +26,17 @@ object ConceptDAO {
    * @return the concept translated from the given row
    */
   def parseRow(row: CypherResultRow): Concept = {
-    val label = row[String]("concept_label")
-    val properties = row[Seq[Long]]("concept_prop").map(PropertyDAO.getById).toList
-    val rulesProperty = ValuedProperty.rowToPropertiesList(row, "concept_rules")
-    val display = DisplayProperty.parseString(row[String]("concept_display"))
-    Concept(label, properties, rulesProperty, display)
+    Try {
+      val label = row[String]("concept_label")
+      val properties = row[Seq[Long]]("concept_prop").map(PropertyDAO.getById).toList
+      val rulesProperty = ValuedProperty.rowToPropertiesList(row, "concept_rules")
+      val needs = row[Seq[Long]]("concept_needs").map(NeedDAO.getById).toList
+      val display = DisplayProperty.parseString(row[String]("concept_display"))
+      Concept(label, properties, rulesProperty, needs, display)
+    } match {
+      case Success(concept) => concept
+      case Failure(e) => Concept.error
+    }
   }
 
   /**

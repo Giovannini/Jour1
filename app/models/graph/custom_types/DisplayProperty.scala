@@ -1,6 +1,8 @@
 package models.graph.custom_types
 
-import play.api.libs.json.{JsValue, JsNumber, JsString, Json}
+import play.api.data.Form
+import play.api.data.Forms._
+import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
 
 case class DisplayProperty(color: String, zIndex: Int) {
@@ -21,6 +23,11 @@ case class DisplayProperty(color: String, zIndex: Int) {
 }
 
 object DisplayProperty {
+
+  val form = Form(mapping(
+                           "color" -> text,
+                           "zindex" -> number
+                         )(DisplayProperty.apply)(DisplayProperty.unapply))
 
   def apply() = new DisplayProperty()
   def apply(color: String) = new DisplayProperty(color)
