@@ -1,7 +1,7 @@
 package models.graph.ontology.concept
 
 import models.graph.NeoDAO
-import models.graph.custom_types.DisplayProperty
+import models.graph.custom_types.{DisplayProperty, Statement}
 import models.graph.ontology.ValuedProperty
 import models.graph.ontology.property.{Property, PropertyDAO}
 import models.graph.ontology.relation.Relation
@@ -11,6 +11,8 @@ import org.anormcypher.CypherResultRow
  * Distance Access Object for accessing Concept objects in Neo4J DB
  */
 object ConceptDAO {
+
+  implicit val connection = NeoDAO.connection
 
   /**
    * Read a Neo4J cypher result row from the DB and convert it to a concept object
@@ -29,104 +31,148 @@ object ConceptDAO {
   }
 
   /**
-   * Method to add a property to a given concept
+   * Get a concept from its id
    * @author Thomas GIOVANNINI
-   * @param concept to which the property has to be added
-   * @param property to be added
-   * @return the concept with the given property added
-   */
-  def addPropertyToConcept(concept: Concept, property: Property): Concept = {
-    NeoDAO.addPropertyToConcept(concept, property)
-    Concept(concept.label, property :: concept.properties, concept.rules, DisplayProperty())
-  }
-
-  /**
-   * Method to remove a property from a given concept
-   * @author Thomas GIOVANNINI
-   * @param concept to which the property has to be removed
-   * @param property to be removed
-   * @return the concept without the given property
-   */
-  def removePropertyFromConcept(concept: Concept, property: Property): Concept = {
-    if (concept.properties.contains(property)) {
-      NeoDAO.removePropertyFromConcept(concept, property)
-      Concept(concept.label, concept.properties diff List(property), concept.rules, DisplayProperty())
-    } else concept
-  }
-
-  /**
-   * Method to add a rule to a given concept
-   * @author Thomas GIOVANNINI
-   * @param concept to which the property has to be added
-   * @param rule to be added
-   * @return the concept with the given property added
-   */
-  def addRuleToConcept(concept: Concept, rule: ValuedProperty): Concept = {
-    NeoDAO.addRuleToConcept(concept, rule)
-    Concept(concept.label, concept.properties, rule :: concept.rules, DisplayProperty())
-  }
-
-  /**
-   * Method to remove a rule from a given concept
-   * @author Thomas GIOVANNINI
-   * @param concept to which the property has to be removed
-   * @param rule to be removed
-   * @return the concept without the given rule
-   */
-  def removeRuleFromConcept(concept: Concept, rule: ValuedProperty): Concept = {
-    if (concept.rules.contains(rule)) {
-      NeoDAO.removeRuleFromConcept(concept, rule)
-      Concept(concept.label, concept.properties, concept.rules diff List(rule), DisplayProperty())
-    } else concept
-  }
-
-  /**
-   * Method to get a concept from the graph by its ID
-   * @author Julien Pradet
-   * @param conceptId the ID of the desired concept
-   * @return the desired concept if exists
+   * @param conceptId concept id
+   * @return concept if it exists, error otherwise
    */
   def getById(conceptId: Long): Concept = {
-    NeoDAO.getConceptById(conceptId)
+    val cypherResultRowStream = Statement.getConceptById(conceptId)
+      .apply
+    if (cypherResultRowStream.nonEmpty) {
+      ConceptDAO.parseRow(cypherResultRowStream.head)
+    } else Concept.error
   }
 
   /**
-   * Method to get a concept from the graph by its label
-   * @author Aurélie LORGEOUX
-   * @param label the label of the desired concept
-   * @return the desired concept if exists
+   * Get a concept from its label
+   * @author Thomas GIOVANNINI
+   * @param label concept's label
+   * @return concept if it exists, error otherwise
    */
   def getByLabel(label: String): Concept = {
-    NeoDAO.getConceptByLabel(label)
+    val cypherResultRowStream = Statement.getConceptByLabel(label)
+      .apply
+    if (cypherResultRowStream.nonEmpty) {
+      ConceptDAO.parseRow(cypherResultRowStream.head)
+    } else Concept.error
   }
 
   /**
-   * Method to get all the concepts in the graph database
-   * @author Julien Pradet
-   * @return a list of concepts
+   * Get all the concepts existing in the db
+   * @author Thomas GIOVANNINI
+   * @return a list of the existing concepts
    */
-  def findAll: List[Concept] = {
-    NeoDAO.findAllConcepts()
+  def getAll: List[Concept] = {
+    Statement.getAllConcepts.apply()
+      .map(ConceptDAO.parseRow)
+      .toList
+  }
+
+  /*########################
+      Basic DB transactions
+   ########################*/
+  
+  /**
+   * Add a concept into the DB.
+   * @author Thomas GIOVANNINI
+   * @author Julien Pradet
+   * @param concept concept to write into the DB
+   * @return true if the concept was correctly added
+   *         false else
+   *
+   * Edit JP : The function now checks if the concept already exists
+   */
+  def addConceptToDB(concept: Concept): Boolean = {
+    getById(concept.id) == Concept.error &&
+    Statement.createConcept(concept).execute()
   }
 
   /**
-   * Method to retrieve all the parents of a given concept
+   * Update a concept with a full set of new properties
+   * @author Julien PRADET
+   * @param originalConcept the concept that is meant to be changed
+   * @param concept the new concept
+   * @return the new concept as it exists in the db
+   */
+  def updateConcept(originalConcept: Concept, concept: Concept): Concept = {
+    val statement = Statement.updateConcept(originalConcept, concept)
+    val cypherResultRowStream = statement.apply
+    if(cypherResultRowStream.nonEmpty) {
+      ConceptDAO.parseRow(cypherResultRowStream.head)
+    } else {
+      Concept.error
+    }
+  }
+
+  /**
+   * Remove a concept from the DB.
+   * @author Thomas GIOVANNINI
+   * @param concept to remove
+   * @return true if the concept was correctly removed
+   *         false else
+   */
+  def removeConceptFromDB(concept: Concept): Boolean = {
+    val statement = Statement.deleteConcept(concept.id)
+    statement.execute
+  }
+
+  /*########################
+      Relations
+   ########################*/
+
+  /**
+   * Get all the relations from a given source concept
    * @author Julien Pradet
-   * @param conceptId the ID of the concept
-   * @return a list of relations and concepts
+   * @param conceptId id of the source concept
+   * @return a list of tuple containing the relation and destination concept.
+   */
+  def getRelationsFrom(conceptId: Long): List[(Relation, Concept)] = {
+    Statement.getRelationsFrom(conceptId)
+      .apply
+      .filter(ConceptDAO.noInstance)
+      .map(row => (Relation.DBGraph.parseRow(row), ConceptDAO.parseRow(row)))
+      .toList
+  }
+
+  /**
+   * Get all the relations to a given destination concept
+   * @author Julien Pradet
+   * @param conceptId id of the source concept
+   * @return a list of tuple containing the relation and destination concept.
+   */
+  def getRelationsTo(conceptId: Long): List[(Relation, Concept)] = {
+    Statement.getRelationsTo(conceptId)
+      .apply
+      .toList
+      .filter(ConceptDAO.noInstance)
+      .map { row => (Relation.DBGraph.parseRow(row), ConceptDAO.parseRow(row))}
+  }
+
+  /**
+   * Get all the parents of a given concept
+   * @author Thomas GIOVANNINI
+   * @param conceptId concept id of the concept child
+   * @return a list of the parents of the concept
    */
   def getParents(conceptId: Long): List[Concept] = {
-    NeoDAO.findParentConcepts(conceptId)
+    val statement = Statement.getParentConcepts(conceptId)
+    statement.apply
+      .map(ConceptDAO.parseRow)
+      .toList
   }
 
   /**
    * Method to retrieve all the children of a given concept
-   * @author Julien Pradet
+   * @author Thomas GIOVANNINI
    * @param conceptId the ID of the concept
    * @return a list of relations and concepts
    */
   def getChildren(conceptId: Long): List[Concept] = {
-    NeoDAO.findChildrenConcepts(conceptId)
+    val statement = Statement.getChildrenConcepts(conceptId)
+    statement.apply
+      .map(ConceptDAO.parseRow)
+      .toList
   }
 
   /**
@@ -140,26 +186,6 @@ object ConceptDAO {
   }
 
   /**
-   * Get all the relations from a given source concept
-   * @author Julien Pradet
-   * @param conceptId id of the source concept
-   * @return a list of tuple containing the relation and destination concept.
-   */
-  def getRelationsFrom(conceptId: Long): List[(Relation, Concept)] = {
-    NeoDAO.getRelationsFrom(conceptId)
-  }
-
-  /**
-   * Get all the relations to a given destination concept
-   * @author Julien Pradet
-   * @param conceptId id of the source concept
-   * @return a list of tuple containing the relation and destination concept.
-   */
-  def getRelationsTo(conceptId: Long): List[(Relation, Concept)] = {
-    NeoDAO.getRelationsTo(conceptId)
-  }
-
-  /**
    * Get all the relations given a concept
    * @author Thomas GIOVANNINI
    * @param conceptId id of the concept
@@ -169,16 +195,67 @@ object ConceptDAO {
     (getRelationsFrom(conceptId), getRelationsTo(conceptId))
   }
 
+  /*########################
+      Properties
+   ########################*/
   /**
-   * Method to know if a row represents an instance or not
+   * Add a new property to a concept
    * @author Thomas GIOVANNINI
-   * @param row to test
-   * @return true if the row doesn't represent an instance
+   * @param concept to update
+   * @param property to add to the concept
+   * @return true if the property was correctly added
    *         false else
    */
-  def noInstance(row: CypherResultRow): Boolean = {
-    row[String]("node_type") != "INSTANCE"
+  def addPropertyToConcept(concept: Concept, property: Property): Boolean = {
+    val statement = Statement.addPropertyToConcept(concept, property)
+    statement.execute
   }
+
+  /**
+   * Remove a given property from a concept
+   * @author Thomas GIOVANNINI
+   * @param concept to update
+   * @param property to remove from the concept
+   * @return true if the property was correctly removed
+   *         false else
+   */
+  def removePropertyFromConcept(concept: Concept, property: Property):Boolean = {
+    val statement = Statement.removePropertyFromConcept(concept, property)
+    statement.execute
+  }
+
+  /*########################
+      Rules
+   ########################*/
+  /**
+   * Add a new rule to a concept
+   * @author Thomas GIOVANNINI
+   * @param concept to update
+   * @param rule to add to the concept
+   * @return true if the rule was correctly added
+   *         false else
+   */
+  def addRuleToConcept(concept: Concept, rule: ValuedProperty) = {
+    val statement = Statement.addRuleToConcept(concept, rule)
+    statement.execute
+  }
+
+  /**
+   * Remove a rule from a concept
+   * @author Thomas GIOVANNINI
+   * @param concept to update
+   * @param rule to remove from the concept
+   * @return true if the rule was correctly removed
+   *         false else
+   */
+  def removeRuleFromConcept(concept: Concept, rule: ValuedProperty) = {
+    val statement = Statement.removeRuleFromConcept(concept, rule)
+    statement.execute
+  }
+
+  /*########################
+      Actions
+   ########################*/
 
   /**
    * Method to retrieve all the possible actions for a given concept
@@ -187,7 +264,7 @@ object ConceptDAO {
    * @return a list of relations and concepts
    */
   def getReachableRelations(conceptId: Long): List[(Relation, Concept)] = {
-    val conceptRelations = getRelationsFrom(conceptId) /*.filter(notASubtype)*/
+    val conceptRelations = getRelationsFrom(conceptId)
     val parentsRelations = getParentsRelations(conceptId)
     conceptRelations ::: parentsRelations
   }
@@ -202,5 +279,20 @@ object ConceptDAO {
     getParents(conceptId).flatMap {
       parent => getReachableRelations(parent.id)
     }
+  }
+
+  /*########################
+      Predicates
+   ########################*/
+
+  /**
+   * Method to know if a row represents an instance or not
+   * @author Thomas GIOVANNINI
+   * @param row to test
+   * @return true if the row doesn't represent an instance
+   *         false else
+   */
+  def noInstance(row: CypherResultRow): Boolean = {
+    row[String]("node_type") != "INSTANCE"
   }
 }

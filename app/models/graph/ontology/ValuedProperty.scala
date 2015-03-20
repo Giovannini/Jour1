@@ -83,8 +83,9 @@ object ValuedProperty {
   }
 
   /**
-   * Method to convert a json value of an unknown type to its real type
+   * Convert a json value of an unknown type to its real type
    * @param jsonValue to convert
+   * @param valueType of the property to parse
    * @return the value in its correct type
    */
   private def parseValue(jsonValue: JsValue, valueType: String): Any = {
@@ -146,25 +147,28 @@ object ValuedProperty {
     ValuedProperty(prop, value)
   }
 
-  def updateList(vpList: List[ValuedProperty], vp: ValuedProperty): List[ValuedProperty] = vpList match{
-    case head::tail =>
-      if (head.property == vp.property) vp :: tail
-      else head :: updateList(tail, vp)
-    case _ => List()
-  }
-
   /**
-   * Remove from a long list of rules the recurrent ones, keeping the first coming.
+   * Builds a new list from this one without any duplicate property elements.
    * @author Thomas GIOVANNINI
    * @param rulesList the list to reduce
-   * @param matchedProperties the already matched properties that shouldn't be added
-   * @return a shorter rules list
+   * @return A new list which contains the first occurrence of every property of this list. 
    */
-  def keepHighestLevelRules(rulesList: List[ValuedProperty], matchedProperties: List[Property])
-    : List[ValuedProperty] = rulesList match {
-    case head :: tail =>
-      if (matchedProperties.contains(head.property)) keepHighestLevelRules(tail, matchedProperties)
-      else head :: keepHighestLevelRules(tail, head.property :: matchedProperties)
-    case _ => List()
+  def distinctProperties(rulesList: List[ValuedProperty])= {
+    /**
+     * Remove from a long list of rules the recurrent ones, keeping the first coming.
+     * @author Thomas GIOVANNINI
+     * @param rulesList the list to reduce
+     * @param matchedProperties the already matched properties that shouldn't be added
+     * @return a shorter rules list
+     */
+    def distinctPropertiesRec(rulesList: List[ValuedProperty], matchedProperties: List[Property])
+      : List[ValuedProperty]  = rulesList match {
+      case head :: tail =>
+        if (matchedProperties.contains(head.property)) distinctPropertiesRec(tail, matchedProperties)
+        else head :: distinctPropertiesRec(tail, head.property :: matchedProperties)
+      case _ => List()
+    }
+
+    distinctPropertiesRec(rulesList, List())
   }
 }

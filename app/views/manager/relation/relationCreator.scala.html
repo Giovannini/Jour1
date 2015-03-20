@@ -14,7 +14,7 @@
     @helper.form(action = controllers.ontology.routes.RelationManager.create()) {
       @helper.input(RelationManager.relationForm("concept1_id")) { (id, name, value, args) =>
         <select name="@name" id="@id">
-        @for(concept <- ConceptDAO.findAll){
+        @for(concept <- ConceptDAO.getAll){
           <option value="@concept.id">@concept.label</option>
         }
         </select>
@@ -31,7 +31,7 @@
       }
       @helper.input(RelationManager.relationForm("concept2_id")) { (id, name, value, args) =>
         <select name="@name" id="@id">
-        @for(concept <- ConceptDAO.findAll){
+        @for(concept <- ConceptDAO.getAll){
           <option value="@concept.id">@concept.label</option>
         }
         </select>

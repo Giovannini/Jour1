@@ -17,7 +17,7 @@ object RestCall extends Controller {
    * @author Thomas GIOVANNINI
    */
   def getAllConcepts = Action {
-    val concepts = ConceptDAO.findAll
+    val concepts = ConceptDAO.getAll
       .map(_.toJson)
     Ok(Json.toJson(concepts))
   }

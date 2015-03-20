@@ -11,12 +11,12 @@ import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
  * @author Thomas GIOVANNINI
  * @param label for the concept
  * @param _properties of this concept
- * @param rules of this concept
+ * @param _rules of this concept
  * @param displayProperty for tis concept to be displayed
  */
 case class Concept(label: String,
                    private val _properties: List[Property],
-                   rules: List[ValuedProperty],
+                   private val _rules: List[ValuedProperty],
                    displayProperty: DisplayProperty) {
   require(label.matches("^[A-Z][A-Za-z0-9_ ]*$"))
 
@@ -25,6 +25,7 @@ case class Concept(label: String,
    * @author Thomas GIOVANNINI
    */
   lazy val properties: List[Property] = (_properties ::: getParents.flatMap(_.properties)).distinct
+  lazy val rules: List[ValuedProperty] = ValuedProperty.distinctProperties(_rules ::: getParents.flatMap(_.rules))
 
   val id: Long = hashCode
 
@@ -70,22 +71,13 @@ case class Concept(label: String,
   /*#################################
    * Methods related to rules
    #################################*/
-  /**
-   * Retrieve the rules of a Concept but also the one from its parents
-   * @author Thomas GIOVANNINI
-   * @return a list of rules
-   */
-  def getAllRules: List[ValuedProperty] = {
-    ValuedProperty.keepHighestLevelRules(rules ::: getParents.flatMap(_.getAllRules), List())
-  }
-
-  /**
+    /**
    * Get value for a given rule
    * @author Thomas GIOVANNINI
    * @param property to evaluate
    * @return the value associated to the given property in rules
    */
-  def getRuleValue(property: Property): Any = {
+  def getRuleValueByProperty(property: Property): Any = {
     rules.find(_.property == property)
       .getOrElse(property.defaultValuedProperty)
       .value
@@ -106,7 +98,7 @@ case class Concept(label: String,
   /**
    * Get descendance of the concept
    * @author Thomas GIOVANNINI
-   * @return all children of gthe concept and their children
+   * @return all children of the concept and their children
    */
   def getDescendance: List[Concept] = {
     ConceptDAO.getChildren(id).flatMap(concept => concept :: concept.getDescendance)

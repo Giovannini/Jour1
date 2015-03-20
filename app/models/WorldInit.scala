@@ -7,7 +7,7 @@ import models.graph.ontology.concept.{ConceptDAO, Concept}
 import models.graph.ontology.property.PropertyDAO
 import models.graph.ontology.relation.Relation
 
-import scala.util.Random
+import scala.util.{Failure, Success, Try, Random}
 
 /**
  * Class with method to initialize the world
@@ -34,12 +34,17 @@ object WorldInit {
    * @return List of Instances of the world
    */
   def worldMapGeneration(): Unit = {
-    val allGroundsConcepts = getGroundConcept(ConceptDAO.findAll).getDescendance
+    val allGroundsConcepts = getGroundConcept(ConceptDAO.getAll).getDescendance
     val instanciableConcepts = getInstanciableConcepts diff allGroundsConcepts
-    generateGround(allGroundsConcepts)
-    //Take a lot of time
-    // TODO: find a way to parallelize the process
-    instanciableConcepts.foreach(fillWorldWithInstances)
+    Try {
+      generateGround(allGroundsConcepts)
+      //Take a lot of time
+      // TODO: find a way to parallelize the process
+      instanciableConcepts.foreach(fillWorldWithInstances)
+    } match {
+      case Success(_) => println("World is generated")
+      case Failure(_) => println("Problem while generating the world...")
+    }
   }
 
   /**
@@ -63,7 +68,7 @@ object WorldInit {
    *         0 else
    */
   def getStrengthOf(concept: Concept): Int = {
-    concept.getRuleValue(propertyStrength).asInstanceOf[Int]
+    concept.getRuleValueByProperty(propertyStrength).asInstanceOf[Int]
   }
 
   /**
@@ -224,7 +229,7 @@ object WorldInit {
    */
   def randomObjectInstanciation(grounds: List[Concept], height: Int, width: Int): List[Instance] = {
     val nbTile = height * width
-    val instanciableConcepts = ConceptDAO.findAll diff grounds
+    val instanciableConcepts = ConceptDAO.getAll diff grounds
     val sumStr = computeSumStrength(instanciableConcepts)
     getNumberOfInstancesForEachConcept(instanciableConcepts, sumStr * 2, nbTile)
       .map(tuple => randomlyPutInstancesOfOneConcept(tuple._1, tuple._2, height, width))
@@ -337,7 +342,7 @@ object WorldInit {
    * @return list of Object instanciables in the world, sort by order of appearance
    */
   def getInstanciableConcepts: List[Concept] = {
-    val instanciableConcepts = getInstanciableConceptsInList(ConceptDAO.findAll)
+    val instanciableConcepts = getInstanciableConceptsInList(ConceptDAO.getAll)
     val listLiveOnRelationTriplets = getLiveOnRelationTriplets(instanciableConcepts)
     getConceptsByAppearanceOrder(listLiveOnRelationTriplets, instanciableConcepts)
   }

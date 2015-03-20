@@ -3,7 +3,7 @@ package controllers
 import models.graph.NeoDAO
 import models.graph.custom_types.DisplayProperty
 import models.graph.ontology._
-import models.graph.ontology.concept.Concept
+import models.graph.ontology.concept.{ConceptDAO, Concept}
 import models.graph.ontology.property.{Property, PropertyDAO}
 import models.graph.ontology.relation.Relation
 import models.instance_action.action.ActionManager
@@ -161,22 +161,22 @@ object WorldInitialisation extends Controller {
     NeoDAO.clearDB()
     println("Adding concepts to graph...")
     /*Storage of the concepts in DB*/
-    val addConceptVerification = NeoDAO.addConceptToDB(conceptMan) &&
-      NeoDAO.addConceptToDB(conceptPredator) &&
-      NeoDAO.addConceptToDB(conceptAnimal) &&
-      NeoDAO.addConceptToDB(conceptWolf) &&
-      NeoDAO.addConceptToDB(conceptSheep) &&
-      NeoDAO.addConceptToDB(conceptGrass) &&
-      NeoDAO.addConceptToDB(conceptEdible) &&
-      NeoDAO.addConceptToDB(conceptApple) &&
-      NeoDAO.addConceptToDB(conceptBush) &&
-      NeoDAO.addConceptToDB(conceptAppleTree) &&
-      NeoDAO.addConceptToDB(conceptTree) &&
-      NeoDAO.addConceptToDB(conceptFir) &&
-      NeoDAO.addConceptToDB(conceptVegetable) &&
-      NeoDAO.addConceptToDB(conceptGround) &&
-      NeoDAO.addConceptToDB(conceptWater) &&
-      NeoDAO.addConceptToDB(conceptEarth)
+    val addConceptVerification = ConceptDAO.addConceptToDB(conceptMan) &&
+      ConceptDAO.addConceptToDB(conceptPredator) &&
+      ConceptDAO.addConceptToDB(conceptAnimal) &&
+      ConceptDAO.addConceptToDB(conceptWolf) &&
+      ConceptDAO.addConceptToDB(conceptSheep) &&
+      ConceptDAO.addConceptToDB(conceptGrass) &&
+      ConceptDAO.addConceptToDB(conceptEdible) &&
+      ConceptDAO.addConceptToDB(conceptApple) &&
+      ConceptDAO.addConceptToDB(conceptBush) &&
+      ConceptDAO.addConceptToDB(conceptAppleTree) &&
+      ConceptDAO.addConceptToDB(conceptTree) &&
+      ConceptDAO.addConceptToDB(conceptFir) &&
+      ConceptDAO.addConceptToDB(conceptVegetable) &&
+      ConceptDAO.addConceptToDB(conceptGround) &&
+      ConceptDAO.addConceptToDB(conceptWater) &&
+      ConceptDAO.addConceptToDB(conceptEarth)
     /*Creation of the relations in DB*/
     println("Adding relations to graph...")
     val addRelationVerification =

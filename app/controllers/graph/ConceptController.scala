@@ -62,7 +62,7 @@ object ConceptController extends Controller {
       },
       success = {
         newConcept => println(newConcept)
-        if(NeoDAO.addConceptToDB(newConcept)) {
+        if(ConceptDAO.addConceptToDB(newConcept)) {
           Ok(newConcept.toJson)
         } else {
           InternalServerError(Json.obj("global" -> "Couldn't add concept to DB"))
@@ -83,7 +83,7 @@ object ConceptController extends Controller {
       success = {
         newConcept => println(newConcept)
           val conceptToUpdate = Concept(label, Nil, Nil, DisplayProperty())
-          val updatedConcept = NeoDAO.updateConcept(conceptToUpdate, newConcept)
+          val updatedConcept = ConceptDAO.updateConcept(conceptToUpdate, newConcept)
           if(updatedConcept == Concept.error) {
             InternalServerError(Json.obj("global" -> "Couldn't update concept in DB"))
           } else {
@@ -175,7 +175,7 @@ object ConceptController extends Controller {
   def deleteConcept(label: String) = Action {
     val concept = ConceptDAO.getByLabel(label)
     println(concept.id)
-    println(NeoDAO.removeConceptFromDB(concept))
+    println(ConceptDAO.removeConceptFromDB(concept))
     Redirect(controllers.routes.Application.index())
   }
 }
