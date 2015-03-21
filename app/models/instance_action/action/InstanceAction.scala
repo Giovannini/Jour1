@@ -100,23 +100,6 @@ object InstanceAction {
    * @return the corresponding action
    */
   def parse(id: Long, label: String, parametersToParse: String, preconditionsToParse: String, subActionsToParse: String): InstanceAction = {
-    println("check parsing of")
-
-    println(label)
-    println()
-
-    println(preconditionsToParse)
-    println(Precondition.parseSubConditions(preconditionsToParse).length)
-    println()
-
-    println(subActionsToParse)
-    println(parseSubActions(subActionsToParse).length)
-    println()
-
-    println(parametersToParse)
-    println(Parameter.parseParameters(parametersToParse).length)
-    println()
-
     InstanceAction(
       id,
       label,

@@ -236,11 +236,6 @@ object ActionManager{
     val res = mutable.Map[ParameterReference, ParameterValue]()
 
     parameters.foreach(item => {
-      println()
-      println("item")
-      println(item._2)
-      println()
-
       item._2 match {
         case reference if reference.isInstanceOf[ParameterReference] => {
           res.update(item._1, arguments(reference.asInstanceOf[ParameterReference]))

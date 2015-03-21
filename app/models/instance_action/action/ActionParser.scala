@@ -27,12 +27,6 @@ object ActionParser {
         action,
         instancesId.map(id => ParameterValue(id, "Long"))
       )
-      arguments.map(item => {
-        println("key / value")
-        println(item._1)
-        println(item._2)
-        1
-      })
 
       ActionManager.execute(action, arguments)
     }
@@ -56,9 +50,6 @@ object ActionParser {
    * @return a list of arguments and their values
    */
   def getArgumentsList(action: InstanceAction, args: List[ParameterValue]): Map[ParameterReference, ParameterValue] = {
-    println("check zipping reference/value")
-    println(action.parameters.length)
-    println(args.length)
     action.parameters.zip(args).toMap
   }
 

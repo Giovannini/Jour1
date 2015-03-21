@@ -62,9 +62,6 @@ case class Precondition(id: Long,
     }
 
     val args = parameters.toList.unzip._2.toArray
-    println("arguments")
-    println(args.length)
-    println(args.map(_.toString))
     this.label match {
       // First test if it's among the Hard Coded preconditions
       case "isNextTo" => HCPrecondition.isNextTo(args)

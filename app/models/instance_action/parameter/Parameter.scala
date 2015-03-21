@@ -25,8 +25,6 @@ object Parameter {
         if(value.startsWith("__val")) {
           ParameterValue(value.substring(5), _type)
         } else {
-          println("value")
-          println(value)
           ParameterReference(value, _type)
         }
       }
