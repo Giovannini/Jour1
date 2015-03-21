@@ -1,8 +1,9 @@
 package models.graph.ontology
 
+import controllers.Application
 import models.graph.custom_types.Coordinates
 import models.graph.ontology.concept.need.Need
-import models.graph.ontology.concept.{ConceptDAO, Concept}
+import models.graph.ontology.concept.{Concept, ConceptDAO}
 import models.graph.ontology.property.Property
 import play.api.libs.json._
 
@@ -120,8 +121,16 @@ case class Instance(id:             Int,
     Instance(id, label, coordinates, newconcept.properties.map(_.defaultValuedProperty),newconcept)
   }
 
+  def evaluateNeeds: List[Need] = {
+    val senseRadius = properties.find(_.property == Property("Sense", 3)).getOrElse(ValuedProperty.error).value.toInt
+    val coordinatesList = coordinates.getNearCoordinate(senseRadius)
+    //TODO send request to WorldActor instead
+    val sensedInstances = coordinatesList.flatMap(Application.map.getInstancesAt)
 
-  def evaluateNeeds: List[Need] = ???
+    val needs = concept.needs
+    //TODO compute needs given sensedInstances
+    needs
+  }
 
   /**
    * Get value for a given property
@@ -130,7 +139,7 @@ case class Instance(id:             Int,
    * @return the value of the property
    */
   def getValueForProperty(property: Property): Double = {
-    properties.find(_.property == property).get.value
+    properties.find(_.property == property).getOrElse(ValuedProperty.error).value
   }
 }
 

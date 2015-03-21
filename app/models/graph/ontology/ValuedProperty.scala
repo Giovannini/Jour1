@@ -32,6 +32,8 @@ case class ValuedProperty(property: Property, value: Double){
 
 object ValuedProperty {
 
+  val error = ValuedProperty(Property.error, 0L)
+
   val form = Form(mapping(
     "property" -> text,
     "value" -> of[Double]

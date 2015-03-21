@@ -84,6 +84,7 @@ object WorldInitialisation extends Controller {
     val propertyInstanciable = Property("Instanciable", 0).save
     val propertyStrength = Property("Strength", 0).save
 
+    val propertySense = Property("Sense", 3).save
     val propertyDuplicationSpeed = Property("DuplicationSpeed", 5).save
     val propertyWalkingDistance = Property("WalkingDistance", 3).save
     val propertyHunger = Property("Hunger", 5).save
@@ -94,33 +95,33 @@ object WorldInitialisation extends Controller {
     /* Creation of needs */
     val needFood = Need(0L, "Hunger", propertyHunger, 0,
       List(),
-      List(ActionManager.nameToId("Eat")))
+      List(ActionManager.nameToId("Eat"), ActionManager.nameToId("Move")))
 
     println("Declaration of concepts...")
 
     /*Concepts declaration*/
     val conceptMan = Concept("Man",
-      List(),
+      List(propertySense),
       List(ValuedProperty(propertyStrength, 2), ValuedProperty(propertyInstanciable, 1)),
       List(),
       DisplayProperty("#E3B494", 20))
     val conceptPredator = Concept("Predator",
-      List(propertyHunger),
+      List(propertyHunger, propertySense),
       List(), List(), DisplayProperty())
     val conceptWolf = Concept("Wolf",
-      List(),
+      List(propertySense),
       List(ValuedProperty(propertyStrength, 2),
         ValuedProperty(propertyInstanciable, 1)),
       List(),
       DisplayProperty("#1A1A22", 18))
     val conceptSheep = Concept("Sheep",
-      List(),
+      List(propertySense),
       List(ValuedProperty(propertyStrength, 2),
         ValuedProperty(propertyInstanciable, 1)),
       List(),
       DisplayProperty("#EEE9D6", 16))
     val conceptAnimal = Concept("Animal",
-      List(propertyWalkingDistance, propertyHunger),
+      List(propertyWalkingDistance, propertyHunger, propertySense),
       List(), List(), DisplayProperty())
     val conceptGrass = Concept("Grass",
       List(propertyDuplicationSpeed),

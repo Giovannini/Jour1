@@ -41,19 +41,16 @@ case class Coordinates(x: Int, y: Int) {
   }
 
   /**
-   * @author Simon
-   * @param rayon
-   * @return
+   * Get a list of coordinates at a given distance of this one
+   * @author Thomas GIOVANNINI
+   * @param radius to look into
+   * @return a list of coordinates at a given distance of this one
    */
-  def getNearCoordinate(rayon: Int): List[Coordinates] = {
-    var listCoord: List[Coordinates] = List()
-    for (x <- (-rayon) until rayon; y <- (-rayon) until rayon) {
-      val coord = Coordinates(x, y)
-      if (this.getDistanceWith(coord) <= rayon) {
-        listCoord = coord :: listCoord
-      }
-    }
-    listCoord
+  def getNearCoordinate(radius: Int): List[Coordinates] = {
+    val valueList = ((-radius) to radius).toList
+    valueList.flatMap(value => valueList.map((_, value)))
+      .filter(tuple => (tuple._1 * tuple._1) + (tuple._2 * tuple._2) < radius * radius)
+      .map(tuple => Coordinates(tuple._1, tuple._2) + this)
   }
 
   def getNextCoordinates: List[Coordinates] = {
