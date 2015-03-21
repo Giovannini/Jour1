@@ -39,7 +39,7 @@ object ConsequenceStatement {
         """).on(
         'label -> consequence.label,
         'severity -> consequence.severity,
-        'effect -> consequence.effect.id
+        'effect -> consequence.effects.map(_.id).mkString(";")
       )
   }
 

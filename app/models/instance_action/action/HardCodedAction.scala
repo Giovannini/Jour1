@@ -76,7 +76,7 @@ object HardCodedAction {
   def modifyProperty(args: Array[Any]): Unit = {
     val instance = Application.map.getInstanceById(args(0).asInstanceOf[Long])
     val property =  Property.parseString(args(1).asInstanceOf[String])
-    val value = args(2)
+    val value = args(2).asInstanceOf[Double]
     val newInstance = instance.modifyValueOfProperty(property, value)
     Application.map.updateInstance(instance, newInstance)
   }
@@ -86,33 +86,11 @@ object HardCodedAction {
    * @param args array containing id of the instance to update and property to string to modify
    */
   def addOneToProperty(args: Array[Any]): Unit = {
-    /**
-     * Parse a property value to Int if it should be
-     * @param value to maybe parse
-     * @param property from which the value may be modified
-     * @return the value that may have been parsed
-     */
-    def parseMaybe(value: Double, property: Property): Any = {
-      if(property.valueType == "Int") value.asInstanceOf[Int]
-      else value
-    }
-    /**
-     * Get value for an instance of a given property
-     * @author Thomas GIOVANNINI
-     * @param instance from which the property is taken
-     * @param property to look for
-     * @return the desired value
-     */
-    def getValueOfProperty(instance: Instance, property: Property): Double = {
-      val _valueOfProperty = instance.getValueForProperty(property)
-      if (property.valueType == "Int") _valueOfProperty.asInstanceOf[Int]
-      else _valueOfProperty.asInstanceOf[Double]
-    }
     val instance = map.getInstanceById(args(0).asInstanceOf[Long])
     val property = Property.parseString(args(1).asInstanceOf[String])
 
-    val valueOfProperty: Double = getValueOfProperty(instance, property)
-    val newInstance = instance.modifyValueOfProperty(property, parseMaybe(valueOfProperty + 1, property))
+    val valueOfProperty: Double = instance.getValueForProperty(property)
+    val newInstance = instance.modifyValueOfProperty(property, valueOfProperty + 1)
     Application.map.updateInstance(instance, newInstance)
   }
 
@@ -121,33 +99,11 @@ object HardCodedAction {
    * @param args array containing id of the instance to update and property to string to modify
    */
   def removeOneFromProperty(args: Array[Any]): Unit = {
-    /**
-     * Parse a property value to Int if it should be
-     * @param value to maybe parse
-     * @param property from which the value may be modified
-     * @return the value that may have been parsed
-     */
-    def parseMaybe(value: Double, property: Property): Any = {
-      if(property.valueType == "Int") value.asInstanceOf[Int]
-      else value
-    }
-    /**
-     * Get value for an instance of a given property
-     * @author Thomas GIOVANNINI
-     * @param instance from which the property is taken
-     * @param property to look for
-     * @return the desired value
-     */
-    def getValueOfProperty(instance: Instance, property: Property): Double = {
-      val _valueOfProperty = instance.getValueForProperty(property)
-      if (property.valueType == "Int") _valueOfProperty.asInstanceOf[Int]
-      else _valueOfProperty.asInstanceOf[Double]
-    }
     val instance = map.getInstanceById(args(0).asInstanceOf[Long])
     val property = Property.parseString(args(1).asInstanceOf[String])
 
-    val valueOfProperty: Double = getValueOfProperty(instance, property)
-    val newInstance = instance.modifyValueOfProperty(property, parseMaybe(valueOfProperty - 1, property))
+    val valueOfProperty: Double = instance.getValueForProperty(property)
+    val newInstance = instance.modifyValueOfProperty(property, valueOfProperty - 1)
     Application.map.updateInstance(instance, newInstance)
   }
 

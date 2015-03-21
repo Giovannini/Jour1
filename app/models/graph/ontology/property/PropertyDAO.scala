@@ -13,6 +13,7 @@ import scala.language.postfixOps
  * Model for properties persistancy
  */
 object PropertyDAO {
+
   implicit val connection = Application.connection
 
   /**
@@ -20,12 +21,9 @@ object PropertyDAO {
    * @author Thomas GIOVANNINI
    */
   private val propertyParser: RowParser[Property] = {
-    get[Long]("id") ~
-      get[String]("label") ~
-      get[String]("type") ~
-      get[String]("defaultValue") map {
-      case id ~ label ~ valueType ~ defaultValue =>
-        Property.parse(id, label, valueType, defaultValue)
+    get[String]("label") ~
+    get[Double]("defaultValue") map {
+      case label ~ defaultValue => Property(label, defaultValue)
     }
   }
 
@@ -63,9 +61,8 @@ object PropertyDAO {
   def save(property: Property): Property = {
     DB.withConnection { implicit connection =>
       val statement = PropertyStatement.add(property)
-      val optionId: Option[Long] = statement.executeInsert()
-      val id = optionId.getOrElse(-1L)
-      Property(id, property.label, property.valueType, property.defaultValue)
+      statement.execute()
+      property
     }
   }
 

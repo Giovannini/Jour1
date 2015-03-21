@@ -17,7 +17,7 @@ object ActionManager{
 
   val map = Application.map
 
-  val nameToId: collection.mutable.Map[String, Long] = collection.mutable.Map.empty[String, Long]
+  val nameToId: collection.mutable.Map[String, InstanceAction] = collection.mutable.Map.empty[String, InstanceAction]
 
   /**
    * Initialize the action manager by creating basic actions.
@@ -46,19 +46,18 @@ object ActionManager{
     val _actionAddOneToProperty = {
       val p_instanceID = Parameter("instanceID", "Long")
       val p_propertyName = Parameter("propertyName", "Property")
-      InstanceAction.identify(0L, "addOneToProperty",
-        List((PreconditionManager.nameToId("hasProperty"), List(p_instanceID, p_propertyName)),
-          (PreconditionManager.nameToId("isANumberProperty"), List(p_propertyName))),
-        List[(Long, List[Parameter])](),
+      InstanceAction(0L, "addOneToProperty",
+        List(PreconditionManager.nameToId("hasProperty").withParameters(List(p_instanceID, p_propertyName))),
+        List[InstanceAction](),
         List(p_instanceID, p_propertyName)).save
     }
     nameToId += "_actionAddOneToProperty " -> _actionAddOneToProperty
     val _actionRemoveOneFromProperty = {
       val p_instanceID = Parameter("instanceID", "Long")
       val p_propertyName = Parameter("propertyName", "Property")
-      InstanceAction.identify(0L, "removeOneFromProperty",
-        List((PreconditionManager.nameToId("hasProperty"), List(p_instanceID, p_propertyName))),
-        List[(Long, List[Parameter])](),
+      InstanceAction(0L, "removeOneFromProperty",
+        List(PreconditionManager.nameToId("hasProperty").withParameters(List(p_instanceID, p_propertyName))),
+        List[InstanceAction](),
         List(p_instanceID, p_propertyName)).save
     }
     nameToId += "_actionRemoveOneFromProperty " -> _actionRemoveOneFromProperty
@@ -66,25 +65,25 @@ object ActionManager{
     val _actionMoveInstanceAt = {
       val p_instanceToMove = Parameter("instanceToMove", "Long")
       val p_groundWhereToMoveIt = Parameter("groundWhereToMoveIt", "Long")
-      InstanceAction.identify(0L, "ACTION_MOVE",
-        List((PreconditionManager.nameToId("isAtWalkingDistance"), List(p_instanceToMove, p_groundWhereToMoveIt))),
-        List((_actionAddInstanceAt, List(p_instanceToMove, p_groundWhereToMoveIt)),
-          (_actionRemoveInstanceAt, List(p_instanceToMove))),
+      InstanceAction(0L, "ACTION_MOVE",
+        List(PreconditionManager.nameToId("isAtWalkingDistance").withParameters(List(p_instanceToMove, p_groundWhereToMoveIt))),
+        List(_actionAddInstanceAt.withParameters(List(p_instanceToMove, p_groundWhereToMoveIt)),
+          _actionRemoveInstanceAt.withParameters(List(p_instanceToMove))),
         List(p_instanceToMove, p_groundWhereToMoveIt)).save
     }
-    nameToId += "_actionMoveInstanceAt " -> _actionMoveInstanceAt
+    nameToId += "Move " -> _actionMoveInstanceAt
     val _actionEat = {
       val p_instanceThatEat = Parameter("instanceThatEat", "Long")
       val p_instanceThatIsEaten = Parameter("instanceThatIsEaten", "Long")
       val p_propertyHunger = Parameter("Hunger", "Property")
-      InstanceAction.identify(0L, "ACTION_EAT",
-        List((PreconditionManager.nameToId("isOnSameTile"), List(p_instanceThatEat, p_instanceThatIsEaten)),
-          (PreconditionManager.nameToId("hasProperty"), List(p_instanceThatEat, p_propertyHunger))),
-        List((_actionRemoveInstanceAt, List(p_instanceThatIsEaten)),
-          (_actionRemoveOneFromProperty, List(p_instanceThatEat, p_propertyHunger))),
+      InstanceAction(0L, "ACTION_EAT",
+        List(PreconditionManager.nameToId("isOnSameTile").withParameters(List(p_instanceThatEat, p_instanceThatIsEaten)),
+          PreconditionManager.nameToId("hasProperty").withParameters(List(p_instanceThatEat, p_propertyHunger))),
+        List(_actionRemoveInstanceAt.withParameters(List(p_instanceThatIsEaten)),
+          _actionRemoveOneFromProperty.withParameters(List(p_instanceThatEat, p_propertyHunger))),
         List(p_instanceThatEat, p_instanceThatIsEaten, p_propertyHunger)).save
     }
-    nameToId += "_actionEat " -> _actionEat
+    nameToId += "Eat" -> _actionEat
   }
 
   /**

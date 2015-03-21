@@ -45,7 +45,7 @@ case class Concept(label: String,
    */
   def toJson: JsValue = {
     Json.obj("label" -> JsString(label),
-      "properties" -> properties.map(p => JsNumber(p.id)),
+      "properties" -> properties.map(_.toJson),
       "rules" -> rules.map(_.toJson),
       "needs" -> needs.map(need => JsNumber(need.id)),
       "type" -> JsString("CONCEPT"),
@@ -64,8 +64,8 @@ case class Concept(label: String,
 
   def toNodePropertiesString = {
     "{ label: \"" + label + "\"," +
-      " properties: [" + properties.map(_.id).mkString(",") + "]," +
-      " rules: [" + rules.map("\"" + _ + "\"").mkString(",") + "]," +
+      " properties: [" + properties.map("\""+_.toString+"\"").mkString(",") + "]," +
+      " rules: [" + rules.map("\""+_.toString+"\"").mkString(",") + "]," +
       " needs: [" + needs.map("\"" + _.id + "\"").mkString(",") + "]," +
       " display: \"" + displayProperty + "\"," +
       " type: \"CONCEPT\"," +
@@ -81,7 +81,7 @@ case class Concept(label: String,
    * @param property to evaluate
    * @return the value associated to the given property in rules
    */
-  def getRuleValueByProperty(property: Property): Any = {
+  def getRuleValueByProperty(property: Property): Double = {
     rules.find(_.property == property)
       .getOrElse(property.defaultValuedProperty)
       .value
@@ -120,18 +120,19 @@ object Concept {
    * Apply method used in the Concept controller
    * Allows to match a json to a form
    * @param label concept label
-   * @param properties concept properties
+   * @param propertiesToParse concept properties
    * @param rules concept rules
    * @param displayProperty concept display properties
    * @return a concept using these parameters
    */
   def applyForm(
       label: String,
-      properties: List[Property],
+      propertiesToParse: List[String],
       rules: List[ValuedProperty],
       needs: List[Need],
       displayProperty: DisplayProperty)
     : Concept = {
+    val properties = propertiesToParse.map(Property.parseString)
     Concept(label, properties, rules, needs, displayProperty)
   }
 
@@ -142,8 +143,8 @@ object Concept {
    * @return the different parts of a concept
    */
   def unapplyForm(concept: Concept)
-    : Option[(String, List[Property], List[ValuedProperty], List[Need], DisplayProperty)] = {
-    Some(concept.label, concept.properties, concept.rules, concept.needs, concept.displayProperty)
+    : Option[(String, List[String], List[ValuedProperty], List[Need], DisplayProperty)] = {
+    Some(concept.label, concept.properties.map(_.toString), concept.rules, concept.needs, concept.displayProperty)
   }
 
   /**

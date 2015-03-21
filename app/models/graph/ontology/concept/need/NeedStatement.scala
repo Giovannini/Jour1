@@ -34,11 +34,13 @@ object NeedStatement {
    */
   def add(need: Need) = {
     SQL("""
-            INSERT INTO needs(label, consequencesSteps)
-            VALUES({label}, {consequencesSteps})
+            INSERT INTO needs(label, property, consequencesSteps, meansOfSatisfaction)
+            VALUES({label}, {property}, {consequencesSteps}, {meansOfSatisfaction})
         """).on(
         'label -> need.label,
-        'consequencesSteps -> need.consequencesSteps.map(_.toDB).mkString(";")
+        'property -> need.affectedProperty.toString,
+        'consequencesSteps -> need.consequencesSteps.map(_.toDB).mkString(";"),
+        'meansOfSatisfaction -> need.meansOfSatisfaction.map(_.id).mkString(";")
       )
   }
 

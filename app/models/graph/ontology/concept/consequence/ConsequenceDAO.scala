@@ -22,9 +22,10 @@ object ConsequenceDAO {
     get[Long]("id") ~
       get[String]("label") ~
       get[Long]("severity") ~
-      get[Long]("effectID") map {
-      case id ~ label ~ severity ~ effectID =>
-        Consequence(id, label, severity, InstanceAction.getById(effectID))
+      get[String]("effects") map {
+      case id ~ label ~ severity ~ effectsIDs =>
+        val effects: List[InstanceAction] = InstanceAction.retrieveFromStringOfIds(effectsIDs)
+        Consequence(id, label, severity, effects)
     }
   }
 

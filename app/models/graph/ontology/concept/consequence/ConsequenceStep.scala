@@ -16,12 +16,10 @@ case class ConsequenceStep(value: Double, consequence: Consequence) {
 }
 
 object ConsequenceStep{
-
   val form = Form(mapping(
      "value" -> of[Double],
      "consequence" -> Consequence.form.mapping
    )(ConsequenceStep.apply)(ConsequenceStep.unapply))
-
   val error = ConsequenceStep(-1L, Consequence.error)
 
   /**

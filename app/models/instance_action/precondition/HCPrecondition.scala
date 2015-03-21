@@ -79,34 +79,11 @@ object HCPrecondition {
       .contains(property)
   }
 
-  /**
-   * Check whether a property is a number or not
-   * @author Thomas GIOVANNINI
-   * @param args array containing the property name
-   * @return true if the property's value is a number
-   *         false else
-   */
-  def isANumberProperty(args: Array[Any]): Boolean = {
-    val property = Property.parseString(args(0).asInstanceOf[String])
-    property.valueType == "Int" || property.valueType == "Double"
-  }
-
   def isHigherThan(args: Array[Any]): Boolean = {
-    /**
-     * Get value for an instance of a given property
-     * @author Thomas GIOVANNINI
-     * @param instance from which the property is taken
-     * @param property to look for
-     * @return the desired value
-     */
-    def getValueOfProperty(property: Property, value: Any): Double = {
-      if (property.valueType == "Int") value.asInstanceOf[Int]
-      else value.asInstanceOf[Double]
-    }
     val sourceInstance = map.getInstanceById(args(0).asInstanceOf[Long])
     val property = Property.parseString(args(1).asInstanceOf[String])
-    val value = getValueOfProperty(property, args(2))
-    val instanceValue = getValueOfProperty(property, sourceInstance.getValueForProperty(property))
+    val value = args(2).asInstanceOf[Double]
+    val instanceValue = sourceInstance.getValueForProperty(property)
     instanceValue > value
   }
 

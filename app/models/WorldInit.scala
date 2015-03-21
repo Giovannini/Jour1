@@ -36,7 +36,6 @@ object WorldInit {
   def worldMapGeneration(): Unit = {
     val allGroundsConcepts = getGroundConcept(ConceptDAO.getAll).getDescendance
     val instanciableConcepts = getInstanciableConcepts diff allGroundsConcepts
-    println("Number of instanciableConcepts: " + instanciableConcepts.length)
     Try {
       generateGround(allGroundsConcepts)
       //Take a lot of time
@@ -71,7 +70,7 @@ object WorldInit {
    *         0 else
    */
   def getStrengthOf(concept: Concept): Int = {
-    concept.getRuleValueByProperty(propertyStrength).asInstanceOf[Int]
+    concept.getRuleValueByProperty(propertyStrength).toInt
   }
 
   /**
@@ -188,10 +187,8 @@ object WorldInit {
    * @return
    */
   def getInstanciableConceptsInList: List[Concept] = {
-    println("Property instanciable = " + propertyInstanciable)
     ConceptDAO.getAll.filter { concept =>
-      println(concept.label + ": " + concept.rules.mkString(", "))
-      concept.rules.contains(ValuedProperty(propertyInstanciable, true))
+      concept.rules.contains(ValuedProperty(propertyInstanciable, 1))
     }
   }
 

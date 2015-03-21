@@ -30,11 +30,10 @@ object PropertyStatement {
    * @return a sql statement
    */
   def add(property: Property): SimpleSql[Row] = {
-    SQL("""INSERT INTO properties(label, type, defaultValue)
-           VALUES({label}, {type}, {defaultValue})""")
+    SQL("""INSERT INTO properties(label, defaultValue)
+           VALUES({label}, {defaultValue})""")
       .on(
         'label -> property.label,
-        'type -> property.valueType,
         'defaultValue -> property.defaultValue.toString
       )
   }
@@ -65,11 +64,10 @@ object PropertyStatement {
   def update(id: Long, property: Property) = {
     SQL("""
       UPDATE properties
-      SET label = {label}, type = {type}, defaultValue = {defaultValue}
+      SET label = {label}, defaultValue = {defaultValue}
       WHERE id = {id}""").on(
         'id -> id,
         'label -> property.label,
-        'type -> property.valueType,
         'defaultValue -> property.defaultValue.toString
       )
   }

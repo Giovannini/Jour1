@@ -23,7 +23,6 @@ case class DisplayProperty(color: String, zIndex: Int) {
 }
 
 object DisplayProperty {
-
   val form = Form(mapping(
                            "color" -> text,
                            "zindex" -> number

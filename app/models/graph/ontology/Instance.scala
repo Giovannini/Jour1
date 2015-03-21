@@ -1,6 +1,7 @@
 package models.graph.ontology
 
 import models.graph.custom_types.Coordinates
+import models.graph.ontology.concept.need.Need
 import models.graph.ontology.concept.{ConceptDAO, Concept}
 import models.graph.ontology.property.Property
 import play.api.libs.json._
@@ -34,6 +35,36 @@ case class Instance(id:             Int,
 
   override def hashCode = label.hashCode + concept.hashCode
 
+  /*###############
+    Modifications
+  ###############*/
+  /**
+   * Method to give id to the instance
+   * @param newId to give to the instance
+   * @return the same instance with updated id
+   */
+  def withId(newId: Int): Instance = {
+    Instance(newId, label, coordinates, properties, concept)
+  }
+
+  /**
+   * Modify the label of an instance
+   * @param newLabel for the instance
+   * @return a new instance looking lke this one but with an updated label
+   */
+  def withLabel(newLabel: String): Instance = {
+    Instance(id, newLabel, coordinates, properties, concept)
+  }
+
+  /**
+   * Method to give coordinates to the instance
+   * @param newCoordinates to give to the instance
+   * @return the same instance with updated coordinates
+   */
+  def at(newCoordinates: Coordinates): Instance = {
+    Instance(id, label, newCoordinates, properties, concept)
+  }
+  
   /**
    * Method to add a property to the instance
    * @author Thomas GIOVANNINI
@@ -50,7 +81,7 @@ case class Instance(id:             Int,
    * @param newProperties for the instance
    * @return a new instance looking like this one but with updated properties
    */
-  def updateProperties(newProperties: List[ValuedProperty]): Instance = {
+  def withProperties(newProperties: List[ValuedProperty]): Instance = {
     if(newProperties.map(_.property) == this.concept.properties){
       Instance(id, label, coordinates, newProperties, concept)
     }else this
@@ -63,7 +94,7 @@ case class Instance(id:             Int,
    * @param newValue for this property
    * @return a new instance looking like this one but with an updated property
    */
-  def modifyValueOfProperty(property: Property, newValue: Any): Instance = {
+  def modifyValueOfProperty(property: Property, newValue: Double): Instance = {
     def modifyPropertyRec(vp: ValuedProperty, remainingProperties: List[ValuedProperty]): List[ValuedProperty] = {
       remainingProperties match {
         case List() => List()
@@ -80,15 +111,6 @@ case class Instance(id:             Int,
   }
 
   /**
-   * Modify the label of an instance
-   * @param newLabel for the instance
-   * @return a new instance looking lke this one but with an updated label
-   */
-  def withLabel(newLabel: String): Instance = {
-    Instance(id, newLabel, coordinates, properties, concept)
-  }
-
-  /**
    * Modify the concept of an instance
    * @author Thomas GIOVANNINI
    * @param newconcept for the instance
@@ -98,23 +120,8 @@ case class Instance(id:             Int,
     Instance(id, label, coordinates, newconcept.properties.map(_.defaultValuedProperty),newconcept)
   }
 
-  /**
-   * Method to give coordinates to the instance
-   * @param newCoordinates to give to the instance
-   * @return the same instance with updated coordinates
-   */
-  def at(newCoordinates: Coordinates): Instance = {
-    Instance(id, label, newCoordinates, properties, concept)
-  }
 
-  /**
-   * Method to give id to the instance
-   * @param newId to give to the instance
-   * @return the same instance with updated id
-   */
-  def withId(newId: Int): Instance = {
-    Instance(newId, label, coordinates, properties, concept)
-  }
+  def evaluateNeeds: List[Need] = ???
 
   /**
    * Get value for a given property
@@ -122,7 +129,7 @@ case class Instance(id:             Int,
    * @param property of which the value is desired
    * @return the value of the property
    */
-  def getValueForProperty(property: Property): Any = {
+  def getValueForProperty(property: Property): Double = {
     properties.find(_.property == property).get.value
   }
 }

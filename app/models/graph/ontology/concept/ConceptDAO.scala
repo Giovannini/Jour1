@@ -4,7 +4,7 @@ import models.graph.NeoDAO
 import models.graph.custom_types.{DisplayProperty, Statement}
 import models.graph.ontology.ValuedProperty
 import models.graph.ontology.concept.need.NeedDAO
-import models.graph.ontology.property.{Property, PropertyDAO}
+import models.graph.ontology.property.Property
 import models.graph.ontology.relation.Relation
 import org.anormcypher.CypherResultRow
 
@@ -28,8 +28,8 @@ object ConceptDAO {
   def parseRow(row: CypherResultRow): Concept = {
     Try {
       val label = row[String]("concept_label")
-      val properties = row[Seq[Long]]("concept_prop").map(PropertyDAO.getById).toList
-      val rulesProperty = ValuedProperty.rowToPropertiesList(row, "concept_rules")
+      val properties = row[Seq[String]]("concept_prop").map(Property.parseString).toList
+      val rulesProperty = row[Seq[String]]("concept_rules").map(ValuedProperty.parse).toList
       val needs = row[Seq[Long]]("concept_needs").map(NeedDAO.getById).toList
       val display = DisplayProperty.parseString(row[String]("concept_display"))
       Concept(label, properties, rulesProperty, needs, display)
@@ -94,7 +94,7 @@ object ConceptDAO {
    */
   def addConceptToDB(concept: Concept): Boolean = {
     getById(concept.id) == Concept.error &&
-    Statement.createConcept(concept).execute()
+      Statement.createConcept(concept).execute()
   }
 
   /**

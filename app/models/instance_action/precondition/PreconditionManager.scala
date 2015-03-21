@@ -12,7 +12,7 @@ object PreconditionManager {
    * Search "Can I see an apple from there?"
    */
 
-  val nameToId: collection.mutable.Map[String, Long] = collection.mutable.Map.empty[String, Long]
+  val nameToId: collection.mutable.Map[String, Precondition] = collection.mutable.Map.empty[String, Precondition]
 
   /*#######################
     Preconditions creation
@@ -26,8 +26,6 @@ object PreconditionManager {
     List(Parameter("instance1ID", "Long"), Parameter("instance2ID", "Long"), Parameter("distance", "Int")))
   val preconditionHasProperty = Precondition(0L, "hasProperty", List[Precondition](),
     List(Parameter("instanceID", "Long"), Parameter("property", "Property")))
-  val preconditionIsANumberProperty = Precondition(0L, "isANumberProperty", List[Precondition](),
-    List(Parameter("property", "Property")))
 
   /*Composed preconditions*/
   val preconditionPropertyIsHigherThan = {
@@ -35,8 +33,7 @@ object PreconditionManager {
     val p_propertyID = Parameter("property", "Property")
     val p_value = Parameter("value", "Int")
     Precondition(0L, "propertyIsHigherThan",
-      List(preconditionHasProperty.withParameters(List(p_instanceID, p_propertyID)),
-        preconditionIsANumberProperty.withParameters(List(p_propertyID))),
+      List(preconditionHasProperty.withParameters(List(p_instanceID, p_propertyID))),
       List(p_instanceID, p_propertyID, p_value))
   }
   val preconditionPropertyIsLowerThan = {
@@ -44,8 +41,7 @@ object PreconditionManager {
     val p_propertyID = Parameter("property", "Property")
     val p_value = Parameter("value", "Int")
     Precondition(0L, "propertyIsLowerThan",
-      List(preconditionHasProperty.withParameters(List(p_instanceID, p_propertyID)),
-        preconditionIsANumberProperty.withParameters(List(p_propertyID))),
+      List(preconditionHasProperty.withParameters(List(p_instanceID, p_propertyID))),
       List(p_instanceID, p_propertyID, p_value))
   }
 
@@ -56,7 +52,6 @@ object PreconditionManager {
     nameToId += "isOnSameTile" -> preconditionIsOnSameTile.save
     nameToId += "isAtWalkingDistance" -> preconditionIsAtWalkingDistance.save
     nameToId += "hasProperty" -> preconditionHasProperty.save
-    nameToId += "isANumberProperty" -> preconditionIsANumberProperty.save
 
     /*Composed preconditions*/
     nameToId += "propertyIsHigherThan" -> preconditionPropertyIsHigherThan.save

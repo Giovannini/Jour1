@@ -60,11 +60,12 @@ object PreconditionDAO {
    * @return true if the precondition saved
    *         false else
    */
-  def save(precondition: Precondition): Long = {
+  def save(precondition: Precondition): Precondition = {
     DB.withConnection { implicit connection =>
       val statement = PreconditionStatement.add(precondition)
       val optionId: Option[Long] = statement.executeInsert()
-      optionId.getOrElse(-1L)
+      val id = optionId.getOrElse(-1L)
+      precondition.withId(id)
     }
   }
 

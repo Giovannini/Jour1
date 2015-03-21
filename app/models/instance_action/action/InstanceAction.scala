@@ -12,6 +12,7 @@ import play.api.db.DB
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
 import scala.language.postfixOps
+import scala.util.{Failure, Success, Try}
 
 //TODO comment
 /**
@@ -59,7 +60,7 @@ case class InstanceAction(id: Long,
    * @author Thomas GIOVANNINI
    * @return its ID
    */
-  def save: Long = {
+  def save: InstanceAction = {
     InstanceAction.save(this)
   }
 
@@ -121,29 +122,29 @@ case class InstanceAction(id: Long,
 object InstanceAction {
   implicit val connection = Application.connection
 
+  val error = InstanceAction(-1, "error", List[Precondition](), List[InstanceAction](), List[Parameter]())
+
   lazy val form: Form[InstanceAction] = Form(mapping(
     "id" -> longNumber,
     "label" -> text,
-    "preconditions" -> list(Precondition.form.mapping),
-    "subactions" -> list(InstanceAction.form.mapping),
+    "preconditions" -> list(longNumber),
+    "subactions" -> list(longNumber),
     "parameters" -> list(Parameter.form.mapping)
-  )(InstanceAction.apply)(InstanceAction.unapply))
+  )(InstanceAction.applyForm)(InstanceAction.unapplyForm))
 
-  /**
-   * Identify an InstanceAction by finding preconditions and subactions by their IDs
-   * @author Thomas GIOVANNINI
-   * @param id of the desired InstanceAction
-   * @param label of the desired InstanceAction
-   * @param preconditions tuple containing ids of the precondition for the InstanceAction and custom parameters list
-   * @param subActions tuple containing ids of the subactions for the InstanceAction and custom parameters list
-   * @param parameters of the desired InstanceAction
-   * @return an InstanceAction with identified preconditions and subActions
-   */
-  def identify(id: Long, label: String, preconditions: List[(Long, List[Parameter])], subActions: List[(Long, List[Parameter])], parameters: List[Parameter]): InstanceAction = {
-    InstanceAction(id, label,
-      preconditions.map(tuple => PreconditionDAO.getById(tuple._1).withParameters(tuple._2)),
-      subActions.map(tuple => getById(tuple._1).withParameters(tuple._2)),
-      parameters)
+  private def applyForm(
+    id: Long,
+    label: String,
+    preconditionsToParse: List[Long],
+    subActionsToParse: List[Long],
+    parameters: List[Parameter]): InstanceAction = {
+    val preconditions = preconditionsToParse.map(PreconditionDAO.getById)
+    val subActions = subActionsToParse.map(InstanceAction.getById)
+    InstanceAction(id, label, preconditions, subActions, parameters)
+  }
+
+  private def unapplyForm(ia: InstanceAction) = {
+    Some((ia.id, ia.label, ia.preconditions.map(_.id), ia.subActions.map(_.id), ia.parameters))
   }
 
   /**
@@ -155,7 +156,8 @@ object InstanceAction {
    * @param subActionsToParse to retrieve real sub-actions of the action
    * @return the corresponding action
    */
-  def parse(id: Long, label: String, preconditionsToParse: String, subActionsToParse: String, parametersToParse: String): InstanceAction = {
+  def parse(id: Long, label: String, preconditionsToParse: String, subActionsToParse: String, parametersToParse: String)
+  : InstanceAction = {
     var error = false
     def parseParameters(): List[Parameter] = {
       if (parametersToParse.isEmpty) List()
@@ -196,7 +198,20 @@ object InstanceAction {
     else InstanceAction(id, label, preconditions, parsedSubActions, parameters)
   }
 
-  val error = InstanceAction(-1, "error", List[Precondition](), List[InstanceAction](), List[Parameter]())
+  def retrieveFromStringOfIds(stringOfIds: String): List[InstanceAction] = {
+    Try{
+      stringOfIds.split(";")
+        .map{ id =>
+          getById(id.toLong)
+        }.toList
+    } match {
+      case Success(list) => list
+      case Failure(e) =>
+        println("Error occured while executing function retrieveFromStringOfIds in class InstanceAction")
+        println(e)
+        List()
+    }
+  }
 
   /**
    * Parse rule to interact with database
@@ -243,11 +258,12 @@ object InstanceAction {
    * @return true if the rule saved
    *         false else
    */
-  def save(action: InstanceAction): Long = {
+  def save(action: InstanceAction): InstanceAction = {
     DB.withConnection { implicit connection =>
       val statement = InstanceActionStatement.add(action)
       val optionId: Option[Long] = statement.executeInsert()
-      optionId.getOrElse(-1L)
+      val id = optionId.getOrElse(-1L)
+      action.withId(id)
     }
   }
 
@@ -301,6 +317,7 @@ object InstanceAction {
       statement.executeUpdate
     }
   }
+
 }
 
 

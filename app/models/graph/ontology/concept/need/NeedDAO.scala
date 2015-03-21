@@ -4,6 +4,8 @@ import anorm.SqlParser._
 import anorm._
 import controllers.Application
 import models.graph.ontology.concept.consequence.ConsequenceStep
+import models.graph.ontology.property.Property
+import models.instance_action.action.InstanceAction
 
 import scala.language.postfixOps
 
@@ -21,9 +23,15 @@ object NeedDAO {
   private val needParser: RowParser[Need] = {
     get[Long]("id") ~
       get[String]("label") ~
-      get[String]("consequencesSteps") map {
-      case id ~ label ~ consequencesSteps =>
-        Need(id, label, ConsequenceStep.parseList(consequencesSteps))
+      get[String]("property") ~
+      get[Double]("priority") ~
+      get[String]("consequencesSteps") ~
+      get[String]("meansOfSatisfaction") map {
+      case id ~ label ~ propertyToParse ~ priority ~ consequencesStepsToParse ~ meansOfSatisfactionToParse =>
+        val property = Property.parseString(propertyToParse)
+        val consequencesSteps = ConsequenceStep.parseList(consequencesStepsToParse)
+        val meansOfSatisfaction = InstanceAction.retrieveFromStringOfIds(meansOfSatisfactionToParse)
+        Need(id, label, property, priority, consequencesSteps, meansOfSatisfaction)
     }
   }
 
