@@ -18,8 +18,10 @@
                 <div class="title" ng-controller="SearchController">
                     <form class="form" ng-submit="launchSearch()">
                         <div class="form-group">
-                            <label for="search" class="form-label">Search :</label>
-                            <input autofocus="autofocus" class="form-input" id="search" type="text" ng-model="search" />
+                            <label class="form-group__label" for="search" class="form-label">Search :</label>
+                            <div class="form-group__input">
+                                <input autofocus="autofocus" class="form-input" id="search" type="text" ng-model="search" />
+                            </div>
                         </div>
                     </form>
                     <div class="error">

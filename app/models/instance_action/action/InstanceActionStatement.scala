@@ -26,6 +26,18 @@ object InstanceActionStatement {
     SQL("SELECT * FROM rules")
   }
 
+  private def precondString(action: InstanceAction): String = {
+    action.preconditions.map(p => {
+      p._1.id + " (" + p._2.unzip._2.map(_.toDBString).mkString(",")+")"
+    }).mkString(";")
+  }
+
+  private def contentString(action: InstanceAction): String = {
+    action.subActions.map(action => {
+      action._1.id + " (" + action._2.unzip._2.map(_.toDBString).mkString(",")+")"
+    }).mkString(";")
+  }
+
   /**
    * Add a rule to database
    * @author Aurélie LORGEOUX
@@ -39,8 +51,8 @@ object InstanceActionStatement {
     """).on(
       'label -> action.label,
       'param -> action.parameters.mkString(";"),
-      'precond -> action.preconditions.map(p => p.id + " -> " + p.parameters.mkString(",")).mkString(";"),
-      'content-> action.subActions.map(action => action.id + " -> " + action.parameters.mkString(",")).mkString(";")
+      'precond -> precondString(action),
+      'content -> contentString(action)
     )
   }
 
@@ -79,8 +91,8 @@ object InstanceActionStatement {
         'id -> id,
         'label -> action.label,
         'param -> action.parameters.mkString(";"),
-        'precond -> action.preconditions.mkString(";"),
-        'content -> action.subActions.mkString(";")
+        'precond -> precondString(action),
+        'content -> contentString(action)
       )
   }
 

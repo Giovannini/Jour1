@@ -3,25 +3,29 @@ package models.instance_action.precondition
 import controllers.Application
 import models.WorldMap
 import models.graph.ontology.Instance
-import models.instance_action.Parameter
-import play.api.libs.json.{JsNumber, JsString, Json}
+import models.instance_action.parameter.{ParameterError, ParameterValue, Parameter, ParameterReference}
+import play.api.libs.json.{JsValue, JsNumber, JsString, Json}
 
 /**
  * Model for preconditions
  */
+case class Precondition(id: Long,
+                        label: String,
+                        subConditions: List[(Precondition, Map[ParameterReference, Parameter])],
+                        parameters: List[ParameterReference]) {
 
-case class Precondition(id: Long, label: String, subConditions: List[Precondition], parameters: List[Parameter]){
+
   /* A precondition can't have itself as a sub-condition. */
-  require(! retrieveAllSubConditions.map(_.id).contains(id))
+  require(!retrieveAllSubConditions.map(_.id).contains(id))
 
   /*######################
     Logical composition
   ######################*/
-  def or(other: Precondition)(arguments: List[(Parameter, Any)], map: WorldMap) = {
+  def or(other: Precondition)(arguments: Map[ParameterReference, ParameterValue], map: WorldMap) = {
     this.isFilled(arguments) || other.isFilled(arguments)
   }
 
-  def and(other: Precondition)(arguments: List[(Parameter, Any)], map: WorldMap) = {
+  def and(other: Precondition)(arguments: Map[ParameterReference, ParameterValue], map: WorldMap) = {
     this.isFilled(arguments) && other.isFilled(arguments)
   }
 
@@ -32,52 +36,46 @@ case class Precondition(id: Long, label: String, subConditions: List[Preconditio
     Precondition(id, this.label, this.subConditions, this.parameters)
   }
 
-  def modifyParameter(oldParameter: Parameter, newParameter: Parameter): Precondition = {
-    def replaceParameterInList(parameters: List[Parameter]): List[Parameter] = {
-      parameters match {
-        case List() => List()
-        case head::tail =>
-          if (head == oldParameter) newParameter :: tail
-          else head :: replaceParameterInList(tail)
-      }
-    }
-    if (parameters.contains(oldParameter)) {
-      val newSubConditions: List[Precondition] = subConditions.map {
-        subCondition => subCondition.modifyParameter(oldParameter, newParameter)
-      }
-      val newParameters: List[Parameter] = replaceParameterInList(parameters)
-      Precondition(id, label, newSubConditions, newParameters)
-    } else this
-  }
-
-  def withParameters(newParameters: List[Parameter]): Precondition = {
-    Precondition(this.id, this.label, this.subConditions, newParameters)
-  }
-
-
   def retrieveAllSubConditions: List[Precondition] = {
-    subConditions.flatMap(_.retrieveAllSubConditions).distinct
+    subConditions.unzip._1.flatMap(_.retrieveAllSubConditions).distinct
   }
 
   /**
-   * Execute a given action with given arguments
+   * Tests if a Precondition is filled or not
+   * Every single parameters must be a value for the test
    * @author Thomas GIOVANNINI
+   * @author Julien Pradet
    * @param parameters with which execute the action
    * @return true if the action was correctly executed
    *         false else
    */
-  def isFilled(parameters: List[(Parameter, Any)]): Boolean = {
-    val args = getArgumentsList(parameters).map(_._2).toArray
+  def isFilled(parameters: Map[ParameterReference, ParameterValue]): Boolean = {
+    def isSubconditionFilled(subcondition: Precondition, parameters: Map[ParameterReference, Parameter]): Boolean = {
+      // Replace any reference to a current parameter to its value
+      val newParameters = parameters.map({
+        case (ref, param) if param.isInstanceOf[ParameterReference] => (ref, parameters(param.asInstanceOf[ParameterReference]))
+        case (ref, param) => (ref, param.asInstanceOf[ParameterValue])
+      }).asInstanceOf[Map[ParameterReference, ParameterValue]]
+
+      // Evaluate if the subcondition is filled or not
+      subcondition.isFilled(newParameters)
+    }
+
+    val args = parameters.toList.unzip._2.toArray
+    println("arguments")
+    println(args.length)
+    println(args.map(_.toString))
     this.label match {
+      // First test if it's among the Hard Coded preconditions
       case "isNextTo" => HCPrecondition.isNextTo(args)
       case "isOnSameTile" => HCPrecondition.isOnSameTile(args)
       case "isAtWalkingDistance" => HCPrecondition.isAtWalkingDistance(args)
       case "hasProperty" => HCPrecondition.hasProperty(args)
       case "propertyIsHigherThan" => HCPrecondition.isHigherThan(args)
       case "propertyIsLowerThan" => ! HCPrecondition.isHigherThan(args)
+      // It's a user-created precondition
       case _ =>
-        this.subConditions
-        .forall(precondition => precondition.isFilled(parameters))
+        this.subConditions.forall(current => isSubconditionFilled(current._1, current._2))
     }
   }
 
@@ -87,21 +85,9 @@ case class Precondition(id: Long, label: String, subConditions: List[Preconditio
    * @return a list of arguments and their values
    */
   //TODO make it beautiful
-  def getArgumentsList(availableParameters: List[(Parameter, Any)]): List[(Parameter, Any)] = {
-    def getArgumentsListRec(arguments: List[Parameter], availableParameters: List[(Parameter, Any)])
-    : List[(Parameter, Any)] = arguments match {
-      case List() => List()
-      case head::tail =>
-        val goodParameter = availableParameters.find(_._1.reference == head.reference)
-        if (goodParameter.isDefined){
-          goodParameter.get :: getArgumentsListRec(tail, availableParameters diff List(goodParameter))
-        }
-        else{
-          List()
-        }
-    }
+  def getArgumentsList(args: List[ParameterValue]): Map[ParameterReference, ParameterValue] = {
 
-    getArgumentsListRec(this.parameters, availableParameters)
+    parameters.zip(args).toMap
   }
 
   def instancesThatFill(source: Instance): Set[Instance] = {
@@ -114,15 +100,22 @@ case class Precondition(id: Long, label: String, subConditions: List[Preconditio
         PreconditionFiltering.isAtWalkingDistance(source).toSet
       case _ =>
         this.subConditions
-          .map(precondition => precondition.instancesThatFill(source))
+          .map(_._1.instancesThatFill(source))
           .foldRight(Application.map.getInstances.toSet)(_ intersect _)
     }
   }
 
   def toJson = Json.obj(
     "id" -> JsNumber(id),
+    "label" -> JsString(label)
+  )
+
+  def toJsonWithParameters(parameters: Map[ParameterReference, Parameter]): JsValue = Json.obj(
+    "id" -> JsNumber(id),
     "label" -> JsString(label),
-    "parameters" -> parameters.map(_.toJson)
+    "parameters" -> parameters.map(item => {
+      Parameter.toJsonWithIsParam(item._2)
+    })
   )
 
   def save: Precondition = PreconditionDAO.save(this)
@@ -130,16 +123,53 @@ case class Precondition(id: Long, label: String, subConditions: List[Preconditio
 
 object Precondition {
 
-  val error = Precondition(-1L, "error", List[Precondition](), List[Parameter]())
+  /*
+   * Parsers used to create a Precondition from DB
+   */
 
-  def parse(id: Long, label: String, parametersToParse: String, subConditionsToParse: String): Precondition = {
-    val subConditions: List[Precondition] = if(subConditionsToParse != ""){
-      subConditionsToParse.split(";")
-        .map(s =>PreconditionDAO.getById(s.toLong))
-        .toList
-    }else List()
-    val arguments: List[Parameter] = parametersToParse.split("/").map(Parameter.parseArgument).toList
-    Precondition(id, label, subConditions, arguments)
+  def parseSubCondition(subConditionToParse: String): (Precondition, Map[ParameterReference, Parameter]) = {
+    val globalPattern = "(^\\d*|\\(.*\\)$)".r
+    val result = globalPattern.findAllIn(subConditionToParse).toArray
+
+    // Get the precondition
+    val id = result(0).toInt
+    val precondition = PreconditionDAO.getById(id)
+
+    // Set the map of parameters
+    val paramPattern = "([^\\(|,|\\)]+)".r
+    val params = paramPattern.findAllIn(result(1)).toList.map(Parameter.parse)
+
+    // Return the subCondition
+    (precondition, Parameter.linkParameterToReference(precondition.parameters, params))
   }
+
+  def parseSubConditions(subConditionsToParse: String): List[(Precondition, Map[ParameterReference, Parameter])] = {
+    if(subConditionsToParse != "") {
+      subConditionsToParse.split(";")
+        .map(s => parseSubCondition(s))
+        .toList
+    } else {
+      List()
+    }
+  }
+
+  /**
+   * Parses a precondition from BDD
+   * @param id
+   * @param label
+   * @param parametersToParse
+   * @param subConditionsToParse
+   * @return
+   */
+  def parse(id: Long, label: String, parametersToParse: String, subConditionsToParse: String): Precondition = {
+    Precondition(
+      id,
+      label,
+      parseSubConditions(subConditionsToParse),
+      Parameter.parseParameters(parametersToParse)
+    )
+  }
+
+  val error = Precondition(-1L, "error", List(), List())
 }
 

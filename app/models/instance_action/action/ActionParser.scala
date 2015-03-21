@@ -1,7 +1,7 @@
 package models.instance_action.action
 
 import models.graph.ontology.property.PropertyDAO
-import models.instance_action.Parameter
+import models.instance_action.parameter.{ParameterValue, ParameterReference}
 
 /**
  * Parser class for actions
@@ -22,8 +22,18 @@ object ActionParser {
     if (action == InstanceAction.error) {
       println("Action not found.")
       false
-    }else{
-      val arguments = getArgumentsList(action, instancesId)
+    } else {
+      val arguments = getArgumentsList(
+        action,
+        instancesId.map(id => ParameterValue(id, "Long"))
+      )
+      arguments.map(item => {
+        println("key / value")
+        println(item._1)
+        println(item._2)
+        1
+      })
+
       ActionManager.execute(action, arguments)
     }
   }
@@ -42,22 +52,14 @@ object ActionParser {
   /**
    * Get the argument list needed to execute an action
    * @param action the action to execute
-   * @param ids the ids of the instances needed to execute the actions
+   * @param args arguments used by the action
    * @return a list of arguments and their values
    */
-  def getArgumentsList(action: InstanceAction, ids: List[Long]): List[(Parameter, Any)] = {
-    def getArgumentsListRec(arguments: List[Parameter], ids: List[Long]): List[(Parameter, Any)] = {
-      arguments match {
-        case List() => List()
-        case head::tail =>
-          if (head._type == "Property") {
-            (head, PropertyDAO.getByName(head.reference).toString) :: getArgumentsListRec(tail, ids)
-          }
-          else if (ids.nonEmpty) (head, ids.head) :: getArgumentsListRec(tail, ids.tail)
-          else List() //error
-      }
-    }
-    getArgumentsListRec(action.parameters, ids)
+  def getArgumentsList(action: InstanceAction, args: List[ParameterValue]): Map[ParameterReference, ParameterValue] = {
+    println("check zipping reference/value")
+    println(action.parameters.length)
+    println(args.length)
+    action.parameters.zip(args).toMap
   }
 
 

@@ -1,5 +1,6 @@
 package models.graph.ontology.concept.need
 
+import forms.InstanceActionForm
 import models.graph.ontology.concept.consequence.ConsequenceStep
 import models.graph.ontology.property.Property
 import models.instance_action.action.InstanceAction
@@ -27,13 +28,13 @@ case class Need(id: Long,
 object Need {
 
   val error = Need(-1L, "error", Property.error, 0, List(), List())
-  println("caca2")
+
   val form = Form(mapping(
     "id" -> longNumber,
     "label" -> text,
     "affectedProperty" -> Property.form.mapping,
     "priority" -> of[Double],
     "consequencesSteps" -> list(ConsequenceStep.form.mapping),
-    "meansOfSatisfaction" -> list(InstanceAction.form.mapping)
+    "meansOfSatisfaction" -> list(InstanceActionForm.form.mapping)
   )(Need.apply)(Need.unapply))
 }

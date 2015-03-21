@@ -67,6 +67,7 @@ object RestCall extends Controller {
       val result = ActionParser.parseAction(actionId, actionArguments)
       result
     }
+
     val t1 = System.currentTimeMillis()
     val result = execution(request)
     val t2 = System.currentTimeMillis()
@@ -107,7 +108,7 @@ object RestCall extends Controller {
   def reduceDestinationList(sourceInstance: Instance, action: InstanceAction, instances: List[Instance]) = {
     val preconditionsToValidate = action.preconditions
     preconditionsToValidate.view
-      .map(_.instancesThatFill(sourceInstance))
+      .map(_._1.instancesThatFill(sourceInstance))
       .foldRight(instances.toSet)(_ intersect _)
       .map(_.toJson)
       .toList

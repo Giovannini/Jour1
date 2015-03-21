@@ -1,11 +1,11 @@
-package models.instance_action
+package models.instance_action.parameter
 
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json.{JsString, Json}
 
 
-case class Parameter(reference: String, _type: String){
+case class ParameterReference(reference: String, _type: String) extends Parameter{
   require(reference.matches("[A-Za-z0-9_]*"))
 
   def toJson = Json.obj(
@@ -14,23 +14,19 @@ case class Parameter(reference: String, _type: String){
   )
 
   override def toString = reference + ": " + _type
+
+  def toDBString = toString
 }
 
-object Parameter {
+object ParameterReference {
+  val error = ParameterReference("error", "error")
 
-  val form: Form[Parameter] = Form(mapping(
-     "reference" -> text,
-     "_type" -> text
-   )(Parameter.apply)(Parameter.unapply))
-
-  val error = Parameter("error", "error")
-
-  def parseArgument(argumentToString: String): Parameter = {
+  def parseArgument(argumentToString: String): ParameterReference = {
     val splittedString = argumentToString.split(": ")
-    Parameter(splittedString(0), splittedString(1))
+    ParameterReference(splittedString(0), splittedString(1))
   }
 
-  def parseArgumentList(argumentListToString: String): List[Parameter] = {
+  def parseArgumentList(argumentListToString: String): List[ParameterReference] = {
     if (argumentListToString != ""){
       argumentListToString.split(", ")
         .map(parseArgument)

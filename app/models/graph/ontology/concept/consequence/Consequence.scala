@@ -1,5 +1,6 @@
 package models.graph.ontology.concept.consequence
 
+import forms.InstanceActionForm
 import models.instance_action.action.InstanceAction
 import play.api.data.Form
 import play.api.data.Forms._
@@ -15,7 +16,7 @@ object Consequence {
     "id" -> longNumber,
     "label" -> text,
     "severity" -> of[Double],
-    "effects" -> list(InstanceAction.form.mapping)
+    "effects" -> list(InstanceActionForm.form.mapping)
   )(Consequence.apply)(Consequence.unapply))
 
   val error = Consequence(0L, "error", 0, List(InstanceAction.error))

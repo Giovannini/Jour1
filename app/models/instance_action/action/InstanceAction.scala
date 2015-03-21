@@ -3,7 +3,7 @@ package models.instance_action.action
 import anorm.SqlParser._
 import anorm._
 import controllers.Application
-import models.instance_action.Parameter
+import models.instance_action.parameter.{ParameterReference, Parameter}
 import models.instance_action.precondition.{Precondition, PreconditionDAO}
 import play.api.Play.current
 import play.api.data.Form
@@ -26,9 +26,10 @@ import scala.util.{Failure, Success, Try}
  */
 case class InstanceAction(id: Long,
                           label: String,
-                          preconditions: List[Precondition],
-                          subActions: List[InstanceAction],
-                          parameters: List[Parameter]) {
+                          preconditions: List[(Precondition, Map[ParameterReference, Parameter])],
+                          subActions: List[(InstanceAction, Map[ParameterReference, Parameter])],
+                          parameters: List[ParameterReference]) {
+
 
   /**
    * Modify ID of the action
@@ -49,8 +50,24 @@ case class InstanceAction(id: Long,
     Json.obj(
       "id" -> JsNumber(id),
       "label" -> JsString(label),
-      "preconditions" -> preconditions.map(_.toJson),
-      "subActions" -> subActions.map(_.toJson),
+      "preconditions" -> preconditions.map(item => item._1.toJsonWithParameters(item._2)),
+      "subActions" -> subActions.map(item => item._1.toJsonWithParameters(item._2)),
+      "parameters" -> parameters.map(_.toJson)
+    )
+  }
+
+  def toJsonWithParameters(referenceToParameter: Map[ParameterReference, Parameter]): JsValue = {
+    Json.obj(
+      "id" -> JsNumber(id),
+      "label" -> JsString(label),
+      "parameters" -> referenceToParameter.map(item => Parameter.toJsonWithIsParam(item._2))
+    )
+  }
+
+  def toSimpleJson: JsValue = {
+    Json.obj(
+      "id" -> JsNumber(id),
+      "label" -> JsString(label),
       "parameters" -> parameters.map(_.toJson)
     )
   }
@@ -63,57 +80,6 @@ case class InstanceAction(id: Long,
   def save: InstanceAction = {
     InstanceAction.save(this)
   }
-
-  /**
-   * Modify a parameter of the action and for all its subobjects
-   * @author Thomas GIOVANNINI
-   * @param oldParameter to modify
-   * @param newParameter to replace the old one
-   * @return an updated InstanceAction
-   */
-  private def modifyParameter(oldParameter: Parameter, newParameter: Parameter): InstanceAction = {
-    /**
-     * Modify parameters of the action
-     * @author Thomas GIOVANNINI
-     * @param newParameters for the action
-     * @return updated list of parameters
-     */
-    def replaceParameterInList(newParameters: List[Parameter]): List[Parameter] = {
-      newParameters match {
-        case List() => List()
-        case head::tail =>
-          if (head == oldParameter) newParameter :: tail
-          else head :: replaceParameterInList(tail)
-      }
-    }
-
-    if (parameters.contains(oldParameter)) {
-      val newPreconditions: List[Precondition] = preconditions.map(_.modifyParameter(oldParameter, newParameter))
-      val newSubActions: List[InstanceAction] = subActions.map(_.modifyParameter(oldParameter, newParameter))
-      val newParameters: List[Parameter] = replaceParameterInList(this.parameters)
-      InstanceAction(id, label, newPreconditions, newSubActions, newParameters)
-    } else this
-  }
-
-  /**
-   * The same instance action with given parameters
-   * @author Thomas GIOVANNINI
-   * @param newParameters to give to the instance
-   * @return an InstanceAction with those parameters
-   */
-  def withParameters(newParameters: List[Parameter]): InstanceAction = {
-    def modifyParametersRec(parameterTuples: List[(Parameter, Parameter)], action: InstanceAction): InstanceAction = {
-      parameterTuples match {
-        case List() => action
-        case head::tail =>
-          val newAction = action.modifyParameter(head._1, head._2)
-          modifyParametersRec(tail, newAction)
-      }
-    }
-    if (this.parameters.length == newParameters.length) {
-      modifyParametersRec(this.parameters.zip(newParameters), this)
-    }else this
-  }
 }
 
 /**
@@ -122,30 +88,7 @@ case class InstanceAction(id: Long,
 object InstanceAction {
   implicit val connection = Application.connection
 
-  val error = InstanceAction(-1, "error", List[Precondition](), List[InstanceAction](), List[Parameter]())
-
-  lazy val form: Form[InstanceAction] = Form(mapping(
-    "id" -> longNumber,
-    "label" -> text,
-    "preconditions" -> list(longNumber),
-    "subactions" -> list(longNumber),
-    "parameters" -> list(Parameter.form.mapping)
-  )(InstanceAction.applyForm)(InstanceAction.unapplyForm))
-
-  private def applyForm(
-    id: Long,
-    label: String,
-    preconditionsToParse: List[Long],
-    subActionsToParse: List[Long],
-    parameters: List[Parameter]): InstanceAction = {
-    val preconditions = preconditionsToParse.map(PreconditionDAO.getById)
-    val subActions = subActionsToParse.map(InstanceAction.getById)
-    InstanceAction(id, label, preconditions, subActions, parameters)
-  }
-
-  private def unapplyForm(ia: InstanceAction) = {
-    Some((ia.id, ia.label, ia.preconditions.map(_.id), ia.subActions.map(_.id), ia.parameters))
-  }
+  val error = InstanceAction(-1, "error", List(), List(), List())
 
   /**
    * Parse an action from strings
@@ -156,46 +99,56 @@ object InstanceAction {
    * @param subActionsToParse to retrieve real sub-actions of the action
    * @return the corresponding action
    */
-  def parse(id: Long, label: String, preconditionsToParse: String, subActionsToParse: String, parametersToParse: String)
-  : InstanceAction = {
-    var error = false
-    def parseParameters(): List[Parameter] = {
-      if (parametersToParse.isEmpty) List()
-      else if (! parametersToParse.contains(":")) {
-        error = true
-        List()
-      }
-      else parametersToParse.split(";")
-        .map(Parameter.parseArgument)
-        .toList
-    }
-    def parsePreconditions(): List[Precondition] = {
-      if (preconditionsToParse == "") List()
-      else {
-        preconditionsToParse.split(";")
-          .map { string =>
-          val splitted = string.split(" -> ")
-          val precondition = PreconditionDAO.getById(splitted(0).toLong)
-          val parameters = splitted(1).split(",").map(Parameter.parseArgument).toList
-          precondition.withParameters(parameters)
-        }.toList
-      }
-    }
-    def parseSubActions(): List[InstanceAction] = {
-      if (subActionsToParse == "") List()
-      else subActionsToParse.split(";").map { s =>
-        val splitted = s.split(" -> ") //Subaction is ActionID:Parameters
-      val instanceAction = getById(splitted(0).toLong)
-        val parameters = splitted(1).split(",").map(Parameter.parseArgument).toList
-        instanceAction.withParameters(parameters)
-      }.toList
-    }
+  def parse(id: Long, label: String, parametersToParse: String, preconditionsToParse: String, subActionsToParse: String): InstanceAction = {
+    println("check parsing of")
 
-    val parameters = parseParameters()
-    val preconditions = parsePreconditions()
-    val parsedSubActions = parseSubActions()
-    if (error) InstanceAction.error
-    else InstanceAction(id, label, preconditions, parsedSubActions, parameters)
+    println(label)
+    println()
+
+    println(preconditionsToParse)
+    println(Precondition.parseSubConditions(preconditionsToParse).length)
+    println()
+
+    println(subActionsToParse)
+    println(parseSubActions(subActionsToParse).length)
+    println()
+
+    println(parametersToParse)
+    println(Parameter.parseParameters(parametersToParse).length)
+    println()
+
+    InstanceAction(
+      id,
+      label,
+      Precondition.parseSubConditions(preconditionsToParse),
+      parseSubActions(subActionsToParse),
+      Parameter.parseParameters(parametersToParse)
+    )
+  }
+
+  def parseSubActions(subActionsToParse: String): List[(InstanceAction, Map[ParameterReference, Parameter])] = {
+    if(subActionsToParse != "") {
+      subActionsToParse.split(";")
+        .map(s => parseSubAction(s))
+        .toList
+    } else {
+      List()
+    }
+  }
+
+  def parseSubAction(subActionToParse: String) : (InstanceAction, Map[ParameterReference, Parameter]) = {
+    val globalPattern = "(^\\d*|\\(.*\\)$)".r
+    val result = globalPattern.findAllIn(subActionToParse).toArray
+
+    // Get the precondition
+    val id = result(0).toInt
+    val action = InstanceAction.getById(id)
+
+    // Set the map of parameters
+    val paramPattern = "([^\\(|,|\\)]+)".r
+    val params = paramPattern.findAllIn(result(1)).toList.map(Parameter.parse)
+
+    (action, Parameter.linkParameterToReference(action.parameters, params))
   }
 
   def retrieveFromStringOfIds(stringOfIds: String): List[InstanceAction] = {
@@ -223,7 +176,7 @@ object InstanceAction {
       get[String]("param") ~
       get[String]("precond") ~
       get[String]("content") map {
-      case id ~ label ~ param ~ precond ~ content => InstanceAction.parse(id, label, precond, content, param)
+      case id ~ label ~ param ~ precond ~ content => InstanceAction.parse(id, label, param, precond, content)
     }
   }
 
