@@ -26,6 +26,11 @@ object InstanceActionStatement {
     SQL("SELECT * FROM rules")
   }
 
+
+  private def parametersString(action: InstanceAction): String = {
+    action.parameters.map(_.toString).mkString(",")
+  }
+
   private def precondString(action: InstanceAction): String = {
     action.preconditions.map(p => {
       p._1.id + " (" + p._2.unzip._2.map(_.toDBString).mkString(",")+")"
@@ -50,7 +55,7 @@ object InstanceActionStatement {
             VALUES({label}, {param}, {precond}, {content})
     """).on(
       'label -> action.label,
-      'param -> action.parameters.mkString(";"),
+      'param -> parametersString(action),
       'precond -> precondString(action),
       'content -> contentString(action)
     )
@@ -90,7 +95,7 @@ object InstanceActionStatement {
         """).on(
         'id -> id,
         'label -> action.label,
-        'param -> action.parameters.mkString(";"),
+        'param -> parametersString(action),
         'precond -> precondString(action),
         'content -> contentString(action)
       )

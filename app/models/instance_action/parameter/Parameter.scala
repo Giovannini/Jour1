@@ -38,7 +38,7 @@ object Parameter {
   }
 
   def parseParameters(parametersToParse: String): List[ParameterReference] = {
-    parametersToParse.split(";").map(ParameterReference.parseArgument).toList
+    parametersToParse.split(",").map(ParameterReference.parseArgument).toList
   }
 
   def linkParameterToReference(objectParameters: List[ParameterReference], params: List[Parameter]): Map[ParameterReference, Parameter] = {

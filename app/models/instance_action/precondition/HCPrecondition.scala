@@ -3,7 +3,7 @@ package models.instance_action.precondition
 import controllers.Application
 import models.graph.ontology.Instance
 import models.graph.ontology.property.{Property, PropertyDAO}
-import models.instance_action.parameter.ParameterValue
+import models.instance_action.parameter.{ParameterReference, ParameterValue}
 
 /**
  * List of hard codded preconditions
@@ -19,9 +19,13 @@ object HCPrecondition {
    * @return true if the two instances are next to each others
    *         false else
    */
-  def isNextTo(args: Array[ParameterValue]): Boolean = {
-    val instance1 = map.getInstanceById(args(0).asInstanceOf[Long])
-    val instance2 = map.getInstanceById(args(1).asInstanceOf[Long])
+  def isNextTo(args: Map[ParameterReference, ParameterValue]): Boolean = {
+    val instance1ID = args(ParameterReference("instance1ID", "Long")).value.asInstanceOf[Long]
+    val instance2ID = args(ParameterReference("instance2ID", "Long")).value.asInstanceOf[Long]
+
+    val instance1 = map.getInstanceById(instance1ID)
+    val instance2 = map.getInstanceById(instance2ID)
+
     val result = instance1.coordinates.isNextTo(instance2.coordinates)
     result
   }
@@ -33,9 +37,13 @@ object HCPrecondition {
    * @return true if the two instances are on same tile
    *         false else
    */
-  def isOnSameTile(args: Array[ParameterValue]): Boolean = {
-    val instance1 = map.getInstanceById(args(0).asInstanceOf[Long])
-    val instance2 = map.getInstanceById(args(1).asInstanceOf[Long])
+  def isOnSameTile(args: Map[ParameterReference, ParameterValue]): Boolean = {
+    val instance1ID = args(ParameterReference("instance1ID", "Long")).value.asInstanceOf[Long]
+    val instance2ID = args(ParameterReference("instance2ID", "Long")).value.asInstanceOf[Long]
+
+    val instance1 = map.getInstanceById(instance1ID)
+    val instance2 = map.getInstanceById(instance2ID)
+
     val result = instance1.coordinates == instance2.coordinates
     result
   }
@@ -47,7 +55,7 @@ object HCPrecondition {
    * @return true if the first instance can reach the second one by walking
    *         false else
    */
-  def isAtWalkingDistance(args: Array[ParameterValue]): Boolean = {
+  def isAtWalkingDistance(args: Map[ParameterReference, ParameterValue]): Boolean = {
     val propertyWalkingDistance = PropertyDAO.getByName("WalkingDistance")
 
     def retrieveWalkingDistanceValue(instance: Instance) = {
@@ -58,8 +66,11 @@ object HCPrecondition {
         .asInstanceOf[Int]
     }
 
-    val sourceInstance      = map.getInstanceById(args(0).value.asInstanceOf[Long])
-    val destinationInstance = map.getInstanceById(args(1).value.asInstanceOf[Long])
+    val instance1ID = args(ParameterReference("instance1ID", "Long")).value.asInstanceOf[Long]
+    val instance2ID = args(ParameterReference("instance2ID", "Long")).value.asInstanceOf[Long]
+
+    val sourceInstance      = map.getInstanceById(instance1ID)
+    val destinationInstance = map.getInstanceById(instance2ID)
     val desiredDistance     = retrieveWalkingDistanceValue(sourceInstance)
     val distance = sourceInstance.coordinates.getDistanceWith(destinationInstance.coordinates)
     distance <= desiredDistance
@@ -71,19 +82,25 @@ object HCPrecondition {
    * @return true if the instance has the desired property
    *         false else
    */
-  def hasProperty(args: Array[ParameterValue]): Boolean = {
-    val sourceInstance = map.getInstanceById(args(0).asInstanceOf[Long])
-    val property = Property.parseString(args(1).asInstanceOf[String])
+  def hasProperty(args: Map[ParameterReference, ParameterValue]): Boolean = {
+    val instanceId = args(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
+    val propertyString = args(ParameterReference("property", "Property")).value.asInstanceOf[String]
+
+    val sourceInstance = map.getInstanceById(instanceId)
+    val property = PropertyDAO.getByName(propertyString)
 
     sourceInstance.properties
       .map(_.property)
       .contains(property)
   }
 
-  def isHigherThan(args: Array[ParameterValue]): Boolean = {
-    val sourceInstance = map.getInstanceById(args(0).asInstanceOf[Long])
-    val property = Property.parseString(args(1).asInstanceOf[String])
-    val value = args(2).asInstanceOf[Double]
+  def isHigherThan(args: Map[ParameterReference, ParameterValue]): Boolean = {
+    val instanceId = args(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
+    val propertyString = args(ParameterReference("property", "Property")).value.asInstanceOf[String]
+
+    val sourceInstance = map.getInstanceById(instanceId)
+    val property = PropertyDAO.getByName(propertyString)
+    val value = args(ParameterReference("value", "Int")).value.asInstanceOf[Double]
     val instanceValue = sourceInstance.getValueForProperty(property)
     instanceValue > value
   }

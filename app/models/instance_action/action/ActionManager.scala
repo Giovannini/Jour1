@@ -153,14 +153,14 @@ object ActionManager{
             PreconditionManager.nameToId("isOnSameTile"),
             Map(
               ParameterReference("instance1ID", "Long") -> p_instanceThatEat,
-              ParameterReference("instance1ID", "Long") -> p_instanceThatIsEaten
+              ParameterReference("instance2ID", "Long") -> p_instanceThatIsEaten
             )
           ),
           (
             PreconditionManager.nameToId("hasProperty"),
             Map(
-              ParameterReference("instance1ID", "Long") -> p_instanceThatEat,
-              ParameterReference("instance1ID", "Long") -> ParameterValue("Hunger", "Property")
+              ParameterReference("instanceID", "Long") -> p_instanceThatEat,
+              ParameterReference("property", "Property") -> ParameterValue("Hunger", "Property")
             )
           )
         ),
@@ -183,8 +183,7 @@ object ActionManager{
       // Parameters
         List(
           p_instanceThatEat,
-          p_instanceThatIsEaten,
-          p_propertyHunger
+          p_instanceThatIsEaten
         )
       ).save
     }
@@ -200,9 +199,21 @@ object ActionManager{
    *         false else
    */
   def execute(action: InstanceAction, arguments: Map[ParameterReference, ParameterValue]):Boolean = {
-    val preconditionCheck = action.preconditions.forall(_._1.isFilled(arguments))
+    val preconditionCheck = action.preconditions.forall(item => {
+      // TODO Duplicate of a part of isFilled in Precondition
+      val args = item._2.map({
+        case (ref, param) if param.isInstanceOf[ParameterReference] => {
+          (ref, arguments(param.asInstanceOf[ParameterReference]))
+        }
+        case (ref, param) => {
+          (ref, param.asInstanceOf[ParameterValue])
+        }
+      })
+
+      item._1.isFilled(args)
+    })
     if (preconditionCheck) {
-      val args = arguments.map(_._2).toArray
+      val args = arguments
       action.label match {
         case "addInstanceAt" =>
           HardCodedAction.addInstanceAt(args)
@@ -218,8 +229,8 @@ object ActionManager{
           true
         case _ =>
           action.subActions
-          .map(subAction => execute(subAction._1, takeGoodArguments(subAction._2, arguments)))
-          .foldRight(true)(_ & _)
+            .map(subAction => execute(subAction._1, takeGoodArguments(subAction._2, arguments)))
+            .foldRight(true)(_ & _)
       }
     }else{
       println("Precondition not filled for action " + action.label + ".")

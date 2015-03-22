@@ -61,15 +61,14 @@ case class Precondition(id: Long,
       subcondition.isFilled(newParameters)
     }
 
-    val args = parameters.toList.unzip._2.toArray
     this.label match {
       // First test if it's among the Hard Coded preconditions
-      case "isNextTo" => HCPrecondition.isNextTo(args)
-      case "isOnSameTile" => HCPrecondition.isOnSameTile(args)
-      case "isAtWalkingDistance" => HCPrecondition.isAtWalkingDistance(args)
-      case "hasProperty" => HCPrecondition.hasProperty(args)
-      case "propertyIsHigherThan" => HCPrecondition.isHigherThan(args)
-      case "propertyIsLowerThan" => ! HCPrecondition.isHigherThan(args)
+      case "isNextTo" => HCPrecondition.isNextTo(parameters)
+      case "isOnSameTile" => HCPrecondition.isOnSameTile(parameters)
+      case "isAtWalkingDistance" => HCPrecondition.isAtWalkingDistance(parameters)
+      case "hasProperty" => HCPrecondition.hasProperty(parameters)
+      case "propertyIsHigherThan" => HCPrecondition.isHigherThan(parameters)
+      case "propertyIsLowerThan" => ! HCPrecondition.isHigherThan(parameters)
       // It's a user-created precondition
       case _ =>
         this.subConditions.forall(current => isSubconditionFilled(current._1, current._2))
@@ -81,9 +80,7 @@ case class Precondition(id: Long,
    * @param availableParameters the ids of the instances needed to execute the actions
    * @return a list of arguments and their values
    */
-  //TODO make it beautiful
   def getArgumentsList(args: List[ParameterValue]): Map[ParameterReference, ParameterValue] = {
-
     parameters.zip(args).toMap
   }
 

@@ -21,28 +21,40 @@ object PreconditionManager {
     0,
     "isNextTo",
     List(),
-    List(ParameterReference("instance1ID", "Long"), ParameterReference("instance2ID", "Long"))
+    List(
+      ParameterReference("instance1ID", "Long"),
+      ParameterReference("instance2ID", "Long")
+    )
   )
 
   val preconditionIsOnSameTile = Precondition(
     0,
     "isOnSameTile",
     List(),
-    List(ParameterReference("instance1ID", "Long"), ParameterReference("instance2ID", "Long"))
+    List(
+      ParameterReference("instance1ID", "Long"),
+      ParameterReference("instance2ID", "Long")
+    )
   )
 
   val preconditionIsAtWalkingDistance = Precondition(
     0,
     "isAtWalkingDistance",
     List(),
-    List(ParameterReference("instance1ID", "Long"), ParameterReference("instance2ID", "Long"))
+    List(
+      ParameterReference("instance1ID", "Long"),
+      ParameterReference("instance2ID", "Long")
+    )
   )
 
   val preconditionHasProperty = Precondition(
     0,
     "hasProperty",
     List(),
-    List(ParameterReference("instanceID", "Long"), ParameterReference("property", "Property"))
+    List(
+      ParameterReference("instanceID", "Long"),
+      ParameterReference("property", "Property")
+    )
   )
 
   /*Composed preconditions*/
