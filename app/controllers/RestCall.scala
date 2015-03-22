@@ -27,7 +27,7 @@ object RestCall extends Controller {
    * @author Thomas GIOVANNINI
    * @param conceptId of the concept the relations are desired
    */
-  def getAllActionsOf(conceptId: Int) = Action {
+  def getAllActionsOf(conceptId: Long) = Action {
     val t1 = System.currentTimeMillis()
     val relations = ConceptDAO.getReachableRelations(conceptId)
     val actions = relations.filter(_._1.isAnAction)
@@ -62,7 +62,7 @@ object RestCall extends Controller {
     def execution(request: Request[JsValue]): Boolean = {
       val jsonRequest = Json.toJson(request.body)
       val actionReference = (jsonRequest \ "action").as[Long]
-      val actionId = Relation.DBList.getActionIdFromId(actionReference)
+      val actionId = Relation.DBList.getActionIdFromRelationId(actionReference)
       val actionArguments = (jsonRequest \ "instances").as[List[Long]]
       val result = ActionParser.parseAction(actionId, actionArguments)
       result
@@ -84,44 +84,34 @@ object RestCall extends Controller {
    */
   def getPossibleDestinationOfAction(initInstanceId: Long, relationId: Long, conceptId: Long) = Action {
     val sourceInstance = Application.map.getInstanceById(initInstanceId)
-    val actionID = Relation.DBList.getActionIdFromId(relationId)
+    val actionID = Relation.DBList.getActionIdFromRelationId(relationId)
     val action = ActionParser.getAction(actionID)
     val destinationInstancesList = Application.map.getInstancesOf(conceptId)
     if (sourceInstance == Instance.error || action == InstanceAction.error){
       Ok(Json.arr())
     }
     val t1 = System.currentTimeMillis()
-    val reducedList = reduceDestinationList(sourceInstance, action, destinationInstancesList)
+    val reducedList = action.getDestinationList(sourceInstance, destinationInstancesList)
+      .map(_.toJson)
     val t2 = System.currentTimeMillis()
     println("Getting destinations took " + (t2 - t1) + "ms.")
     Ok(Json.toJson(reducedList))
   }
 
-  /**
-   * Get the instances that validate all the preconditions of a given action
-   * @author Thomas GIOVANNINI
-   * @param sourceInstance the source of the action
-   * @param action from which the preconditions should be validated
-   * @param instances list of instances to validate
-   * @return a list of instances under JSON format
-   */
-  def reduceDestinationList(sourceInstance: Instance, action: InstanceAction, instances: List[Instance]) = {
-    val preconditionsToValidate = action.preconditions
-    preconditionsToValidate.view
-      .map(_._1.instancesThatFill(sourceInstance))
-      .foldRight(instances.toSet)(_ intersect _)
-      .map(_.toJson)
-      .toList
-  }
-
-  def editInstance(instanceId: Int) = Action {
+  def editInstance(instanceId: Long) = Action {
     val instance = Application.map.getInstanceById(instanceId)
     Ok(views.html.manager.instance.instanceEditor(instance, controllers.ontology.routes.InstanceManager.update()))
   }
 
-  def createInstance(conceptId: Int) = Action {
+  def createInstance(conceptId: Long) = Action {
     val concept = ConceptDAO.getById(conceptId)
     val instance = Instance.createRandomInstanceOf(concept)
     Ok(views.html.manager.instance.instanceEditor(instance, controllers.ontology.routes.InstanceManager.create()))
+  }
+
+  def getBestAction(instanceID: Long) = Action {
+    val instance = Application.map.getInstanceById(instanceID)
+    val bestAction = instance.selectAction
+    Ok("Best action for instance " + instanceID + " - " + instance.label + "\n" + bestAction.label)
   }
 }

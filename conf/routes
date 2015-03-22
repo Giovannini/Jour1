@@ -56,6 +56,8 @@ GET         /map                                                     controllers
 POST        /action                                                  controllers.RestCall.executeAction
 GET         /relations/:conceptId                                    controllers.RestCall.getAllActionsOf(conceptId: Int)
 
+GET   /needs/:instanceID      controllers.RestCall.getBestAction(instanceID: Long)
+
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                                            controllers.Assets.at(path="/public", file)
 

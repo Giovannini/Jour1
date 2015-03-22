@@ -11,7 +11,7 @@ import scala.util.{Failure, Success, Try}
  */
 case class ConsequenceStep(value: Double, consequence: Consequence) {
 
-  def toDB = value + " -> " + consequence.id
+  def toDB = value + " -> " + consequence.toDB
 
 }
 
@@ -32,9 +32,9 @@ object ConsequenceStep{
     Try {
       val splittedString = string.split(" -> ")
       val value = splittedString(0).toDouble
-      val consequenceID = splittedString(1).toLong
+      val consequence = Consequence.parseString(splittedString(1))
 
-      ConsequenceStep(value, ConsequenceDAO.getById(consequenceID))
+      ConsequenceStep(value, consequence)
     } match {
       case Success(cs) => cs
       case Failure(e) =>

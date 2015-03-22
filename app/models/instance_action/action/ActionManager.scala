@@ -1,11 +1,8 @@
 package models.instance_action.action
 
 import controllers.Application
-import models.graph.ontology.property.PropertyDAO
 import models.instance_action.parameter._
-import models.instance_action.precondition.{Precondition, PreconditionManager}
-
-import scala.collection.mutable
+import models.instance_action.precondition.PreconditionManager
 
 /**
  * Manage actions
@@ -40,7 +37,7 @@ object ActionManager{
         List(p_instanceToAdd, groundWhereToAddIt)
       ).save
     }
-    nameToId += "_actionAddInstanceAt " -> _actionAddInstanceAt
+    nameToId += "_actionAddInstanceAt" -> _actionAddInstanceAt
 
     val _actionRemoveInstanceAt = {
       val p_instanceToRemove = ParameterReference("instanceToRemove", "Long")
@@ -52,7 +49,7 @@ object ActionManager{
         List(p_instanceToRemove)
       ).save
     }
-    nameToId += "_actionRemoveInstanceAt " -> _actionRemoveInstanceAt
+    nameToId += "_actionRemoveInstanceAt" -> _actionRemoveInstanceAt
 
     val _actionAddOneToProperty = {
       val p_instanceID = ParameterReference("instanceID", "Long")
@@ -76,7 +73,7 @@ object ActionManager{
         List(p_instanceID, p_propertyName)
       ).save
     }
-    nameToId += "_actionAddOneToProperty " -> _actionAddOneToProperty
+    nameToId += "_actionAddOneToProperty" -> _actionAddOneToProperty
 
     val _actionRemoveOneFromProperty = {
       val p_instanceID = ParameterReference("instanceID", "Long")
@@ -99,7 +96,7 @@ object ActionManager{
         // Parameters
         List(p_instanceID, p_propertyName)).save
     }
-    nameToId += "_actionRemoveOneFromProperty " -> _actionRemoveOneFromProperty
+    nameToId += "_actionRemoveOneFromProperty" -> _actionRemoveOneFromProperty
 
     /*Function to add to the BDD*/
     val _actionMoveInstanceAt = {
@@ -108,8 +105,7 @@ object ActionManager{
       InstanceAction(
         0L,
         "ACTION_MOVE",
-      // Preconditions
-        List(
+        preconditions = List(
           (
             PreconditionManager.nameToId("isAtWalkingDistance"),
             Map(
@@ -119,8 +115,7 @@ object ActionManager{
           )
 
         ),
-      // SubActions
-        List(
+        subActions =  List(
           (
             _actionAddInstanceAt,
             Map(
@@ -135,20 +130,17 @@ object ActionManager{
             )
           )
         ),
-      // Parameters
-        List(p_instanceToMove, p_groundWhereToMoveIt)).save
+        parameters = List(p_instanceToMove, p_groundWhereToMoveIt)).save
     }
     nameToId += "Move" -> _actionMoveInstanceAt
 
     val _actionEat = {
       val p_instanceThatEat = ParameterReference("instanceThatEat", "Long")
       val p_instanceThatIsEaten = ParameterReference("instanceThatIsEaten", "Long")
-      val p_propertyHunger = ParameterReference("Hunger", "Property")
       InstanceAction(
         0L,
         "ACTION_EAT",
-      // Preconditions
-        List(
+      preconditions = List(
           (
             PreconditionManager.nameToId("isOnSameTile"),
             Map(
@@ -164,8 +156,7 @@ object ActionManager{
             )
           )
         ),
-      // SubActions
-        List(
+      subActions = List(
           (
             _actionRemoveInstanceAt,
             Map(
@@ -180,83 +171,13 @@ object ActionManager{
             )
           )
         ),
-      // Parameters
-        List(
+      parameters = List(
           p_instanceThatEat,
           p_instanceThatIsEaten
         )
       ).save
     }
     nameToId += "Eat" -> _actionEat
-  }
-
-  /**
-   * Execute a given action with given arguments
-   * @author Thomas GIOVANNINI
-   * @param action to execute
-   * @param arguments with which execute the action
-   * @return true if the action was correctly executed
-   *         false else
-   */
-  def execute(action: InstanceAction, arguments: Map[ParameterReference, ParameterValue]):Boolean = {
-    val preconditionCheck = action.preconditions.forall(item => {
-      // TODO Duplicate of a part of isFilled in Precondition
-      val args = item._2.map({
-        case (ref, param) if param.isInstanceOf[ParameterReference] => {
-          (ref, arguments(param.asInstanceOf[ParameterReference]))
-        }
-        case (ref, param) => {
-          (ref, param.asInstanceOf[ParameterValue])
-        }
-      })
-
-      item._1.isFilled(args)
-    })
-    if (preconditionCheck) {
-      val args = arguments
-      action.label match {
-        case "addInstanceAt" =>
-          HardCodedAction.addInstanceAt(args)
-          true
-        case "removeInstanceAt" =>
-          HardCodedAction.removeInstanceAt(args)
-          true
-        case "addOneToProperty" =>
-          HardCodedAction.addOneToProperty(args)
-          true
-        case "removeOneFromProperty" =>
-          HardCodedAction.removeOneFromProperty(args)
-          true
-        case _ =>
-          action.subActions
-            .map(subAction => execute(subAction._1, takeGoodArguments(subAction._2, arguments)))
-            .foldRight(true)(_ & _)
-      }
-    }else{
-      println("Precondition not filled for action " + action.label + ".")
-      false
-    }
-  }
-
-  /**
-   * Take the good argument list from the list of arguments of sur-action
-   * @author Thomas GIOVANNINI
-   * @return a reduced argument list
-   */
-  def takeGoodArguments(parameters: Map[ParameterReference, Parameter], arguments: Map[ParameterReference, ParameterValue]): Map[ParameterReference, ParameterValue] = {
-    val res = mutable.Map[ParameterReference, ParameterValue]()
-
-    parameters.foreach(item => {
-      item._2 match {
-        case reference if reference.isInstanceOf[ParameterReference] => {
-          res.update(item._1, arguments(reference.asInstanceOf[ParameterReference]))
-        }
-        case value if value.isInstanceOf[ParameterValue] => res.update(item._1, value.asInstanceOf[ParameterValue])
-        case _ => println("Failed to match parameter " + item._1.toString)
-      }
-    })
-
-    res.toMap
   }
 }
 

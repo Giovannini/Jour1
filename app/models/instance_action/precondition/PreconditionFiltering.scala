@@ -24,8 +24,8 @@ object PreconditionFiltering {
    * @param source the source instance
    * @return a list of instances that are next to the source instance
    */
-  def isNextTo(source: Instance): List[Instance] = {
-    val result = allInstances.filter(_.coordinates.isNextTo(source.coordinates))
+  def isNextTo(source: Instance, instancesList: List[Instance]): List[Instance] = {
+    val result = instancesList.filter(_.coordinates.isNextTo(source.coordinates))
     result
   }
 
@@ -35,8 +35,8 @@ object PreconditionFiltering {
    * @param source the source instance
    * @return a list of instances that have the same coordinates as the source instance
    */
-  def isOnSameTile(source: Instance): List[Instance] = {
-    val result = allInstances.filter(_.coordinates == source.coordinates)
+  def isOnSameTile(source: Instance, instancesList: List[Instance]): List[Instance] = {
+    val result = instancesList.filter(_.coordinates == source.coordinates)
     result
   }
 
@@ -46,7 +46,7 @@ object PreconditionFiltering {
    * @param source the source instance
    * @return a list of instances that are at walking distance from the source
    */
-  def isAtWalkingDistance(source: Instance): List[Instance] = {
+  def isAtWalkingDistance(source: Instance, instancesList: List[Instance]): List[Instance] = {
     /**
      * Recursively run through all the instances to get a coordinates list of all the tile the source instance can go.
      * @param source instance
@@ -56,15 +56,15 @@ object PreconditionFiltering {
     def getNear(source: Instance, remainingDistance: Int): List[Instance] = {
       if (remainingDistance < 1) List()
       else {
-        source :: isNextTo(source)
-          .filter(instance => instance.concept.label == "Earth")
+        source :: isNextTo(source, instancesList)
           .flatMap(newSource => getNear(newSource, remainingDistance - 1))
       }
     }
 
     val propertyWalkingDistance = PropertyDAO.getByName("WalkingDistance")
-    getNear(source, source.getValueForProperty(propertyWalkingDistance).asInstanceOf[Int])
+    val result = getNear(source, source.getValueForProperty(propertyWalkingDistance).asInstanceOf[Int])
       .distinct
+    result
   }
 
   /**

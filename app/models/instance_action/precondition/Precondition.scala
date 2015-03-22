@@ -1,10 +1,8 @@
 package models.instance_action.precondition
 
-import controllers.Application
-import models.WorldMap
 import models.graph.ontology.Instance
-import models.instance_action.parameter.{ParameterError, ParameterValue, Parameter, ParameterReference}
-import play.api.libs.json.{JsValue, JsNumber, JsString, Json}
+import models.instance_action.parameter.{Parameter, ParameterReference, ParameterValue}
+import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
 /**
  * Model for preconditions
@@ -21,13 +19,13 @@ case class Precondition(id: Long,
   /*######################
     Logical composition
   ######################*/
-  def or(other: Precondition)(arguments: Map[ParameterReference, ParameterValue], map: WorldMap) = {
+  /*def or(other: Precondition)(arguments: Map[ParameterReference, ParameterValue]) = {
     this.isFilled(arguments) || other.isFilled(arguments)
   }
 
-  def and(other: Precondition)(arguments: Map[ParameterReference, ParameterValue], map: WorldMap) = {
+  def and(other: Precondition)(arguments: Map[ParameterReference, ParameterValue]) = {
     this.isFilled(arguments) && other.isFilled(arguments)
-  }
+  }*/
 
   /*######################
     Precondition modifications
@@ -49,53 +47,54 @@ case class Precondition(id: Long,
    * @return true if the action was correctly executed
    *         false else
    */
-  def isFilled(parameters: Map[ParameterReference, ParameterValue]): Boolean = {
-    def isSubconditionFilled(subcondition: Precondition, parameters: Map[ParameterReference, Parameter]): Boolean = {
-      // Replace any reference to a current parameter to its value
-      val newParameters = parameters.map({
-        case (ref, param) if param.isInstanceOf[ParameterReference] => (ref, parameters(param.asInstanceOf[ParameterReference]))
-        case (ref, param) => (ref, param.asInstanceOf[ParameterValue])
-      }).asInstanceOf[Map[ParameterReference, ParameterValue]]
-
-      // Evaluate if the subcondition is filled or not
-      subcondition.isFilled(newParameters)
+  def isFilled(parameters: Map[ParameterReference, Parameter], arguments: Map[ParameterReference, ParameterValue])
+  : Boolean = {
+    def retrieveGoodArguments() = {
+      parameters.map({
+        case (ref, param) =>
+          (ref, param match {
+            case key: ParameterReference => arguments(key)
+            case _ => param.asInstanceOf[ParameterValue]
+          })
+      })
     }
+    val args = retrieveGoodArguments()
 
     this.label match {
       // First test if it's among the Hard Coded preconditions
-      case "isNextTo" => HCPrecondition.isNextTo(parameters)
-      case "isOnSameTile" => HCPrecondition.isOnSameTile(parameters)
-      case "isAtWalkingDistance" => HCPrecondition.isAtWalkingDistance(parameters)
-      case "hasProperty" => HCPrecondition.hasProperty(parameters)
-      case "propertyIsHigherThan" => HCPrecondition.isHigherThan(parameters)
-      case "propertyIsLowerThan" => ! HCPrecondition.isHigherThan(parameters)
+      case "isNextTo" => HCPrecondition.isNextTo(args)
+      case "isOnSameTile" => HCPrecondition.isOnSameTile(args)
+      case "isAtWalkingDistance" => HCPrecondition.isAtWalkingDistance(args)
+      case "hasProperty" => HCPrecondition.hasProperty(args)
+      case "propertyIsHigherThan" => HCPrecondition.isHigherThan(args)
+      case "propertyIsLowerThan" => ! HCPrecondition.isHigherThan(args)
       // It's a user-created precondition
       case _ =>
-        this.subConditions.forall(current => isSubconditionFilled(current._1, current._2))
+        this.subConditions.forall(current => current._1.isFilled(current._2, arguments))
     }
   }
 
-  /**
+  /*
    * Get the argument list needed to execute an action
-   * @param availableParameters the ids of the instances needed to execute the actions
+   * @param args the ids of the instances needed to execute the actions
    * @return a list of arguments and their values
    */
-  def getArgumentsList(args: List[ParameterValue]): Map[ParameterReference, ParameterValue] = {
+  /*def getArgumentsList(args: List[ParameterValue]): Map[ParameterReference, ParameterValue] = {
     parameters.zip(args).toMap
-  }
+  }*/
 
-  def instancesThatFill(source: Instance): Set[Instance] = {
+  def instancesThatFill(source: Instance, instancesList: List[Instance]): Set[Instance] = {
     this.label match {
       case "isNextTo" =>
-        PreconditionFiltering.isNextTo(source).toSet
+        PreconditionFiltering.isNextTo(source, instancesList).toSet
       case "isOnSameTile" =>
-        PreconditionFiltering.isOnSameTile(source).toSet
+        PreconditionFiltering.isOnSameTile(source, instancesList).toSet
       case "isAtWalkingDistance" =>
-        PreconditionFiltering.isAtWalkingDistance(source).toSet
+        PreconditionFiltering.isAtWalkingDistance(source, instancesList).toSet
       case _ =>
         this.subConditions
-          .map(_._1.instancesThatFill(source))
-          .foldRight(Application.map.getInstances.toSet)(_ intersect _)
+          .map(_._1.instancesThatFill(source, instancesList))
+          .foldRight(instancesList.toSet)(_ intersect _)
     }
   }
 

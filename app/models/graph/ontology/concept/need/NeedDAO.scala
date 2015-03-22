@@ -6,6 +6,8 @@ import controllers.Application
 import models.graph.ontology.concept.consequence.ConsequenceStep
 import models.graph.ontology.property.Property
 import models.instance_action.action.InstanceAction
+import play.api.db.DB
+import play.api.Play.current
 
 import scala.language.postfixOps
 
@@ -36,27 +38,39 @@ object NeedDAO {
   }
 
   def clear: Boolean = {
-    val statement = NeedStatement.clearDB
-    statement.execute()
+    DB.withConnection { implicit connection =>
+      val statement = NeedStatement.clearDB
+      statement.execute()
+    }
   }
 
   def getAll: List[Need] = {
-    val statement = NeedStatement.getAll
-    statement.as(needParser *)
+    DB.withConnection { implicit connection =>
+      val statement = NeedStatement.getAll
+      statement.as(needParser *)
+    }
   }
 
   def getById(id: Long): Need = {
-    val statement = NeedStatement.getById(id)
-    statement.as(needParser.singleOpt).getOrElse(Need.error)
+    DB.withConnection { implicit connection =>
+      val statement = NeedStatement.getById(id)
+      statement.as(needParser.singleOpt).getOrElse(Need.error)
+    }
   }
 
-  def save(consequence: Need): Boolean = {
-    val statement = NeedStatement.add(consequence)
-    statement.execute()
+  def save(need: Need): Need = {
+    DB.withConnection { implicit connection =>
+      val statement = NeedStatement.add(need)
+      val optionId: Option[Long] = statement.executeInsert()
+      val id = optionId.getOrElse(-1L)
+      need.withId(id)
+    }
   }
 
   def delete(id: Long): Boolean = {
-    val statement = NeedStatement.remove(id)
-    statement.execute()
+    DB.withConnection { implicit connection =>
+      val statement = NeedStatement.remove(id)
+      statement.execute()
+    }
   }
 }

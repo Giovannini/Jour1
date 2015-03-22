@@ -30,12 +30,15 @@ object ConceptDAO {
       val label = row[String]("concept_label")
       val properties = row[Seq[String]]("concept_prop").map(Property.parseString).toList
       val rulesProperty = row[Seq[String]]("concept_rules").map(ValuedProperty.parse).toList
-      val needs = row[Seq[Long]]("concept_needs").map(NeedDAO.getById).toList
+      val needs = row[Seq[String]]("concept_needs").map(id => NeedDAO.getById(id.toLong)).toList
       val display = DisplayProperty.parseString(row[String]("concept_display"))
       Concept(label, properties, rulesProperty, needs, display)
     } match {
       case Success(concept) => concept
-      case Failure(e) => Concept.error
+      case Failure(e) =>
+        println("Error while parsing row for a concept.")
+        println(e)
+        Concept.error
     }
   }
 

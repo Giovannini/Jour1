@@ -1,7 +1,6 @@
 package models.instance_action.action
 
-import models.graph.ontology.property.PropertyDAO
-import models.instance_action.parameter.{ParameterValue, ParameterReference}
+import models.instance_action.parameter.{ParameterReference, ParameterValue}
 
 /**
  * Parser class for actions
@@ -28,7 +27,7 @@ object ActionParser {
         instancesId.map(id => ParameterValue(id, "Long"))
       )
 
-      ActionManager.execute(action, arguments)
+      action.execute(arguments)
     }
   }
 

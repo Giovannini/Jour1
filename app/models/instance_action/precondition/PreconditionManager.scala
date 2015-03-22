@@ -1,6 +1,6 @@
 package models.instance_action.precondition
 
-import models.instance_action.parameter.{Parameter, ParameterReference}
+import models.instance_action.parameter.ParameterReference
 
 /**
  * Manager for the preconditions.
@@ -8,7 +8,7 @@ import models.instance_action.parameter.{Parameter, ParameterReference}
 object PreconditionManager {
 
   /* TODO: preconditions to implement
-   * See [Thomas]
+   * See
    * Search "Can I see an apple from there?"
    */
 

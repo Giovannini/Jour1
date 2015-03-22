@@ -18,7 +18,7 @@
                 <h2>Selected Tile : {{ tile.x }}, {{ tile.y }}</h2>
                 <ul>
                     <li ng-repeat="(instanceId, instance) in instances">
-                        <a ng-click="selectInstance(instanceId)" class="item">{{ instance.label }}</a>
+                        <a ng-click="selectInstance(instanceId)" class="item">{{ instance.label }} {{ instance.id }}</a>
                         <div class="instance-info" ng-show="selectedInstance == instanceId">
                             <div class="loading" ng-show="loadingActions == instanceId">
                                 Loading...

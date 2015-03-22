@@ -1,3 +1,4 @@
+/*
 package models.graph.ontology.concept.consequence
 
 import anorm.SqlParser._
@@ -54,3 +55,4 @@ object ConsequenceDAO {
     statement.execute()
   }
 }
+*/

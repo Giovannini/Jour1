@@ -3,7 +3,8 @@ package controllers
 import models.graph.NeoDAO
 import models.graph.custom_types.DisplayProperty
 import models.graph.ontology._
-import models.graph.ontology.concept.need.Need
+import models.graph.ontology.concept.consequence.{Consequence, ConsequenceStep}
+import models.graph.ontology.concept.need.{NeedDAO, Need}
 import models.graph.ontology.concept.{Concept, ConceptDAO}
 import models.graph.ontology.property.{Property, PropertyDAO}
 import models.graph.ontology.relation.Relation
@@ -79,23 +80,28 @@ object WorldInitialisation extends Controller {
 
     PropertyDAO.clear
     Relation.DBList.clear
+    NeedDAO.clear
 
     /*Property declaration*/
     val propertyInstanciable = Property("Instanciable", 0).save
     val propertyStrength = Property("Strength", 0).save
 
-    val propertySense = Property("Sense", 3).save
+    val propertySense = Property("Sense", 5).save
     val propertyDuplicationSpeed = Property("DuplicationSpeed", 5).save
     val propertyWalkingDistance = Property("WalkingDistance", 3).save
     val propertyHunger = Property("Hunger", 5).save
+    val propertyComfort = Property("Comfort", 5).save
 
     PreconditionManager.initialization()
     ActionManager.initialization()
 
     /* Creation of needs */
-    val needFood = Need(0L, "Hunger", propertyHunger, 0,
-      List(),
-      List(ActionManager.nameToId("Eat"), ActionManager.nameToId("Move")))
+    val needFood = NeedDAO.save(Need(0L, "Hunger", propertyHunger, priority = 6,
+      List(ConsequenceStep(10, Consequence(8, List(ActionManager.nameToId("_actionRemoveInstanceAt"))))),
+      List(ActionManager.nameToId("Eat"), ActionManager.nameToId("Move"))))
+    val needSeaAir = NeedDAO.save(Need(0L, "SeaAir", propertyComfort, priority = 5,
+      List(ConsequenceStep(6, Consequence(5, List(ActionManager.nameToId("_actionRemoveOneFromProperty"))))),
+      List(ActionManager.nameToId("Move"))))
 
     println("Declaration of concepts...")
 
@@ -103,7 +109,7 @@ object WorldInitialisation extends Controller {
     val conceptMan = Concept("Man",
       List(propertySense),
       List(ValuedProperty(propertyStrength, 2), ValuedProperty(propertyInstanciable, 1)),
-      List(),
+      List(needSeaAir),
       DisplayProperty("#E3B494", 20))
     val conceptPredator = Concept("Predator",
       List(propertyHunger, propertySense),
@@ -122,7 +128,7 @@ object WorldInitialisation extends Controller {
       DisplayProperty("#EEE9D6", 16))
     val conceptAnimal = Concept("Animal",
       List(propertyWalkingDistance, propertyHunger, propertySense),
-      List(), List(), DisplayProperty())
+      List(), List(needFood), DisplayProperty())
     val conceptGrass = Concept("Grass",
       List(propertyDuplicationSpeed),
       List(ValuedProperty(propertyStrength, 40),

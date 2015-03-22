@@ -21,7 +21,12 @@ case class Need(id: Long,
   affectedProperty: Property,
   priority: Double,
   consequencesSteps: List[ConsequenceStep],
-  meansOfSatisfaction: List[InstanceAction])
+  meansOfSatisfaction: List[InstanceAction]){
+
+  def withId(newID: Long): Need = {
+    Need(newID, label, affectedProperty, priority, consequencesSteps, meansOfSatisfaction)
+  }
+}
 
 // TODO: the labal is not really mandatory here
 

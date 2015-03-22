@@ -3,14 +3,14 @@ package models.instance_action.action
 import anorm.SqlParser._
 import anorm._
 import controllers.Application
-import models.instance_action.parameter.{ParameterReference, Parameter}
-import models.instance_action.precondition.{Precondition, PreconditionDAO}
+import models.graph.ontology.Instance
+import models.instance_action.parameter.{ParameterValue, Parameter, ParameterReference}
+import models.instance_action.precondition.Precondition
 import play.api.Play.current
-import play.api.data.Form
-import play.api.data.Forms._
 import play.api.db.DB
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
+import scala.collection.mutable
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
@@ -41,6 +41,10 @@ case class InstanceAction(id: Long,
     InstanceAction(newId, this.label, this.preconditions, this.subActions, this.parameters)
   }
 
+
+  /*#################
+    Json parsing
+  #################*/
   /**
    * Parse the instance action to a Json object
    * @author Thomas GIOVANNINI
@@ -72,6 +76,10 @@ case class InstanceAction(id: Long,
     )
   }
 
+
+  /*#################
+    DB interactions
+  #################*/
   /**
    * Save the action to database
    * @author Thomas GIOVANNINI
@@ -79,6 +87,89 @@ case class InstanceAction(id: Long,
    */
   def save: InstanceAction = {
     InstanceAction.save(this)
+  }
+
+
+  /*#################
+    Executions
+  #################*/
+  /**
+   * Get the instances that validate all the preconditions of a given action
+   * @author Thomas GIOVANNINI
+   * @param sourceInstance the source of the action
+   * @param instances list of instances to validate
+   * @return a list of instances under JSON format
+   */
+  def getDestinationList(sourceInstance: Instance, instances: List[Instance]): List[Instance] = {
+    println("Getting destination list for action " + this.label + ", " + instances.length)
+    val result = preconditions
+      .map(_._1.instancesThatFill(sourceInstance, instances))
+      .foldRight(instances.toSet)(_ intersect _)
+      .toList
+    println("Destination list has a size of " + result.length + " for action " + this.label)
+    println(result.map(_.label).mkString(", "))
+    result
+  }
+
+  /**
+   * Check if all the action's preconditions are filled before executing it.
+   * @param arguments to use to check those preconditions
+   * @return true if all the preconditions are filled
+   *         false else
+   */
+  def checkPreconditions(arguments: Map[ParameterReference, ParameterValue]): Boolean = {
+    preconditions.forall(item => item._1.isFilled(item._2, arguments))
+  }
+
+  /**
+   * Execute a given action with given arguments
+   * @author Thomas GIOVANNINI
+   * @param arguments with which execute the action
+   * @return true if the action was correctly executed
+   *         false else
+   */
+  def execute(arguments: Map[ParameterReference, ParameterValue]):Boolean = {
+    val preconditionCheck = checkPreconditions(arguments)
+
+    if (preconditionCheck) {
+      this.label match {
+        case "addInstanceAt" =>
+          HardCodedAction.addInstanceAt(arguments)
+          true
+        case "removeInstanceAt" =>
+          HardCodedAction.removeInstanceAt(arguments)
+          true
+        case "addOneToProperty" =>
+          HardCodedAction.addOneToProperty(arguments)
+          true
+        case "removeOneFromProperty" =>
+          HardCodedAction.removeOneFromProperty(arguments)
+          true
+        case _ =>
+          subActions.forall(subAction => subAction._1.execute(takeGoodArguments(subAction._2, arguments)))
+      }
+    }else{
+      println("Precondition not filled for action " + this.label + ".")
+      false
+    }
+  }
+
+  /**
+   * Take the good argument list from the list of arguments of sur-action
+   * @author Thomas GIOVANNINI
+   * @return a reduced argument list
+   */
+  def takeGoodArguments(parameters: Map[ParameterReference, Parameter], arguments: Map[ParameterReference, ParameterValue]): Map[ParameterReference, ParameterValue] = {
+    val res = mutable.Map[ParameterReference, ParameterValue]()
+    //TODO functionalize
+    parameters.foreach(item => item._2 match {
+      case reference: ParameterReference =>
+        res.update(item._1, arguments(reference.asInstanceOf[ParameterReference]))
+      case value: ParameterValue => res.update(item._1, value.asInstanceOf[ParameterValue])
+      case _ => println("Failed to match parameter " + item._1.toString)
+    })
+
+    res.toMap
   }
 }
 

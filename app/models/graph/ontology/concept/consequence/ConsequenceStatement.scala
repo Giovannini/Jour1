@@ -1,3 +1,4 @@
+/*
 package models.graph.ontology.concept.consequence
 
 import anorm._
@@ -85,3 +86,4 @@ object ConsequenceStatement {
   }
 
 }
+*/

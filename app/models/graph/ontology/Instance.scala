@@ -5,6 +5,7 @@ import models.graph.custom_types.Coordinates
 import models.graph.ontology.concept.need.Need
 import models.graph.ontology.concept.{Concept, ConceptDAO}
 import models.graph.ontology.property.Property
+import models.instance_action.action.InstanceAction
 import play.api.libs.json._
 
 
@@ -121,15 +122,62 @@ case class Instance(id:             Int,
     Instance(id, label, coordinates, newconcept.properties.map(_.defaultValuedProperty),newconcept)
   }
 
-  def evaluateNeeds: List[Need] = {
-    val senseRadius = properties.find(_.property == Property("Sense", 3)).getOrElse(ValuedProperty.error).value.toInt
-    val coordinatesList = coordinates.getNearCoordinate(senseRadius)
-    //TODO send request to WorldActor instead
-    val sensedInstances = coordinatesList.flatMap(Application.map.getInstancesAt)
+  /**
+   * Choose the better action an action has to do to fulfill its needs.
+   * @author Thomas GIOVANNINI
+   * @return an InstanceAction that the instance should do.
+   */
+  def selectAction: InstanceAction = {
+    /**
+     * Sort needs by order of importance
+     * @author Thomas GIOVANNINI
+     * @return a sorted list of needs
+     */
+    def orderNeedsByImportance: List[Need] = {
+      //TODO sorting
+      this.concept.needs
+    }
 
-    val needs = concept.needs
-    //TODO compute needs given sensedInstances
-    needs
+    val possibleActions = orderNeedsByImportance.flatMap(_.meansOfSatisfaction)
+      .distinct
+    val relations = concept.getPossibleActionsAndDestinations
+
+
+    /**
+     * Retrieve all the instances that are sensed by this instance.
+     * @author Thomas GIOVANNINI
+     * @return a list of sensed instances.
+     */
+    def getSensedInstances: List[Instance] = {
+      val senseRadius = properties.find(_.property == Property("Sense", 5)).getOrElse(ValuedProperty.error).value.toInt
+      val coordinatesList = coordinates.getNearCoordinate(senseRadius)
+      //TODO send request to WorldActor instead
+      coordinatesList.flatMap(Application.map.getInstancesAt)
+    }
+
+    val possibleDestinations = getSensedInstances
+
+    /**
+     * Get best possible action to do for this instance
+     * @author Thomas GIOVANNINI
+     * @return an InstanceAction
+     */
+    def getBestAction: InstanceAction = {
+      /**
+       * Check if the instance can do an action or not
+       * @author Thomas GIOVANNINI
+       * @param action the instance wish to do
+       * @return true if the instance can do the action
+       *         false else
+       */
+      def isDoable(action: InstanceAction): Boolean = {
+        val destinationList = action.getDestinationList(this, possibleDestinations)
+        (destinationList.map(_.concept).toSet intersect relations(action).toSet).nonEmpty
+      }
+
+      possibleActions.find(isDoable).getOrElse(InstanceAction.error)
+    }
+    getBestAction
   }
 
   /**

@@ -155,13 +155,24 @@ object Relation {
      * @param id id of the relation
      * @return if of action
      */
-    def getActionIdFromId(id: Long): Long = {
+    def getActionIdFromRelationId(id: Long): Long = {
       DB.withConnection { implicit connection =>
         val statement = RelationSQLStatement.getActionId(id)
         val optionResult = statement.apply.map(row => row[Long]("actionId")).headOption
         val result = optionResult.getOrElse(-1L)
         result
       }
+    }
+
+    /**
+     * Get action associated to a relation
+     * @author Thomas GIOVANNINI
+     * @param id id of the relation
+     * @return if of action
+     */
+    def getActionFromRelationId(id: Long): InstanceAction = {
+      val actionID = getActionIdFromRelationId(id)
+      InstanceAction.getById(actionID)
     }
 
     /**
