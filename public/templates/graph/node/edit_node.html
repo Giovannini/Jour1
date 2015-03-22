@@ -63,11 +63,7 @@
             <div class="form-group">
                 <label class="form-group__label" for="rules_{{$index}}_value">Value:</label>
                 <div class="form-group__input">
-                    <input ng-if="node.rules[$index].property.valueType == 'Boolean'" ng-true-value="'1'" ng-false-value="'0'" type="checkbox" id="rules_{{$index}}_value" name="rules_{{$index}}_value" ng-model="node.rules[$index].value" />
-                    <input ng-if="node.rules[$index].property.valueType == 'String'" type="text" id="rules_{{$index}}_value" name="rules_{{$index}}_value" ng-model="node.rules[$index].value" />
-                    <input ng-if="node.rules[$index].property.valueType == 'Int'" type="number" id="rules_{{$index}}_value" name="rules_{{$index}}_value" ng-model="node.rules[$index].value" />
-                    <input ng-if="node.rules[$index].property.valueType == 'Double'" type="number" id="rules_{{$index}}_value" name="rules_{{$index}}_value" ng-model="node.rules[$index].value" />
-
+                    <input type="number" id="rules_{{$index}}_value" name="rules_{{$index}}_value" ng-model="node.rules[$index].value" />
                 </div>
             </div>
             <div class="form-group">
