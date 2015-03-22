@@ -27,7 +27,7 @@ object RulesVisualisation extends Controller {
   }
 
   def ruleUnapply(action: InstanceAction): Option[(Int, String, List[String], List[String], List[String])] = {
-    Option((action.id.toInt, action.label, action.parameters.map(_.toString), action.preconditions.map(_.toString), action.subActions.map(_.toString)))
+    Option((action.id.toInt, action.label, action.parameters.map(_.toString), action.preconditions.map(_.toString()), action.subActions.map(_.toString())))
   }
 
   /**

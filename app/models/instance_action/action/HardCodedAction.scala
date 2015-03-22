@@ -1,10 +1,8 @@
 package models.instance_action.action
 
 import controllers.Application
-import models.graph.custom_types.Coordinates
 import models.graph.ontology.Instance
-import models.graph.ontology.concept.ConceptDAO
-import models.graph.ontology.property.{PropertyDAO, Property}
+import models.graph.ontology.property.PropertyDAO
 import models.instance_action.parameter.{ParameterReference, ParameterValue}
 
 /**
@@ -61,7 +59,7 @@ object HardCodedAction {
 //    map.getInstancesAt(coordinates).map(_.concept).contains(concept)
 //  }
 
-  /**
+  /*
    * Modify value of a property
    * @author Thomas GIOVANNINI
    * @param args array containing id of the instance to update, property to string to modify and new value

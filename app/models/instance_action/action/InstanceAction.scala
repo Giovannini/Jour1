@@ -101,13 +101,10 @@ case class InstanceAction(id: Long,
    * @return a list of instances under JSON format
    */
   def getDestinationList(sourceInstance: Instance, instances: List[Instance]): List[Instance] = {
-    println("Getting destination list for action " + this.label + ", " + instances.length)
     val result = preconditions
       .map(_._1.instancesThatFill(sourceInstance, instances))
       .foldRight(instances.toSet)(_ intersect _)
       .toList
-    println("Destination list has a size of " + result.length + " for action " + this.label)
-    println(result.map(_.label).mkString(", "))
     result
   }
 

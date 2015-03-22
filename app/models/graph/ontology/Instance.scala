@@ -4,7 +4,7 @@ import controllers.Application
 import models.graph.custom_types.Coordinates
 import models.graph.ontology.concept.need.Need
 import models.graph.ontology.concept.{Concept, ConceptDAO}
-import models.graph.ontology.property.Property
+import models.graph.ontology.property.{PropertyType, Property}
 import models.instance_action.action.InstanceAction
 import play.api.libs.json._
 
@@ -149,7 +149,7 @@ case class Instance(id:             Int,
      * @return a list of sensed instances.
      */
     def getSensedInstances: List[Instance] = {
-      val senseRadius = properties.find(_.property == Property("Sense", 5)).getOrElse(ValuedProperty.error).value.toInt
+      val senseRadius = properties.find(_.property == Property("Sense", PropertyType.Int, 5)).getOrElse(ValuedProperty.error).value.toInt
       val coordinatesList = coordinates.getNearCoordinate(senseRadius)
       //TODO send request to WorldActor instead
       coordinatesList.flatMap(Application.map.getInstancesAt)

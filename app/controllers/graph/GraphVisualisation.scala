@@ -70,21 +70,21 @@ object GraphVisualisation extends Controller {
    * Gets all the properties
    * @return
    */
-  def getProperties() = Action { request =>
+  def getProperties = Action { request =>
     jsonOrRedirectToIndex(request) {
       val properties = PropertyDAO.getAll
       Ok(Json.toJson(properties.map(_.toJson)))
     }
   }
 
-  def getPreconditions() = Action { request =>
+  def getPreconditions = Action { request =>
     jsonOrRedirectToIndex(request) {
       val preconditions = PreconditionDAO.getAll
       Ok(Json.toJson(preconditions.map(_.toJson)))
     }
   }
 
-  def getActions() = Action { request =>
+  def getActions = Action { request =>
     jsonOrRedirectToIndex(request) {
       val preconditions = InstanceAction.getAll
       Ok(Json.toJson(preconditions.map(_.toJson)))

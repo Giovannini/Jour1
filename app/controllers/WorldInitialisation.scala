@@ -6,7 +6,7 @@ import models.graph.ontology._
 import models.graph.ontology.concept.consequence.{Consequence, ConsequenceStep}
 import models.graph.ontology.concept.need.{NeedDAO, Need}
 import models.graph.ontology.concept.{Concept, ConceptDAO}
-import models.graph.ontology.property.{Property, PropertyDAO}
+import models.graph.ontology.property.{PropertyType, Property, PropertyDAO}
 import models.graph.ontology.relation.Relation
 import models.instance_action.action.ActionManager
 import models.instance_action.precondition.PreconditionManager
@@ -83,14 +83,14 @@ object WorldInitialisation extends Controller {
     NeedDAO.clear
 
     /*Property declaration*/
-    val propertyInstanciable = Property("Instanciable", 0).save
-    val propertyStrength = Property("Strength", 0).save
+    val propertyInstanciable = Property("Instanciable", PropertyType.Bool, 0).save
+    val propertyStrength = Property("Strength", PropertyType.Int, 0).save
 
-    val propertySense = Property("Sense", 5).save
-    val propertyDuplicationSpeed = Property("DuplicationSpeed", 5).save
-    val propertyWalkingDistance = Property("WalkingDistance", 3).save
-    val propertyHunger = Property("Hunger", 5).save
-    val propertyComfort = Property("Comfort", 5).save
+    val propertySense = Property("Sense", PropertyType.Int, 5).save
+    val propertyDuplicationSpeed = Property("DuplicationSpeed", PropertyType.Double, 5).save
+    val propertyWalkingDistance = Property("WalkingDistance", PropertyType.Int, 3).save
+    val propertyHunger = Property("Hunger", PropertyType.Double, 5).save
+    val propertyComfort = Property("Comfort", PropertyType.Double, 5).save
 
     PreconditionManager.initialization()
     ActionManager.initialization()

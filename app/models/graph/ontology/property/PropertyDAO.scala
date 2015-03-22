@@ -22,8 +22,10 @@ object PropertyDAO {
    */
   private val propertyParser: RowParser[Property] = {
     get[String]("label") ~
+    get[String]("type") ~
     get[Double]("defaultValue") map {
-      case label ~ defaultValue => Property(label, defaultValue)
+      case label ~ propertyType ~ defaultValue =>
+        Property(label, PropertyType.parse(propertyType), defaultValue)
     }
   }
 

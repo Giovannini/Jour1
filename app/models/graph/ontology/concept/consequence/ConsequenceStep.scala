@@ -7,7 +7,7 @@ import play.api.data.format.Formats._
 import scala.util.{Failure, Success, Try}
 
 /**
- * Created by giovannini on 3/18/15.
+ * Step for a consequence
  */
 case class ConsequenceStep(value: Double, consequence: Consequence) {
 
