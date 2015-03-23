@@ -90,7 +90,7 @@ object WorldInitialisation extends Controller {
     val propertyDuplicationSpeed = Property("DuplicationSpeed", PropertyType.Double, 5).save
     val propertyWalkingDistance = Property("WalkingDistance", PropertyType.Int, 3).save
     val propertyHunger = Property("Hunger", PropertyType.Double, 5).save
-    val propertyComfort = Property("Comfort", PropertyType.Double, 5).save
+    val propertyComfort = Property("Comfort", PropertyType.Double, 3).save
 
     PreconditionManager.initialization()
     ActionManager.initialization()
@@ -100,14 +100,14 @@ object WorldInitialisation extends Controller {
       List(ConsequenceStep(10, Consequence(8, List(ActionManager.nameToId("_actionRemoveInstanceAt"))))),
       List(ActionManager.nameToId("Eat"), ActionManager.nameToId("Move"))))
     val needSeaAir = NeedDAO.save(Need(0L, "SeaAir", propertyComfort, priority = 5,
-      List(ConsequenceStep(6, Consequence(5, List(ActionManager.nameToId("_actionRemoveOneFromProperty"))))),
+      List(ConsequenceStep(5, Consequence(5, List(ActionManager.nameToId("_actionRemoveOneFromProperty"))))),
       List(ActionManager.nameToId("Move"))))
 
     println("Declaration of concepts...")
 
     /*Concepts declaration*/
     val conceptMan = Concept("Man",
-      List(propertySense),
+      List(propertySense, propertyComfort),
       List(ValuedProperty(propertyStrength, 2), ValuedProperty(propertyInstanciable, 1)),
       List(needSeaAir),
       DisplayProperty("#E3B494", 20))

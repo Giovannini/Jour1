@@ -110,8 +110,11 @@ object RestCall extends Controller {
   }
 
   def getBestAction(instanceID: Long) = Action {
+    val t1 = System.currentTimeMillis()
     val instance = Application.map.getInstanceById(instanceID)
     val bestAction = instance.selectAction
+    val t2 = System.currentTimeMillis()
+    println("Getting best action took " + (t2 - t1) + "ms.")
     Ok("Best action for instance " + instanceID + " - " + instance.label + "\n" + bestAction.label)
   }
 }

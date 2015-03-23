@@ -134,8 +134,9 @@ case class Instance(id:             Int,
      * @return a sorted list of needs
      */
     def orderNeedsByImportance: List[Need] = {
-      //TODO sorting
-      this.concept.needs
+      val result = this.concept.needs.sortBy(- _.evaluate(this))
+      println("Chosen need: " + result.head.label)
+      result
     }
 
     val possibleActions = orderNeedsByImportance.flatMap(_.meansOfSatisfaction)
