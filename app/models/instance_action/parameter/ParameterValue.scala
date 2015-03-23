@@ -1,8 +1,8 @@
 package models.instance_action.parameter
 
 import models.graph.ontology.Instance
-import models.graph.ontology.property.Property
-import play.api.libs.json.{JsNumber, JsString, Json, JsValue}
+import models.graph.ontology.property.PropertyDAO
+import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
 
 case class ParameterValue(value: Any, _type: String) extends Parameter {
@@ -13,9 +13,11 @@ case class ParameterValue(value: Any, _type: String) extends Parameter {
 
   def toDBString = "__val"+value + ": " + _type
 
-  def jsonValue: JsValue = _type match {
-    case "Int" => JsNumber(value.asInstanceOf[Int])
-    case "Long" => value.asInstanceOf[Instance].toJson
-    case "Property" => value.asInstanceOf[Property].toJson
+  def jsonValue: JsValue = {
+    _type match {
+      case "Int" => JsNumber(value.asInstanceOf[Int])
+      case "Long" => value.asInstanceOf[Instance].toJson
+      case "Property" => PropertyDAO.getByName(value.asInstanceOf[String]).toJson
+    }
   }
 }

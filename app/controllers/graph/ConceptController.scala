@@ -15,7 +15,6 @@ import play.api.mvc._
  * Controller that operate CRUD operations on Concepts
  */
 object ConceptController extends Controller {
-  println("caca")
   /**
    * Concept form
    */
@@ -128,7 +127,6 @@ object ConceptController extends Controller {
         /* Get the initial concept */
         val statement = Statement.getConceptByLabel(search)
         val cypherResultRowStream = statement.apply()(NeoDAO.connection)
-        println(cypherResultRowStream.nonEmpty)
         if (cypherResultRowStream.nonEmpty) {
           // A concept has been found
           val nodes = cypherResultRowStream.map(ConceptDAO.parseRow)
@@ -162,7 +160,6 @@ object ConceptController extends Controller {
   def deleteConcept(label: String) = {
     Action {
       val concept = ConceptDAO.getByLabel(label)
-      println(concept.id)
       println(ConceptDAO.removeConceptFromDB(concept))
       Redirect(controllers.routes.Application.index())
     }

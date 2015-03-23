@@ -64,7 +64,9 @@ case class InstanceAction(id: Long,
     Json.obj(
       "id" -> JsNumber(id),
       "label" -> JsString(label),
-      "parameters" -> referenceToParameter.map(item => Parameter.toJsonWithIsParam(item._2))
+      "parameters" -> referenceToParameter.map(item => {
+        Parameter.toJsonWithIsParam(item._1, item._2)
+      })
     )
   }
 

@@ -50,17 +50,20 @@ object Parameter {
     parameters.toMap
   }
 
-  def toJsonWithIsParam(parameter: Parameter): JsValue = parameter match {
+  def toJsonWithIsParam(ref: ParameterReference, parameter: Parameter): JsValue = parameter match {
     case reference if reference.isInstanceOf[ParameterReference] => Json.obj(
       "isParam" -> true,
+      "reference" -> ref.reference,
       "value" -> reference.toJson
     )
     case value if value.isInstanceOf[ParameterValue] => Json.obj(
       "isParam" -> false,
+      "reference" -> ref.reference,
       "value" -> value.toJson
     )
     case error => Json.obj(
       "isParam" -> false,
+      "reference" -> ref.reference,
       "value" -> error.toJson
     )
   }

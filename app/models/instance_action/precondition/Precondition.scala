@@ -100,14 +100,15 @@ case class Precondition(id: Long,
 
   def toJson = Json.obj(
     "id" -> JsNumber(id),
-    "label" -> JsString(label)
+    "label" -> JsString(label),
+    "parameters" -> parameters.map(_.toJson)
   )
 
   def toJsonWithParameters(parameters: Map[ParameterReference, Parameter]): JsValue = Json.obj(
     "id" -> JsNumber(id),
     "label" -> JsString(label),
     "parameters" -> parameters.map(item => {
-      Parameter.toJsonWithIsParam(item._2)
+      Parameter.toJsonWithIsParam(item._1, item._2)
     })
   )
 
@@ -121,7 +122,7 @@ object Precondition {
    */
 
   def parseSubCondition(subConditionToParse: String): (Precondition, Map[ParameterReference, Parameter]) = {
-    val globalPattern = "(^\\d*|\\(.*\\)$)".r
+    val globalPattern = "(^\\w*|\\(.*\\)$)".r
     val result = globalPattern.findAllIn(subConditionToParse).toArray
 
     // Get the precondition

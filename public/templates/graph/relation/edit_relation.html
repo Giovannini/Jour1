@@ -1,4 +1,8 @@
-<a href="{{ back_url }}">Go back</a>
+<div class="form-field">
+    <div class="form-field__legend--single">
+        <a href="{{ back_url }}">Go back</a>
+    </div>
+</div>
 
 <form class="form" name="relationForm">
     <fieldset class="form-field">
@@ -89,37 +93,37 @@
             <!-- Arguments for the precondition -->
             <div class="form-group">
                 <div ng-repeat="param in relation.preconditions[$index].precondition.parameters" class="form-group">
-                    <label class="form-group__label" for="preconditions_{{$parent.$index}}_arguments_{{ $index }}_isParam">
+                    <label class="form-group__label" for="preconditions_{{$parent.$index}}_arguments_{{ param.reference }}_isParam">
                         {{ param.reference }}
                         <input
                                 title="Is it a parameter ?"
                                 type="checkbox"
-                                id="preconditions_{{$parent.$index}}_arguments_{{ $index }}_isParam"
-                                name="preconditions_{{$parent.$index}}_arguments_{{ $index }}_isParam"
-                                ng-model="relation.preconditions[$parent.$index].arguments[$index].isParam"/>
+                                id="preconditions_{{$parent.$index}}_arguments_{{ param.reference }}_isParam"
+                                name="preconditions_{{$parent.$index}}_arguments_{{ param.reference }}_isParam"
+                                ng-model="relation.preconditions[$parent.$index].arguments[param.reference].isParam"/>
                         :
                     </label>
                     <div class="form-group__input">
                         <select
-                                ng-if="relation.preconditions[$parent.$index].arguments[$index].isParam"
-                                id="preconditions_{{$parent.$parent.$index}}_arguments_{{ $index }}"
-                                name="preconditions_{{$parent.$parent.$index}}_arguments_{{ $index }}"
-                                ng-model="relation.preconditions[$parent.$parent.$index].arguments[$index].value"
+                                ng-if="relation.preconditions[$parent.$index].arguments[param.reference].isParam"
+                                id="preconditions_{{$parent.$parent.$index}}_arguments_{{ param.reference }}"
+                                name="preconditions_{{$parent.$parent.$index}}_arguments_{{ param.reference }}"
+                                ng-model="relation.preconditions[$parent.$parent.$index].arguments[param.reference].value"
                                 ng-options="param as param.reference for param in parametersFilteredByType(param.type)"></select>
 
-                        <div ng-if="!relation.preconditions[$parent.$index].arguments[$index].isParam">
+                        <div ng-if="!relation.preconditions[$parent.$index].arguments[param.reference].isParam">
                             <input
                                     ng-if="param.type == 'Int' || param.type == 'Long'"
                                     type="number"
-                                    id="preconditions_{{ $parent.$parent.$parent.$index }}_arguments_{{ $index }}"
-                                    name="preconditions_{{ $parent.$parent.$parent.$index }}_arguments_{{ $index }}"
-                                    ng-model="relation.preconditions[$parent.$parent.$parent.$index].arguments[$index].value" />
+                                    id="preconditions_{{ $parent.$parent.$parent.$index }}_arguments_{{ param.reference }}"
+                                    name="preconditions_{{ $parent.$parent.$parent.$index }}_arguments_{{ param.reference }}"
+                                    ng-model="relation.preconditions[$parent.$parent.$parent.$index].arguments[param.reference].value" />
 
                             <select
                                     ng-if="param.type == 'Property'"
-                                    id="preconditions_{{ $parent.$parent.$parent.$index }}_arguments_{{ $index }}"
-                                    name="preconditions_{{ $parent.$parent.$parent.$index }}_arguments_{{ $index }}"
-                                    ng-model="relation.preconditions[$parent.$parent.$parent.$index].arguments[$index].value"
+                                    id="preconditions_{{ $parent.$parent.$parent.$index }}_arguments_{{ param.reference }}"
+                                    name="preconditions_{{ $parent.$parent.$parent.$index }}_arguments_{{ param.reference }}"
+                                    ng-model="relation.preconditions[$parent.$parent.$parent.$index].arguments[param.reference].value"
                                     ng-options="property.id as property.label for property in properties"></select>
                         </div>
                     </div>
@@ -160,37 +164,37 @@
             <!-- arguments -->
             <div class="form-group">
                 <div class="form-group"  ng-repeat="param in relation.actions[$index].action.parameters">
-                    <label class="form-group__label" for="actions_{{$parent.$index}}_arguments_{{ $index }}">
+                    <label class="form-group__label" for="actions_{{$parent.$index}}_arguments_{{ param.reference }}_isParam">
                         {{ param.reference }}
                         <input
                                 title="Is it a parameter ?"
                                 type="checkbox"
-                                id="actions_{{$parent.$index}}_arguments_{{ $index }}_isParam"
-                                name="actions_{{$parent.$index}}_arguments_{{ $index }}_isParam"
-                                ng-model="relation.actions[$parent.$index].arguments[$index].isParam"/>
+                                id="actions_{{$parent.$index}}_arguments_{{ param.reference }}_isParam"
+                                name="actions_{{$parent.$index}}_arguments_{{ param.reference }}_isParam"
+                                ng-model="relation.actions[$parent.$index].arguments[param.reference].isParam"/>
                         :
                     </label>
                     <div class="form-group__input">
                         <select
-                                ng-if="relation.actions[$parent.$index].arguments[$index].isParam"
-                                id="actions_{{$parent.$parent.$index}}_arguments_{{ $index }}"
-                                name="actions_{{$parent.$parent.$index}}_arguments_{{ $index }}"
-                                ng-model="relation.actions[$parent.$parent.$index].arguments[$index].value"
+                                ng-if="relation.actions[$parent.$index].arguments[param.reference].isParam"
+                                id="actions_{{$parent.$parent.$index}}_arguments_{{ param.reference }}"
+                                name="actions_{{$parent.$parent.$index}}_arguments_{{ param.reference }}"
+                                ng-model="relation.actions[$parent.$parent.$index].arguments[param.reference].value"
                                 ng-options="param as param.reference for param in parametersFilteredByType(param.type)"></select>
 
-                        <div ng-if="!relation.actions[$parent.$index].arguments[$index].isParam">
+                        <div ng-if="!relation.actions[$parent.$index].arguments[param.reference].isParam">
                             <input
                                     ng-if="param.type == 'Int' || param.type == 'Long'"
                                     type="number"
-                                    id="actions_{{ $parent.$parent.$parent.$index }}_arguments_{{ $index }}"
-                                    name="actions_{{ $parent.$parent.$parent.$index }}_arguments_{{ $index }}"
-                                    ng-model="relation.actions[$parent.$parent.$parent.$index].arguments[$index].value" />
+                                    id="actions_{{ $parent.$parent.$parent.$index }}_arguments_{{ param.reference }}"
+                                    name="actions_{{ $parent.$parent.$parent.$index }}_arguments_{{ param.reference }}"
+                                    ng-model="relation.actions[$parent.$parent.$parent.$index].arguments[param.reference].value" />
 
                             <select
                                     ng-if="param.type == 'Property'"
-                                    id="actions_{{ $parent.$parent.$parent.$index }}_arguments_{{ $index }}"
-                                    name="actions_{{ $parent.$parent.$parent.$parent.$index }}_arguments_{{ $index }}"
-                                    ng-model="relation.actions[$parent.$parent.$parent.$index].arguments[$index].value"
+                                    id="actions_{{ $parent.$parent.$parent.$index }}_arguments_{{ param.reference }}"
+                                    name="actions_{{ $parent.$parent.$parent.$parent.$index }}_arguments_{{ param.reference }}"
+                                    ng-model="relation.actions[$parent.$parent.$parent.$index].arguments[param.reference].value"
                                     ng-options="property.id as property.label for property in properties"></select>
                         </div>
                     </div>

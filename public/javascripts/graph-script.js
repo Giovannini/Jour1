@@ -568,6 +568,7 @@ var EditRelationCtrl = ['$scope', '$routeParams', 'NodesFactory', 'EditRelationF
     $scope.submit_button = "Edit";
     $scope.back_url = "#/relation/"+$routeParams.label;
     $scope.relation  = {};
+    var relationInitialized = false;
 
     EditRelationFactory.init(
         function(error) {
@@ -583,14 +584,17 @@ var EditRelationCtrl = ['$scope', '$routeParams', 'NodesFactory', 'EditRelationF
         },
         function updateActions(actions) {
             $scope.actions = actions;
+            console.log("initActions", actions);
             initRelation();
         }
     );
 
     function initRelation() {
-        if($scope.properties != null
-                && $scope.preconditions != null
-                && $scope.actions != null) {
+        if(!relationInitialized
+                && $scope.properties.length > 0
+                && $scope.preconditions.length > 0
+                && $scope.actions.length > 0) {
+            relationInitialized = true;
             NodesFactory.getRelation(
                 $routeParams.label,
                 function(relation) {
@@ -627,18 +631,16 @@ var EditRelationCtrl = ['$scope', '$routeParams', 'NodesFactory', 'EditRelationF
                      *          ]
                      */
 
-
-
                     /* match parameters to arguments */
                     function matchParameters(currentParameters) {
                         /* Find a parameter matching for each parameters */
-                        var arguments = [];
+                        var arguments = {};
                         for (var parameterIndex in currentParameters) {
                             var parameterInitialized = false;
                             /* First look in the parameters of the relation */
                             for (var j = 0; j < relation.parameters.length && !parameterInitialized; j++) {
-                                if (currentParameters[parameterIndex].reference == relation.parameters[j].reference) {
-                                    arguments[parameterIndex] = {
+                                if (currentParameters[parameterIndex].value.reference == relation.parameters[j].reference) {
+                                    arguments[currentParameters[parameterIndex].reference] = {
                                         isParam: true,
                                         value: relation.parameters[j]
                                     };
@@ -648,7 +650,7 @@ var EditRelationCtrl = ['$scope', '$routeParams', 'NodesFactory', 'EditRelationF
 
                             /* if it hasn't been found, set the value directly */
                             if (!parameterInitialized) {
-                                arguments[parameterIndex] = {
+                                arguments[currentParameters[parameterIndex].reference] = {
                                     isParam: false,
                                     value: relation.parameters[j]
                                 }
@@ -679,6 +681,8 @@ var EditRelationCtrl = ['$scope', '$routeParams', 'NodesFactory', 'EditRelationF
 
                     /* Treating actions */
                     var newActions = [];
+                    console.log(relation.subActions);
+                    console.log($scope.actions);
                     for(var actionIndex in relation.subActions) {
                         for(var id in $scope.actions) {
                             if(relation.subActions[actionIndex].id == $scope.actions[id].id) {
@@ -696,6 +700,7 @@ var EditRelationCtrl = ['$scope', '$routeParams', 'NodesFactory', 'EditRelationF
                             }
                         }
                     }
+                    console.log(newActions);
                     relation.actions = newActions;
 
                     $scope.relation = relation;
@@ -886,7 +891,7 @@ var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', 'NodesFactory', 'EditNod
             function (root, display) {
                 for (var ruleIndex in display.rules) {
                     for (var i = 0; i < $scope.properties.length; i++) {
-                        if (display.rules[ruleIndex].property === $scope.properties[i].id) {
+                        if (display.rules[ruleIndex].property.label === $scope.properties[i].label) {
                             display.rules[ruleIndex].property = $scope.properties[i];
                         }
                     }
@@ -894,7 +899,7 @@ var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', 'NodesFactory', 'EditNod
 
                 for (var propertyIndex in display.properties) {
                     for (var i = 0; i < $scope.properties.length; i++) {
-                        if (display.properties[propertyIndex] === $scope.properties[i].id) {
+                        if (display.properties[propertyIndex].label === $scope.properties[i].label) {
                             display.properties[propertyIndex] = $scope.properties[i];
                         }
                     }
@@ -1011,7 +1016,15 @@ angular.module('graphEditor', ["ngResource", "ngRoute"])
         return function(input) {
             return input
                 .map(function(parameter) {
-                    return parameter.reference;
+                    if(parameter.isParam) {
+                        return parameter.value.reference + ": " + parameter.value.type;
+                    } else {
+                        if(parameter.value.type === "Property") {
+                            return parameter.value.value.label + ": " + parameter.value.type;
+                        } else {
+                            return parameter.value.value;
+                        }
+                    }
                 })
                 .join(", ");
         };

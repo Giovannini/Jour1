@@ -1,7 +1,6 @@
 package models.instance_action.precondition
 
 import anorm._
-import models.instance_action.parameter.{Parameter, ParameterReference}
 
 /**
  * All values from this objects are SQLStatements
@@ -36,7 +35,7 @@ object PreconditionStatement {
       item => {
         val precondition = item._1
         val parameters = item._2
-        precondition.label + "" + "(" + parameters.map(
+        precondition.id + "" + "(" + parameters.map(
           (entry) => entry._2.toDBString
         ).mkString(",") + ")"
       }
