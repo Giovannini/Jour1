@@ -58,7 +58,8 @@ var RestFactory = function() {
         },
         instances: {
             get: getUrl("/instances"),
-            getByConcept: function(idInstance, action, conceptId) { return getUrl("/instances/"+idInstance+"/"+action+"/"+conceptId); }
+            getByConcept: function(idInstance, action, conceptId) { return getUrl("/instances/"+idInstance+"/"+action+"/"+conceptId); },
+            deleteInstance: function(idInstance) { return postUrl("/instances/delete/"+idInstance, {}); }
         },
         action: {
             sendAction: function(initInstance, action, destInstance) {

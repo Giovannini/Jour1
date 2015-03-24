@@ -1,10 +1,43 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
+<div class="tile-info" ng-show="!isTileSelected">
+    <h2>No tile selected</h2>
+</div>
+<div class="tile-info loading" ng-show="loadingTile">
+    Loading...
+</div>
+<div class="tile-info" ng-show="isTileSelected">
+    <h2>Selected Tile : {{ tile.x }}, {{ tile.y }}</h2>
+    <ul>
+        <li ng-repeat="(instanceId, instance) in instances">
+            <div class="instance-list">
+                <a class="instance-item instance-title" ng-click="selectInstance(instanceId)">{{ instance.label }} {{ instance.id }}</a>
+                <a class="instance-item" href="#/instance/{{ instance.id }}/edit">Edit</a>
+                <a class="instance-item" ng-click="deleteInstance(instanceId)">Remove</a>
+            </div>
+            <div class="instance-info" ng-show="selectedInstance == instanceId">
+                <div class="loading" ng-show="loadingActions == instanceId">
+                    Loading...
+                </div>
+                <ul ng-show="loadingActions != instanceId" class="instance-info">
+                    <li ng-show="actions[instanceId].length == 0" class="no-item">No actions</li>
+                    <li ng-repeat="(actionId, action) in actions[instanceId]" class="item">
+                        <a ng-click="selectAction(actionId)">{{ action.label }}</a>
+                        <div class="choose-instance" ng-show="selectedAction == actionId">
+                            <div class="loading" ng-show="loadingChoice">
+                                Loading...
+                            </div>
+                            <div class="" ng-show="showChoice">
+                                <ul>
+                                    <li ng-repeat="choice in choices">
+                                        <a ng-click="sendAction(instance.id, actionId, choice.id)">{{ choice.label }} ({{ choice.coordinates.x}}, {{ choice.coordinates.y}})</a>
+                                    </li>
+                                    <li ng-show="choices.length == 0">No instance</li>
+                                </ul>
 
-</body>
-</html>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </li>
+    </ul>
+</div>

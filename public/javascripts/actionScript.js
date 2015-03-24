@@ -9,7 +9,7 @@ var ActionController = ['$scope', function($scope) {
     $scope.selectedInstance = -1;
     $scope.actions = [];
     var needToApply;
-    
+
     // Selected tile
     $scope.tile = {
         x: -1,
@@ -118,7 +118,44 @@ var ActionController = ['$scope', function($scope) {
             }
         );
     }
+
+    /**
+     * Try to delete an instance
+     * @param instanceId id of the instance among those placed in the same location from the map
+     */
+    $scope.deleteInstance = function(instanceId) {
+        Rest.instances.deleteInstance($scope.instances[instanceId].id)(
+            function(responseText) {
+                $scope.instances.splice(instanceId, 1);
+                $scope.$apply();
+            },
+            function(status, responseText) {
+            }
+        );
+    }
 }];
 
-angular.module('actionManagerApp', [])
-    .controller('ActionController', ActionController);
+var InstanceController = ['$scope', '$routeParams', function($scope, $routeParams) {
+    $scope.isEdition = true;
+    $scope.instanceId = $routeParams.id;
+    $scope.submit_button = "Edit";
+    $scope.back_url = "#/";
+}];
+
+angular.module('actionManagerApp', ["ngRoute"])
+    .config(['$routeProvider', function($routeProvider) {
+        $routeProvider.
+            when('/overview', {
+                templateUrl: 'assets/templates/map/overview.html',
+                controller: 'ActionController'
+            }).
+            when('/instance/:id/edit', {
+                templateUrl: 'assets/templates/map/instance/edit_instance.html',
+                controller: 'InstanceController'
+            }).
+            otherwise({
+                redirectTo: '/overview'
+            });
+    }])
+    .controller('ActionController', ActionController)
+    .controller('InstanceController', InstanceController)
