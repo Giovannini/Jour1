@@ -120,7 +120,7 @@ case class Concept(
    * @author Thomas GIOVANNINI
    * @return a map with all possibles actions as keys and with the list of all possible destinations as values
    */
-  def getPossibleActionsAndDestinations: Map[InstanceAction, List[Concept]] = {
+  lazy val getPossibleActionsAndDestinations: Map[InstanceAction, List[Concept]] = {
     ConceptDAO.getReachableRelations(id)
       .groupBy(_._1)
       .map(tuple => (

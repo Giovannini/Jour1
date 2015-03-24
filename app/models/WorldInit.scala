@@ -34,7 +34,8 @@ object WorldInit {
    * @return List of Instances of the world
    */
   def worldMapGeneration(): Unit = {
-    val allGroundsConcepts = getGroundConcept(ConceptDAO.getAll).getDescendance
+    val groundConcept = ConceptDAO.getByLabel("Ground")
+    val allGroundsConcepts = groundConcept.getDescendance
     val instanciableConcepts = getInstanciableConcepts diff allGroundsConcepts
     Try {
       generateGround(allGroundsConcepts)

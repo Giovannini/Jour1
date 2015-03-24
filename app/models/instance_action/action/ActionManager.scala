@@ -112,7 +112,7 @@ object ActionManager{
               ParameterReference("instance1ID", "Long") -> p_instanceToMove,
               ParameterReference("instance2ID", "Long") -> p_groundWhereToMoveIt
             )
-          )
+            )
 
         ),
         subActions =  List(
@@ -122,17 +122,51 @@ object ActionManager{
               ParameterReference("instanceToAdd", "Long") -> p_instanceToMove,
               ParameterReference("groundWhereToAddIt", "Long") -> p_groundWhereToMoveIt
             )
-          ),
+            ),
           (
             _actionRemoveInstanceAt,
             Map(
               ParameterReference("instanceToRemove", "Long") -> p_instanceToMove
             )
-          )
+            )
         ),
         parameters = List(p_instanceToMove, p_groundWhereToMoveIt)).save
     }
     nameToId += "Move" -> _actionMoveInstanceAt
+
+    val _actionMoveInstanceToFoodAt = {
+      val p_instanceToMove = ParameterReference("instanceToMove", "Long")
+      val p_groundWhereToMoveIt = ParameterReference("FoodWhereToMoveIt", "Long")
+      InstanceAction(
+        0L,
+        "ACTION_MOVE_TO_FOOD",
+        preconditions = List(
+          (
+            PreconditionManager.nameToId("isAtWalkingDistance"),
+            Map(
+              ParameterReference("instance1ID", "Long") -> p_instanceToMove,
+              ParameterReference("instance2ID", "Long") -> p_groundWhereToMoveIt
+            )
+          )
+        ),
+        subActions =  List(
+          (
+            _actionAddInstanceAt,
+            Map(
+              ParameterReference("instanceToAdd", "Long") -> p_instanceToMove,
+              ParameterReference("groundWhereToAddIt", "Long") -> p_groundWhereToMoveIt
+            )
+            ),
+          (
+            _actionRemoveInstanceAt,
+            Map(
+              ParameterReference("instanceToRemove", "Long") -> p_instanceToMove
+            )
+            )
+        ),
+        parameters = List(p_instanceToMove, p_groundWhereToMoveIt)).save
+    }
+    nameToId += "MoveToFood" -> _actionMoveInstanceToFoodAt
 
     val _actionEat = {
       val p_instanceThatEat = ParameterReference("instanceThatEat", "Long")

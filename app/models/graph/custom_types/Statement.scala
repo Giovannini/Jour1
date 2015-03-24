@@ -280,7 +280,7 @@ object Statement {
    * @param conceptId of which the children are desired
    * @return a cypher statement
    */
-  def getChildrenConcepts(conceptId: Long): CypherStatement = {
+  def   getChildrenConcepts(conceptId: Long): CypherStatement = {
     val relationSubtypeName = Relation.DBList.getByName("SUBTYPE_OF")
     Cypher("""
         |MATCH (n1 {id: {id}})<-[r]-(n2)
