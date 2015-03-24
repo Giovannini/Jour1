@@ -1,8 +1,6 @@
 package models.instance_action.parameter
 
-import play.api.libs.json.{Json, JsValue}
-
-import scala.collection.mutable
+import play.api.libs.json.{JsValue, Json}
 
 trait Parameter {
   def toJson: JsValue
@@ -42,12 +40,13 @@ object Parameter {
   }
 
   def linkParameterToReference(objectParameters: List[ParameterReference], params: List[Parameter]): Map[ParameterReference, Parameter] = {
+    objectParameters.zip(params).toMap/*
     val parameters = mutable.Map[ParameterReference, Parameter]()
     objectParameters.map(parameters.put(_, ParameterError("not found parameter")))
     for (i <- 0 to objectParameters.length - 1) {
       parameters.put(objectParameters(i), params(i))
     }
-    parameters.toMap
+    parameters.toMap*/
   }
 
   def toJsonWithIsParam(ref: ParameterReference, parameter: Parameter): JsValue = parameter match {

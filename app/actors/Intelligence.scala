@@ -1,10 +1,9 @@
 package actors
 
-import akka.actor.{ActorSystem, Props, Actor, ActorRef}
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.routing.RoundRobinPool
 import controllers.Application
-import models.graph.ontology.property.PropertyDAO
-import models.graph.ontology.{ValuedProperty, Instance}
+import models.graph.ontology.Instance
 import models.instance_action.action.ActionParser
 
 /**
@@ -25,15 +24,15 @@ object Intelligence {
       name = "master")
 
     // start the calculation
-    master ! Calculate
+    master ! NewTurn
   }
 
   class InstanceIntelligence extends Actor {
 
     def getActionFor(instance: Instance, sensedInstances: List[Instance]): Boolean = {
       val (action, destination) = instance.selectAction(sensedInstances)
+      println(instance.label + instance.id + " " + action.label + destination.label + destination.id)
       ActionParser.parseAction(action.id, List(instance.id, destination.id)) // TODO change that with log
-      //action.label + " " + instance.id + " " + destination.id
     }
 
     override def receive: Receive = {
@@ -53,13 +52,12 @@ object Intelligence {
       Props[InstanceIntelligence].withRouter(RoundRobinPool(nrOfWorkers)), name = "workerRouter")
 
     override def receive: Actor.Receive = {
-      case Calculate ⇒
-        val propertyInstanciable = PropertyDAO.getByName("Instanciable")
-        val instanciableInstances = Application.map.getInstances
-          .filter(_.concept.rules.contains(ValuedProperty(propertyInstanciable, 1)))
-        nrOfInstances = instanciableInstances.length
+      case NewTurn ⇒
+        val instancesWithNeeds = Application.map.getInstances
+          .filter(_.concept.needs.nonEmpty)
+        nrOfInstances = instancesWithNeeds.length
         println("Number of instances to compute: " + nrOfInstances)
-        for (instance <- instanciableInstances)
+        for (instance <- instancesWithNeeds)
           workerRouter ! ComputeAction(instance, instance.getSensedInstances.flatMap(Application.map.getInstancesAt))
       case ResultAction(log) =>
         nrOfResults += 1

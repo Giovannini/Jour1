@@ -148,8 +148,7 @@ case class Instance(id:             Int,
       result
     }
 
-    val possibleActions = orderNeedsByImportance.flatMap(_.meansOfSatisfaction)
-      .distinct
+    val possibleActions = orderNeedsByImportance.flatMap(_.meansOfSatisfaction).distinct
     val relations = concept.getPossibleActionsAndDestinations
     /**
      * Get best possible action to do for this instance

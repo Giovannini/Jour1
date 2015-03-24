@@ -47,7 +47,7 @@ case class Need(
         val factorValue = math.log(numberOfTurnsBeforeConsequence + 3)
         (priority + actualConsequenceStep.consequence.severity) / factorValue
       }
-    println("Priority for need " + label + " is " + result)
+    //println("Priority for need " + label + " is " + result)
     result
   }
 }

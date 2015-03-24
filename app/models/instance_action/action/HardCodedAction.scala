@@ -1,7 +1,6 @@
 package models.instance_action.action
 
 import controllers.Application
-import models.graph.ontology.Instance
 import models.graph.ontology.property.PropertyDAO
 import models.instance_action.parameter.{ParameterReference, ParameterValue}
 
@@ -33,12 +32,11 @@ object HardCodedAction {
    */
   def removeInstanceAt(args: Map[ParameterReference, ParameterValue]) = {
     val instanceId = args(ParameterReference("instanceToRemove", "Long")).value.asInstanceOf[Long]
+    val groundWhereToRemoveItId = args(ParameterReference("groundWhereToRemoveIt", "Long")).value.asInstanceOf[Long]
+
     val instance = map.getInstanceById(instanceId)
-    val key = instance.concept.id
-    if (map.instances.contains(key)) {
-      map.instances(key) = map.instances(key) diff List(instance)
-      instance
-    } else Instance.error
+    val coordinates = map.getInstanceById(groundWhereToRemoveItId).coordinates
+    map.removeInstance(instance.at(coordinates))
   }
 
   //NOT USED
