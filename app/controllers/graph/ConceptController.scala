@@ -1,13 +1,10 @@
 package controllers.graph
 
+import forms.graph.ontology.concept.ConceptForm
+import ConceptForm.conceptForm
 import models.graph.NeoDAO
 import models.graph.custom_types.{DisplayProperty, Statement}
-import models.graph.ontology.ValuedProperty
-import models.graph.ontology.concept.need.Need
 import models.graph.ontology.concept.{Concept, ConceptDAO}
-import models.graph.ontology.property.Property
-import play.api.data.Form
-import play.api.data.Forms._
 import play.api.libs.json.Json
 import play.api.mvc._
 
@@ -15,16 +12,6 @@ import play.api.mvc._
  * Controller that operate CRUD operations on Concepts
  */
 object ConceptController extends Controller {
-  /**
-   * Concept form
-   */
-  val conceptForm = Form(mapping(
-    "label" -> nonEmptyText, //can't be modified
-    "properties" -> list(Property.form.mapping),
-    "rules" -> list(ValuedProperty.form.mapping),
-    "needs" -> list(Need.form.mapping),
-    "displayProperty" -> DisplayProperty.form.mapping
-  )(Concept.apply)(Concept.unapply))
 
   /**
    * Creates a concept in DB from a JSON request

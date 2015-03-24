@@ -1,13 +1,9 @@
 package models.graph.ontology.concept.need
 
-import forms.InstanceActionForm
 import models.graph.ontology.Instance
 import models.graph.ontology.concept.consequence.ConsequenceStep
 import models.graph.ontology.property.Property
 import models.instance_action.action.InstanceAction
-import play.api.data.Form
-import play.api.data.Forms._
-import play.api.data.format.Formats._
 
 /**
  * Object used by instances to decide the action they'd better do.
@@ -59,15 +55,5 @@ case class Need(
 // TODO: the label is not really mandatory here
 
 object Need {
-
   val error = Need(-1L, "error", Property.error, 0, List(), List())
-
-  val form = Form(mapping(
-    "id" -> longNumber,
-    "label" -> text,
-    "affectedProperty" -> Property.form.mapping,
-    "priority" -> of[Double],
-    "consequencesSteps" -> list(ConsequenceStep.form.mapping),
-    "meansOfSatisfaction" -> list(InstanceActionForm.form.mapping)
-  )(Need.apply)(Need.unapply))
 }

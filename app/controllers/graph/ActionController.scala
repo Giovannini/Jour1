@@ -1,6 +1,6 @@
 package controllers.graph
 
-import forms.ParameterForm
+import forms.instance_action.parameter.ParameterForm
 import models.instance_action.action.InstanceAction
 import models.instance_action.parameter.ParameterReference$
 import models.instance_action.precondition.Precondition

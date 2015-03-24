@@ -2,8 +2,6 @@ package models.graph.ontology.property
 
 import models.graph.ontology.ValuedProperty
 import models.graph.ontology.property.PropertyType.PropertyType
-import play.api.data.Form
-import play.api.data.Forms._
 import play.api.libs.json._
 
 /**
@@ -33,13 +31,6 @@ case class Property(label: String, propertyType: PropertyType, defaultValue: Dou
 object Property {
   val error = Property("Error", PropertyType.Error, 0)
 
-  val form = Form(mapping(
-    "property" -> nonEmptyText
-  )(Property.parseString)(Property.unapplyForm))
-
-  private def unapplyForm(property: Property) = {
-    Some(property.toString)
-  }
 
   def parseString(stringProperty: String): Property = {
     val splitted = stringProperty.split(":")

@@ -1,4 +1,4 @@
-package forms
+package forms.instance_action.parameter
 
 import models.instance_action.parameter._
 import play.api.data.Forms._

@@ -25,13 +25,13 @@ body {
 }
 
 .left-panel {
-  width: 80%;
+  width: 60%;
 }
 
 .right-panel {
   background-color: lighten($darkColor, 5);
   color: $lightColor;
-  width: 20%;
+  width: 40%;
   border-left: 1px solid lighten($darkColor, 15);
   overflow: scroll;
 }
