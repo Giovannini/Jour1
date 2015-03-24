@@ -1,11 +1,10 @@
-package forms
+package forms.instance_action.precondition
 
-import models.instance_action.parameter.{ParameterError, ParameterReference, Parameter}
-import models.instance_action.precondition.{PreconditionDAO, Precondition}
+import forms.instance_action.parameter.ParameterForm
+import models.instance_action.parameter.{Parameter, ParameterReference}
+import models.instance_action.precondition.{Precondition, PreconditionDAO}
 import play.api.data.Form
 import play.api.data.Forms._
-
-import scala.collection.mutable
 
 object PreconditionForm {
   lazy val subconditionForm: Form[(Precondition, Map[ParameterReference, Parameter])] = Form(mapping(

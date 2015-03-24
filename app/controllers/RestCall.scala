@@ -1,11 +1,12 @@
 package controllers
 
-import models.graph.ontology.concept.{ConceptDAO, Concept}
-import models.graph.ontology.relation.Relation
+import actors.Intelligence
 import models.graph.ontology.Instance
+import models.graph.ontology.concept.{Concept, ConceptDAO}
+import models.graph.ontology.relation.Relation
+import models.instance_action.action.{ActionParser, InstanceAction}
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller, Request}
-import models.instance_action.action.{InstanceAction, ActionParser}
 
 /**
  * Controller to send Json data to client
@@ -112,9 +113,15 @@ object RestCall extends Controller {
   def getBestAction(instanceID: Long) = Action {
     val t1 = System.currentTimeMillis()
     val instance = Application.map.getInstanceById(instanceID)
-    val bestAction = instance.selectAction
+    val bestAction = instance.selectAction(instance.getSensedInstances.flatMap(Application.map.getInstancesAt))
     val t2 = System.currentTimeMillis()
     println("Getting best action took " + (t2 - t1) + "ms.")
-    Ok("Best action for instance " + instanceID + " - " + instance.label + "\n" + bestAction.label)
+    Ok("Best action for instance " + instanceID + " - " + instance.label + "\n" +
+       bestAction._1.label + " to instance " + bestAction._2.id + " - " + bestAction._2.label)
+  }
+
+  def next() = Action {
+    Intelligence.calculate(nrOfWorkers = 4)
+    Ok(views.html.map.index())
   }
 }

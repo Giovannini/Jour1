@@ -857,6 +857,7 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
 var NewNodeCtrl = ['$scope', '$routeParams', 'EditNodeFactory', function($scope, $routeParams, EditNodeFactory) {
     $scope.submit_button = "Edit";
     $scope.back_url = "#/";
+    $scope.message = "Loading...";
 
     EditNodeFactory.init(
         function(error) {
@@ -875,9 +876,13 @@ var NewNodeCtrl = ['$scope', '$routeParams', 'EditNodeFactory', function($scope,
     $scope.addRule = EditNodeFactory.addRule;
     $scope.removeRule = EditNodeFactory.removeRule;
 
+    $scope.isShowingNode = function() {
+        return typeof $scope.node !== "undefined" && $scope.node != null;
+    };
+
     $scope.submitNode = function() {
         EditNodeFactory.setNode($scope.node);
-        EditNodeFactory.submitNode(baseUrl+'graph/node/new');
+        EditNodeFactory.submitNode(baseUrl+'graph/node/new')();
     }
 }];
 
@@ -885,6 +890,7 @@ var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', 'NodesFactory', 'EditNod
     Scopes.get('search').search = $routeParams.label;
     $scope.submit_button = "Edit";
     $scope.back_url = "#/node/"+$routeParams.label;
+    $scope.message = "Loading...";
 
     var searchNode = function() {
         NodesFactory.searchNodes(
@@ -933,9 +939,12 @@ var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', 'NodesFactory', 'EditNod
     $scope.addRule = EditNodeFactory.addRule;
     $scope.removeRule = EditNodeFactory.removeRule;
 
+    $scope.isShowingNode = function() {
+        return typeof $scope.node !== "undefined" && $scope.node != null;
+    };
     $scope.submitNode = function() {
         EditNodeFactory.setNode($scope.node);
-        EditNodeFactory.submitNode(baseUrl+'graph/node/'+$routeParams.label+'/edit');
+        EditNodeFactory.submitNode(baseUrl+'graph/node/'+$routeParams.label+'/edit')();
     }
 }];
 

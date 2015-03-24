@@ -1,10 +1,9 @@
 package models.graph.ontology
 
-import controllers.Application
 import models.graph.custom_types.Coordinates
 import models.graph.ontology.concept.need.Need
 import models.graph.ontology.concept.{Concept, ConceptDAO}
-import models.graph.ontology.property.{PropertyType, Property}
+import models.graph.ontology.property.{Property, PropertyType}
 import models.instance_action.action.InstanceAction
 import play.api.libs.json._
 
@@ -123,11 +122,21 @@ case class Instance(id:             Int,
   }
 
   /**
+   * Retrieve all the instances that are sensed by this instance.
+   * @author Thomas GIOVANNINI
+   * @return a list of sensed instances.
+   */
+  def getSensedInstances: List[Coordinates] = {
+    val senseRadius = properties.find(_.property == Property("Sense", PropertyType.Int, 5)).getOrElse(ValuedProperty.error).value.toInt
+    coordinates.getNearCoordinate(senseRadius)
+  }
+
+  /**
    * Choose the better action an action has to do to fulfill its needs.
    * @author Thomas GIOVANNINI
    * @return an InstanceAction that the instance should do.
    */
-  def selectAction: InstanceAction = {
+  def selectAction(sensedInstances: List[Instance]): (InstanceAction, Instance) = {
     /**
      * Sort needs by order of importance
      * @author Thomas GIOVANNINI
@@ -135,35 +144,18 @@ case class Instance(id:             Int,
      */
     def orderNeedsByImportance: List[Need] = {
       val result = this.concept.needs.sortBy(- _.evaluate(this))
-      println("Chosen need: " + result.head.label)
+      //println("Chosen need: " + result.head.label)
       result
     }
 
-    val possibleActions = orderNeedsByImportance.flatMap(_.meansOfSatisfaction)
-      .distinct
+    val possibleActions = orderNeedsByImportance.flatMap(_.meansOfSatisfaction).distinct
     val relations = concept.getPossibleActionsAndDestinations
-
-
-    /**
-     * Retrieve all the instances that are sensed by this instance.
-     * @author Thomas GIOVANNINI
-     * @return a list of sensed instances.
-     */
-    def getSensedInstances: List[Instance] = {
-      val senseRadius = properties.find(_.property == Property("Sense", PropertyType.Int, 5)).getOrElse(ValuedProperty.error).value.toInt
-      val coordinatesList = coordinates.getNearCoordinate(senseRadius)
-      //TODO send request to WorldActor instead
-      coordinatesList.flatMap(Application.map.getInstancesAt)
-    }
-
-    val possibleDestinations = getSensedInstances
-
     /**
      * Get best possible action to do for this instance
      * @author Thomas GIOVANNINI
      * @return an InstanceAction
      */
-    def getBestAction: InstanceAction = {
+    def getBestAction: (InstanceAction, Instance) = {
       /**
        * Check if the instance can do an action or not
        * @author Thomas GIOVANNINI
@@ -171,13 +163,23 @@ case class Instance(id:             Int,
        * @return true if the instance can do the action
        *         false else
        */
-      def isDoable(action: InstanceAction): Boolean = {
-        val destinationList = action.getDestinationList(this, possibleDestinations)
-        (destinationList.map(_.concept).toSet intersect relations(action).toSet).nonEmpty
+      def destinationList(action: InstanceAction): List[Instance] = {
+        val destinationList = action.getDestinationList(this, sensedInstances)
+        destinationList.filter(instance => relations(action).contains(instance.concept))
       }
 
-      possibleActions.find(isDoable).getOrElse(InstanceAction.error)
+      def retrieveBestAction(possibleActions: List[InstanceAction])
+      : (InstanceAction, Instance) = possibleActions match {
+        case head::tail =>
+          val destinationsList = destinationList(head)
+          if (destinationsList.nonEmpty) (head, destinationsList.head)
+          else retrieveBestAction(tail)
+        case _ => (InstanceAction.error, this)
+      }
+
+      retrieveBestAction(possibleActions)
     }
+
     getBestAction
   }
 

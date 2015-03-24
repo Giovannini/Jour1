@@ -7,7 +7,7 @@ import models.instance_action.precondition.PreconditionManager
 /**
  * Manage actions
  */
-object ActionManager{
+object ActionManager {
 
   /* TODO: actions to implement
    * Eat do not remove the object but only a part of it [Simon]
@@ -41,12 +41,13 @@ object ActionManager{
 
     val _actionRemoveInstanceAt = {
       val p_instanceToRemove = ParameterReference("instanceToRemove", "Long")
+      val groundWhereToRemoveIt = ParameterReference("groundWhereToRemoveIt", "Long")
       InstanceAction(
         0L,
         "removeInstanceAt",
         List(),
         List(),
-        List(p_instanceToRemove)
+        List(p_instanceToRemove, groundWhereToRemoveIt)
       ).save
     }
     nameToId += "_actionRemoveInstanceAt" -> _actionRemoveInstanceAt
@@ -65,7 +66,7 @@ object ActionManager{
               ParameterReference("instanceID", "Long") -> p_instanceID,
               ParameterReference("property", "Property") -> p_propertyName
             )
-          )
+            )
         ),
         // SubActions
         List(),
@@ -89,7 +90,7 @@ object ActionManager{
               ParameterReference("instanceID", "Long") -> p_instanceID,
               ParameterReference("property", "Property") -> p_propertyName
             )
-          )
+            )
         ),
         // SubActions
         List(),
@@ -113,20 +114,20 @@ object ActionManager{
               ParameterReference("instance2ID", "Long") -> p_groundWhereToMoveIt
             )
           )
-
         ),
-        subActions =  List(
+        subActions = List(
           (
             _actionAddInstanceAt,
             Map(
               ParameterReference("instanceToAdd", "Long") -> p_instanceToMove,
               ParameterReference("groundWhereToAddIt", "Long") -> p_groundWhereToMoveIt
             )
-          ),
+            ),
           (
             _actionRemoveInstanceAt,
             Map(
-              ParameterReference("instanceToRemove", "Long") -> p_instanceToMove
+              ParameterReference("instanceToRemove", "Long") -> p_instanceToMove,
+              ParameterReference("groundWhereToRemoveIt", "Long") -> p_groundWhereToMoveIt
             )
           )
         ),
@@ -134,44 +135,80 @@ object ActionManager{
     }
     nameToId += "Move" -> _actionMoveInstanceAt
 
+/*    val _actionMoveInstanceToFoodAt = {
+      val p_instanceToMove = ParameterReference("instanceToMove", "Long")
+      val p_groundWhereToMoveIt = ParameterReference("FoodWhereToMoveIt", "Long")
+      InstanceAction(
+        0L,
+        "ACTION_MOVE_TO_FOOD",
+        preconditions = List(
+          (
+            PreconditionManager.nameToId("isAtWalkingDistance"),
+            Map(
+              ParameterReference("instance1ID", "Long") -> p_instanceToMove,
+              ParameterReference("instance2ID", "Long") -> p_groundWhereToMoveIt
+            )
+            )
+        ),
+        subActions = List(
+          (
+            _actionAddInstanceAt,
+            Map(
+              ParameterReference("instanceToAdd", "Long") -> p_instanceToMove,
+              ParameterReference("groundWhereToAddIt", "Long") -> p_groundWhereToMoveIt
+            )
+            ),
+          (
+            _actionRemoveInstanceAt,
+            Map(
+              ParameterReference("instanceToRemove", "Long") -> p_instanceToMove,
+              ParameterReference("groundWhereToRemoveIt", "Long") -> p_groundWhereToMoveIt
+            )
+          )
+        ),
+        parameters = List(p_instanceToMove, p_groundWhereToMoveIt)).save
+    }
+    nameToId += "MoveToFood" -> _actionMoveInstanceToFoodAt*/
+
     val _actionEat = {
       val p_instanceThatEat = ParameterReference("instanceThatEat", "Long")
       val p_instanceThatIsEaten = ParameterReference("instanceThatIsEaten", "Long")
       InstanceAction(
         0L,
         "ACTION_EAT",
-      preconditions = List(
+        preconditions = List(
           (
             PreconditionManager.nameToId("isOnSameTile"),
             Map(
               ParameterReference("instance1ID", "Long") -> p_instanceThatEat,
               ParameterReference("instance2ID", "Long") -> p_instanceThatIsEaten
             )
-          ),
+            ),
           (
             PreconditionManager.nameToId("hasProperty"),
             Map(
               ParameterReference("instanceID", "Long") -> p_instanceThatEat,
               ParameterReference("property", "Property") -> ParameterValue("Hunger", "Property")
             )
-          )
+            )
         ),
-      subActions = List(
+        subActions = List(
           (
             _actionRemoveInstanceAt,
             Map(
-              ParameterReference("instanceToRemove", "Long") -> p_instanceThatIsEaten
+              ParameterReference("instanceToRemove", "Long") -> p_instanceThatIsEaten,
+              ParameterReference("groundWhereToRemoveIt", "Long") -> p_instanceThatIsEaten
             )
-          ),
+            ),
           (
             _actionRemoveOneFromProperty,
             Map(
               ParameterReference("instanceID", "Long") -> p_instanceThatEat,
               ParameterReference("propertyName", "Property") -> ParameterValue("Hunger", "Property")
             )
-          )
+            )
         ),
-      parameters = List(
+        parameters = List(
           p_instanceThatEat,
           p_instanceThatIsEaten
         )

@@ -34,11 +34,6 @@ object ValuedProperty {
 
   val error = ValuedProperty(Property.error, 0L)
 
-  val form = Form(mapping(
-    "property" -> text,
-    "value" -> of[Double]
-  )(ValuedProperty.applyForm)(ValuedProperty.unapplyForm))
-
   /**
    * Apply method used in the Concept controller
    * Allows to match a json to a form

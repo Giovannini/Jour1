@@ -130,9 +130,9 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
    * @param instance to add to the map
    */
   def addInstance(instance: Instance): Instance = {
-    val key = instance.concept.id
+    val conceptID = instance.concept.id
     val newInstance = instance.withId(getNewInstanceId)
-    instances(key) = newInstance :: instances.getOrElse(key, List())
+    instances(conceptID) = newInstance :: instances.getOrElse(conceptID, List())
     newInstance
   }
 

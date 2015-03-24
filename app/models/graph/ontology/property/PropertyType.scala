@@ -1,7 +1,7 @@
 package models.graph.ontology.property
 
 /**
- * Created by giovannini on 3/22/15.
+ * Enumeration object listing all different property types.
  */
 object PropertyType extends Enumeration{
 

@@ -5,8 +5,13 @@
 </div>
 
 <div ng-show="!isShowingRelation()">
-    <h2>{{ message }}</h2>
+    <div class="form-field">
+        <div class="form-field__legend--single">
+            <h2>{{ message }}</h2>
+        </div>
+    </div>
 </div>
+
 <div ng-show="isShowingRelation()" class="form">
     <div class="form-field">
         <div class="form-field__legend--single">

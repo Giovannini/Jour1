@@ -120,7 +120,7 @@ case class Concept(
    * @author Thomas GIOVANNINI
    * @return a map with all possibles actions as keys and with the list of all possible destinations as values
    */
-  def getPossibleActionsAndDestinations: Map[InstanceAction, List[Concept]] = {
+  lazy val getPossibleActionsAndDestinations: Map[InstanceAction, List[Concept]] = {
     ConceptDAO.getReachableRelations(id)
       .groupBy(_._1)
       .map(tuple => (
@@ -136,37 +136,6 @@ object Concept {
   implicit val connection = NeoDAO.connection
 
   val error = Concept("XXX", List(), List(), List(), DisplayProperty())
-
-  /**
-   * Apply method used in the Concept controller
-   * Allows to match a json to a form
-   * @param label concept label
-   * @param propertiesToParse concept properties
-   * @param rules concept rules
-   * @param displayProperty concept display properties
-   * @return a concept using these parameters
-   */
-  def applyForm(
-    label: String,
-    propertiesToParse: List[String],
-    rules: List[ValuedProperty],
-    needs: List[Need],
-    displayProperty: DisplayProperty)
-  : Concept = {
-    val properties = propertiesToParse.map(Property.parseString)
-    Concept(label, properties, rules, needs, displayProperty)
-  }
-
-  /**
-   * Unapply method used in the Concept controller
-   * Allows to match a json to a form
-   * @param concept concept
-   * @return the different parts of a concept
-   */
-  def unapplyForm(concept: Concept)
-  : Option[(String, List[String], List[ValuedProperty], List[Need], DisplayProperty)] = {
-    Some(concept.label, concept.properties.map(_.toString), concept.rules, concept.needs, concept.displayProperty)
-  }
 
   /**
    * Create a concept given a list of ids of properties instead of a list of properties directly.

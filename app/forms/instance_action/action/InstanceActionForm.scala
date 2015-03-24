@@ -1,7 +1,9 @@
-package forms
+package forms.instance_action.action
 
+import forms.instance_action.parameter.ParameterForm
+import forms.instance_action.precondition.PreconditionForm
 import models.instance_action.action.InstanceAction
-import models.instance_action.parameter.{ParameterReference, Parameter}
+import models.instance_action.parameter.{Parameter, ParameterReference}
 import models.instance_action.precondition.Precondition
 import play.api.data.Form
 import play.api.data.Forms._

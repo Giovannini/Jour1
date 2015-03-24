@@ -96,6 +96,7 @@ object WorldInitialisation extends Controller {
     ActionManager.initialization()
 
     /* Creation of needs */
+    //TODO change action Move to action MoveToBlabla
     val needFood = NeedDAO.save(Need(0L, "Hunger", propertyHunger, priority = 6,
       List(ConsequenceStep(10, Consequence(8, List(ActionManager.nameToId("_actionRemoveInstanceAt"))))),
       List(ActionManager.nameToId("Eat"), ActionManager.nameToId("Move"))))
