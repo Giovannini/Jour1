@@ -8,7 +8,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.format.Formats._
 import play.api.data.validation.Constraints._
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{AnyContent, Action, Controller}
 
 /**
  * Object containing tools for instance editing
@@ -39,7 +39,7 @@ object InstanceManager extends Controller {
    * @author Simon RONCIERE
    * @return an action redirecting to the index page of the application
    */
-  def create = Action { implicit request =>
+  def create: Action[AnyContent] = Action { implicit request =>
 
     /**
      * Create the relation following a form with no errors in it.
@@ -48,7 +48,7 @@ object InstanceManager extends Controller {
     def doCreate(form: (Int, Int, String, Int, Int, List[Double])) = {
       val oldInstance = Application.map.getInstanceById(form._1)
       val newInstance = getNewInstance(form, oldInstance)
-      Application.map.addInstance(newInstance)
+      Application.map.createInstance(newInstance)
     }
 
     val newTodoForm = instanceForm.bindFromRequest()
@@ -64,13 +64,13 @@ object InstanceManager extends Controller {
    * @author Thomas GIOVANNINI
    * @return an action redirecting to the index page of the application
    */
-  def update = Action { implicit request =>
+  def update: Action[AnyContent] = Action { implicit request =>
     /**
      * Update the map following a form with no errors in it.
      * @author Thomas GIOVANNINI
      * @return the updated instance
      */
-    def doUpdate(form: (Int, Int, String, Int, Int, List[Double])) = {
+    def doUpdate(form: (Int, Int, String, Int, Int, List[Double])): Unit = {
       val oldInstance = Application.map.getInstanceById(form._1)
       val newInstance = getNewInstance(form, oldInstance)
       Application.map.updateInstance(oldInstance, newInstance)
@@ -83,9 +83,8 @@ object InstanceManager extends Controller {
     Redirect(controllers.routes.MapController.show())
   }
 
-  def delete(instanceId: Int) = Action {
-    val instanceToRemove = Application.map.getInstanceById(instanceId)
-    Application.map.removeInstance(instanceToRemove)
+  def delete(instanceId: Int): Action[AnyContent] = Action {
+    Application.map.removeInstance(instanceId)
     Redirect(controllers.routes.MapController.show())
   }
 

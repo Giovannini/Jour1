@@ -11,7 +11,7 @@ import models.instance_action.action.ActionParser
  */
 object Intelligence {
 
-  def calculate(nrOfWorkers: Int) {
+  def calculate(nrOfWorkers: Int) = {
     // Create an Akka system
     val system = ActorSystem("IntelligenceSystem")
 

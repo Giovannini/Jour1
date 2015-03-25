@@ -4,7 +4,7 @@ import models.graph.NeoDAO
 import models.graph.custom_types.DisplayProperty
 import models.graph.ontology._
 import models.graph.ontology.concept.consequence.{Consequence, ConsequenceStep}
-import models.graph.ontology.concept.need.{NeedDAO, Need}
+import models.graph.ontology.concept.need.{MeanOfSatisfaction, NeedDAO, Need}
 import models.graph.ontology.concept.{Concept, ConceptDAO}
 import models.graph.ontology.property.{PropertyType, Property, PropertyDAO}
 import models.graph.ontology.relation.Relation
@@ -22,21 +22,19 @@ object WorldInitialisation extends Controller {
    * Send an example of the json list of instances in the world map that will be sent to the client
    * @author Thomas GIOVANNINI
    */
-  def getWorld = {
-    Action {
-      val exampleMap = {
-        if (isWorldMapInitialized) {
-          println("Getting a world already initialized.")
-          Application.map
-        }
-        else {
-          println("World is not initialized yet.")
-          isWorldMapInitialized = true
-          worldGeneration
-        }
+  def getWorld: Action[AnyContent] = Action {
+    val exampleMap = {
+      if (isWorldMapInitialized) {
+        println("Getting a world already initialized.")
+        Application.map
       }
-      Ok(exampleMap.toJson)
+      else {
+        println("World is not initialized yet.")
+        isWorldMapInitialized = true
+        worldGeneration()
+      }
     }
+    Ok(exampleMap.toJson)
   }
 
   /**
@@ -44,7 +42,7 @@ object WorldInitialisation extends Controller {
    * @author Thomas GIOVANNINI
    * @return a fake world map
    */
-  def worldGeneration: WorldMap = {
+  def worldGeneration(): WorldMap = {
     val map = Application.map
     val t1 = System.currentTimeMillis()
     WorldInit.worldMapGeneration()
@@ -53,7 +51,7 @@ object WorldInitialisation extends Controller {
     map
   }
 
-  def initGraph = {
+  def initGraph: Action[AnyContent] = {
     Action {
       val result = NeoDAO.clearDB()
       //this is working
@@ -95,19 +93,53 @@ object WorldInitialisation extends Controller {
     PreconditionManager.initialization()
     ActionManager.initialization()
 
+    val conceptGround = Concept("Ground", List(), List(), List(), DisplayProperty())
+    val conceptWater = Concept("Water",
+      List(),
+      List(ValuedProperty(propertyStrength, 2),
+        ValuedProperty(propertyInstanciable, 1)),
+      List(),
+      DisplayProperty("#86B6B6", 0))
+    val conceptEarth = Concept("Earth",
+      List(),
+      List(ValuedProperty(propertyStrength, 3),
+        ValuedProperty(propertyInstanciable, 1)),
+      List(),
+      DisplayProperty("#878377", 1))
+    val conceptGrass = Concept("Grass",
+      List(propertyDuplicationSpeed),
+      List(ValuedProperty(propertyStrength, 40),
+        ValuedProperty(propertyInstanciable, 1)),
+      List(),
+      DisplayProperty("#62A663", 8))
+    val conceptEdible = Concept("Edible", List(), List(), List(), DisplayProperty())
+    val conceptApple = Concept("Apple",
+      List(),
+      List(ValuedProperty(propertyStrength, 2), ValuedProperty(propertyInstanciable, 1)),
+      List(),
+      DisplayProperty("#A83B36", 20))
+
+    val conceptSheep = Concept("Sheep",
+      List(propertySense),
+      List(ValuedProperty(propertyStrength, 2),
+        ValuedProperty(propertyInstanciable, 1)),
+      List(),
+      DisplayProperty("#EEE9D6", 16)
+    )
+
     /* Creation of needs */
-    //TODO change action Move to action MoveToBlabla
     val needFood = NeedDAO.save(Need(0L, "Hunger", propertyHunger, priority = 6,
       List(ConsequenceStep(10, Consequence(8, List(ActionManager.nameToId("_actionRemoveInstanceAt"))))),
-      List(ActionManager.nameToId("Eat"), ActionManager.nameToId("Move"))))
+      List(MeanOfSatisfaction(ActionManager.nameToId("Eat"), List(conceptApple, conceptSheep)),
+        MeanOfSatisfaction(ActionManager.nameToId("Move"), List(conceptApple, conceptSheep)))))
     val needSeaAir = NeedDAO.save(Need(0L, "SeaAir", propertyComfort, priority = 5,
       List(ConsequenceStep(5, Consequence(5, List(ActionManager.nameToId("_actionRemoveOneFromProperty"))))),
-      List(ActionManager.nameToId("Move"))))
+      List(MeanOfSatisfaction(ActionManager.nameToId("Move"), List()))))
 
     println("Declaration of concepts...")
 
     /*Concepts declaration*/
-    val conceptMan = Concept("Man",
+    lazy val conceptMan = Concept("Man",
       List(propertySense, propertyComfort),
       List(ValuedProperty(propertyStrength, 2), ValuedProperty(propertyInstanciable, 1)),
       List(needSeaAir),
@@ -121,27 +153,9 @@ object WorldInitialisation extends Controller {
         ValuedProperty(propertyInstanciable, 1)),
       List(),
       DisplayProperty("#1A1A22", 18))
-    val conceptSheep = Concept("Sheep",
-      List(propertySense),
-      List(ValuedProperty(propertyStrength, 2),
-        ValuedProperty(propertyInstanciable, 1)),
-      List(),
-      DisplayProperty("#EEE9D6", 16))
     val conceptAnimal = Concept("Animal",
       List(propertyWalkingDistance, propertyHunger, propertySense),
       List(), List(needFood), DisplayProperty())
-    val conceptGrass = Concept("Grass",
-      List(propertyDuplicationSpeed),
-      List(ValuedProperty(propertyStrength, 40),
-        ValuedProperty(propertyInstanciable, 1)),
-      List(),
-      DisplayProperty("#62A663", 8))
-    val conceptEdible = Concept("Edible", List(), List(), List(), DisplayProperty())
-    val conceptApple = Concept("Apple",
-      List(),
-      List(ValuedProperty(propertyStrength, 2), ValuedProperty(propertyInstanciable, 1)),
-      List(),
-      DisplayProperty("#A83B36", 20))
     val conceptBush = Concept("Bush",
       List(),
       List(ValuedProperty(propertyStrength, 2),
@@ -166,19 +180,6 @@ object WorldInitialisation extends Controller {
       List(),
       DisplayProperty("#221D1D", 8))
     val conceptVegetable = Concept("Vegetable", List(), List(), List(), DisplayProperty())
-    val conceptGround = Concept("Ground", List(), List(), List(), DisplayProperty())
-    val conceptWater = Concept("Water",
-      List(),
-      List(ValuedProperty(propertyStrength, 2),
-        ValuedProperty(propertyInstanciable, 1)),
-      List(),
-      DisplayProperty("#86B6B6", 0))
-    val conceptEarth = Concept("Earth",
-      List(),
-      List(ValuedProperty(propertyStrength, 3),
-        ValuedProperty(propertyInstanciable, 1)),
-      List(),
-      DisplayProperty("#878377", 1))
 
     println("Relations declaration...")
 

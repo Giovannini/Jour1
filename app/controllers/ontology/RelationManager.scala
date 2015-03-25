@@ -4,7 +4,7 @@ import models.graph.NeoDAO
 import models.graph.ontology.relation.Relation
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{AnyContent, Action, Controller}
 
 /**
  * Object to create, delete and modify relations of the graph
@@ -28,7 +28,7 @@ object RelationManager extends Controller{
    * @author Thomas GIOVANNINI
    * @return an action creating a relation
    */
-  def createRelation = Action {
+  def createRelation: Action[AnyContent] = Action {
     Ok(views.html.manager.relation.relationCreator())
   }
 
@@ -44,7 +44,7 @@ object RelationManager extends Controller{
    * Handle the relation creation form
    * @author Thomas GIOVANNINI
    */
-  def create = Action { implicit request =>
+  def create: Action[AnyContent] = Action { implicit request =>
     /**
      * Create the relation following a form with no errors in it.
      * @author Thomas GIOVANNINI
@@ -72,7 +72,7 @@ object RelationManager extends Controller{
    * @param dest concept destination
    * @return an action redirecting to index of application
    */
-  def delete(src: Long, id: Long, dest: Long) = Action {
+  def delete(src: Long, id: Long, dest: Long): Action[AnyContent] = Action {
     NeoDAO.removeRelationFromDB(src, id, dest)
     Redirect(controllers.routes.Application.index())
   }

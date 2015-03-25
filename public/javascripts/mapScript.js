@@ -250,9 +250,10 @@ var MapFactory = function(Rest) {
     };
 
     var addInstance = function(instance) {
-        if(typeof instance === "undefined")
+        if(typeof instance === "undefined") {
             return;
 
+        }
         if(instance instanceof Array) {
             for (var id in instance) {
                 addInstance(instance[id]);
@@ -268,8 +269,9 @@ var MapFactory = function(Rest) {
                     instance.properties
                 )
             }
-            if(instance.label === "XXX")
+            if(instance.label === "XXX") {
                 console.log(instance);
+            }
             instances[instance.id] = instance;
         }
     };
@@ -653,8 +655,9 @@ var MapController = function(Graph, Map, Drawer) {
         width = Map.getWidth();
         height = Map.getHeight();
 
-        if(Object.keys(concepts).length > 0 && instances.length > 0)
+        if(Object.keys(concepts).length > 0 && instances.length > 0) {
             initMap();
+        }
     });
 
     document.addEventListener(TAG+"selectTile", function(event) {

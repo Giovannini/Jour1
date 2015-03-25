@@ -18,7 +18,7 @@ object ConceptForm {
   /**
    * Concept form
    */
-  val conceptForm = Form(
+  val form = Form(
     mapping(
       "label" -> nonEmptyText, //can't be modified
       "properties" -> list(PropertyForm.form.mapping),
@@ -33,7 +33,7 @@ object ConceptForm {
    * Apply method used in the Concept controller
    * Allows to match a json to a form
    * @param label concept label
-   * @param propertiesToParse concept properties
+   * @param properties concept properties
    * @param rules concept rules
    * @param displayProperty concept display properties
    * @return a concept using these parameters

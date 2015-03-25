@@ -6,7 +6,7 @@ import models.graph.ontology.concept.{Concept, ConceptDAO}
 import models.graph.ontology.relation.Relation
 import models.instance_action.action.{ActionParser, InstanceAction}
 import play.api.libs.json._
-import play.api.mvc.{Action, Controller, Request}
+import play.api.mvc.{AnyContent, Action, Controller, Request}
 
 /**
  * Controller to send Json data to client
@@ -17,7 +17,7 @@ object RestCall extends Controller {
    * Get all the concepts existing in the graph
    * @author Thomas GIOVANNINI
    */
-  def getAllConcepts = Action {
+  def getAllConcepts: Action[AnyContent] = Action {
     val concepts = ConceptDAO.getAll
       .map(_.toJson)
     Ok(Json.toJson(concepts))
@@ -28,7 +28,7 @@ object RestCall extends Controller {
    * @author Thomas GIOVANNINI
    * @param conceptId of the concept the relations are desired
    */
-  def getAllActionsOf(conceptId: Long) = Action {
+  def getAllActionsOf(conceptId: Long): Action[AnyContent] = Action {
     val t1 = System.currentTimeMillis()
     val relations = ConceptDAO.getReachableRelations(conceptId)
     val actions = relations.filter(_._1.isAnAction)
@@ -55,7 +55,7 @@ object RestCall extends Controller {
    * json model: {action: "action", instances: [instance, instance, ...]}
    * @author Thomas GIOVANNINI
    */
-  def executeAction = Action(parse.json) { request =>
+  def executeAction: Action[JsValue] = Action(parse.json) { request =>
     /**
      * Parse json request and execute it.
      * @author Thomas GIOVANNINI
@@ -83,7 +83,8 @@ object RestCall extends Controller {
    * @author Thomas GIOVANNINI
    * @return a list of instances under JSON format
    */
-  def getPossibleDestinationOfAction(initInstanceId: Long, relationId: Long, conceptId: Long) = Action {
+  def getPossibleDestinationOfAction(initInstanceId: Long, relationId: Long, conceptId: Long)
+  : Action[AnyContent] = Action {
     val sourceInstance = Application.map.getInstanceById(initInstanceId)
     val actionID = Relation.DBList.getActionIdFromRelationId(relationId)
     val action = ActionParser.getAction(actionID)
@@ -99,18 +100,18 @@ object RestCall extends Controller {
     Ok(Json.toJson(reducedList))
   }
 
-  def editInstance(instanceId: Long) = Action {
+  def editInstance(instanceId: Long): Action[AnyContent] = Action {
     val instance = Application.map.getInstanceById(instanceId)
     Ok(views.html.manager.instance.instanceEditor(instance, controllers.ontology.routes.InstanceManager.update()))
   }
 
-  def createInstance(conceptId: Long) = Action {
+  def createInstance(conceptId: Long): Action[AnyContent] = Action {
     val concept = ConceptDAO.getById(conceptId)
     val instance = Instance.createRandomInstanceOf(concept)
     Ok(views.html.manager.instance.instanceEditor(instance, controllers.ontology.routes.InstanceManager.create()))
   }
 
-  def getBestAction(instanceID: Long) = Action {
+  def getBestAction(instanceID: Long): Action[AnyContent] = Action {
     val t1 = System.currentTimeMillis()
     val instance = Application.map.getInstanceById(instanceID)
     val bestAction = instance.selectAction(instance.getSensedInstances.flatMap(Application.map.getInstancesAt))

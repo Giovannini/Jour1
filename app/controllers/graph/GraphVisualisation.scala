@@ -14,7 +14,7 @@ object GraphVisualisation extends Controller {
    * The graph displayed to the user allows him to entirely manage the graph with an user friendly interface
    * @return
    */
-  def index = Action {
+  def index: Action[AnyContent] = Action {
     Ok(views.html.graph.index())
   }
 
@@ -39,7 +39,7 @@ object GraphVisualisation extends Controller {
    * @param propertyId property ID
    * @return Property in json if it's found. 404 otherwise
    */
-  def getProperty(propertyId: Int) = Action { request =>
+  def getProperty(propertyId: Int): Action[AnyContent] = Action { request =>
     jsonOrRedirectToIndex(request) {
       val property = PropertyDAO.getById(propertyId)
       if (property == Property.error) {
@@ -55,7 +55,7 @@ object GraphVisualisation extends Controller {
    * @param actionLabel action label
    * @return Action in json if it's found. 404 otherwise
    */
-  def getAction(actionLabel: String) = Action { request =>
+  def getAction(actionLabel: String): Action[AnyContent] = Action { request =>
     jsonOrRedirectToIndex(request) {
       val action = InstanceAction.getByName(actionLabel)
       if(action == InstanceAction.error) {
@@ -70,21 +70,21 @@ object GraphVisualisation extends Controller {
    * Gets all the properties
    * @return
    */
-  def getProperties = Action { request =>
+  def getProperties: Action[AnyContent] = Action { request =>
     jsonOrRedirectToIndex(request) {
       val properties = PropertyDAO.getAll
       Ok(Json.toJson(properties.map(_.toJson)))
     }
   }
 
-  def getPreconditions = Action { request =>
+  def getPreconditions: Action[AnyContent] = Action { request =>
     jsonOrRedirectToIndex(request) {
       val preconditions = PreconditionDAO.getAll
       Ok(Json.toJson(preconditions.map(_.toJson)))
     }
   }
 
-  def getActions = Action { request =>
+  def getActions: Action[AnyContent] = Action { request =>
     jsonOrRedirectToIndex(request) {
       val preconditions = InstanceAction.getAll
       Ok(Json.toJson(preconditions.map(_.toJson)))

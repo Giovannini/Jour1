@@ -3,7 +3,7 @@ package controllers.rules
 import models.graph.ontology.relation.Relation
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{AnyContent, Action, Controller}
 
 object RelationVisualisation extends Controller {
   /**
@@ -36,7 +36,7 @@ object RelationVisualisation extends Controller {
    * @author Aurélie LORGEOUX
    * @return an action displaying all relations
    */
-  def index = Action {
+  def index: Action[AnyContent] = Action {
     Ok(views.html.relations.relations())
   }
 
@@ -45,7 +45,7 @@ object RelationVisualisation extends Controller {
    * @author Aurélie LORGEOUX
    * @return an action displaying form to create a new relation
    */
-  def createForm = Action {
+  def createForm: Action[AnyContent] = Action {
     Ok(views.html.relations.formCreator(relationForm))
   }
 
@@ -54,7 +54,7 @@ object RelationVisualisation extends Controller {
    * @author Aurélie LORGEOUX
    * @return an action redirecting to the list of relations
    */
-  def createSubmit = Action { implicit request =>
+  def createSubmit: Action[AnyContent] = Action { implicit request =>
     /**
      * Create relation
      * @author Aurélie LORGEOUX
@@ -88,7 +88,7 @@ object RelationVisualisation extends Controller {
    * @param id id of the relation
    * @return an action displaying a form to update the relation
    */
-  def updateForm(id: Long) = Action {
+  def updateForm(id: Long): Action[AnyContent] = Action {
     val relation = Relation.DBList.getById(id)
     val relationFormFilled = relationForm.fill(relation)
     Ok(views.html.relations.formEditor(relationFormFilled, id))
@@ -100,7 +100,7 @@ object RelationVisualisation extends Controller {
    * @param id id of the relation
    * @return an action redirecting to the list of relations
    */
-  def updateSubmit(id: Long) = Action { implicit request =>
+  def updateSubmit(id: Long): Action[AnyContent] = Action { implicit request =>
     /**
      * Update relation
      * @author Aurélie LORGEOUX
@@ -134,7 +134,7 @@ object RelationVisualisation extends Controller {
    * @param id id of the relation
    * @return an action reidrecting to the list of relations
    */
-  def delete(id: Long) = Action {
+  def delete(id: Long): Action[AnyContent] = Action {
     Relation.DBList.delete(id)
     Ok(views.html.relations.relations())
   }

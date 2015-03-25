@@ -41,13 +41,12 @@ object ActionManager {
 
     val _actionRemoveInstanceAt = {
       val p_instanceToRemove = ParameterReference("instanceToRemove", "Long")
-      val groundWhereToRemoveIt = ParameterReference("groundWhereToRemoveIt", "Long")
       InstanceAction(
         0L,
         "removeInstanceAt",
         List(),
         List(),
-        List(p_instanceToRemove, groundWhereToRemoveIt)
+        List(p_instanceToRemove)
       ).save
     }
     nameToId += "_actionRemoveInstanceAt" -> _actionRemoveInstanceAt
@@ -126,8 +125,7 @@ object ActionManager {
           (
             _actionRemoveInstanceAt,
             Map(
-              ParameterReference("instanceToRemove", "Long") -> p_instanceToMove,
-              ParameterReference("groundWhereToRemoveIt", "Long") -> p_groundWhereToMoveIt
+              ParameterReference("instanceToRemove", "Long") -> p_instanceToMove
             )
           )
         ),
@@ -196,8 +194,7 @@ object ActionManager {
           (
             _actionRemoveInstanceAt,
             Map(
-              ParameterReference("instanceToRemove", "Long") -> p_instanceThatIsEaten,
-              ParameterReference("groundWhereToRemoveIt", "Long") -> p_instanceThatIsEaten
+              ParameterReference("instanceToRemove", "Long") -> p_instanceThatIsEaten
             )
             ),
           (

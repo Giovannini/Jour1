@@ -1,7 +1,7 @@
 package models.graph.ontology
 
 import models.graph.custom_types.Coordinates
-import models.graph.ontology.concept.need.Need
+import models.graph.ontology.concept.need.{MeanOfSatisfaction, Need}
 import models.graph.ontology.concept.{Concept, ConceptDAO}
 import models.graph.ontology.property.{Property, PropertyType}
 import models.instance_action.action.InstanceAction
@@ -159,20 +159,26 @@ case class Instance(id:             Int,
       /**
        * Check if the instance can do an action or not
        * @author Thomas GIOVANNINI
-       * @param action the instance wish to do
+       * @param mean the instance will use
        * @return true if the instance can do the action
        *         false else
        */
-      def destinationList(action: InstanceAction): List[Instance] = {
-        val destinationList = action.getDestinationList(this, sensedInstances)
-        destinationList.filter(instance => relations(action).contains(instance.concept))
+      def destinationList(mean: MeanOfSatisfaction): List[Instance] = {
+        val destinationList = mean.action.getDestinationList(this, sensedInstances)
+        destinationList.filter { instance =>
+          val concept = instance.concept
+          relations(mean.action).contains(concept) &&
+          mean.destinationConcepts.contains(concept)
+        }
       }
 
-      def retrieveBestAction(possibleActions: List[InstanceAction])
+
+      //def retrieveBestAction(possibleActions: List[(InstanceAction, List[Concept]])
+      def retrieveBestAction(possibleActions: List[MeanOfSatisfaction])
       : (InstanceAction, Instance) = possibleActions match {
         case head::tail =>
           val destinationsList = destinationList(head)
-          if (destinationsList.nonEmpty) (head, destinationsList.head)
+          if (destinationsList.nonEmpty) (head.action, destinationsList.head)
           else retrieveBestAction(tail)
         case _ => (InstanceAction.error, this)
       }

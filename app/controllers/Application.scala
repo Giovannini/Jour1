@@ -17,7 +17,7 @@ object Application extends Controller {
    * Show the different urls of the project
    * @author Julien Pradet
    */
-  def index = Action {
+  def index: Action[AnyContent] = Action {
     Ok(views.html.index())
   }
 

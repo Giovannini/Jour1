@@ -1,11 +1,11 @@
 package controllers.graph
 
 import forms.graph.ontology.concept.ConceptForm
-import ConceptForm.conceptForm
+import ConceptForm.form
 import models.graph.NeoDAO
 import models.graph.custom_types.{DisplayProperty, Statement}
 import models.graph.ontology.concept.{Concept, ConceptDAO}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 
 /**
@@ -17,10 +17,10 @@ object ConceptController extends Controller {
    * Creates a concept in DB from a JSON request
    * @return Satus of the request
    */
-  def createConcept() = {
+  def createConcept(): Action[JsValue] = {
     Action(parse.json) { request =>
       println(request.body)
-      val newConceptForm = conceptForm.bind(request.body)
+      val newConceptForm = form.bind(request.body)
       newConceptForm.fold(
         hasErrors = {
           form => {
@@ -39,10 +39,10 @@ object ConceptController extends Controller {
     }
   }
 
-  def updateConcept(label: String) = {
+  def updateConcept(label: String): Action[JsValue] = {
     Action(parse.json) { request =>
       println(request.body)
-      val newConceptForm = conceptForm.bind(request.body)
+      val newConceptForm = form.bind(request.body)
       newConceptForm.fold(
         hasErrors = {
           form => {
@@ -70,7 +70,7 @@ object ConceptController extends Controller {
    * @return a json that contains each nodes in an array, and the list of edges to display on the graph
    *         This format is compatible with AlchemyJS as a data source
    */
-  def readConcept(search: String, deepness: Int) = {
+  def readConcept(search: String, deepness: Int): Action[AnyContent] = {
     Action { request =>
       GraphVisualisation.jsonOrRedirectToIndex(request) {
         require(deepness >= 0)
@@ -144,7 +144,7 @@ object ConceptController extends Controller {
    * @param label label of concept to remove
    * @return an action redirecting to the main page of application
    */
-  def deleteConcept(label: String) = {
+  def deleteConcept(label: String): Action[AnyContent] = {
     Action {
       val concept = ConceptDAO.getByLabel(label)
       println(ConceptDAO.removeConceptFromDB(concept))

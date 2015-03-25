@@ -70,14 +70,6 @@ case class InstanceAction(id: Long,
     )
   }
 
-  def toSimpleJson: JsValue = {
-    Json.obj(
-      "id" -> JsNumber(id),
-      "label" -> JsString(label),
-      "parameters" -> parameters.map(_.toJson)
-    )
-  }
-
 
   /*#################
     DB interactions
@@ -127,7 +119,7 @@ case class InstanceAction(id: Long,
    * @return true if the action was correctly executed
    *         false else
    */
-  def execute(arguments: Map[ParameterReference, ParameterValue]):Boolean = {
+  def execute(arguments: Map[ParameterReference, ParameterValue]): Boolean = {
     val preconditionCheck = checkPreconditions(arguments)
 
     if (preconditionCheck) {
@@ -151,6 +143,36 @@ case class InstanceAction(id: Long,
       println("Precondition not filled for action " + this.label + ".")
       false
     }
+  }
+
+  /**
+   * LOG a given action with given arguments
+   * @author Thomas GIOVANNINI
+   * @param arguments with which execute the action
+   * @return true if the action was correctly executed
+   *         false else
+   */
+  def log(arguments: Map[ParameterReference, ParameterValue]): List[(InstanceAction, Map[ParameterReference, ParameterValue])] = {
+    /*val preconditionCheck = checkPreconditions(arguments)
+
+    if (preconditionCheck) {
+      this.label match {
+        case "addInstanceAt" =>
+          (this, arguments)
+        case "removeInstanceAt" =>
+          List(LogAction.removeInstanceAt(arguments))
+        case "addOneToProperty" =>
+          List(LogAction.addOneToProperty(arguments))
+        case "removeOneFromProperty" =>
+          List(LogAction.removeOneFromProperty(arguments))
+        case _ =>
+          subActions.flatMap(subAction => subAction._1.log(takeGoodArguments(subAction._2, arguments)))
+      }
+    }else{
+      println("Precondition not filled for action " + this.label + ".")
+      List(LogAction.nothing)
+    }*/
+    List()
   }
 
   /**
@@ -180,6 +202,9 @@ object InstanceAction {
 
   val error = InstanceAction(-1, "error", List(), List(), List())
 
+  /*######################
+    Parsing
+  ######################*/
   /**
    * Parse an action from strings
    * @param id of the action
@@ -189,7 +214,8 @@ object InstanceAction {
    * @param subActionsToParse to retrieve real sub-actions of the action
    * @return the corresponding action
    */
-  def parse(id: Long, label: String, parametersToParse: String, preconditionsToParse: String, subActionsToParse: String): InstanceAction = {
+  def parse(id: Long, label: String, parametersToParse: String, preconditionsToParse: String, subActionsToParse: String)
+  : InstanceAction = {
     InstanceAction(
       id,
       label,
@@ -240,8 +266,8 @@ object InstanceAction {
   }
 
   /**
-   * Parse rule to interact with database
-   * @author Aurélie LORGEOUX
+   * Parse an action of an instance from database
+   * @author Thomas GIOVANNINI
    */
   private val actionParser: RowParser[InstanceAction] = {
     get[Long]("id") ~

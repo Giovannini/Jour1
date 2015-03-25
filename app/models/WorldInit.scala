@@ -39,6 +39,7 @@ object WorldInit {
     val instanciableConcepts = getInstanciableConcepts diff allGroundsConcepts
     Try {
       generateGround(allGroundsConcepts)
+      println("After ground generation: " + Application.map.getInstances.length)
       //Take a lot of time
       // TODO: find a way to parallelize the process
       instanciableConcepts.foreach(fillWorldWithInstances)
@@ -54,13 +55,13 @@ object WorldInit {
    *
    * @param allGroundsConcepts
    */
-  def generateGround(allGroundsConcepts: List[Concept]) {
+  def generateGround(allGroundsConcepts: List[Concept]) = {
     val layer = Layer.generateLayer(frequency, octave, persistence, smoothed, outputSize)
     val layerExtremums = layer.getExtremums
     val repartitionList = repartition(layerExtremums, allGroundsConcepts).sortBy(_._1)
     matrixToList(layer.matrix)
       .map(createInstance(_, repartitionList))
-      .foreach(map.addInstance)
+      .foreach(map.createInstance)
   }
 
   /**
@@ -265,7 +266,7 @@ object WorldInit {
   def fillWorldWithInstances(concept: Concept): Unit = {
     //instanciate first concept
     val instances = createInstances(concept)
-    instances.foreach(Application.map.addInstance)
+    instances.foreach(Application.map.createInstance)
 
   }
 
