@@ -105,4 +105,14 @@ object HCPrecondition {
     instanceValue > value
   }
 
+  def hasInstanceOfConcept(args: Map[ParameterReference, ParameterValue]):Boolean={
+    val instanceId = args(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
+    val conceptId = args(ParameterReference("ConceptID", "Long")).value.asInstanceOf[Long]
+
+    val instance = map.getInstanceById(instanceId)
+    val listInstance = map.getInstancesAt(instance.coordinates)
+    listInstance.exists(p=>p.concept.id == conceptId)
+  }
+
+
 }

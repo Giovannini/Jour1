@@ -132,23 +132,32 @@ object ActionManager {
             PreconditionManager.nameToId("hasProperty"),
             Map(
               ParameterReference("instanceID", "Long") -> p_instanceThatEat,
-              ParameterReference("property", "Property") -> ParameterValue("Hunger", "Property"),
-              ParameterReference("valueToAdd", "Int") -> ParameterValue(1, "Int")
+              ParameterReference("property", "Property") -> ParameterValue("Hunger", "Property")
+            )
+            ),
+          (
+            PreconditionManager.nameToId("hasProperty"),
+            Map(
+              ParameterReference("instanceID", "Long") -> p_instanceThatIsEaten,
+              ParameterReference("property", "Property") -> ParameterValue("Feed", "Property")
             )
             )
         ),
         subActions = List(
           (
-            _removeInstanceAt,
+            _addToProperty,
             Map(
-              ParameterReference("instanceToRemove", "Long") -> p_instanceThatIsEaten
+              ParameterReference("instanceID", "Long") -> p_instanceThatEat,
+              ParameterReference("propertyName", "Property") -> ParameterValue("Hunger", "Property"),
+              ParameterReference("valueToAdd", "Int") -> ParameterValue(-1, "Int")
             )
             ),
           (
             _addToProperty,
             Map(
-              ParameterReference("instanceID", "Long") -> p_instanceThatEat,
-              ParameterReference("propertyName", "Property") -> ParameterValue("Hunger", "Property")
+              ParameterReference("instanceID", "Long") -> p_instanceThatIsEaten,
+              ParameterReference("propertyName", "Property") -> ParameterValue("Feed", "Property"),
+              ParameterReference("valueToAdd", "Int") -> ParameterValue(-2, "Int")
             )
             )
         ),

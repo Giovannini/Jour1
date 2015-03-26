@@ -57,12 +57,14 @@ object HardCodedAction {
   def addToProperty(args: Map[ParameterReference, ParameterValue]): Unit = {
     val instanceId = args(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
     val propertyString = args(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
+    val valToAdd = args(ParameterReference("valueToAdd", "Int")).value.asInstanceOf[String].toDouble
+
 
     val instance = map.getInstanceById(instanceId)
     val property = PropertyDAO.getByName(propertyString)
 
     val valueOfProperty: Double = instance.getValueForProperty(property)
-    val newInstance = instance.modifyValueOfProperty(property, valueOfProperty + 1)
+    val newInstance = instance.modifyValueOfProperty(property, valueOfProperty + valToAdd)
     Application.map.updateInstance(instance, newInstance)
   }
 

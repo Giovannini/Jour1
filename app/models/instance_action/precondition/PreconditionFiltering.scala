@@ -36,8 +36,7 @@ object PreconditionFiltering {
    * @return a list of instances that have the same coordinates as the source instance
    */
   def isOnSameTile(source: Instance, instancesList: List[Instance]): List[Instance] = {
-    val result = instancesList.filter(_.coordinates == source.coordinates)
-    result
+    instancesList.filter(_.coordinates == source.coordinates)
   }
 
   /**
@@ -81,5 +80,9 @@ object PreconditionFiltering {
     sourceInstance.concept
       .properties
       .contains(property)
+  }
+
+  def hasInstanceOfConcept(conceptId:Int,instancesList: List[Instance]): List[Instance] = {
+    instancesList.filter(inst => inst.concept.id==conceptId)
   }
 }

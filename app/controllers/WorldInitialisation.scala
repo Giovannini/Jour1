@@ -88,6 +88,7 @@ object WorldInitialisation extends Controller {
     val propertyDuplicationSpeed = Property("DuplicationSpeed", PropertyType.Double, 5).save
     val propertyWalkingDistance = Property("WalkingDistance", PropertyType.Int, 3).save
     val propertyHunger = Property("Hunger", PropertyType.Double, 5).save
+    val propertyFeed = Property("Feed", PropertyType.Double, 6).save
     val propertyComfort = Property("Comfort", PropertyType.Double, 3).save
 
     PreconditionManager.initialization()
@@ -112,7 +113,7 @@ object WorldInitialisation extends Controller {
         ValuedProperty(propertyInstanciable, 1)),
       List(),
       DisplayProperty("#62A663", 8))
-    val conceptEdible = Concept("Edible", List(), List(), List(), DisplayProperty())
+    val conceptEdible = Concept("Edible", List(propertyFeed), List(), List(), DisplayProperty())
     val conceptApple = Concept("Apple",
       List(),
       List(ValuedProperty(propertyStrength, 2), ValuedProperty(propertyInstanciable, 1)),
@@ -120,7 +121,7 @@ object WorldInitialisation extends Controller {
       DisplayProperty("#A83B36", 20))
 
     val conceptSheep = Concept("Sheep",
-      List(propertySense),
+      List(propertySense,propertyFeed),
       List(ValuedProperty(propertyStrength, 2),
         ValuedProperty(propertyInstanciable, 1)),
       List(),
@@ -154,7 +155,7 @@ object WorldInitialisation extends Controller {
       List(),
       DisplayProperty("#1A1A22", 18))
     val conceptAnimal = Concept("Animal",
-      List(propertyWalkingDistance, propertyHunger, propertySense),
+      List(propertyWalkingDistance, propertyHunger, propertyFeed, propertySense),
       List(), List(needFood), DisplayProperty())
     val conceptBush = Concept("Bush",
       List(),
