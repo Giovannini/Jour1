@@ -4,17 +4,15 @@ import anorm.SqlParser._
 import anorm._
 import controllers.Application
 import models.graph.ontology.Instance
-import models.instance_action.parameter.{ParameterValue, Parameter, ParameterReference}
+import models.instance_action.parameter.{Parameter, ParameterReference, ParameterValue}
 import models.instance_action.precondition.Precondition
 import play.api.Play.current
 import play.api.db.DB
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
-import scala.collection.mutable
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
-//TODO comment
 /**
  * Model of rule for persistence
  * @author Aurélie LORGEOUX
@@ -24,11 +22,12 @@ import scala.util.{Failure, Success, Try}
  * @param subActions content of the rule
  * @param parameters parameters for the function
  */
-case class InstanceAction(id: Long,
-                          label: String,
-                          preconditions: List[(Precondition, Map[ParameterReference, Parameter])],
-                          subActions: List[(InstanceAction, Map[ParameterReference, Parameter])],
-                          parameters: List[ParameterReference]) {
+case class InstanceAction(
+  id: Long,
+  label: String,
+  preconditions: List[(Precondition, Map[ParameterReference, Parameter])],
+  subActions: List[(InstanceAction, Map[ParameterReference, Parameter])],
+  parameters: List[ParameterReference]) {
 
 
   /**
@@ -124,22 +123,25 @@ case class InstanceAction(id: Long,
 
     if (preconditionCheck) {
       this.label match {
+        /*case "createInstance" =>
+          HardCodedAction.createInstance(arguments)
+          true*/
         case "addInstanceAt" =>
           HardCodedAction.addInstanceAt(arguments)
           true
         case "removeInstanceAt" =>
           HardCodedAction.removeInstanceAt(arguments)
           true
-        case "addOneToProperty" =>
-          HardCodedAction.addOneToProperty(arguments)
+        case "addToProperty" =>
+          HardCodedAction.addToProperty(arguments)
           true
-        case "removeOneFromProperty" =>
-          HardCodedAction.removeOneFromProperty(arguments)
+        case "modifyProperty" =>
+          HardCodedAction.modifyProperty(arguments)
           true
         case _ =>
           subActions.forall(subAction => subAction._1.execute(takeGoodArguments(subAction._2, arguments)))
       }
-    }else{
+    } else {
       println("Precondition not filled for action " + this.label + ".")
       false
     }
@@ -152,27 +154,35 @@ case class InstanceAction(id: Long,
    * @return true if the action was correctly executed
    *         false else
    */
-  def log(arguments: Map[ParameterReference, ParameterValue]): List[(InstanceAction, Map[ParameterReference, ParameterValue])] = {
-    /*val preconditionCheck = checkPreconditions(arguments)
+  def log(arguments: Map[ParameterReference, ParameterValue]): List[LogAction] = {
+    val preconditionCheck = checkPreconditions(arguments)
 
     if (preconditionCheck) {
       this.label match {
         case "addInstanceAt" =>
-          (this, arguments)
+          val instanceId = arguments(ParameterReference("instanceToAdd", "Long")).value.asInstanceOf[Long]
+          val groundId = arguments(ParameterReference("groundWhereToAddIt", "Long")).value.asInstanceOf[Long]
+          List(LogAction("ADD " + instanceId + " " + groundId))
         case "removeInstanceAt" =>
-          List(LogAction.removeInstanceAt(arguments))
-        case "addOneToProperty" =>
-          List(LogAction.addOneToProperty(arguments))
-        case "removeOneFromProperty" =>
-          List(LogAction.removeOneFromProperty(arguments))
+          val instanceId = arguments(ParameterReference("instanceToRemove", "Long")).value.asInstanceOf[Long]
+          List(LogAction("REMOVE " + instanceId))
+        case "addToProperty" =>
+          val instanceId = arguments(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
+          val propertyString = arguments(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
+          val valueToAdd = arguments(ParameterReference("propertyValue", "Property")).value.asInstanceOf[Double]
+          List(LogAction("ADD_TO_PROPERTY " + instanceId + " " + propertyString + " " + valueToAdd))
+        case "modifyProperty" =>
+          val instanceId = arguments(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
+          val propertyString = arguments(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
+          val newValue = arguments(ParameterReference("propertyValue", "Property")).value.asInstanceOf[Double]
+          List(LogAction("MODIFY_PROPERTY " + instanceId + " " + propertyString + " " + newValue))
         case _ =>
           subActions.flatMap(subAction => subAction._1.log(takeGoodArguments(subAction._2, arguments)))
       }
-    }else{
+    } else {
       println("Precondition not filled for action " + this.label + ".")
       List(LogAction.nothing)
-    }*/
-    List()
+    }
   }
 
   /**
@@ -181,16 +191,13 @@ case class InstanceAction(id: Long,
    * @return a reduced argument list
    */
   def takeGoodArguments(parameters: Map[ParameterReference, Parameter], arguments: Map[ParameterReference, ParameterValue]): Map[ParameterReference, ParameterValue] = {
-    val res = mutable.Map[ParameterReference, ParameterValue]()
-    //TODO functionalize
-    parameters.foreach(item => item._2 match {
-      case reference: ParameterReference =>
-        res.update(item._1, arguments(reference.asInstanceOf[ParameterReference]))
-      case value: ParameterValue => res.update(item._1, value.asInstanceOf[ParameterValue])
-      case _ => println("Failed to match parameter " + item._1.toString)
-    })
-
-    res.toMap
+    parameters.mapValues {
+      case reference: ParameterReference => arguments(reference.asInstanceOf[ParameterReference])
+      case value: ParameterValue => value.asInstanceOf[ParameterValue]
+      case e: Parameter =>
+        println("Failed to match parameter " + e)
+        ParameterValue.error
+    }.filter(_._2 != ParameterValue.error)
   }
 }
 
@@ -198,6 +205,7 @@ case class InstanceAction(id: Long,
  * Model for rule
  */
 object InstanceAction {
+
   implicit val connection = Application.connection
 
   val error = InstanceAction(-1, "error", List(), List(), List())
@@ -226,7 +234,7 @@ object InstanceAction {
   }
 
   def parseSubActions(subActionsToParse: String): List[(InstanceAction, Map[ParameterReference, Parameter])] = {
-    if(subActionsToParse != "") {
+    if (subActionsToParse != "") {
       subActionsToParse.split(";")
         .map(s => parseSubAction(s))
         .toList
@@ -235,7 +243,7 @@ object InstanceAction {
     }
   }
 
-  def parseSubAction(subActionToParse: String) : (InstanceAction, Map[ParameterReference, Parameter]) = {
+  def parseSubAction(subActionToParse: String): (InstanceAction, Map[ParameterReference, Parameter]) = {
     val globalPattern = "(^\\d*|\\(.*\\)$)".r
     val result = globalPattern.findAllIn(subActionToParse).toArray
 
@@ -251,11 +259,11 @@ object InstanceAction {
   }
 
   def retrieveFromStringOfIds(stringOfIds: String): List[InstanceAction] = {
-    Try{
+    Try {
       stringOfIds.split(";")
-        .map{ id =>
-          getById(id.toLong)
-        }.toList
+        .map { id =>
+        getById(id.toLong)
+      }.toList
     } match {
       case Success(list) => list
       case Failure(e) =>
@@ -271,10 +279,10 @@ object InstanceAction {
    */
   private val actionParser: RowParser[InstanceAction] = {
     get[Long]("id") ~
-      get[String]("label") ~
-      get[String]("param") ~
-      get[String]("precond") ~
-      get[String]("content") map {
+    get[String]("label") ~
+    get[String]("param") ~
+    get[String]("precond") ~
+    get[String]("content") map {
       case id ~ label ~ param ~ precond ~ content => InstanceAction.parse(id, label, param, precond, content)
     }
   }

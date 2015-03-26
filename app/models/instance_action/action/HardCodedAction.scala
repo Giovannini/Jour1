@@ -10,6 +10,7 @@ import models.instance_action.parameter.{ParameterReference, ParameterValue}
 object HardCodedAction {
 
   val map = Application.map
+
   /**
    * Add an instance to the map at given coordinates
    * @author Thomas GIOVANNINI
@@ -21,6 +22,13 @@ object HardCodedAction {
 
     map.addInstance(instanceId, groundWhereToAddItId)
   }
+
+  //TODO
+  /*def createInstance(args: Map[ParameterReference, ParameterValue]): Unit = {
+    val jsonToParse = args(ParameterReference("instanceToAdd", "Long")).value.asInstanceOf[String]
+
+    map.createInstance(instance)
+  }*/
 
   /**
    * Remove an instance from the map at given coordinates
@@ -46,7 +54,7 @@ object HardCodedAction {
    * Add one to a number property
    * @param args array containing id of the instance to update and property to string to modify
    */
-  def addOneToProperty(args: Map[ParameterReference, ParameterValue]): Unit = {
+  def addToProperty(args: Map[ParameterReference, ParameterValue]): Unit = {
     val instanceId = args(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
     val propertyString = args(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
 
@@ -55,22 +63,6 @@ object HardCodedAction {
 
     val valueOfProperty: Double = instance.getValueForProperty(property)
     val newInstance = instance.modifyValueOfProperty(property, valueOfProperty + 1)
-    Application.map.updateInstance(instance, newInstance)
-  }
-
-  /**
-   * Remove one from a number property
-   * @param args array containing id of the instance to update and property to string to modify
-   */
-  def removeOneFromProperty(args: Map[ParameterReference, ParameterValue]): Unit = {
-    val instanceId = args(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
-    val propertyString = args(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
-
-    val instance = map.getInstanceById(instanceId)
-    val property = PropertyDAO.getByName(propertyString)
-
-    val valueOfProperty: Double = instance.getValueForProperty(property)
-    val newInstance = instance.modifyValueOfProperty(property, valueOfProperty - 1)
     Application.map.updateInstance(instance, newInstance)
   }
 

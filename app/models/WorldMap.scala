@@ -119,9 +119,7 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
 
   def createInstance(instance: Instance): Unit = {
     Try {
-//      println("Creating instance " + instance.label + " at " + instance.coordinates)
       val conceptID = instance.concept.id
-      val length = instances.getOrElse(conceptID, List()).length
       instances(conceptID) = instance.withId(getNewInstanceId) :: instances.getOrElse(conceptID, List())
     } match {
       case Success(_) =>
@@ -174,6 +172,17 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
     val instance = getInstanceById(instanceId)
     val property = PropertyDAO.getByName(propertyString)
     val modifiedInstance = instance.modifyValueOfProperty(property, propertyValue)
+
+    val conceptId = instance.concept.id
+    instances(conceptId) = modifiedInstance :: (instances.getOrElse(conceptId, List()) diff List(instance))
+
+  }
+
+  def addToProperty(instanceId: Long, propertyString: String, valueToAdd: Double): Unit = {
+    val instance = getInstanceById(instanceId)
+    val property = PropertyDAO.getByName(propertyString)
+    val newValue = instance.getValueForProperty(property) + valueToAdd
+    val modifiedInstance = instance.modifyValueOfProperty(property, newValue)
 
     val conceptId = instance.concept.id
     instances(conceptId) = modifiedInstance :: (instances.getOrElse(conceptId, List()) diff List(instance))

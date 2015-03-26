@@ -2,7 +2,7 @@ package models.instance_action.precondition
 
 import controllers.Application
 import models.graph.ontology.Instance
-import models.graph.ontology.property.{Property, PropertyDAO}
+import models.graph.ontology.property.PropertyDAO
 import models.instance_action.parameter.{ParameterReference, ParameterValue}
 
 /**
