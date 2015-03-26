@@ -3,6 +3,7 @@ package models.graph.ontology.concept.need
 import models.graph.ontology.Instance
 import models.graph.ontology.concept.consequence.ConsequenceStep
 import models.graph.ontology.property.Property
+import play.api.libs.json.{JsString, Json, JsNumber, JsValue}
 
 /**
  * Object used by instances to decide the action they'd better do.
@@ -48,6 +49,17 @@ case class Need(
       }
     //println("Priority for need " + label + " is " + result)
     result
+  }
+
+  def toJson: JsValue = {
+    Json.obj(
+      "id" -> JsNumber(id),
+      "label" -> JsString(label),
+      "affectedProperty" -> affectedProperty.toJson,
+      "priority" -> JsNumber(priority),
+      "consequenceSteps" -> consequencesSteps.map(_.toJson),
+      "meansOfSatisfaction" -> meansOfSatisfaction.map(_.toJson)
+    )
   }
 }
 

@@ -125,22 +125,30 @@ input.ng-invalid-pattern {
 
 .form-group {
   display: block;
-  clear: both;
   width: 100%;
   margin: 10px 0;
 }
 
-.highlight {
-  background-color: lighten($darkColor,5);
+.highlight, .highlight--mega {
   width: calc(100% - 15px);
   padding: 7.5px;
 }
 
+.highlight {
+  background-color: lighten($darkColor,5);
+}
+
+.highlight--mega {
+  background-color: lighten($darkColor,10);
+}
+
 .form-field__legend--single, .form-group__label--single {
-  height: 30px;
   line-height: 30px;
   margin: 0;
   padding: 0;
+}
+.form-field__legend--single {
+  height: 30px;
 }
 
 .form-field__legend h2, .form-field__legend--single h2 {
@@ -180,6 +188,7 @@ input.ng-invalid-pattern {
 .form-field__description, .form-group__input {
   margin: 0 0 0 30%;
   width: calc(70% - 30px);
+  padding: 0 15px;
 }
 
 .form-group__label, .form-group__input {
@@ -189,7 +198,7 @@ input.ng-invalid-pattern {
 .form-group__input input {
   height: 18px;
   padding: 5px;
-  width: 100%;
+  width: calc(100% - 12px);
 }
 
 .form-group__input [type="checkbox"] {
@@ -197,12 +206,7 @@ input.ng-invalid-pattern {
   width: auto;
 }
 
-.form-group__input button {
-  height: 18px;
-  padding: 5px;
-}
-
-.form-group__input.remove button {
+.form-group__input .button--remove {
   background: none;
   border: none;
   font-size: 0.8em;
@@ -213,7 +217,7 @@ input.ng-invalid-pattern {
 .form-group__input select {
   height: 30px;
   padding: 5px;
-  width: calc(100% + 12px);
+  width: 100%;
 }
 
 .form-field__legend {
@@ -224,6 +228,11 @@ input.ng-invalid-pattern {
 .form-field__description {
   color: darken($lightColor, 25);
   font-size: 0.8em;
+}
+
+.error {
+  font-size: 1em;
+  color: #dd8888;
 }
 
 .form-submit {

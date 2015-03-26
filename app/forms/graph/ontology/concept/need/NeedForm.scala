@@ -11,7 +11,6 @@ import play.api.data.format.Formats
 
 object NeedForm {
   val form = Form(mapping(
-    "id" -> longNumber,
     "label" -> text,
     "affectedProperty" -> PropertyForm.form.mapping,
     "priority" -> of(Formats.doubleFormat),
@@ -19,11 +18,11 @@ object NeedForm {
     "meansOfSatisfaction" -> list(MeanOfSatisfactionForm.form.mapping)
   )(applyForm)(unapplyForm))
 
-  def applyForm(id: Long, label: String, affectedProperty: Property, priority: Double, consequencesSteps: List[ConsequenceStep], meansOfSatisfaction: List[MeanOfSatisfaction]) = {
-    Need.apply(id, label, affectedProperty, priority, consequencesSteps, meansOfSatisfaction)
+  def applyForm(label: String, affectedProperty: Property, priority: Double, consequencesSteps: List[ConsequenceStep], meansOfSatisfaction: List[MeanOfSatisfaction]): Need = {
+    Need.apply(0, label, affectedProperty, priority, consequencesSteps, meansOfSatisfaction)
   }
 
-  def unapplyForm(need: Need): Option[(Long, String, Property, Double, List[ConsequenceStep], List[MeanOfSatisfaction])] = {
-    Need.unapply(need)
+  def unapplyForm(need: Need): Option[(String, Property, Double, List[ConsequenceStep], List[MeanOfSatisfaction])] = {
+    Some(need.label, need.affectedProperty, need.priority, need.consequencesSteps, need.meansOfSatisfaction)
   }
 }

@@ -1,0 +1,56 @@
+<div class="form-field">
+    <div class="form-field__legend--single">
+        <a href="{{ back_url }}">Go back</a>
+    </div>
+</div>
+
+<div ng-show="!isShowingAction()">
+    <div class="form-field">
+        <div class="form-field__legend--single">
+            <h2>{{ message }}</h2>
+        </div>
+    </div>
+</div>
+
+<div ng-show="isShowingAction()" class="form">
+    <div class="form-field">
+        <div class="form-field__legend--single">
+            <h2>{{ action.label }}</h2>
+            - <a href="#/relation/{{action.label}}/edit">Edit</a>
+            - <a href="#/relation/{{action.label}}/delete">Delete</a>
+        </div>
+    </div>
+
+    <div class="form-field">
+        <div class="form-group">
+            <h3 class="form-field__legend--single">Parameters :</h3>
+        </div>
+        <div ng-repeat="parameter in action.parameters" class="form-group highlight">
+            <div class="form-field__legend--single">
+                {{ parameter.reference }}: {{ parameter.type }}
+            </div>
+        </div>
+    </div>
+
+    <div class="form-field">
+        <div class="form-group">
+            <h3 class="form-field__legend--single">Preconditions :</h3>
+        </div>
+        <div ng-repeat="precondition in action.preconditions" class="form-group highlight">
+            <div class="form-field__legend--single">
+                {{ precondition.label }} ({{ precondition.parameters | displayListParameter }})
+            </div>
+        </div>
+    </div>
+
+    <div class="form-field">
+        <div class="form-group">
+            <h3 class="form-field__legend--single">Actions :</h3>
+        </div>
+        <div ng-repeat="action in action.subActions" class="form-group highlight">
+            <div class="form-field__legend--single">
+                {{ action.label }} ({{ action.parameters | displayListParameter }})
+            </div>
+        </div>
+    </div>
+</div>

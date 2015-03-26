@@ -1,10 +1,10 @@
 package controllers.graph
 
-import forms.graph.ontology.concept.ConceptForm
-import ConceptForm.form
+import forms.graph.ontology.concept.ConceptForm.form
 import models.graph.NeoDAO
 import models.graph.custom_types.{DisplayProperty, Statement}
 import models.graph.ontology.concept.{Concept, ConceptDAO}
+import models.instance_action.action.InstanceAction
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 
@@ -150,5 +150,11 @@ object ConceptController extends Controller {
       println(ConceptDAO.removeConceptFromDB(concept))
       Redirect(controllers.routes.Application.index())
     }
+  }
+
+  def getActions(label: String) = Action {
+    val concept = ConceptDAO.getByLabel(label)
+    val actions = concept.getPossibleActionsAndDestinations.filter(_._1 != InstanceAction.error)
+    Ok(Json.toJson(actions.map(_._1.toJson)))
   }
 }

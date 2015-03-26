@@ -4,6 +4,7 @@
     </div>
 </div>
 
+<!-- Loading message -->
 <div ng-show="!isShowingNode()">
     <div class="form-field">
         <div class="form-field__legend--single">
@@ -11,7 +12,12 @@
         </div>
     </div>
 </div>
+<!-- Form to edit the current node -->
 <form ng-show="isShowingNode()" class="form" ng-submit="submitNode()">
+    <!--
+        General :
+            node.label
+    -->
     <fieldset class="form-field">
         <div class="form-group">
             <h3 class="form-field__legend--single">General</h3>
@@ -24,10 +30,16 @@
         </div>
     </fieldset>
 
+    <!--
+        Properties :
+            node.properties = [
+                items from $scope.properties
+            ]
+    -->
     <fieldset class="form-field">
         <div class="form-group">
             <h3 class="form-field__legend">Properties</h3>
-            <p class="form-field__description">Information that needs to be provided to its instance</p>
+            <p class="form-field__description">Properties that each instance of the concept must have (allows to have different behaviors on each instance)</p>
         </div>
         <div class="form-group highlight" ng-repeat="property in node.properties track by $index">
             <div class="form-group">
@@ -42,8 +54,8 @@
                 </div>
             </div>
             <div class="form-group">
-                <div class="form-group__input remove">
-                    <button type="button" ng-click="removeProperty($index)">Remove</button>
+                <div class="form-group__input">
+                    <button type="button" class="button--remove" ng-click="removeProperty($index)">Remove</button>
                 </div>
             </div>
         </div>
@@ -52,10 +64,19 @@
         </div>
     </fieldset>
 
+    <!--
+        Rules
+        node.rules = [
+            {
+                property: item from $scope.properties,
+                value: Double
+            }
+        ]
+    -->
     <fieldset class="form-field">
         <div class="form-group">
             <h3 class="form-field__legend">Rules</h3>
-            <p class="form-field__description">Information that needs to be provided to its instance</p>
+            <p class="form-field__description">Rules defining how the system will spread the concept on the map</p>
         </div>
         <div class="form-group highlight" ng-repeat="rule in node.rules track by $index">
             <div class="form-group">
@@ -78,13 +99,154 @@
                 </div>
             </div>
             <div class="form-group">
-                <div class="form-group__input remove">
-                    <button type="button" ng-click="removeRule($index)">Remove</button>
+                <div class="form-group__input">
+                    <button type="button" class="button--remove" ng-click="removeRule($index)">Remove</button>
                 </div>
             </div>
         </div>
         <div class="form-group form-add">
             <button type="button" ng-click="addRule()">Add a rule</button>
+        </div>
+    </fieldset>
+
+    <!--
+        Needs
+        node.needs = [
+            {
+                label: String,
+                affectedProperty: item from node.properties,
+                priority: Double,
+                consequencesSteps: [ How the current state impacts the instance
+                    {
+                        value: Value of the property that triggers the consequence
+                        consequence: {
+                            severity: Value that tells haw bad is a consequence (the higher, the worse),
+                            effects: [
+                                Actions triggerd by the consequence
+                            ]
+                        }
+                    }
+                ,
+                meansOfSatisfaction: [ How to change the current state of the instance - the first actions are the ones that are first chosen
+                    item chosen from $scope.actions
+                ]
+        ]
+    -->
+    <fieldset class="form-field">
+        <div class="form-group">
+            <h3 class="form-field__legend">Needs</h3>
+            <p class="form-field__description">
+                Needs that must be fullfilled by an instance of this concept.
+                From a given state of the instance, it triggers a list of action to execute and prioritizes these actions.
+                It also provides information to the node to know how to change the affected property.
+            </p>
+        </div>
+        <div ng-show="!canAddNeeds()">
+            <p class="form-field__description error">
+                You need to add some actions to the concept before settings its needs.
+            </p>
+        </div>
+        <div ng-show="canAddNeeds()">
+            <div class="form-group highlight" ng-repeat="need in node.needs track by $index">
+                <div class="form-group">
+                    <label class="form-group__label" for="needs_{{ $index }}_label">Name:</label>
+                    <div class="form-group__input">
+                        <input type="text" id="needs_{{ $index }}_label" name="needs_{{ $index }}_label" ng-model="node.needs[$index].label" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-group__label" for="needs_{{ $index }}_priority">Priority:</label>
+                    <div class="form-group__input">
+                        <input type="number" id="needs_{{ $index }}_priority" name="needs_{{ $index }}_priority" ng-model="node.needs[$index].priority" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-group__label" for="needs_{{ $index }}_property">Affected property:</label>
+                    <div class="form-group__input">
+                        <select
+                                id="needs_{{ $index }}_property"
+                                name="needs_{{ $index }}_property"
+                                ng-model="node.needs[$index].affectedProperty"
+                                ng-options="property as property.label for property in node.properties"></select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-group__label">Consequences:</div>
+                    <div class="form-group__input">
+                        <div class="form-group highlight--mega" ng-repeat="consequence in node.needs[$index].consequenceSteps track by $index">
+                            <div class="form-group__label--single">
+                                <div class="form-group">
+                                    <div class="form-group__label">
+                                        Severity:
+                                    </div>
+                                    <div class="form-group__input">
+                                        <input type="number" ng-model="consequence.consequence.severity" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="form-group__label">
+                                        Effects:
+                                    </div>
+                                    <div class="form-group__input">
+                                        <div ng-repeat="effect in consequence.consequence.effects">
+                                            <select
+                                                    ng-options="effect as effect.label for effect in effects"
+                                                    ng-model="effect"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="form-group__label">
+                                        Activation:
+                                    </div>
+                                    <div class="form-group__input">
+                                        <input type="number" ng-model="consequence.value" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <button type="button" class="button--remove" ng-click="removeConsequence($parent.$index, $index)">Remove</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group form-add">
+                            <button type="button" ng-click="addConsequence($index)">Add a consequence</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-group__label">Means of satisfaction :</div>
+                    <div class="form-group__input">
+                        <div class="form-group highlight--mega" ng-repeat="means in node.needs[$index].meansOfSatisfaction track by $index">
+                            <div class="form-group__label--single">
+                                <select
+                                        id="needs_{{ $parent.$index }}_means_{{ $index }}"
+                                        name="needs_{{ $parent.$index }}_means_{{ $index }}"
+                                        ng-model="node.needs[$parent.$index].meansOfSatisfaction[$index]"
+                                        ng-options="action as action.label for action in actions"></select>
+
+                                <button type="button" class="button--remove" ng-click="removeMeans($parent.$index, $index)">Remove</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group form-add">
+                            <button type="button" ng-click="addMeans($index)">Add an action</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-group__input">
+                        <button class="button--remove" type="button" ng-click="removeNeed($index)">Remove</button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group form-add">
+                <button type="button" ng-click="addNeed()">Add a need</button>
+            </div>
         </div>
     </fieldset>
 

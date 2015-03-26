@@ -2,6 +2,7 @@ package models.graph.ontology.concept.need
 
 import models.graph.ontology.concept.{ConceptDAO, Concept}
 import models.instance_action.action.InstanceAction
+import play.api.libs.json.{JsValue, Json}
 
 import scala.util.{Failure, Success, Try}
 
@@ -12,6 +13,10 @@ case class MeanOfSatisfaction(action: InstanceAction, destinationConcepts: List[
 
   override def toString = action.id + " -> " + destinationConcepts.map(_.id).mkString(",")
 
+  def toJson : JsValue = Json.obj(
+    "action" -> action.id,
+    "destinationConcepts" -> destinationConcepts.map(_.id)
+  )
 }
 
 object MeanOfSatisfaction {
