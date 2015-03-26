@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.routing.RoundRobinPool
 import controllers.Application
 import models.graph.ontology.Instance
-import models.instance_action.action.{LogAction, ActionParser}
+import models.instance_action.action.{InstanceAction, LogAction, ActionParser}
 
 /**
  * Actors to deal with parallelization of instance action computation.
@@ -31,8 +31,12 @@ object Intelligence {
 
     def getActionFor(instance: Instance, sensedInstances: List[Instance]): List[LogAction] = {
       val (action, destination) = instance.selectAction(sensedInstances)
-      println(instance.label + instance.id + " " + action.label + " " + destination.label + destination.id)
-      ActionParser.parseActionForLog(action.id, List(instance.id, destination.id)) // TODO change that with log
+      if (action != InstanceAction.error){
+        //println(instance.label + instance.id + " " + action.label + " " + destination.label + destination.id)
+        ActionParser.parseActionForLog(action.id, List(instance.id, destination.id))
+      }else{
+        List()
+      }
     }
 
     override def receive: Receive = {

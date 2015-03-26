@@ -169,12 +169,12 @@ case class InstanceAction(
         case "addToProperty" =>
           val instanceId = arguments(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
           val propertyString = arguments(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
-          val valueToAdd = arguments(ParameterReference("valueToAdd", "Int")).value.asInstanceOf[Double]
+          val valueToAdd = arguments(ParameterReference("valueToAdd", "Int")).value.asInstanceOf[String]
           List(LogAction("ADD_TO_PROPERTY " + instanceId + " " + propertyString + " " + valueToAdd))
         case "modifyProperty" =>
           val instanceId = arguments(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
           val propertyString = arguments(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
-          val newValue = arguments(ParameterReference("propertyValue", "Int")).value.asInstanceOf[Double]
+          val newValue = arguments(ParameterReference("propertyValue", "Int")).value.asInstanceOf[String]
           List(LogAction("MODIFY_PROPERTY " + instanceId + " " + propertyString + " " + newValue))
         case _ =>
           subActions.flatMap(subAction => subAction._1.log(takeGoodArguments(subAction._2, arguments)))

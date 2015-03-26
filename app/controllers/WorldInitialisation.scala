@@ -131,8 +131,11 @@ object WorldInitialisation extends Controller {
     /* Creation of needs */
     val needFood = NeedDAO.save(Need(0L, "Hunger", propertyHunger, priority = 6,
       List(ConsequenceStep(10, Consequence(8, List(ActionManager.nameToId("_removeInstanceAt"))))),
-      List(MeanOfSatisfaction(ActionManager.nameToId("Eat"), List(conceptApple, conceptSheep)),
-        MeanOfSatisfaction(ActionManager.nameToId("Move"), List(conceptApple, conceptSheep)))))
+      List(MeanOfSatisfaction(ActionManager.nameToId("Eat"), List(conceptSheep)),
+        MeanOfSatisfaction(ActionManager.nameToId("Eat"), List(conceptApple)),
+        MeanOfSatisfaction(ActionManager.nameToId("Move"), List(conceptSheep)),
+        MeanOfSatisfaction(ActionManager.nameToId("Move"), List(conceptApple)),
+        MeanOfSatisfaction(ActionManager.nameToId("Move"), List()))))
     val needSeaAir = NeedDAO.save(Need(0L, "SeaAir", propertyComfort, priority = 5,
       List(ConsequenceStep(5, Consequence(5, List(ActionManager.nameToId("_addToProperty"))))),
       List(MeanOfSatisfaction(ActionManager.nameToId("Move"), List()))))

@@ -167,13 +167,8 @@ case class Instance(id:             Int,
         val destinationList = mean.action.getDestinationList(this, sensedInstances)
         destinationList.filter { instance =>
           val concept = instance.concept
-          /*val firstTest = relations(mean.action).contains(concept)
-          println("first test: " + relations(mean.action).map(_.label).mkString(", "))
-          val secondTest = mean.destinationConcepts.contains(concept)
-          firstTest && secondTest*/
-          //println("Concept: " + concept.label)
-          //println("test: " + mean.destinationConcepts.map(_.label).mkString(", "))
-          mean.destinationConcepts.contains(concept)
+          if (mean.destinationConcepts.isEmpty) relations(mean.action).contains(concept)
+          else mean.destinationConcepts.contains(concept)
         }
       }
 
