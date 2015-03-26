@@ -4,6 +4,8 @@ import models.graph.ontology.Instance
 import models.instance_action.parameter.{Parameter, ParameterReference, ParameterValue}
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
+import scala.util.{Failure, Success, Try}
+
 /**
  * Model for preconditions
  */
@@ -68,6 +70,7 @@ case class Precondition(id: Long,
       case "hasProperty" => HCPrecondition.hasProperty(args)
       case "propertyIsHigherThan" => HCPrecondition.isHigherThan(args)
       case "propertyIsLowerThan" => ! HCPrecondition.isHigherThan(args)
+      case "hasInstanceOfConcept" => HCPrecondition.hasInstanceOfConcept(args)
       // It's a user-created precondition
       case _ =>
         this.subConditions.forall(current => current._1.isFilled(current._2, arguments))
@@ -91,6 +94,7 @@ case class Precondition(id: Long,
         PreconditionFiltering.isOnSameTile(source, instancesList).toSet
       case "isAtWalkingDistance" =>
         PreconditionFiltering.isAtWalkingDistance(source, instancesList).toSet
+      //case "hasInstanceOfConcept" =>PreconditionFiltering.hasInstanceOfConcept(source, instancesList)
       case _ =>
         this.subConditions
           .map(_._1.instancesThatFill(source, instancesList))
@@ -149,19 +153,28 @@ object Precondition {
 
   /**
    * Parses a precondition from BDD
-   * @param id
-   * @param label
-   * @param parametersToParse
-   * @param subConditionsToParse
-   * @return
+   * @author Thomas GIOVANNINI
+   * @param id of the precondition
+   * @param label of the precondition
+   * @param parametersToParse string to parse to retrieve parameters of the precondition
+   * @param subConditionsToParse string to parse to retrieve subConditions of the precondition
+   * @return a Precondition object
    */
   def parse(id: Long, label: String, parametersToParse: String, subConditionsToParse: String): Precondition = {
-    Precondition(
-      id,
-      label,
-      parseSubConditions(subConditionsToParse),
-      Parameter.parseParameters(parametersToParse)
-    )
+    Try{
+      Precondition(
+        id,
+        label,
+        parseSubConditions(subConditionsToParse),
+        Parameter.parseParameters(parametersToParse)
+      )
+    } match {
+      case Success(p) => p
+      case Failure(e) =>
+        println("Error while parsing precondition " + label + " from strings:")
+        println(e.getStackTrace)
+        error
+    }
   }
 
   val error = Precondition(-1L, "error", List(), List())

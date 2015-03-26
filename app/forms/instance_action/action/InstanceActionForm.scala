@@ -18,24 +18,23 @@ object InstanceActionForm {
 
   val form: Form[InstanceAction] = Form(
     mapping(
-      "id" -> longNumber,
       "label" -> text,
       "preconditions" -> list(PreconditionForm.subconditionForm.mapping),
-      "subactions" -> list(subactionForm.mapping),
+      "subActions" -> list(subactionForm.mapping),
       "parameters" -> list(ParameterForm.referenceForm.mapping)
     )(applyForm)(unapplyForm)
   )
 
-  private def applyForm(id: Long,
+  private def applyForm(
                         label: String,
                         preconditions: List[(Precondition, Map[ParameterReference, Parameter])],
                         subactions: List[(InstanceAction, Map[ParameterReference, Parameter])],
                         parameters: List[ParameterReference]): InstanceAction = {
-    InstanceAction(id, label, preconditions, subactions, parameters)
+    InstanceAction(0, label, preconditions, subactions, parameters)
   }
 
   private def unapplyForm(ia: InstanceAction) = {
-    Some((ia.id, ia.label, ia.preconditions, ia.subActions, ia.parameters))
+    Some((ia.label, ia.preconditions, ia.subActions, ia.parameters))
   }
 
   def applySubaction(id: Long, params: List[Parameter]): (InstanceAction, Map[ParameterReference, Parameter]) = {

@@ -5,9 +5,8 @@ import anorm._
 import controllers.Application
 import models.graph.ontology.concept.consequence.ConsequenceStep
 import models.graph.ontology.property.Property
-import models.instance_action.action.InstanceAction
-import play.api.db.DB
 import play.api.Play.current
+import play.api.db.DB
 
 import scala.language.postfixOps
 
@@ -32,7 +31,7 @@ object NeedDAO {
       case id ~ label ~ propertyToParse ~ priority ~ consequencesStepsToParse ~ meansOfSatisfactionToParse =>
         val property = Property.parseString(propertyToParse)
         val consequencesSteps = ConsequenceStep.parseList(consequencesStepsToParse)
-        val meansOfSatisfaction = InstanceAction.retrieveFromStringOfIds(meansOfSatisfactionToParse)
+        val meansOfSatisfaction = MeanOfSatisfaction.parseList(meansOfSatisfactionToParse)
         Need(id, label, property, priority, consequencesSteps, meansOfSatisfaction)
     }
   }

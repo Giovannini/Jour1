@@ -109,6 +109,8 @@ object ConceptDAO {
    */
   def updateConcept(originalConcept: Concept, concept: Concept): Concept = {
     val statement = Statement.updateConcept(originalConcept, concept)
+    println(statement.toString)
+    println()
     val cypherResultRowStream = statement.apply
     if(cypherResultRowStream.nonEmpty) {
       ConceptDAO.parseRow(cypherResultRowStream.head)

@@ -10,6 +10,7 @@ import models.instance_action.parameter.{ParameterReference, ParameterValue}
 object HardCodedAction {
 
   val map = Application.map
+
   /**
    * Add an instance to the map at given coordinates
    * @author Thomas GIOVANNINI
@@ -19,86 +20,51 @@ object HardCodedAction {
     val instanceId = args(ParameterReference("instanceToAdd", "Long")).value.asInstanceOf[Long]
     val groundWhereToAddItId = args(ParameterReference("groundWhereToAddIt", "Long")).value.asInstanceOf[Long]
 
-    val instance = map.getInstanceById(instanceId)
-    val groundInstance = map.getInstanceById(groundWhereToAddItId)
-    val coordinates = groundInstance.coordinates
-    map.addInstance(instance.at(coordinates))
+    map.addInstance(instanceId, groundWhereToAddItId)
   }
+
+  //TODO
+  /*def createInstance(args: Map[ParameterReference, ParameterValue]): Unit = {
+    val jsonToParse = args(ParameterReference("instanceToAdd", "Long")).value.asInstanceOf[String]
+
+    map.createInstance(instance)
+  }*/
 
   /**
    * Remove an instance from the map at given coordinates
    * @author Thomas GIOVANNINI
    * @param args arguments containing the instance to remove and the coordinates where to remove it
    */
-  def removeInstanceAt(args: Map[ParameterReference, ParameterValue]) = {
+  def removeInstanceAt(args: Map[ParameterReference, ParameterValue]): Unit = {
     val instanceId = args(ParameterReference("instanceToRemove", "Long")).value.asInstanceOf[Long]
-    val groundWhereToRemoveItId = args(ParameterReference("groundWhereToRemoveIt", "Long")).value.asInstanceOf[Long]
-
-    val instance = map.getInstanceById(instanceId)
-    val coordinates = map.getInstanceById(groundWhereToRemoveItId).coordinates
-    map.removeInstance(instance.at(coordinates))
+    map.removeInstance(instanceId)
   }
 
-  //NOT USED
-//  def searchInstance(args: Map[ParameterReference, ParameterValue]): Unit = {
-//    val instance = map.getInstanceById(args(0).value.asInstanceOf[Long])
-//    val xCoordinate = args(1).value.asInstanceOf[Int]
-//    val yCoordinate = args(2).value.asInstanceOf[Int]
-//    val coordinates = Coordinates(xCoordinate, yCoordinate)
-//    map.getInstancesAt(coordinates).contains(instance)
-//  }
+  def modifyProperty(args: Map[ParameterReference, ParameterValue]): Unit = {
+    val instanceId = args(ParameterReference("instanceToModify", "Long")).value.asInstanceOf[Long]
+    val propertyString = args(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
+    val newValue = args(ParameterReference("propertyValue", "Int")).value.asInstanceOf[Double]
 
-  //NOT USED
-//  def searchConcept(args: Map[ParameterReference, ParameterValue]) = {
-//    val concept = ConceptDAO.getById(args(0).value.asInstanceOf[Long])
-//    val xCoordinate = args(1).value.asInstanceOf[Int]
-//    val yCoordinate = args(2).value.asInstanceOf[Int]
-//    val coordinates = Coordinates(xCoordinate, yCoordinate)
-//    map.getInstancesAt(coordinates).map(_.concept).contains(concept)
-//  }
+    map.modifyProperty(instanceId, propertyString, newValue)
+  }
 
-  /*
-   * Modify value of a property
-   * @author Thomas GIOVANNINI
-   * @param args array containing id of the instance to update, property to string to modify and new value
-   */
-//  def modifyProperty(args: Map[ParameterReference, ParameterValue]): Unit = {
-//    val instance = Application.map.getInstanceById(args(0).value.asInstanceOf[Long])
-//    val property = PropertyDAO.getById(args(1).value.asInstanceOf[Int])
-//    val value = args(2).value.asInstanceOf[Double]
-//    val newInstance = instance.modifyValueOfProperty(property, value)
-//    Application.map.updateInstance(instance, newInstance)
-//  }
+
 
   /**
    * Add one to a number property
    * @param args array containing id of the instance to update and property to string to modify
    */
-  def addOneToProperty(args: Map[ParameterReference, ParameterValue]): Unit = {
+  def addToProperty(args: Map[ParameterReference, ParameterValue]): Unit = {
     val instanceId = args(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
     val propertyString = args(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
+    val valToAdd = args(ParameterReference("valueToAdd", "Int")).value.asInstanceOf[String].toDouble
+
 
     val instance = map.getInstanceById(instanceId)
     val property = PropertyDAO.getByName(propertyString)
 
     val valueOfProperty: Double = instance.getValueForProperty(property)
-    val newInstance = instance.modifyValueOfProperty(property, valueOfProperty + 1)
-    Application.map.updateInstance(instance, newInstance)
-  }
-
-  /**
-   * Remove one from a number property
-   * @param args array containing id of the instance to update and property to string to modify
-   */
-  def removeOneFromProperty(args: Map[ParameterReference, ParameterValue]): Unit = {
-    val instanceId = args(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
-    val propertyString = args(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
-
-    val instance = map.getInstanceById(instanceId)
-    val property = PropertyDAO.getByName(propertyString)
-
-    val valueOfProperty: Double = instance.getValueForProperty(property)
-    val newInstance = instance.modifyValueOfProperty(property, valueOfProperty - 1)
+    val newInstance = instance.modifyValueOfProperty(property, valueOfProperty + valToAdd)
     Application.map.updateInstance(instance, newInstance)
   }
 

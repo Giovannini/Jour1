@@ -41,7 +41,7 @@ object NeedStatement {
         'property -> need.affectedProperty.toString,
         'priority -> need.priority,
         'consequencesSteps -> need.consequencesSteps.map(_.toDB).mkString(";"),
-        'meansOfSatisfaction -> need.meansOfSatisfaction.map(_.id).mkString(";")
+        'meansOfSatisfaction -> need.meansOfSatisfaction.map(_.toString).mkString(";")
       )
   }
 

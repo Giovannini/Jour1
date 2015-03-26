@@ -2,9 +2,11 @@ package models
 
 import models.graph.custom_types.{Label, Coordinates}
 import models.graph.ontology.concept.{ConceptDAO, Concept}
-import models.graph.ontology.property.Property
+import models.graph.ontology.property.{PropertyDAO, Property}
 import models.graph.ontology.Instance
 import play.api.libs.json.{JsValue, Json}
+
+import scala.util.{Success, Failure, Try}
 
 
 /**
@@ -36,7 +38,9 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
    * @author Thomas GIOVANNINI
    * @return a list of all the instances existing on the world map
    */
-  def getInstances: List[Instance] = instances.flatMap(_._2).toList
+  def getInstances: List[Instance] = {
+    instances.flatMap(_._2).toList
+  }
 
   /**
    * Get all the instances on a world map of a desired concept
@@ -113,47 +117,82 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
     getInstances.filter(instance => instance.coordinates == coordinates)
   }
 
-  /**
-   * Add an instance to the map at the given coordinates
-   * @author Thomas GIOVANNINI
-   */
-  /*def addInstanceAt(instance: Instance, coordinates: Coordinates): Instance = {
-    val key = instance.concept.id
-    val newInstance = instance.at(coordinates).withId(getNewInstanceId)
-    instances(key) = newInstance :: instances.getOrElse(key, List())
-    newInstance
-  }*/
+  def createInstance(instance: Instance): Unit = {
+    Try {
+      val conceptID = instance.concept.id
+      instances(conceptID) = instance.withId(getNewInstanceId) :: instances.getOrElse(conceptID, List())
+    } match {
+      case Success(_) =>
+      case Failure(e) =>
+        println("Failure while adding an instance to the map:")
+        println(e)
+    }
+  }
 
   /**
-   * Add an instance to the map at the given coordinates
+   * Add a copy of an existing instance to the map at the given coordinates
    * @author Thomas GIOVANNINI
-   * @param instance to add to the map
+   * @param instanceId to add to the map
+   * @param groundId where to add it
    */
-  def addInstance(instance: Instance): Instance = {
-    val conceptID = instance.concept.id
-    val newInstance = instance.withId(getNewInstanceId)
-    instances(conceptID) = newInstance :: instances.getOrElse(conceptID, List())
-    newInstance
+  def addInstance(instanceId: Long, groundId: Long): Unit = {
+    Try {
+      val instance = getInstanceById(instanceId).withId(getNewInstanceId)
+      val ground = getInstanceById(groundId)
+
+      val conceptID = instance.concept.id
+      instances(conceptID) = instance.at(ground.coordinates) :: instances.getOrElse(conceptID, List())
+    } match {
+      case Success(_) =>
+      case Failure(e) =>
+        println("Failure while adding an instance to the map:")
+        println(e)
+    }
   }
 
   /**
    * Remove an instance at the given coordinates from the map
    * @author Thomas GIOVANNINI
-   * @param instance to remove to the tile
+   * @param instanceId to remove from the map
    */
-  def removeInstance(instance: Instance): Instance = {
-    val key = instance.concept.id
-    if (instances.contains(key)) {
-      instances(key) = instances(key) diff List(instance)
-      instance
-    } else Instance.error
+  def removeInstance(instanceId: Long): Unit = {
+    Try {
+      val instance = getInstanceById(instanceId)
+      val conceptId = instance.concept.id
+      instances(conceptId) = instances.getOrElse(conceptId, List()) diff List(instance)
+    } match {
+      case Success(_) =>
+      case Failure(e) =>
+        println("Failure while removing an instance from the map:")
+        println(e)
+    }
   }
 
-  def updateInstance(oldInstance: Instance, newInstance: Instance) = {
-    val key = oldInstance.concept.id
-    removeInstance(oldInstance)
-    instances += key -> (newInstance.withId(oldInstance.id) :: instances.getOrElse(key, List()))
-    newInstance
+  def modifyProperty(instanceId: Long, propertyString: String, propertyValue: Double): Unit = {
+    val instance = getInstanceById(instanceId)
+    val property = PropertyDAO.getByName(propertyString)
+    val modifiedInstance = instance.modifyValueOfProperty(property, propertyValue)
+
+    val conceptId = instance.concept.id
+    instances(conceptId) = modifiedInstance :: (instances.getOrElse(conceptId, List()) diff List(instance))
+
+  }
+
+  def addToProperty(instanceId: Long, propertyString: String, valueToAdd: Double): Unit = {
+    val instance = getInstanceById(instanceId)
+    val property = PropertyDAO.getByName(propertyString)
+    val newValue = instance.getValueForProperty(property) + valueToAdd
+    val modifiedInstance = instance.modifyValueOfProperty(property, newValue)
+
+    val conceptId = instance.concept.id
+    instances(conceptId) = modifiedInstance :: (instances.getOrElse(conceptId, List()) diff List(instance))
+
+  }
+
+  def updateInstance(oldInstance: Instance, newInstance: Instance): Unit = {
+    val conceptId = oldInstance.concept.id
+    instances(conceptId) = newInstance.withId(oldInstance.id) ::
+                           (instances.getOrElse(conceptId, List()) diff List(oldInstance))
   }
 
   /**
@@ -164,7 +203,9 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
    * @return true if the tile contains an instance of the desired concept
    *         false else
    */
-  def search(concept: Concept, on: Coordinates) = getInstancesAt(on).map(_.concept).contains(concept)
+  def search(concept: Concept, on: Coordinates) = {
+    getInstancesAt(on).map(_.concept).contains(concept)
+  }
 
   /**
    * Return whether the tile has instances on it or not
@@ -174,5 +215,7 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
    * @return true if the tile contains the desired instance
    *         false else
    */
-  def search(instance: Instance, on: Coordinates) = getInstancesAt(on).contains(instance)
+  def search(instance: Instance, on: Coordinates) = {
+    getInstancesAt(on).contains(instance)
+  }
 }

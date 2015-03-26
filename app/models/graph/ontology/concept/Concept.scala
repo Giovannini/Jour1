@@ -54,7 +54,7 @@ case class Concept(
     Json.obj("label" -> JsString(label),
       "properties" -> properties.map(_.toJson),
       "rules" -> rules.map(_.toJson),
-      "needs" -> needs.map(need => JsNumber(need.id)),
+      "needs" -> needs.map(_.toJson),
       "type" -> JsString("CONCEPT"),
       "id" -> JsNumber(hashCode()),
       "display" -> displayProperty.toJson)

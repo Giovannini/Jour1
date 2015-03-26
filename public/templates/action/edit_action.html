@@ -1,0 +1,217 @@
+<div class="form-field">
+    <div class="form-field__legend--single">
+        <a href="{{ back_url }}">Go back</a>
+    </div>
+</div>
+
+<form class="form" name="actionForm">
+    <fieldset class="form-field">
+        <div class="form-group">
+            <h3 class="form-field__legend--single">General</h3>
+        </div>
+        <div class="form-group highlight">
+            <div class="form-group">
+                <label class="form-group__label" for="action_name">Name:</label>
+                <div class="form-group__input">
+                    <input
+                            type="text"
+                            id="action_name"
+                            name="action_name"
+                            ng-model="action.label"
+                            ng-pattern="/^ACTION_[\w]+$/"/>
+                    <span ng-show="actionForm.action_name.$error.pattern">Must start with "ACTION_"</span>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+
+    <!-- Parameters -->
+    <fieldset class="form-field">
+        <!-- Description of the field -->
+        <div class="form-group">
+            <h3 class="form-field__legend">Parameters</h3>
+            <p class="form-field__description">Information that needs to be provided to its instance</p>
+        </div>
+        <!-- parameters -->
+        <div class="form-group highlight" ng-repeat="parameter in action.parameters track by $index">
+            <!-- Reference -->
+            <div class="form-group">
+                <label class="form-group__label" for="parameters_{{$index}}_reference">Reference:</label>
+                <div class="form-group__input">
+                    <input
+                            id="parameters_{{$index}}_reference"
+                            type="text"
+                            name="parameters_{{$index}}_reference"
+                            ng-model="action.parameters[$index].reference" />
+                </div>
+            </div>
+            <!-- Type -->
+            <div class="form-group">
+                <label class="form-group__label" for="parameters_{{$index}}_type">Type:</label>
+                <div class="form-group__input">
+                    <select
+                            id="parameters_{{$index}}_type"
+                            name="parameters_{{$index}}_type"
+                            ng-model="action.parameters[$index].type"
+                            ng-options="type.value as type.label for type in paramTypes"></select>
+                </div>
+            </div>
+            <!-- delete a parameter -->
+            <div class="form-group">
+                <div class="form-group__input remove">
+                    <button type="button" ng-click="removeParameter($index)">Remove</button>
+                </div>
+            </div>
+        </div>
+        <div class="form-group form-add">
+            <button type="button" ng-click="addParameter()">Add a parameter</button>
+        </div>
+    </fieldset>
+
+    <!-- Preconditions -->
+    <fieldset class="form-field">
+        <!-- Description of the field -->
+        <div class="form-group">
+            <h3 class="form-field__legend">Preconditions</h3>
+            <p class="form-field__description">Preconditions that need to be met before executing the action</p>
+        </div>
+        <!-- preconditions -->
+        <div class="form-group highlight" ng-repeat="precondition in action.preconditions track by $index">
+            <!-- precondition -->
+            <div class="form-group">
+                <label class="form-group__label" for="preconditions_{{$index}}_precondition">Precondition:</label>
+                <div class="form-group__input">
+                    <select
+                            id="preconditions_{{$index}}_precondition"
+                            name="preconditions_{{$index}}_precondition"
+                            ng-model="action.preconditions[$index].precondition"
+                            ng-options="precond as precond.label for precond in preconditions"
+                            ng-change="updatePreconditionParameters($index)">
+                    </select>
+                </div>
+            </div>
+            <!-- Arguments for the precondition -->
+            <div class="form-group">
+                <div ng-repeat="param in action.preconditions[$index].precondition.parameters" class="form-group">
+                    <label class="form-group__label" for="preconditions_{{$parent.$index}}_arguments_{{ param.reference }}_isParam">
+                        {{ param.reference }}
+                        <input
+                                title="Is it a parameter ?"
+                                type="checkbox"
+                                id="preconditions_{{$parent.$index}}_arguments_{{ param.reference }}_isParam"
+                                name="preconditions_{{$parent.$index}}_arguments_{{ param.reference }}_isParam"
+                                ng-model="action.preconditions[$parent.$index].arguments[param.reference].isParam"/>
+                        :
+                    </label>
+                    <div class="form-group__input">
+                        <select
+                                ng-if="action.preconditions[$parent.$index].arguments[param.reference].isParam"
+                                id="preconditions_{{$parent.$parent.$index}}_arguments_{{ param.reference }}"
+                                name="preconditions_{{$parent.$parent.$index}}_arguments_{{ param.reference }}"
+                                ng-model="action.preconditions[$parent.$parent.$index].arguments[param.reference].value"
+                                ng-options="param as param.reference for param in parametersFilteredByType(param.type)"
+                                ></select>
+
+                        <div ng-if="!action.preconditions[$parent.$index].arguments[param.reference].isParam">
+                            <input
+                                    ng-if="param.type == 'Int' || param.type == 'Long'"
+                                    type="number"
+                                    id="preconditions_{{ $parent.$parent.$parent.$index }}_arguments_{{ param.reference }}"
+                                    name="preconditions_{{ $parent.$parent.$parent.$index }}_arguments_{{ param.reference }}"
+                                    ng-model="action.preconditions[$parent.$parent.$parent.$index].arguments[param.reference].value.value" />
+
+                            <select
+                                    ng-if="param.type == 'Property'"
+                                    id="preconditions_{{ $parent.$parent.$parent.$index }}_arguments_{{ param.reference }}"
+                                    name="preconditions_{{ $parent.$parent.$parent.$index }}_arguments_{{ param.reference }}"
+                                    ng-model="action.preconditions[$parent.$parent.$parent.$index].arguments[param.reference].value.value"
+                                    ng-options="property.label as property.label for property in properties"></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="form-group__input remove">
+                    <button type="button" ng-click="removePrecondition($index)">Remove</button>
+                </div>
+            </div>
+        </div>
+        <div class="form-group form-add">
+            <button type="button" ng-click="addPrecondition()">Add a precondition</button>
+        </div>
+    </fieldset>
+
+    <!-- Actions to do -->
+    <fieldset class="form-field">
+        <!-- Description of the field -->
+        <div class="form-group">
+            <h3 class="form-field__legend">Actions</h3>
+            <p class="form-field__description">Sequence of subactions made when the action is called</p>
+        </div>
+        <!-- Sub actions -->
+        <div class="form-group highlight" ng-repeat="_action in action.actions track by $index">
+            <!-- action -->
+            <div class="form-group">
+                <label class="form-group__label" for="actions_{{$index}}_action">Sub action:</label>
+                <div class="form-group__input">
+                    <select
+                            id="actions_{{$index}}_action"
+                            name="actions_{{$index}}_action"
+                            ng-model="action.actions[$index].action"
+                            ng-options="action as action.label for action in actions"
+                            ng-change="updateActionParameters($index)">
+                    </select>
+                </div>
+            </div>
+            <!-- arguments -->
+            <div class="form-group">
+                <div class="form-group"  ng-repeat="param in action.actions[$index].action.parameters">
+                    <label class="form-group__label" for="actions_{{$parent.$index}}_arguments_{{ param.reference }}_isParam">
+                        {{ param.reference }}
+                        <input
+                                title="Is it a parameter ?"
+                                type="checkbox"
+                                id="actions_{{$parent.$index}}_arguments_{{ param.reference }}_isParam"
+                                name="actions_{{$parent.$index}}_arguments_{{ param.reference }}_isParam"
+                                ng-model="action.actions[$parent.$index].arguments[param.reference].isParam"/>
+                        :
+                    </label>
+                    <div class="form-group__input">
+                        <select
+                                ng-if="action.actions[$parent.$index].arguments[param.reference].isParam"
+                                id="actions_{{$parent.$parent.$index}}_arguments_{{ param.reference }}"
+                                name="actions_{{$parent.$parent.$index}}_arguments_{{ param.reference }}"
+                                ng-model="action.actions[$parent.$parent.$index].arguments[param.reference].value"
+                                ng-options="param as param.reference for param in parametersFilteredByType(param.type)"></select>
+
+                        <div ng-if="!action.actions[$parent.$index].arguments[param.reference].isParam">
+                            <input
+                                    ng-if="param.type == 'Int' || param.type == 'Long'"
+                                    type="number"
+                                    id="actions_{{ $parent.$parent.$parent.$index }}_arguments_{{ param.reference }}"
+                                    name="actions_{{ $parent.$parent.$parent.$index }}_arguments_{{ param.reference }}"
+                                    ng-model="action.actions[$parent.$parent.$parent.$index].arguments[param.reference].value.value" />
+
+                            <select
+                                    ng-if="param.type == 'Property'"
+                                    id="actions_{{ $parent.$parent.$parent.$index }}_arguments_{{ param.reference }}"
+                                    name="actions_{{ $parent.$parent.$parent.$parent.$index }}_arguments_{{ param.reference }}"
+                                    ng-model="action.actions[$parent.$parent.$parent.$index].arguments[param.reference].value.value"
+                                    ng-options="property.label as property.label for property in properties"></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="form-group__input remove">
+                    <button type="button" ng-click="removeAction($index)">Remove</button>
+                </div>
+            </div>
+        </div>
+        <div class="form-group form-add">
+            <button type="button" ng-click="addAction()">Add a subaction</button>
+        </div>
+    </fieldset>
+
+    <button type="submit" class="form-submit" ng-click="submitAction()">{{ submit_button }}</button>
+</form>

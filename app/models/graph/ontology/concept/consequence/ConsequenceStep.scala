@@ -1,14 +1,19 @@
 package models.graph.ontology.concept.consequence
 
+import play.api.libs.json.Json
+
 import scala.util.{Failure, Success, Try}
 
 /**
  * Step for a consequence
  */
 case class ConsequenceStep(value: Double, consequence: Consequence) {
-
   def toDB = value + " -> " + consequence.toDB
 
+  def toJson = Json.obj(
+    "value" -> value,
+    "consequence" -> consequence.toJson
+  )
 }
 
 object ConsequenceStep{

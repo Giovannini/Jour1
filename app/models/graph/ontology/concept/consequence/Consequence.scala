@@ -1,12 +1,18 @@
 package models.graph.ontology.concept.consequence
 
 import models.instance_action.action.InstanceAction
+import play.api.libs.json.Json
 
 /**
  * Class to define the effects from a need
  */
 case class Consequence(severity: Double, effects: List[InstanceAction]){
   def toDB: String = severity + " - " + effects.map(_.id).mkString(", ")
+
+  def toJson = Json.obj(
+    "severity" -> severity,
+    "effects" -> effects.map(_.id)
+  )
 }
 
 object Consequence {

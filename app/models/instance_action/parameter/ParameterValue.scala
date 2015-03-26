@@ -6,6 +6,9 @@ import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
 
 case class ParameterValue(value: Any, _type: String) extends Parameter {
+
+  override def toString: String = "ParameterValue(value= " + value.toString + ", _type = " + _type + ")"
+
   override def toJson: JsValue = Json.obj(
     "type" -> JsString(_type),
     "value" -> jsonValue
@@ -20,4 +23,8 @@ case class ParameterValue(value: Any, _type: String) extends Parameter {
       case "Property" => PropertyDAO.getByName(value.asInstanceOf[String]).toJson
     }
   }
+}
+
+object ParameterValue {
+  val error = ParameterValue(0, "error")
 }

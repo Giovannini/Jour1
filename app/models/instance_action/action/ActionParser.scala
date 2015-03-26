@@ -32,6 +32,29 @@ object ActionParser {
   }
 
   /**
+   * Parse an action from client-side and execute it.
+   * @author Thomas GIOVANNINI
+   * @param actionReference the reference of the action, its id
+   * @param instancesId the instances arguments of the action
+   * @return true if the execution went well
+   *         false else
+   */
+  def parseActionForLog(actionReference: Long, instancesId: List[Long]): List[LogAction] = {
+    val action = getAction(actionReference)
+    if (action == InstanceAction.error) {
+      println("Action not found.")
+      List()
+    } else {
+      val arguments = getArgumentsList(
+        action,
+        instancesId.map(id => ParameterValue(id, "Long"))
+      )
+
+      action.log(arguments)
+    }
+  }
+
+  /**
    * Retrieve action from the actions database and parse it to an action object
    * @author Thomas GIOVANNINI
    * @param actionReference the id of the desired action
