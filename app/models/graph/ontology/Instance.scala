@@ -167,20 +167,29 @@ case class Instance(id:             Int,
         val destinationList = mean.action.getDestinationList(this, sensedInstances)
         destinationList.filter { instance =>
           val concept = instance.concept
-          relations(mean.action).contains(concept) &&
+          /*val firstTest = relations(mean.action).contains(concept)
+          println("first test: " + relations(mean.action).map(_.label).mkString(", "))
+          val secondTest = mean.destinationConcepts.contains(concept)
+          firstTest && secondTest*/
+          //println("Concept: " + concept.label)
+          //println("test: " + mean.destinationConcepts.map(_.label).mkString(", "))
           mean.destinationConcepts.contains(concept)
         }
       }
 
-
       //def retrieveBestAction(possibleActions: List[(InstanceAction, List[Concept]])
       def retrieveBestAction(possibleActions: List[MeanOfSatisfaction])
-      : (InstanceAction, Instance) = possibleActions match {
-        case head::tail =>
-          val destinationsList = destinationList(head)
-          if (destinationsList.nonEmpty) (head.action, destinationsList.head)
-          else retrieveBestAction(tail)
-        case _ => (InstanceAction.error, this)
+      : (InstanceAction, Instance) = {
+        possibleActions match {
+          case head::tail =>
+            //println("Testing action: " + head.action.label)
+            val destinationsList = destinationList(head)
+            if (destinationsList.nonEmpty) (head.action, destinationsList.head)
+            else retrieveBestAction(tail)
+          case _ =>
+            println("No action found for instance " + this.label + this.id)
+            (InstanceAction.error, this)
+        }
       }
 
       retrieveBestAction(possibleActions)
