@@ -152,21 +152,7 @@ object ActionManager {
               ParameterReference("instance1ID", "Long") -> p_instanceThatEat,
               ParameterReference("instance2ID", "Long") -> p_instanceThatIsEaten
             )
-            ),
-          (
-            PreconditionManager.nameToId("hasProperty"),
-            Map(
-              ParameterReference("instanceID", "Long") -> p_instanceThatEat,
-              ParameterReference("property", "Property") -> ParameterValue("Hunger", "Property")
-            )
-            ),
-          (
-            PreconditionManager.nameToId("hasProperty"),
-            Map(
-              ParameterReference("instanceID", "Long") -> p_instanceThatIsEaten,
-              ParameterReference("property", "Property") -> ParameterValue("Feed", "Property")
-            )
-            )
+            )//No need to check properties existence, that will be done by actions addToProperty
         ),
         subActions = List(
           (

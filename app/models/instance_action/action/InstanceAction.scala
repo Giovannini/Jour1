@@ -40,6 +40,9 @@ case class InstanceAction(
     InstanceAction(newId, this.label, this.preconditions, this.subActions, this.parameters)
   }
 
+  def subConditions: List[(Precondition, Map[ParameterReference, Parameter])] = {
+    subActions.flatMap(_._1.preconditions) ++ subActions.flatMap(_._1.subConditions )
+  }
 
   /*#################
     Json parsing
@@ -94,7 +97,9 @@ case class InstanceAction(
    * @return a list of instances under JSON format
    */
   def getDestinationList(sourceInstance: Instance, instances: List[Instance]): List[Instance] = {
-    val result = preconditions
+    //TODO problem: only checking preconditions of the action but none of the subactions
+    println(sourceInstance.id + " destinations: " + (preconditions ++ subConditions).map(_._1.label).mkString(", "))
+    val result = (preconditions ++ subConditions)
       .map(_._1.instancesThatFill(sourceInstance, instances))
       .foldRight(instances.toSet)(_ intersect _)
       .toList

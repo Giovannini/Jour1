@@ -1,7 +1,6 @@
 package models.instance_action.precondition
 
 import controllers.Application
-import models.graph.ontology.Instance
 import models.graph.ontology.property.PropertyDAO
 import models.instance_action.parameter.{ParameterReference, ParameterValue}
 
@@ -58,20 +57,12 @@ object HCPrecondition {
   def isAtWalkingDistance(args: Map[ParameterReference, ParameterValue]): Boolean = {
     val propertyWalkingDistance = PropertyDAO.getByName("WalkingDistance")
 
-    def retrieveWalkingDistanceValue(instance: Instance) = {
-      instance.properties
-        .find(_.property == propertyWalkingDistance)
-        .getOrElse(propertyWalkingDistance.defaultValuedProperty)
-        .value
-        .asInstanceOf[Int]
-    }
-
     val instance1ID = args(ParameterReference("instance1ID", "Long")).value.asInstanceOf[Long]
     val instance2ID = args(ParameterReference("instance2ID", "Long")).value.asInstanceOf[Long]
 
     val sourceInstance      = map.getInstanceById(instance1ID)
     val destinationInstance = map.getInstanceById(instance2ID)
-    val desiredDistance     = retrieveWalkingDistanceValue(sourceInstance)
+    val desiredDistance     = sourceInstance.getValueForProperty(propertyWalkingDistance)
     val distance = sourceInstance.coordinates.getDistanceWith(destinationInstance.coordinates)
     distance <= desiredDistance
   }

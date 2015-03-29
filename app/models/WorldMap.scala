@@ -137,11 +137,13 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
    */
   def addInstance(instanceId: Long, groundId: Long): Unit = {
     Try {
-      val instance = getInstanceById(instanceId).withId(getNewInstanceId)
       val ground = getInstanceById(groundId)
+      val instance = getInstanceById(instanceId)
+        .withId(getNewInstanceId)
+        .at(ground.coordinates)
 
       val conceptID = instance.concept.id
-      instances(conceptID) = instance.at(ground.coordinates) :: instances.getOrElse(conceptID, List())
+      instances(conceptID) = instance :: instances.getOrElse(conceptID, List())
     } match {
       case Success(_) =>
       case Failure(e) =>

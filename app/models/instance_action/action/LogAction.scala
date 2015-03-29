@@ -9,8 +9,9 @@ import scala.util.{Failure, Success, Try}
  */
 case class LogAction(value: String){
 
-  def execute: Unit = {
+  def execute(): Unit = {
     Try {
+      println("Executing LOG: " + this.value)
       val splitted = value.split(" ")
       splitted(0) match {
         case "ADD" =>/*###################################################*/
@@ -37,7 +38,7 @@ case class LogAction(value: String){
           throw new Exception("Error, log: " + error + " is unknown.")
       }
     } match {
-      case Success(_) => println("Done")
+      case Success(_) => //println("Done")
       case Failure(e) =>
         println("Error while parsing action log:")
         println(e.getStackTrace)

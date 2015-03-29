@@ -143,9 +143,7 @@ case class Instance(id:             Int,
      * @return a sorted list of needs
      */
     def orderNeedsByImportance: List[Need] = {
-      val result = this.concept.needs.sortBy(- _.evaluate(this))
-      //println("Chosen need: " + result.head.label)
-      result
+      this.concept.needs.sortBy(- _.evaluate(this))
     }
 
     val possibleActions = orderNeedsByImportance.flatMap(_.meansOfSatisfaction).distinct
@@ -172,7 +170,6 @@ case class Instance(id:             Int,
         }
       }
 
-      //def retrieveBestAction(possibleActions: List[(InstanceAction, List[Concept]])
       def retrieveBestAction(possibleActions: List[MeanOfSatisfaction])
       : (InstanceAction, Instance) = {
         possibleActions match {
