@@ -3,7 +3,7 @@ package controllers.rules
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.mvc._
-import models.instance_action.action.InstanceAction
+import models.interaction.action.{InstanceActionDAO, InstanceAction}
 
 /**
  * Object to create and modify rules
@@ -46,7 +46,7 @@ object RulesVisualisation extends Controller {
    * @return an action redirecting to the listing of rules
    */
   def delete(id: Long): Action[AnyContent] = Action {
-    InstanceAction.delete(id)
+    InstanceActionDAO.delete(id)
     Ok(views.html.rules.rules())
   }
 
@@ -57,7 +57,7 @@ object RulesVisualisation extends Controller {
    * @return an action displaying the rule
    */
   def load(id: Long):Action[AnyContent] = Action {
-    InstanceAction.getById(id) match {
+    InstanceActionDAO.getById(id) match {
       case InstanceAction.error => Ok(views.html.rules.rules())
       case action => Ok(views.html.rules.show(action))
     }
@@ -79,7 +79,7 @@ object RulesVisualisation extends Controller {
    */
   def submit: Action[AnyContent] = Action { implicit request =>
     val ruleData = actionForm.bindFromRequest.get
-    InstanceAction.save(ruleData)
+    InstanceActionDAO.save(ruleData)
     Ok(views.html.rules.rules())
   }
 }

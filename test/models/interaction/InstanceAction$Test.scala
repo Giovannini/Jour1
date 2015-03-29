@@ -1,6 +1,6 @@
-package models.instance_action
+package models.interaction
 
-import models.instance_action.action.InstanceAction
+import models.interaction.action.InstanceAction
 import org.scalatest.FunSuite
 import play.api.test.FakeApplication
 import play.api.test.Helpers._

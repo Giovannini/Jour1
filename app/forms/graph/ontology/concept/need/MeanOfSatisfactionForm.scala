@@ -4,7 +4,7 @@ import forms.graph.ontology.concept.ConceptForm
 import forms.instance_action.action.InstanceActionForm
 import models.graph.ontology.concept.Concept
 import models.graph.ontology.concept.need.MeanOfSatisfaction
-import models.instance_action.action.InstanceAction
+import models.interaction.action.InstanceAction
 import play.api.data.Form
 import play.api.data.Forms._
 

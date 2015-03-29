@@ -1,6 +1,6 @@
-package models.instance_action.precondition
+package models.interaction.precondition
 
-import models.instance_action.parameter.ParameterReference
+import models.interaction.parameter.ParameterReference
 
 /**
  * Manager for the preconditions.

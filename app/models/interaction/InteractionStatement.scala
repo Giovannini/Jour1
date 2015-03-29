@@ -1,11 +1,11 @@
-package models.instance_action.action
+package models.interaction
 
 import anorm._
 
 /**
  * All values from this objects are SQLStatements
  */
-object InstanceActionStatement {
+object InteractionStatement {
 
   /**
    * Request to clear the database
@@ -27,18 +27,18 @@ object InstanceActionStatement {
   }
 
 
-  private def parametersString(action: InstanceAction): String = {
-    action.parameters.map(_.toString).mkString(",")
+  private def parametersString(interaction: Interaction): String = {
+    interaction.parameters.map(_.toString).mkString(",")
   }
 
-  private def precondString(action: InstanceAction): String = {
-    action.preconditions.map(p => {
+  private def precondString(interaction: Interaction): String = {
+    interaction.preconditions.map(p => {
       p._1.id + " (" + p._2.unzip._2.map(_.toDBString).mkString(",")+")"
     }).mkString(";")
   }
 
-  private def contentString(action: InstanceAction): String = {
-    action.subActions.map(action => {
+  private def contentString(interaction: Interaction): String = {
+    interaction.subActions.map(action => {
       action._1.id + " (" + action._2.unzip._2.map(_.toDBString).mkString(",")+")"
     }).mkString(";")
   }
@@ -46,18 +46,18 @@ object InstanceActionStatement {
   /**
    * Add a rule to database
    * @author Aurélie LORGEOUX
-   * @param action rule to add
+   * @param interaction rule to add
    * @return a sql statement
    */
-  def add(action: InstanceAction) = {
+  def add(interaction: Interaction) = {
     SQL("""
             INSERT INTO rules(label, param, precond, content)
             VALUES({label}, {param}, {precond}, {content})
     """).on(
-      'label -> action.label,
-      'param -> parametersString(action),
-      'precond -> precondString(action),
-      'content -> contentString(action)
+      'label -> interaction.label,
+      'param -> parametersString(interaction),
+      'precond -> precondString(interaction),
+      'content -> contentString(interaction)
     )
   }
 
@@ -81,10 +81,10 @@ object InstanceActionStatement {
    * Set a rule in database
    * @author Aurélie LORGEOUX
    * @param id id of the rule
-   * @param action new rule with changes
+   * @param interaction new rule with changes
    * @return a sql statement
    */
-  def set(id: Long, action: InstanceAction) = {
+  def set(id: Long, interaction: Interaction) = {
     SQL("""
       UPDATE rules SET
       label = {label},
@@ -94,10 +94,10 @@ object InstanceActionStatement {
       WHERE id = {id}
         """).on(
         'id -> id,
-        'label -> action.label,
-        'param -> parametersString(action),
-        'precond -> precondString(action),
-        'content -> contentString(action)
+        'label -> interaction.label,
+        'param -> parametersString(interaction),
+        'precond -> precondString(interaction),
+        'content -> contentString(interaction)
       )
   }
 

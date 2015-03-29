@@ -4,7 +4,8 @@ import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.routing.RoundRobinPool
 import controllers.Application
 import models.graph.ontology.Instance
-import models.instance_action.action.{InstanceAction, LogAction, ActionParser}
+import models.interaction.{InteractionParser, LogInteraction}
+import models.interaction.action.InstanceAction
 
 /**
  * Actors to deal with parallelization of instance action computation.
@@ -29,10 +30,10 @@ object Intelligence {
 
   class InstanceIntelligence extends Actor {
 
-    def getActionFor(instance: Instance, sensedInstances: List[Instance]): List[LogAction] = {
+    def getActionFor(instance: Instance, sensedInstances: List[Instance]): List[LogInteraction] = {
       val (action, destination) = instance.selectAction(sensedInstances)
       if (action != InstanceAction.error) {
-        val logs = ActionParser.parseActionForLog(action.id, List(instance.id, destination.id))
+        val logs = InteractionParser.parseActionForLog(action.id, List(instance.id, destination.id))
         logs.foreach(log => println(instance.id + " - " + log.value))
         logs
       } else {
@@ -48,7 +49,7 @@ object Intelligence {
 
   class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
 
-    var logs: List[LogAction] = List()
+    var logs: List[LogInteraction] = List()
     var nrOfResults: Int = _
     var nrOfInstances: Int = _
     val start: Long = System.currentTimeMillis

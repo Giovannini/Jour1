@@ -1,7 +1,7 @@
 package models.graph.ontology.concept.need
 
 import models.graph.ontology.concept.{ConceptDAO, Concept}
-import models.instance_action.action.InstanceAction
+import models.interaction.action.{InstanceActionDAO, InstanceAction}
 import play.api.libs.json.{JsValue, Json}
 
 import scala.util.{Failure, Success, Try}
@@ -37,7 +37,7 @@ object MeanOfSatisfaction {
 
   def parseString(string: String): MeanOfSatisfaction = Try {
     val splitted = string.split(" -> ")
-    val action = InstanceAction.getById(splitted(0).toLong)
+    val action = InstanceActionDAO.getById(splitted(0).toLong)
     val destinationsConcept = {
       if (splitted.length == 1){
         List()

@@ -6,7 +6,7 @@ import controllers.Application
 import models.graph.NeoDAO
 import models.graph.custom_types.Statement
 import models.graph.ontology.concept.Concept
-import models.instance_action.action.InstanceAction
+import models.interaction.action.{InstanceActionDAO, InstanceAction}
 import org.anormcypher.CypherResultRow
 import play.api.Play.current
 import play.api.db.DB
@@ -128,7 +128,7 @@ object Relation {
      *         false else
      */
     def save(relationName: String): Long = {
-      val id = InstanceAction.getByName(relationName).id
+      val id = InstanceActionDAO.getByName(relationName).id
       DB.withConnection { implicit connection =>
         val statement = RelationSQLStatement.add(id, relationName)
         val optionId: Option[Long] = statement.executeInsert()
@@ -172,7 +172,7 @@ object Relation {
      */
     def getActionFromRelationId(id: Long): InstanceAction = {
       val actionID = getActionIdFromRelationId(id)
-      InstanceAction.getById(actionID)
+      InstanceActionDAO.getById(actionID)
     }
 
     /**

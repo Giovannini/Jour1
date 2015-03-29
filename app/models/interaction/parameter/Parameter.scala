@@ -1,4 +1,4 @@
-package models.instance_action.parameter
+package models.interaction.parameter
 
 import play.api.libs.json.{JsValue, Json}
 

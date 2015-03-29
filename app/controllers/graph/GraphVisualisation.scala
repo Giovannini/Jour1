@@ -1,8 +1,8 @@
 package controllers.graph
 
 import models.graph.ontology.property.{Property, PropertyDAO}
-import models.instance_action.action.InstanceAction
-import models.instance_action.precondition.PreconditionDAO
+import models.interaction.action.{InstanceActionDAO, InstanceAction}
+import models.interaction.precondition.PreconditionDAO
 import play.api.libs.json.Json
 import play.api.mvc._
 
@@ -57,7 +57,7 @@ object GraphVisualisation extends Controller {
    */
   def getAction(actionLabel: String): Action[AnyContent] = Action { request =>
     jsonOrRedirectToIndex(request) {
-      val action = InstanceAction.getByName(actionLabel)
+      val action = InstanceActionDAO.getByName(actionLabel)
       if(action == InstanceAction.error) {
         NotFound("Undefined action")
       } else {
@@ -86,7 +86,7 @@ object GraphVisualisation extends Controller {
 
   def getActions: Action[AnyContent] = Action { request =>
     jsonOrRedirectToIndex(request) {
-      val preconditions = InstanceAction.getAll
+      val preconditions = InstanceActionDAO.getAll
       Ok(Json.toJson(preconditions.map(_.toJson)))
     }
   }

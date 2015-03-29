@@ -1,12 +1,14 @@
-package models.instance_action.action
+package models.interaction
 
-import models.instance_action.parameter.{ParameterReference, ParameterValue}
+import models.interaction.action.{InstanceActionDAO, InstanceAction}
+import models.interaction.parameter.{ParameterReference, ParameterValue}
+
+import scala.util.{Success, Failure, Try}
 
 /**
  * Parser class for actions
  */
-object ActionParser {
-
+object InteractionParser {
 
   /**
    * Parse an action from client-side and execute it.
@@ -16,18 +18,17 @@ object ActionParser {
    * @return true if the execution went well
    *         false else
    */
-  def parseAction(actionReference: Long, instancesId: List[Long]): Boolean = {
-    val action = getAction(actionReference)
-    if (action == InstanceAction.error) {
-      println("Action not found.")
-      false
-    } else {
-      val arguments = getArgumentsList(
-        action,
-        instancesId.map(id => ParameterValue(id, "Long"))
-      )
-
+  def parseInteraction(actionReference: Long, instancesId: List[Long]): Boolean = {
+    Try {
+      val action = getAction(actionReference)
+      val arguments = getArgumentsList(action, instancesId.map(id => ParameterValue(id, "Long")))
       action.execute(arguments)
+    } match {
+      case Success(bool) => bool
+      case Failure(e) =>
+        println("Error while parsing an interaction: ")
+        println(e.getStackTrace)
+        false
     }
   }
 
@@ -39,7 +40,7 @@ object ActionParser {
    * @return true if the execution went well
    *         false else
    */
-  def parseActionForLog(actionReference: Long, instancesId: List[Long]): List[LogAction] = {
+  def parseActionForLog(actionReference: Long, instancesId: List[Long]): List[LogInteraction] = {
     val action = getAction(actionReference)
     if (action == InstanceAction.error) {
       println("Action not found.")
@@ -60,9 +61,8 @@ object ActionParser {
    * @param actionReference the id of the desired action
    * @return an action object
    */
-  def getAction(actionReference: Long): InstanceAction = {
-    val action = InstanceAction.getById(actionReference)
-    action
+  def getAction(actionReference: Long): Interaction = {
+    InstanceActionDAO.getById(actionReference)
   }
 
   /**
@@ -71,7 +71,7 @@ object ActionParser {
    * @param args arguments used by the action
    * @return a list of arguments and their values
    */
-  def getArgumentsList(action: InstanceAction, args: List[ParameterValue]): Map[ParameterReference, ParameterValue] = {
+  def getArgumentsList(action: Interaction, args: List[ParameterValue]): Map[ParameterReference, ParameterValue] = {
     action.parameters.zip(args).toMap
   }
 

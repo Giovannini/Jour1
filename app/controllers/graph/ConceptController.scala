@@ -4,7 +4,7 @@ import forms.graph.ontology.concept.ConceptForm.form
 import models.graph.NeoDAO
 import models.graph.custom_types.{DisplayProperty, Statement}
 import models.graph.ontology.concept.{Concept, ConceptDAO}
-import models.instance_action.action.InstanceAction
+import models.interaction.action.InstanceAction
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 

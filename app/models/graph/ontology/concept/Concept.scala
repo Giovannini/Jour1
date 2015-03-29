@@ -6,7 +6,7 @@ import models.graph.ontology.ValuedProperty
 import models.graph.ontology.concept.need.{NeedDAO, Need}
 import models.graph.ontology.property.{Property, PropertyDAO}
 import models.graph.ontology.relation.Relation
-import models.instance_action.action.InstanceAction
+import models.interaction.action.InstanceAction
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
 /**

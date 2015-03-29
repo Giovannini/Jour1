@@ -4,7 +4,7 @@ import models.graph.custom_types.Coordinates
 import models.graph.ontology.concept.need.{MeanOfSatisfaction, Need}
 import models.graph.ontology.concept.{Concept, ConceptDAO}
 import models.graph.ontology.property.{Property, PropertyType}
-import models.instance_action.action.InstanceAction
+import models.interaction.action.InstanceAction
 import play.api.libs.json._
 
 

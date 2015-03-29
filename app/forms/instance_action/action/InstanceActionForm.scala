@@ -2,9 +2,9 @@ package forms.instance_action.action
 
 import forms.instance_action.parameter.ParameterForm
 import forms.instance_action.precondition.PreconditionForm
-import models.instance_action.action.InstanceAction
-import models.instance_action.parameter.{Parameter, ParameterReference}
-import models.instance_action.precondition.Precondition
+import models.interaction.action.{InstanceActionDAO, InstanceAction}
+import models.interaction.parameter.{Parameter, ParameterReference}
+import models.interaction.precondition.Precondition
 import play.api.data.Form
 import play.api.data.Forms._
 
@@ -38,7 +38,7 @@ object InstanceActionForm {
   }
 
   def applySubaction(id: Long, params: List[Parameter]): (InstanceAction, Map[ParameterReference, Parameter]) = {
-    val action = InstanceAction.getById(id)
+    val action = InstanceActionDAO.getById(id)
     val parameters = Parameter.linkParameterToReference(action.parameters, params)
     (action, parameters)
   }
