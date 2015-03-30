@@ -1,56 +1,21 @@
-<link rel="stylesheet" href="@routes.Assets.at("stylesheets/map.css")" />
+@main("Map Vizualisation") {
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/map.css")" />
 
-<div class="game-container" ng-app="actionManagerApp">
-    <div class="game-row">
-        <div class="left-panel">
-            <div id="pixi" class="map-container">
-                <div class="loading">Loading...</div>
+    <div class="game-container" ng-app="actionManagerApp">
+        <div class="game-row">
+            <div class="left-panel">
+                <div id="pixi" class="map-container">
+                    <div class="loading">Loading...</div>
+                </div>
             </div>
-        </div>
-        <div class="right-panel" ng-controller="ActionController">
-            <div class="tile-info" ng-show="!isTileSelected">
-                <h2>No tile selected</h2>
-            </div>
-            <div class="tile-info loading" ng-show="loadingTile">
-                Loading...
-            </div>
-            <div class="tile-info" ng-show="isTileSelected">
-                <h2>Selected Tile : {{ tile.x }}, {{ tile.y }}</h2>
-                <ul>
-                    <li ng-repeat="(instanceId, instance) in instances">
-                        <a ng-click="selectInstance(instanceId)" class="item">{{ instance.label }} {{ instance.id }}</a>
-                        <div class="instance-info" ng-show="selectedInstance == instanceId">
-                            <div class="loading" ng-show="loadingActions == instanceId">
-                                Loading...
-                            </div>
-                            <ul ng-show="loadingActions != instanceId" class="instance-info">
-                                <li ng-show="actions[instanceId].length == 0" class="no-item">No actions</li>
-                                <li ng-repeat="(actionId, action) in actions[instanceId]" class="item">
-                                    <a ng-click="selectAction(actionId)">{{ action.label }}</a>
-                                    <div class="choose-instance" ng-show="selectedAction == actionId">
-                                        <div class="loading" ng-show="loadingChoice">
-                                            Loading...
-                                        </div>
-                                        <div class="" ng-show="showChoice">
-                                            <ul>
-                                                <li ng-repeat="choice in choices">
-                                                    <a ng-click="sendAction(instance.id, actionId, choice.id)">{{ choice.label }} ({{ choice.coordinates.x}}, {{ choice.coordinates.y}})</a>
-                                                </li>
-                                                <li ng-show="choices.length == 0">No instance</li>
-                                            </ul>
-                                            
-                                        </div>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-                </ul>
+            <div ng-view="" class="right-panel">
             </div>
         </div>
     </div>
-</div>
-<script src="@routes.Assets.at("components/pixi.js/bin/pixi.js")"></script>
-<script src="@routes.Assets.at("javascripts/mapScript.js")"></script>
-<script src="@routes.Assets.at("components/angular/angular.js")"></script>
-<script src="@routes.Assets.at("javascripts/actionScript.js")"></script>
+    <script src="@routes.Assets.at("components/pixi.js/bin/pixi.js")"></script>
+    <script src="@routes.Assets.at("javascripts/mapScript.js")"></script>
+    <script src="@routes.Assets.at("components/angular/angular.js")"></script>
+    <script src="@routes.Assets.at("components/angular-route/angular-route.min.js")"></script>
+    <script src="@routes.Assets.at("components/angular-resource/angular-resource.min.js")"></script>
+    <script src="@routes.Assets.at("javascripts/actionScript.js")"></script>
+}

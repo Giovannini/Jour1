@@ -12,38 +12,6 @@ body {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-a {
-  color: $linkColor;
-
-  &:hover, &:focus {
-    color: $linkHoverColor;
-  }
-
-  &:active {
-    color: $linkActiveColor;
-  }
-}
-
-input, select, button {
-  background-color: lighten($darkColor, 25);
-  border: 1px solid lighten($darkColor, 40);
-  padding: 5px;
-  color: $lightColor;
-}
-
-button:hover {
-  cursor: pointer;
-}
-
-input[type="number"] {
-  width: 40px;
-  text-align: right;
-}
-
-input.ng-invalid-pattern {
-  border: 1px solid #cc4850;
-}
-
 .align-center {
   text-align: center;
 }
@@ -52,10 +20,6 @@ input.ng-invalid-pattern {
 }
 .align-left {
   text-align: left;
-}
-
-.form-label {
-  padding: 0 20px 0 0;
 }
 
 .graph-container {
@@ -109,149 +73,6 @@ input.ng-invalid-pattern {
   height: 100vh;
 }
 
-.form {
-  display: block;
-  margin: 0;
-  padding: 0;
-}
-
-.form-field {
-  display: block;
-  background-color: $darkColor;
-  border: 0;
-  margin: 15px 0;
-  padding: 10px 15px;
-}
-
-.form-group {
-  display: block;
-  width: 100%;
-  margin: 10px 0;
-}
-
-.highlight, .highlight--mega {
-  width: calc(100% - 15px);
-  padding: 7.5px;
-}
-
-.highlight {
-  background-color: lighten($darkColor,5);
-}
-
-.highlight--mega {
-  background-color: lighten($darkColor,10);
-}
-
-.form-field__legend--single, .form-group__label--single {
-  line-height: 30px;
-  margin: 0;
-  padding: 0;
-}
-.form-field__legend--single {
-  height: 30px;
-}
-
-.form-field__legend h2, .form-field__legend--single h2 {
-  display: inline-block;
-  margin: 0;
-}
-
-.form-field__legend, .form-group__label {
-  float: left;
-  width: calc(30% - 30px);
-  margin: 0;
-  padding: 0;
-}
-
-.form-group__label {
-  text-align: right;
-}
-
-.form-group__label button {
-  font-size:1em;
-  color: $linkColor;
-  text-decoration: underline;
-  font-weight: bold;
-  background: none;
-  border: none;
-  padding: 0;
-}
-
-.form-group__label button:hover, .form-group__label button:focus {
-  outline: 0;
-  color: $linkHoverColor;
-}
-.form-group__label button:active {
-  color: $linkActiveColor;
-}
-
-.form-field__description, .form-group__input {
-  margin: 0 0 0 30%;
-  width: calc(70% - 30px);
-  padding: 0 15px;
-}
-
-.form-group__label, .form-group__input {
-  line-height: 30px;
-}
-
-.form-group__input input {
-  height: 18px;
-  padding: 5px;
-  width: calc(100% - 12px);
-}
-
-.form-group__input [type="checkbox"] {
-  height: 26px;
-  width: auto;
-}
-
-.form-group__input .button--remove {
-  background: none;
-  border: none;
-  font-size: 0.8em;
-  padding: 0;
-  text-decoration: underline;
-}
-
-.form-group__input select {
-  height: 30px;
-  padding: 5px;
-  width: 100%;
-}
-
-.form-field__legend {
-  color: $lightColor, 15;
-  font-size: 1em;
-}
-
-.form-field__description {
-  color: darken($lightColor, 25);
-  font-size: 0.8em;
-}
-
-.error {
-  font-size: 1em;
-  color: #dd8888;
-}
-
-.form-submit {
-  display: block;
-  background: lighten($darkColor, 25);
-  color: $lightColor;
-  font-size: 0.9em;
-  text-transform: uppercase;
-  font-weight: bold;
-  padding: 15px 5px;
-  width: 50%;
-  margin: 20px auto;
-  border: 1px;
-}
-
-.form-add {
-  text-align: right;
-}
-
 .title {
   background-color: lighten($darkColor, 15);
   padding: 15px;
@@ -283,3 +104,5 @@ svg:active {
 .node:hover text {
   opacity: 1;
 }
+
+@import "form.scss";

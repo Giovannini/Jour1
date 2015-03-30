@@ -8,15 +8,17 @@ GET         /                                                        controllers
 GET         /init                                                    controllers.WorldInitialisation.initGraph
 
 GET         /concepts                                                controllers.RestCall.getAllConcepts
+GET         /concepts/simple                                         controllers.RestCall.getAllSimplifiedConcepts
 GET         /instances                                               controllers.WorldInitialisation.getWorld
 GET         /instances/:initInstanceId/:actionType/:conceptId        controllers.RestCall.getPossibleDestinationOfAction(initInstanceId: Long, actionType: Long, conceptId: Long)
 
 #Instances manipulation
 GET         /instances/edit/:instanceId                              controllers.RestCall.editInstance(instanceId: Int)
 GET         /instances/create/:conceptId                             controllers.RestCall.createInstance(conceptId: Int)
-GET         /instances/delete/:instanceId                            controllers.ontology.InstanceManager.delete(instanceId: Int)
+POST        /instances/delete/:instanceId                            controllers.ontology.InstanceManager.delete(instanceId: Int)
 POST        /instances/update                                        controllers.ontology.InstanceManager.update
 POST        /instances/create                                        controllers.ontology.InstanceManager.create
+GET         /instances/:instanceId                                   controllers.RestCall.getInstanceById(instanceId: Int)
 
 #Graph manipulation
 GET         /relation/create                                         controllers.ontology.RelationManager.createRelation

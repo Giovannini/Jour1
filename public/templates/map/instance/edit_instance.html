@@ -1,0 +1,66 @@
+<div class="tile-info" ng-show="isEdition">
+    <h2>Instance {{ instanceId }}</h2>
+</div>
+
+<div class="form-field">
+    <div class="form-field__legend--single">
+        <a href="{{ back_url }}">Go back</a>
+    </div>
+</div>
+
+<form class="form" ng-submit="submitInstance()">
+    <fieldset class="form-field">
+        <div class="form-group">
+            <h3 class="form-field__legend--single">General</h3>
+        </div>
+        <div class="form-group highlight">
+            <label class="form-group__label" for="instance_name">Name:</label>
+            <div class="form-group__input">
+                <input type="text" id="instance_name" ng-model="instance.label" />
+            </div>
+        </div>
+    </fieldset>
+
+    <button type="submit" class="form-submit">{{ submit_button }}</button>
+</form>
+<!--
+
+<form class="form">
+    <fieldset class="form-field">
+        <div class="form-group">
+            <h3 class="form-field__legend--single">General</h3>
+        </div>
+        <div class="form-group highlight">
+            <label class="form-group__label" for="node_name">Name:</label>
+            <div class="form-group__input">
+                <input type="text" id="node_name" name="node_name" ng-model="node.label" />
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset class="form-field">
+        <div class="form-group">
+            <h3 class="form-field__legend">Display</h3>
+            <p class="form-field__description">Information that needs to be provided to its instance</p>
+        </div>
+        <div class="form-group highlight">
+            <div class="form-group">
+                <label class="form-group__label" for="node_color">Color:</label>
+                <div class="form-group__input">
+                    <input type="text" id="node_color" name="node_color" ng-model="node.displayProperty.color" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-group__label" for="node_zindex">Zindex:</label>
+                <div  class="form-group__input">
+                    <input type="number" id="node_zindex" name="node_zindex" ng-model="node.displayProperty.zindex" />
+                </div>
+            </div>
+        </div>
+    </fieldset>
+
+    <button type="submit" class="form-submit" ng-click="submitNode()">{{ submit_button }}</button>
+
+
+</form>
+-->

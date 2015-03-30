@@ -61,7 +61,6 @@ object ParameterForm {
    */
   implicit def ParameterFormatter: Formatter[Parameter] = new Formatter[Parameter] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Parameter] = {
-      println(data)
       val isParam = data.get(key+".isParam")
 
       data.get(key+".isParam") match {

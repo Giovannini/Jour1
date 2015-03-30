@@ -76,6 +76,22 @@ body {
   line-height: 30px;
 }
 
+.instance-list {
+  display: flex;
+}
+
+.instance-item {
+  display: inline-block;
+  color: #f0f0f0;
+  cursor: pointer;
+  padding: 10px 10px;
+  line-height: 30px;
+}
+
+.instance-title {
+  flex: 1;
+}
+
 .instance-info {
   background: $darkColor;
 }
@@ -89,3 +105,5 @@ body {
   width: 100%;
   height: 500px;
 }
+
+@import "form.scss";
