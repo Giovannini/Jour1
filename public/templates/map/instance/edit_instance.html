@@ -8,7 +8,7 @@
     </div>
 </div>
 
-<form class="form">
+<form class="form" ng-submit="submitInstance()">
     <fieldset class="form-field">
         <div class="form-group">
             <h3 class="form-field__legend--single">General</h3>
@@ -21,7 +21,7 @@
         </div>
     </fieldset>
 
-    <button type="submit" class="form-submit" ng-click="submitInstance()">{{ submit_button }}</button>
+    <button type="submit" class="form-submit">{{ submit_button }}</button>
 </form>
 <!--
 

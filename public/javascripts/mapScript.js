@@ -58,6 +58,7 @@ var RestFactory = function() {
         },
         instances: {
             get: getUrl("/instances"),
+            getById: function(idInstance) { return getUrl("/instances/"+idInstance); },
             getByConcept: function(idInstance, action, conceptId) { return getUrl("/instances/"+idInstance+"/"+action+"/"+conceptId); },
             deleteInstance: function(idInstance) { return postUrl("/instances/delete/"+idInstance, {}); }
         },
@@ -287,6 +288,17 @@ var MapFactory = function(Rest) {
             document.dispatchEvent(new Event(TAG+"initialized"));
         });
     };
+
+    var getInstance = function(idInstance, callback) {
+        Rest.instances.getById(idInstance)(
+            function(responseText) {
+                callback(JSON.parse(responseText));
+            },
+            function(status, responseText) {
+                console.log(status, responseText);
+            }
+        );
+    };
     
     var getInstances = function(idArray) {
         if(typeof idArray === "undefined") {
@@ -313,6 +325,7 @@ var MapFactory = function(Rest) {
     };
 
     return {
+        getInstance: getInstance,
         getInstances: getInstances,
         getInstancesByConcept: getInstancesByConcept,
         initInstances: initInstances,

@@ -1,18 +1,21 @@
-<link rel="stylesheet" href="@routes.Assets.at("stylesheets/map.css")" />
+@main("Map Vizualisation") {
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/map.css")" />
 
-<div class="game-container" ng-app="actionManagerApp">
-    <div class="game-row">
-        <div class="left-panel">
-            <div id="pixi" class="map-container">
-                <div class="loading">Loading...</div>
+    <div class="game-container" ng-app="actionManagerApp">
+        <div class="game-row">
+            <div class="left-panel">
+                <div id="pixi" class="map-container">
+                    <div class="loading">Loading...</div>
+                </div>
+            </div>
+            <div ng-view="" class="right-panel">
             </div>
         </div>
-        <div ng-view="" class="right-panel">
-        </div>
     </div>
-</div>
-<script src="@routes.Assets.at("components/pixi.js/bin/pixi.js")"></script>
-<script src="@routes.Assets.at("javascripts/mapScript.js")"></script>
-<script src="@routes.Assets.at("components/angular/angular.js")"></script>
-<script src="@routes.Assets.at("components/angular-route/angular-route.min.js")"></script>
-<script src="@routes.Assets.at("javascripts/actionScript.js")"></script>
+    <script src="@routes.Assets.at("components/pixi.js/bin/pixi.js")"></script>
+    <script src="@routes.Assets.at("javascripts/mapScript.js")"></script>
+    <script src="@routes.Assets.at("components/angular/angular.js")"></script>
+    <script src="@routes.Assets.at("components/angular-route/angular-route.min.js")"></script>
+    <script src="@routes.Assets.at("components/angular-resource/angular-resource.min.js")"></script>
+    <script src="@routes.Assets.at("javascripts/actionScript.js")"></script>
+}

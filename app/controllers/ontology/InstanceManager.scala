@@ -65,6 +65,8 @@ object InstanceManager extends Controller {
    * @return an action redirecting to the index page of the application
    */
   def update: Action[AnyContent] = Action { implicit request =>
+    println("test");
+
     /**
      * Update the map following a form with no errors in it.
      * @author Thomas GIOVANNINI

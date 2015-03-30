@@ -17,6 +17,7 @@ GET         /instances/create/:conceptId                             controllers
 POST        /instances/delete/:instanceId                            controllers.ontology.InstanceManager.delete(instanceId: Int)
 POST        /instances/update                                        controllers.ontology.InstanceManager.update
 POST        /instances/create                                        controllers.ontology.InstanceManager.create
+GET         /instances/:instanceId                                   controllers.RestCall.getInstanceById(instanceId: Int)
 
 #Graph manipulation
 GET         /relation/create                                         controllers.ontology.RelationManager.createRelation

@@ -28,7 +28,7 @@ object RestCall extends Controller {
    * @author Thomas GIOVANNINI
    * @param conceptId of the concept the relations are desired
    */
-  def getAllActionsOf(conceptId: Long): Action[AnyContent] = Action {
+  def getAllActionsOf(conceptId: Long) = Action {
     val t1 = System.currentTimeMillis()
     val relations = ConceptDAO.getReachableRelations(conceptId)
     val actions = relations.filter(_._1.isAnAction)
@@ -55,7 +55,7 @@ object RestCall extends Controller {
    * json model: {action: "action", instances: [instance, instance, ...]}
    * @author Thomas GIOVANNINI
    */
-  def executeAction: Action[JsValue] = Action(parse.json) { request =>
+  def executeAction = Action(parse.json) { request =>
     /**
      * Parse json request and execute it.
      * @author Thomas GIOVANNINI
@@ -109,6 +109,17 @@ object RestCall extends Controller {
     val concept = ConceptDAO.getById(conceptId)
     val instance = Instance.createRandomInstanceOf(concept)
     Ok(views.html.manager.instance.instanceEditor(instance, controllers.ontology.routes.InstanceManager.create()))
+  }
+
+  /**
+   * Get an instance with its id
+   * @author Aurélie LORGEOUX
+   * @param instanceId id of the instance
+   * @return instance in JSON
+   */
+  def getInstanceById(instanceId: Long) = Action {
+    val instance = Application.map.getInstanceById(instanceId)
+    Ok(instance.toJson)
   }
 
   def getBestAction(instanceID: Long): Action[AnyContent] = Action {
