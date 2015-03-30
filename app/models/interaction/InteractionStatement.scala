@@ -1,6 +1,7 @@
 package models.interaction
 
 import anorm._
+import models.interaction.action.InstanceAction
 
 /**
  * All values from this objects are SQLStatements
@@ -31,14 +32,16 @@ object InteractionStatement {
     interaction.parameters.map(_.toString).mkString(",")
   }
 
-  private def precondString(interaction: Interaction): String = {
-    interaction.preconditions.map(p => {
-      p._1.id + " (" + p._2.unzip._2.map(_.toDBString).mkString(",")+")"
-    }).mkString(";")
+  private def precondString(interaction: Interaction): String = interaction match {
+    case action: InstanceAction =>
+      action.preconditions.map(precondition => {
+        precondition._1.id + " (" + precondition._2.unzip._2.map(_.toDBString).mkString(",") + ")"
+      }).mkString(";")
+    case _ => ""
   }
 
   private def contentString(interaction: Interaction): String = {
-    interaction.subActions.map(action => {
+    interaction.subInteractions.map(action => {
       action._1.id + " (" + action._2.unzip._2.map(_.toDBString).mkString(",")+")"
     }).mkString(";")
   }

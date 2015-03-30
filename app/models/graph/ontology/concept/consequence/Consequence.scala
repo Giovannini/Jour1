@@ -1,6 +1,6 @@
 package models.graph.ontology.concept.consequence
 
-import models.interaction.action.{InstanceActionDAO, InstanceAction}
+import models.interaction.effect.{Effect, EffectDAO}
 import play.api.libs.json.Json
 
 import scala.util.{Failure, Success, Try}
@@ -8,17 +8,14 @@ import scala.util.{Failure, Success, Try}
 /**
  * Class to define the effects from a need
  */
-case class Consequence(severity: Double, effects: List[InstanceAction]){
+case class Consequence(severity: Double, effect: Effect){
   def toDB: String = {
-    severity + " - " + effects.map {effect =>
-      println(effect.label + ": " + effect.id)
-      effect.id
-    }.mkString(", ")
+    severity + " - " + effect.id
   }
 
   def toJson = Json.obj(
     "severity" -> severity,
-    "effects" -> effects.map(_.id)
+    "effects" -> effect.id
   )
 }
 
@@ -27,8 +24,8 @@ object Consequence {
     Try {
       val splitted = stringToParse.split(" - ")
       val severity = splitted(0).toDouble
-      val effects = splitted(1).split(", ").map(idToParse => InstanceActionDAO.getById(idToParse.toLong)).toList
-      Consequence(severity, effects)
+      val effect = EffectDAO.getById(splitted(1).toLong)
+      Consequence(severity, effect)
     } match {
       case Success(c) => c
       case Failure(e) =>
@@ -38,6 +35,6 @@ object Consequence {
     }
   }
 
-  val error = Consequence(0, List(InstanceAction.error))
+  val error = Consequence(0, Effect.error)
 
 }

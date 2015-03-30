@@ -2,16 +2,18 @@ package models.graph.ontology.concept.need
 
 import models.graph.ontology.concept.{ConceptDAO, Concept}
 import models.interaction.action.{InstanceActionDAO, InstanceAction}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{Json, JsValue}
 
 import scala.util.{Failure, Success, Try}
 
 /**
- * Created by giovannini on 3/25/15.
+ * Object representing the means to satisfy a need
+ * @param action mean for instance to satisfy their need
+ * @param destinationConcept destination of the action
  */
-case class MeanOfSatisfaction(action: InstanceAction, _destinationConcepts: List[Concept]) {
+case class MeanOfSatisfaction(action: InstanceAction, destinationConcept: Concept) {
 
-  val destinationConcepts = _destinationConcepts.flatMap(concept => concept :: concept.getDescendance).distinct
+  val destinationConcepts = destinationConcept :: destinationConcept.getDescendance
 
   override def toString = action.id + " -> " + destinationConcepts.map(_.id).mkString(",")
 
@@ -23,7 +25,7 @@ case class MeanOfSatisfaction(action: InstanceAction, _destinationConcepts: List
 
 object MeanOfSatisfaction {
 
-  val error = MeanOfSatisfaction(InstanceAction.error, List())
+  val error = MeanOfSatisfaction(InstanceAction.error, Concept.error)
 
   def parseList(string: String): List[MeanOfSatisfaction] = Try{
     string.split(";").map(parseString).toList
@@ -40,11 +42,11 @@ object MeanOfSatisfaction {
     val action = InstanceActionDAO.getById(splitted(0).toLong)
     val destinationsConcept = {
       if (splitted.length == 1){
-        List()
+        Concept.error
       }
-      else splitted(1).split(",")
-        .map(id => ConceptDAO.getById(id.toLong))
-        .toList
+      else {
+        ConceptDAO.getById(splitted(1).toLong)
+      }
     }
     MeanOfSatisfaction(action, destinationsConcept)
   } match {

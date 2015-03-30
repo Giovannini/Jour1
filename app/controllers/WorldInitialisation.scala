@@ -130,15 +130,15 @@ object WorldInitialisation extends Controller {
 
     /* Creation of needs */
     val needFood = NeedDAO.save(Need(0L, "Hunger", propertyHunger, priority = 6,
-      List(ConsequenceStep(10, Consequence(8, List(InstanceActionManager.nameToId("_removeInstanceAt"))))),
-      List(MeanOfSatisfaction(InstanceActionManager.nameToId("Eat"), List(conceptSheep)),
-        MeanOfSatisfaction(InstanceActionManager.nameToId("Eat"), List(conceptApple)),
-        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), List(conceptSheep)),
-        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), List(conceptApple)),
-        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), List()))))
+      List(ConsequenceStep(10, Consequence(8, InstanceActionManager.nameToId("_removeInstanceAt").toEffect))),
+      List(MeanOfSatisfaction(InstanceActionManager.nameToId("Eat"), conceptSheep),
+        MeanOfSatisfaction(InstanceActionManager.nameToId("Eat"), conceptApple),
+        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), conceptSheep),
+        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), conceptApple),
+        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.any))))
     val needSeaAir = NeedDAO.save(Need(0L, "SeaAir", propertyComfort, priority = 5,
-      List(ConsequenceStep(5, Consequence(5, List(InstanceActionManager.nameToId("_addToProperty"))))),
-      List(MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), List()))))
+      List(ConsequenceStep(5, Consequence(5, InstanceActionManager.nameToId("_addToProperty").toEffect))),
+      List(MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.any))))
 
     println("Declaration of concepts...")
 

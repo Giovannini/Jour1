@@ -34,7 +34,7 @@ object InstanceActionForm {
   }
 
   private def unapplyForm(ia: InstanceAction) = {
-    Some((ia.label, ia.preconditions, ia.subActions, ia.parameters))
+    Some((ia.label, ia.preconditions, ia.subInteractions, ia.parameters))
   }
 
   def applySubaction(id: Long, params: List[Parameter]): (InstanceAction, Map[ParameterReference, Parameter]) = {

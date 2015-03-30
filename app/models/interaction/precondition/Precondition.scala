@@ -89,7 +89,6 @@ case class Precondition(id: Long,
   }*/
 
   def instancesThatFill(source: Instance, instancesList: List[Instance]): Set[Instance] = {
-    println("instanceThatFill: " + source.id + " - " + label)
     //TODO check output
     val result = this.label match {
       case "isNextTo" =>

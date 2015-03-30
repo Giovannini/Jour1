@@ -136,6 +136,7 @@ object Concept {
   implicit val connection = NeoDAO.connection
 
   val error = Concept("XXX", List(), List(), List(), DisplayProperty())
+  val any = Concept("Any", List(), List(), List(), DisplayProperty())
 
   /**
    * Create a concept given a list of ids of properties instead of a list of properties directly.

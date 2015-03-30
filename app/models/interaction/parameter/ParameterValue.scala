@@ -18,7 +18,7 @@ case class ParameterValue(value: Any, _type: String) extends Parameter {
 
   def jsonValue: JsValue = {
     _type match {
-      case "Int" => JsNumber(value.asInstanceOf[Int])
+      case "Int" => JsNumber(value.toString.toInt)
       case "Long" => value.asInstanceOf[Instance].toJson
       case "Property" => PropertyDAO.getByName(value.asInstanceOf[String]).toJson
     }

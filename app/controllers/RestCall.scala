@@ -4,8 +4,7 @@ import actors.Intelligence
 import models.graph.ontology.Instance
 import models.graph.ontology.concept.{Concept, ConceptDAO}
 import models.graph.ontology.relation.Relation
-import models.interaction.InteractionParser
-import models.interaction.action.InstanceAction
+import models.interaction.action.{InstanceActionParser, InstanceAction}
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, Controller, Request}
 
@@ -66,7 +65,7 @@ object RestCall extends Controller {
       val actionReference = (jsonRequest \ "action").as[Long]
       val actionId = Relation.DBList.getActionIdFromRelationId(actionReference)
       val actionArguments = (jsonRequest \ "instances").as[List[Long]]
-      val result = InteractionParser.parseInteraction(actionId, actionArguments)
+      val result = InstanceActionParser.parseAction(actionId, actionArguments)
       result
     }
 
@@ -88,7 +87,7 @@ object RestCall extends Controller {
   : Action[AnyContent] = Action {
     val sourceInstance = Application.map.getInstanceById(initInstanceId)
     val actionID = Relation.DBList.getActionIdFromRelationId(relationId)
-    val action = InteractionParser.getAction(actionID)
+    val action = InstanceActionParser.getAction(actionID)
     val destinationInstancesList = Application.map.getInstancesOf(conceptId)
     if (sourceInstance == Instance.error || action == InstanceAction.error){
       Ok(Json.arr())

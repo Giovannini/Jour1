@@ -1,14 +1,14 @@
-package models.interaction
+package models.interaction.action
 
-import models.interaction.action.{InstanceActionDAO, InstanceAction}
+import models.interaction.LogInteraction
 import models.interaction.parameter.{ParameterReference, ParameterValue}
 
-import scala.util.{Success, Failure, Try}
+import scala.util.{Failure, Success, Try}
 
 /**
  * Parser class for actions
  */
-object InteractionParser {
+object InstanceActionParser {
 
   /**
    * Parse an action from client-side and execute it.
@@ -18,7 +18,7 @@ object InteractionParser {
    * @return true if the execution went well
    *         false else
    */
-  def parseInteraction(actionReference: Long, instancesId: List[Long]): Boolean = {
+  def parseAction(actionReference: Long, instancesId: List[Long]): Boolean = {
     Try {
       val action = getAction(actionReference)
       val arguments = getArgumentsList(action, instancesId.map(id => ParameterValue(id, "Long")))
@@ -61,7 +61,7 @@ object InteractionParser {
    * @param actionReference the id of the desired action
    * @return an action object
    */
-  def getAction(actionReference: Long): Interaction = {
+  def getAction(actionReference: Long): InstanceAction = {
     InstanceActionDAO.getById(actionReference)
   }
 
@@ -71,7 +71,7 @@ object InteractionParser {
    * @param args arguments used by the action
    * @return a list of arguments and their values
    */
-  def getArgumentsList(action: Interaction, args: List[ParameterValue]): Map[ParameterReference, ParameterValue] = {
+  def getArgumentsList(action: InstanceAction, args: List[ParameterValue]): Map[ParameterReference, ParameterValue] = {
     action.parameters.zip(args).toMap
   }
 

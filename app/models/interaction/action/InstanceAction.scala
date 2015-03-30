@@ -1,12 +1,14 @@
 package models.interaction.action
 
 import controllers.Application
+import models.graph.ontology.Instance
 import models.interaction.Interaction
-import models.interaction.parameter.{Parameter, ParameterReference}
+import models.interaction.parameter.{Parameter, ParameterReference, ParameterValue}
 import models.interaction.precondition.Precondition
+import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
 import scala.language.postfixOps
-import scala.util.{Try, Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 /**
  * Model of rule for persistence
@@ -24,9 +26,79 @@ case class InstanceAction(
   _subActions: List[(Interaction, Map[ParameterReference, Parameter])],
   parameters: List[ParameterReference]) extends Interaction{
 
-  val subActions = _subActions.map(tuple => (tuple._1.asInstanceOf[InstanceAction], tuple._2))
+  val subInteractions = _subActions.map(tuple => (tuple._1.asInstanceOf[InstanceAction], tuple._2))
 
+  def subConditions: List[(Precondition, Map[ParameterReference, Parameter])] = {
+    subInteractions.flatMap(_._1.preconditions) ++ subInteractions.flatMap(_._1.subConditions )
+  }
 
+  /**
+   * Parse the instance action to a Json object
+   * @author Thomas GIOVANNINI
+   * @return a json object representing the instance action
+   */
+  override def toJson: JsValue = {
+    Json.obj(
+      "id" -> JsNumber(id),
+      "label" -> JsString(label),
+      "preconditions" -> preconditions.map(item => item._1.toJsonWithParameters(item._2)),
+      "subActions" -> subInteractions.map(item => item._1.toJsonWithParameters(item._2)),
+      "parameters" -> parameters.map(_.toJson)
+    )
+  }
+
+  /**
+   * Check if all the action's preconditions are filled before executing it.
+   * @param arguments to use to check those preconditions
+   * @return true if all the preconditions are filled
+   *         false else
+   */
+  def checkPreconditions(arguments: Map[ParameterReference, ParameterValue]): Boolean = {
+    preconditions.forall(item => item._1.isFilled(item._2, arguments))
+  }
+
+  /**
+   * Get the instances that validate all the preconditions of a given action
+   * @author Thomas GIOVANNINI
+   * @param sourceInstance the source of the action
+   * @param instances list of instances to validate
+   * @return a list of instances under JSON format
+   */
+  def getDestinationList(sourceInstance: Instance, instances: List[Instance]): List[Instance] = {
+    //TODO problem: only checking preconditions of the action but none of the subactions
+    println(sourceInstance.id + " destinations: " + (preconditions ++ subConditions).map(_._1.label).mkString(", "))
+    val result = (preconditions ++ subConditions)
+      .map(_._1.instancesThatFill(sourceInstance, instances))
+      .foldRight(instances.toSet)(_ intersect _)
+      .toList
+    result
+  }
+
+  /**
+   * Execute a given action with given arguments
+   * @author Thomas GIOVANNINI
+   * @param arguments with which execute the action
+   * @return true if the action was correctly executed
+   *         false else
+   */
+  def executeGoodAction(arguments: Map[ParameterReference, ParameterValue]): Boolean = {
+    this.label match {
+      case "addInstanceAt" =>
+        HardCodedAction.addInstanceAt(arguments)
+        true
+      case "removeInstanceAt" =>
+        HardCodedAction.removeInstanceAt(arguments)
+        true
+      case "addToProperty" =>
+        HardCodedAction.addToProperty(arguments)
+        true
+      case "modifyProperty" =>
+        HardCodedAction.modifyProperty(arguments)
+        true
+      case _ =>
+        subInteractions.forall(subAction => subAction._1.execute(takeGoodArguments(subAction._2, arguments)))
+    }
+  }
 
   /**
    * Modify ID of the action
@@ -35,7 +107,7 @@ case class InstanceAction(
    * @return a new InstanceAction looking like this one but with a new ID
    */
   def withId(newId: Long): InstanceAction = {
-    InstanceAction(newId, this.label, this.preconditions, this.subActions, this.parameters)
+    InstanceAction(newId, this.label, this.preconditions, this.subInteractions, this.parameters)
   }
 
   /*#################
