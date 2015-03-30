@@ -150,8 +150,17 @@ var RestFactory = ['$resource', function($resource) {
  Controller for the home page of the CRUD
  Displays docs, and existing actions
  */
-var OverviewCtrl = ['$scope', '$resource', function($scope, $resource) {
-    
+var OverviewCtrl = ['$scope', 'RestFactory', function($scope, RestFactory) {
+    $scope.error = "";
+    $scope.loading = true;
+    RestFactory.getActions(
+        function(actions) {
+            $scope.actions = actions;
+        },
+        function(failure) {
+            $scope.error = "Impossible to load actions.";
+        }
+    );
 }];
 
 /*

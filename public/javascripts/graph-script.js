@@ -20,6 +20,7 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
     var _edges = [];
     var _properties = {};
     var _preconditions = {};
+    var _concepts = [];
     var options = {
         deepness: 1
     };
@@ -154,6 +155,33 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
         }
     };
 
+    var getConcepts = function getConcepts(success, failure) {
+        if(_concepts.length > 0) {
+            success(_concepts);
+        } else {
+            var request = $resource(
+                baseUrl + 'concepts/simple',
+                {},
+                {
+                    'get': {
+                        method: "GET",
+                        isArray: true,
+                        Accept: "application/json"
+                    }
+                }
+            );
+            request.get(
+                {},
+                function (response) {
+                    success(response);
+                },
+                function (response) {
+                    failure(response);
+                }
+            );
+        }
+    };
+
     var getRelation = function(label, success, failure) {
         var request = $resource(
             baseUrl+'graph/action/:label',
@@ -237,6 +265,7 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
         getPreconditions: getPreconditions,
         getActions: getActions,
         getActionsOfConcept: getActionsOfConcept,
+        getConcepts: getConcepts,
         getRelation: getRelation,
         options: options,
         searchNodes: searchNodes
@@ -405,13 +434,15 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
         _properties,
         _actions,
         _effects,
+        _concepts,
         _notifyError,
         _updateProperties,
         _updateActions,
         _updateEffects,
+        _updateConcepts,
         _submitUrl;
 
-    var init = function(notifyError, updateProperties, updateActions, updateEffects, nodeLabel) {
+    var init = function(notifyError, updateProperties, updateActions, updateEffects, updateConcepts, nodeLabel) {
         _node = {
             label: "",
             properties: [],
@@ -425,21 +456,33 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
 
         _notifyError = notifyError;
         _updateProperties = updateProperties;
-        if(_properties != null) {
+        if(typeof _properties !== "undefined" && _properties != null) {
             _updateProperties(_properties);
+        } else {
+            _properties = null;
         }
 
         _updateActions = updateActions;
-        if(_actions != null) {
+        if(typeof _actions !== "undefined" && _actions != null) {
             _updateActions(_actions);
+        } else {
+            _actions = null;
         }
 
         _updateEffects = updateEffects;
-        if(_effects != null) {
+        if(typeof _effects !== "undefined" && _effects != null) {
             _updateEffects(_effects);
+        } else {
+            _effects = null;
         }
 
-        _properties = null;
+        _updateConcepts = updateConcepts;
+        if(typeof _concepts !== "undefined" && _concepts != null) {
+            _updateConcepts(_concepts);
+        } else {
+            _concepts = null;
+        }
+
         NodesFactory.getProperties(
             function(properties) {
                 _properties = properties;
@@ -451,7 +494,6 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
         );
 
         /* Get all actions */
-        _actions = null;
         if(typeof nodeLabel === "undefined") {
             nodeLabel = "";
         }
@@ -466,7 +508,6 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
             }
         );
 
-        _effects = null;
         NodesFactory.getActions(
             function(effects) {
                 _effects = effects;
@@ -477,6 +518,16 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
             }
         );
         _updateEffects(_effects);
+
+        NodesFactory.getConcepts(
+            function(concepts) {
+                _concepts = concepts;
+                _updateConcepts(_concepts);
+            },
+            function(failure) {
+                _notifyError("Impossible to load concepts");
+            }
+        )
     };
 
     var setNode = function(node) {
@@ -572,6 +623,7 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
         properties: function() { return _properties; },
         actions: function() { return _actions; },
         effects: function() { return _effects; },
+        concepts: function() { return _concepts; },
         init: init,
         setNode: setNode,
         addProperty: addProperty,
@@ -610,6 +662,9 @@ var NewNodeCtrl = ['$scope', '$routeParams', 'EditNodeFactory', function($scope,
         },
         function(effects) {
             $scope.effects = effects;
+        },
+        function(concepts) {
+            $scope.concepts = concepts;
         }
     );
 
@@ -669,8 +724,10 @@ var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', 'NodesFactory', 'EditNod
                 }
 
                 function matchAction(actionId, actions) {
+                    console.log(actionId);
                     for(var i = 0; i < actions.length; i++) {
                         if(actionId == actions[i].id) {
+                            console.log(actions[i]);
                             return actions[i]
                         }
                     }
@@ -701,7 +758,7 @@ var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', 'NodesFactory', 'EditNod
 
                     // Match every action in the means of satisfaction
                     for(var actionIndex in display.needs[needIndex].meansOfSatisfaction) {
-                        display.needs[needIndex].meansOfSatisfaction[actionIndex] = matchMean(display.needs[needIndex].meansOfSatisfaction[actionIndex]);
+                        display.needs[needIndex].meansOfSatisfaction[actionIndex].action = matchMean(display.needs[needIndex].meansOfSatisfaction[actionIndex].action);
                     }
                 }
 
@@ -741,12 +798,16 @@ var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', 'NodesFactory', 'EditNod
             $scope.effects = effects;
             launchSearch();
         },
+        function(concepts) {
+            $scope.concepts = concepts;
+        },
         $routeParams.label
     );
 
     $scope.properties = EditNodeFactory.properties();
     $scope.actions = EditNodeFactory.actions();
     $scope.effects = EditNodeFactory.effects();
+    $scope.concepts = EditNodeFactory.concepts();
 
     $scope.addProperty = EditNodeFactory.addProperty;
     $scope.removeProperty = EditNodeFactory.removeProperty;

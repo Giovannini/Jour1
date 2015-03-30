@@ -23,6 +23,12 @@ object RestCall extends Controller {
     Ok(Json.toJson(concepts))
   }
 
+  def getAllSimplifiedConcepts() = Action {
+    val concepts = ConceptDAO.getAllSimlified
+      .map(_.toSimplifiedJson)
+    Ok(Json.toJson(concepts))
+  }
+
   /**
    * Get all the relation existing for a given concept except for its instances
    * @author Thomas GIOVANNINI
@@ -125,4 +131,5 @@ object RestCall extends Controller {
     Intelligence.calculate(nrOfWorkers = 4)
     Redirect(routes.MapController.show())
   }
+
 }

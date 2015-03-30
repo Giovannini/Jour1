@@ -1,6 +1,29 @@
 
 <div class="content-container" name="relationForm">
-    <ul>
-        <li><a href="#/new">New Action</a></li>
-    </ul>
+    <div class="form-field">
+        <div class="form">
+            <div class="form-group__label">
+                <a href="#/new">Create a new action</a>
+            </div>
+            <div class="form-group__input">
+                An action allows a concept to interact with the rest of the world
+            </div>
+        </div>
+    </div>
+
+
+    <div class="form-field">
+        <div class="form">
+            <div class="form-group__label">
+                Edit an existing action
+            </div>
+            <div class="form-group__input">
+                <ul>
+                    <li ng-repeat="action in actions">
+                        <a href="#/{{action.label}}/edit">{{ action.label }}</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </div>

@@ -85,7 +85,7 @@ object ActionManager {
       val p_propertyValue = ParameterReference("propertyValue", "Int")
       InstanceAction(
         0L,
-        "addToProperty",
+        "modifyProperty",
         // Preconditions
         List(
           (

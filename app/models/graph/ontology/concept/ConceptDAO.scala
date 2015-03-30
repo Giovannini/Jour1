@@ -42,6 +42,20 @@ object ConceptDAO {
     }
   }
 
+  def parseSimplifiedRow(row: CypherResultRow): Concept = {
+    Try {
+      val label = row[String]("concept_label")
+      val display = DisplayProperty.parseString(row[String]("concept_display"))
+      Concept(label, List(), List(), List(), display)
+    } match {
+      case Success(concept) => concept
+      case Failure(e) =>
+        println("Error while parsing row for a concept.")
+        println(e)
+        Concept.error
+    }
+  }
+
   /**
    * Get a concept from its id
    * @author Thomas GIOVANNINI
@@ -78,6 +92,12 @@ object ConceptDAO {
   def getAll: List[Concept] = {
     Statement.getAllConcepts.apply()
       .map(ConceptDAO.parseRow)
+      .toList
+  }
+
+  def getAllSimlified: List[Concept] = {
+    Statement.getAllConcepts.apply()
+      .map(ConceptDAO.parseSimplifiedRow)
       .toList
   }
 
