@@ -8,6 +8,7 @@ GET         /                                                        controllers
 GET         /init                                                    controllers.WorldInitialisation.initGraph
 
 GET         /concepts                                                controllers.RestCall.getAllConcepts
+GET         /concepts/simple                                         controllers.RestCall.getAllSimplifiedConcepts
 GET         /instances                                               controllers.WorldInitialisation.getWorld
 GET         /instances/:initInstanceId/:actionType/:conceptId        controllers.RestCall.getPossibleDestinationOfAction(initInstanceId: Long, actionType: Long, conceptId: Long)
 

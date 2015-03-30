@@ -222,12 +222,32 @@
                     <div class="form-group__input">
                         <div class="form-group highlight--mega" ng-repeat="means in node.needs[$index].meansOfSatisfaction track by $index">
                             <div class="form-group__label--single">
-                                <select
-                                        id="needs_{{ $parent.$index }}_means_{{ $index }}"
-                                        name="needs_{{ $parent.$index }}_means_{{ $index }}"
-                                        ng-model="node.needs[$parent.$index].meansOfSatisfaction[$index]"
-                                        ng-options="action as action.label for action in actions"></select>
-
+                                <div class="form-group">
+                                    <label for="needs_{{ $parent.$index }}_means_{{ $index }}_action" class="form-group__label">
+                                        Action
+                                    </label>
+                                    <div class="form-group__input">
+                                        <select
+                                                id="needs_{{ $parent.$index }}_means_{{ $index }}_action"
+                                                name="needs_{{ $parent.$index }}_means_{{ $index }}_action"
+                                                ng-model="node.needs[$parent.$index].meansOfSatisfaction[$index].action"
+                                                ng-options="action as action.label for action in actions"></select>
+                                    </div>
+                                </div>
+                                <div
+                                        ng-repeat="destination in node.needs[$parent.$index].meansOfSatisfaction[$index].destinationConcepts"
+                                        class="form-group">
+                                    <label for="needs_{{ $parent.$index }}_means_{{ $index }}_concept" class="form-group__label">
+                                        Destination
+                                    </label>
+                                    <div class="form-group__input">
+                                        <select
+                                                id="needs_{{ $parent.$index }}_means_{{ $index }}_concept"
+                                                name="needs_{{ $parent.$index }}_means_{{ $index }}_concept"
+                                                ng-model="destination"
+                                                ng-options="concept.id as concept.label for concept in concepts"></select>
+                                    </div>
+                                </div>
                                 <button type="button" class="button--remove" ng-click="removeMeans($parent.$index, $index)">Remove</button>
                             </div>
                         </div>

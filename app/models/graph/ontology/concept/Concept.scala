@@ -60,6 +60,13 @@ case class Concept(
       "display" -> displayProperty.toJson)
   }
 
+  def toSimplifiedJson: JsValue = {
+    Json.obj(
+      "id" -> JsNumber(id),
+      "label" -> JsString(label)
+    )
+  }
+
   /**
    * Parse a Concept for it to be used in a Neo4J Cypher statement
    * @author Thomas GIOVANNINI
