@@ -165,7 +165,10 @@ case class Instance(id:             Int,
         val destinationList = mean.action.getDestinationList(this, sensedInstances)
         destinationList.filter { instance =>
           val concept = instance.concept
-          if (mean.destinationConcepts.isEmpty) relations(mean.action).contains(concept)
+          if (mean.destinationConcepts.contains(Concept.any)) {
+            println("caca")
+            relations(mean.action).contains(concept)
+          }
           else mean.destinationConcepts.contains(concept)
         }
       }

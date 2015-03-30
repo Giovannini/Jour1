@@ -23,12 +23,12 @@ libraryDependencies ++= Seq( jdbc, anorm , cache, ws,
 
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )
 
-scalacOptions ++= Seq( "-feature", "-language:reflectiveCalls"/*,
+scalacOptions ++= Seq( "-feature", "-language:reflectiveCalls",
   "-deprecation",
   "-encoding", "UTF-8",       // yes, this is 2 args
   "-language:existentials",
   "-language:higherKinds",
-  "-language:implicitConversions",
+  "-language:implicitConversions"/*,
   "-unchecked",
   "-Xfatal-warnings",
   "-Xlint",

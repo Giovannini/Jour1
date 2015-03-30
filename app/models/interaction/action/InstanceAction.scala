@@ -32,6 +32,8 @@ case class InstanceAction(
     subInteractions.flatMap(_._1.preconditions) ++ subInteractions.flatMap(_._1.subConditions )
   }
 
+  def isError: Boolean = this == InstanceAction.error
+
   /**
    * Parse the instance action to a Json object
    * @author Thomas GIOVANNINI
@@ -66,7 +68,7 @@ case class InstanceAction(
    */
   def getDestinationList(sourceInstance: Instance, instances: List[Instance]): List[Instance] = {
     //TODO problem: only checking preconditions of the action but none of the subactions
-    println(sourceInstance.id + " destinations: " + (preconditions ++ subConditions).map(_._1.label).mkString(", "))
+    //println(sourceInstance.id + " destinations: " + (preconditions ++ subConditions).map(_._1.label).mkString(", "))
     val result = (preconditions ++ subConditions)
       .map(_._1.instancesThatFill(sourceInstance, instances))
       .foldRight(instances.toSet)(_ intersect _)

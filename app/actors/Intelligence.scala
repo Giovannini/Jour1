@@ -1,11 +1,13 @@
 package actors
 
+import actors.Communication._
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.routing.RoundRobinPool
 import controllers.Application
 import models.graph.ontology.Instance
+import models.graph.ontology.concept.need.Need
 import models.interaction.LogInteraction
-import models.interaction.action.{InstanceActionParser, InstanceAction}
+import models.interaction.action.InstanceActionParser
 
 /**
  * Actors to deal with parallelization of instance action computation.
@@ -23,6 +25,7 @@ object Intelligence {
     val master = system.actorOf(Props(new World(nrOfWorkers, listener)),
       name = "master")
 
+    //master ! EvaluateNeeds
     // start the calculation
     master ! NewTurn
 
@@ -32,18 +35,37 @@ object Intelligence {
 
     def getActionFor(instance: Instance, sensedInstances: List[Instance]): List[LogInteraction] = {
       val (action, destination) = instance.selectAction(sensedInstances)
-      if (action != InstanceAction.error) {
-        val logs = InstanceActionParser.parseActionForLog(action.id, List(instance.id, destination.id))
-        logs.foreach(log => println(instance.id + " - " + log.value))
-        logs
+      if (! action.isError) {
+        println(instance.label + instance.id + " is doing " + action.label)
+        InstanceActionParser.parseActionForLog(action.id, List(instance.id, destination.id))
       } else {
         List()
       }
     }
 
+    //TODO
+    def updateFromSenses(instance: Instance, sensedInstances: List[Instance]): List[LogInteraction] = {
+      def recursiveUpdate(needs: List[Need], instance: Instance): List[LogInteraction] = needs match {
+        case head::tail =>
+          val property = head.affectedProperty
+          val propertyValue = instance.getValueForProperty(property)
+          val steps = head.consequencesSteps
+          val logs = steps.filter(cs => cs.value <= propertyValue).lastOption match {
+            case Some(consequenceStep) => consequenceStep.consequence.effect.logOn(instance)
+            case _ => List()
+          }
+          logs ::: recursiveUpdate(tail, instance)
+        case _ => List()
+      }
+
+      recursiveUpdate(instance.concept.needs, instance)
+    }
+
     override def receive: Receive = {
       case ComputeAction(instance, sensedInstances) =>
         sender ! ResultAction(getActionFor(instance, sensedInstances))
+      case ComputeNeed(instance, sensedInstances) => //TODO
+        sender ! ResultAction(updateFromSenses(instance, sensedInstances))
     }
   }
 
@@ -62,14 +84,21 @@ object Intelligence {
         val instancesWithNeeds = Application.map.getInstances
           .filter(_.concept.needs.nonEmpty)
         nrOfInstances = instancesWithNeeds.length
-        println("Number of instances to compute: " + nrOfInstances)
+        println("Computing actions for " + nrOfInstances + " instances.")
         for (instance <- instancesWithNeeds)
           workerRouter ! ComputeAction(instance, instance.getSensedInstances.flatMap(Application.map.getInstancesAt))
+      case EvaluateNeeds =>
+        val instancesWithNeeds = Application.map.getInstances
+          .filter(_.concept.needs.nonEmpty)
+        nrOfInstances = instancesWithNeeds.length
+        println("Evaluating needs of " + nrOfInstances + " instances.")
+        for (instance <- instancesWithNeeds)
+          workerRouter ! ComputeNeed(instance, instance.getSensedInstances.flatMap(Application.map.getInstancesAt))
       case ResultAction(logList) =>
         nrOfResults += 1
         logs = logList ::: logs
         if (nrOfResults == nrOfInstances) {
-          logs /*.sortBy(_.value)*/ .foreach(_.execute)
+          logs.foreach(_.execute())
           val end: Long = System.currentTimeMillis()
           listener ! EndOfTurn(end - start)
           context.stop(self)

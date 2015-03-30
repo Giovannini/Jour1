@@ -1,7 +1,8 @@
 package models.interaction.effect
 
 import controllers.Application
-import models.interaction.Interaction
+import models.graph.ontology.Instance
+import models.interaction.{LogInteraction, Interaction}
 import models.interaction.parameter.{Parameter, ParameterReference, ParameterValue}
 
 import scala.language.postfixOps
@@ -51,6 +52,16 @@ case class Effect(
    * @return true
    */
   override def checkPreconditions(arguments: Map[ParameterReference, ParameterValue]): Boolean = true
+
+  def executeOn(instance: Instance): Boolean = {
+    val arguments = parameters.zip(List(ParameterValue(instance.id, "Long"))).toMap
+    this.execute(arguments)
+  }
+
+  def logOn(instance: Instance): List[LogInteraction] = {
+    val arguments = parameters.zip(List(ParameterValue(instance.id, "Long"))).toMap
+    this.log(arguments)
+  }
 }
 
 /**
