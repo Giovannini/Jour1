@@ -1,4 +1,4 @@
-package models.instance_action.parameter
+package models.interaction.parameter
 
 import models.graph.ontology.Instance
 import models.graph.ontology.property.PropertyDAO

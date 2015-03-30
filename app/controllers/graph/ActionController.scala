@@ -1,7 +1,7 @@
 package controllers.graph
 
 import forms.instance_action.action.InstanceActionForm
-import models.instance_action.action.InstanceAction
+import models.interaction.action.{InstanceActionDAO, InstanceAction}
 import play.api.libs.json.Json
 import play.api.mvc._
 
@@ -35,7 +35,7 @@ object ActionController extends Controller {
 
   /**
    * Create a new Instance action
-   * @param label
+   * @param label of the action
    * @return the json of the created action
    */
   def createAction(label: String) = Action(parse.json) {
@@ -49,10 +49,10 @@ object ActionController extends Controller {
         },
         success = {
           newAction => {
-            if(InstanceAction.error != InstanceAction.getByName(newAction.label)) {
+            if(InstanceAction.error != InstanceActionDAO.getByName(newAction.label)) {
               BadRequest(Json.obj("global" -> "Label already exists"))
             } else {
-              val savedAction = InstanceAction.save(newAction)
+              val savedAction = InstanceActionDAO.save(newAction)
               if(savedAction == InstanceAction.error) {
                 InternalServerError(Json.obj("global" -> "Couldn't add to DB."))
               } else {
@@ -67,13 +67,13 @@ object ActionController extends Controller {
 
   /**
    * Get an InstanceAction and returns it in JSON
-   * @param label
+   * @param label of the action
    * @return
    */
   def readAction(label: String) = Action {
     request => {
       jsonOrRedirectToIndex(request) {
-        val action = InstanceAction.getByName(label)
+        val action = InstanceActionDAO.getByName(label)
         if(action == InstanceAction.error) {
           NotFound("Label not found")
         } else {
@@ -85,12 +85,12 @@ object ActionController extends Controller {
 
   /**
    * Updates an existing instance
-   * @param label
+   * @param label of the action
    * @return
    */
   def updateAction(label: String) = Action(parse.json) {
     request => {
-      val action = InstanceAction.getByName(label)
+      val action = InstanceActionDAO.getByName(label)
       if(action == InstanceAction.error) {
         NotFound("Label not found")
       } else {
@@ -103,7 +103,7 @@ object ActionController extends Controller {
           },
           success = {
             newAction => {
-              val result = InstanceAction.update(action.id, newAction)
+              val result = InstanceActionDAO.update(action.id, newAction)
               if(result > 1) {
                 Ok(Json.obj("result" -> "OK"))
               } else {
@@ -118,15 +118,15 @@ object ActionController extends Controller {
 
   /**
    * Deletes an existing instance
-   * @param label
+   * @param label of the action
    * @return
    */
   def deleteAction(label: String) = Action {
-    val action = InstanceAction.getByName(label)
+    val action = InstanceActionDAO.getByName(label)
     if(action == InstanceAction.error) {
       NotFound("Label not found")
     } else {
-      val result = InstanceAction.delete(action.id)
+      val result = InstanceActionDAO.delete(action.id)
       if(result > 1) {
         Ok("deleted")
       } else {

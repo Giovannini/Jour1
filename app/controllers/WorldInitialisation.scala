@@ -8,8 +8,8 @@ import models.graph.ontology.concept.need.{MeanOfSatisfaction, NeedDAO, Need}
 import models.graph.ontology.concept.{Concept, ConceptDAO}
 import models.graph.ontology.property.{PropertyType, Property, PropertyDAO}
 import models.graph.ontology.relation.Relation
-import models.instance_action.action.ActionManager
-import models.instance_action.precondition.PreconditionManager
+import models.interaction.action.InstanceActionManager
+import models.interaction.precondition.PreconditionManager
 import models.{WorldInit, WorldMap}
 import play.api.mvc._
 
@@ -92,7 +92,7 @@ object WorldInitialisation extends Controller {
     val propertyComfort = Property("Comfort", PropertyType.Double, 3).save
 
     PreconditionManager.initialization()
-    ActionManager.initialization()
+    InstanceActionManager.initialization()
 
     val conceptGround = Concept("Ground", List(), List(), List(), DisplayProperty())
     val conceptWater = Concept("Water",
@@ -130,15 +130,15 @@ object WorldInitialisation extends Controller {
 
     /* Creation of needs */
     val needFood = NeedDAO.save(Need(0L, "Hunger", propertyHunger, priority = 6,
-      List(ConsequenceStep(10, Consequence(8, List(ActionManager.nameToId("_removeInstanceAt"))))),
-      List(MeanOfSatisfaction(ActionManager.nameToId("Eat"), List(conceptSheep)),
-        MeanOfSatisfaction(ActionManager.nameToId("Eat"), List(conceptApple)),
-        MeanOfSatisfaction(ActionManager.nameToId("Move"), List(conceptSheep)),
-        MeanOfSatisfaction(ActionManager.nameToId("Move"), List(conceptApple)),
-        MeanOfSatisfaction(ActionManager.nameToId("Move"), List()))))
+      List(ConsequenceStep(10, Consequence(8, InstanceActionManager.nameToId("_removeInstanceAt").toEffect))),
+      List(MeanOfSatisfaction(InstanceActionManager.nameToId("Eat"), conceptSheep),
+        MeanOfSatisfaction(InstanceActionManager.nameToId("Eat"), conceptApple),
+        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), conceptSheep),
+        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), conceptApple),
+        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.any))))
     val needSeaAir = NeedDAO.save(Need(0L, "SeaAir", propertyComfort, priority = 5,
-      List(ConsequenceStep(5, Consequence(5, List(ActionManager.nameToId("_addToProperty"))))),
-      List(MeanOfSatisfaction(ActionManager.nameToId("Move"), List()))))
+      List(ConsequenceStep(5, Consequence(5, InstanceActionManager.nameToId("_addToProperty").toEffect))),
+      List(MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.any))))
 
     println("Declaration of concepts...")
 

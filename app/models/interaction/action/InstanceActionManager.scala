@@ -1,13 +1,14 @@
-package models.instance_action.action
+package models.interaction.action
 
 import controllers.Application
-import models.instance_action.parameter._
-import models.instance_action.precondition.PreconditionManager
+import models.interaction.InteractionDAO
+import models.interaction.parameter._
+import models.interaction.precondition.PreconditionManager
 
 /**
  * Manage actions
  */
-object ActionManager {
+object InstanceActionManager {
 
   /* TODO: actions to implement
    * Eat do not remove the object but only a part of it [Simon]
@@ -25,7 +26,7 @@ object ActionManager {
    */
   def initialization(): Unit = {
     println("Initialization of Action Manager")
-    InstanceAction.clearDB
+    InteractionDAO.clearDB()
     //TODO thing of a way to create an instance from nothing (using json maybe)
     //nameToId += "_createInstance" -> _createInstance
 
@@ -120,7 +121,7 @@ object ActionManager {
             )
             )
         ),
-        subActions = List(
+        _subActions = List(
           (
             _addInstanceAt,
             Map(
@@ -154,7 +155,7 @@ object ActionManager {
             )
             )//No need to check properties existence, that will be done by actions addToProperty
         ),
-        subActions = List(
+        _subActions = List(
           (
             _addToProperty,
             Map(

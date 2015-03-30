@@ -63,8 +63,6 @@ case class Need(
   }
 }
 
-// TODO: the label is not really mandatory here
-
 object Need {
   val error = Need(-1L, "error", Property.error, 0, List(), List())
 }

@@ -1,4 +1,4 @@
-package models.instance_action.action
+package models.interaction
 
 import controllers.Application
 
@@ -7,7 +7,7 @@ import scala.util.{Failure, Success, Try}
 /**
  * Class to log an action without executing it.
  */
-case class LogAction(value: String){
+case class LogInteraction(value: String){
 
   def execute(): Unit = {
     Try {
@@ -47,8 +47,8 @@ case class LogAction(value: String){
 
 }
 
-object LogAction {
+object LogInteraction {
 
-  val nothing = LogAction("ERROR")
+  val nothing = LogInteraction("ERROR")
 
 }

@@ -1,0 +1,146 @@
+package models.interaction
+
+import models.interaction.action.InstanceAction
+import models.interaction.effect.Effect
+import models.interaction.parameter.{Parameter, ParameterReference, ParameterValue}
+import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
+
+import scala.language.postfixOps
+
+/**
+ * Model of interaction
+ * @author Thomas GIOVANNINI
+ */
+trait Interaction {
+
+  val id: Long
+  val label: String
+  val subInteractions: List[(Interaction, Map[ParameterReference, Parameter])]
+  val parameters: List[ParameterReference]
+
+  /*#################
+    Json parsing
+  #################*/
+  /**
+   * Parse the instance action to a Json object
+   * @author Thomas GIOVANNINI
+   * @return a json object representing the instance action
+   */
+  def toJson: JsValue = {
+    Json.obj(
+      "id" -> JsNumber(id),
+      "label" -> JsString(label),
+      "subActions" -> subInteractions.map(item => item._1.toJsonWithParameters(item._2)),
+      "parameters" -> parameters.map(_.toJson)
+    )
+  }
+
+  def toJsonWithParameters(referenceToParameter: Map[ParameterReference, Parameter]): JsValue = {
+    Json.obj(
+      "id" -> JsNumber(id),
+      "label" -> JsString(label),
+      "parameters" -> referenceToParameter.map(item => {
+        Parameter.toJsonWithIsParam(item._1, item._2)
+      })
+    )
+  }
+
+  /*#################
+    Other parsing
+  #################*/
+  def toAction: InstanceAction = {
+    InstanceAction(id, label, List(), subInteractions, parameters)
+  }
+
+  def toEffect: Effect = {
+    val subEffects = subInteractions.map{ tuple =>
+      (tuple._1.toEffect, tuple._2)
+    }
+    Effect(id, label, subEffects, parameters)
+  }
+
+  /*#################
+    Executions
+  #################*/
+  /**
+   * Check if all the action's preconditions are filled before executing it.
+   * @param arguments to use to check those preconditions
+   * @return true if all the preconditions are filled
+   *         false else
+   */
+  def checkPreconditions(arguments: Map[ParameterReference, ParameterValue]): Boolean
+
+  /**
+   * Execute a given action with given arguments
+   * @author Thomas GIOVANNINI
+   * @param arguments with which execute the action
+   * @return true if the action was correctly executed
+   *         false else
+   */
+  def execute(arguments: Map[ParameterReference, ParameterValue]): Boolean = this match {
+    case action: InstanceAction =>
+      val arePreconditionsChecked = action.checkPreconditions(arguments)
+      if (arePreconditionsChecked) {
+        action.executeGoodAction(arguments)
+      } else {
+        println("Precondition not filled for action " + this.label + ".")
+        false
+      }
+    case effect: Effect =>
+      effect.execute(arguments)
+  }
+
+  /**
+   * LOG a given action with given arguments
+   * @author Thomas GIOVANNINI
+   * @param arguments with which execute the action
+   * @return true if the action was correctly executed
+   *         false else
+   */
+  def log(arguments: Map[ParameterReference, ParameterValue]): List[LogInteraction] = {
+    val preconditionCheck = checkPreconditions(arguments)
+
+    if (preconditionCheck) {
+      this.label match {
+        case "addInstanceAt" =>
+          val instanceId = arguments(ParameterReference("instanceToAdd", "Long")).value.asInstanceOf[Long]
+          val groundId = arguments(ParameterReference("groundWhereToAddIt", "Long")).value.asInstanceOf[Long]
+          List(LogInteraction("ADD " + instanceId + " " + groundId))
+        case "removeInstanceAt" =>
+          val instanceId = arguments(ParameterReference("instanceToRemove", "Long")).value.asInstanceOf[Long]
+          List(LogInteraction("REMOVE " + instanceId))
+        case "addToProperty" =>
+          val instanceId = arguments(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
+          val propertyString = arguments(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
+          val valueToAdd = arguments(ParameterReference("valueToAdd", "Int")).value.asInstanceOf[String]
+          List(LogInteraction("ADD_TO_PROPERTY " + instanceId + " " + propertyString + " " + valueToAdd))
+        case "modifyProperty" =>
+          val instanceId = arguments(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
+          val propertyString = arguments(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
+          val newValue = arguments(ParameterReference("propertyValue", "Int")).value.asInstanceOf[String]
+          List(LogInteraction("MODIFY_PROPERTY " + instanceId + " " + propertyString + " " + newValue))
+        case _ =>
+          subInteractions.flatMap(subAction => subAction._1.log(takeGoodArguments(subAction._2, arguments)))
+      }
+    } else {
+      println("Precondition not filled for action " + this.label + ".")
+      List(LogInteraction.nothing)
+    }
+  }
+
+  /**
+   * Take the good argument list from the list of arguments of sur-action
+   * @author Thomas GIOVANNINI
+   * @return a reduced argument list
+   */
+  def takeGoodArguments(parameters: Map[ParameterReference, Parameter], arguments: Map[ParameterReference, ParameterValue]): Map[ParameterReference, ParameterValue] = {
+    parameters.mapValues {
+      case reference: ParameterReference => arguments(reference.asInstanceOf[ParameterReference])
+      case value: ParameterValue => value.asInstanceOf[ParameterValue]
+      case e: Parameter =>
+        println("Failed to match parameter " + e)
+        ParameterValue.error
+    }.filter(_._2 != ParameterValue.error)
+  }
+}
+

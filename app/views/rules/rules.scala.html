@@ -1,5 +1,5 @@
 @()
-@import models.instance_action.action.InstanceAction
+@import models.interaction.action.InstanceActionDAO
 
 
 <!DOCTYPE html>
@@ -13,7 +13,7 @@
     <h1>Règles enregistrées</h1>
 
     <ul>
-    @for(action <- InstanceAction.getAll){
+    @for(action <- InstanceActionDAO.getAll){
         <li>
             @action.id - @action.label
             <a href="/rules/load/@action.id">Voir</a>

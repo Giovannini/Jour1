@@ -1,4 +1,4 @@
-package models.instance_action.precondition
+package models.interaction.precondition
 
 import controllers.Application
 import models.WorldMap

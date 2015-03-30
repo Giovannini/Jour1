@@ -6,7 +6,7 @@ import models.graph.ontology.ValuedProperty
 import models.graph.ontology.concept.need.{NeedDAO, Need}
 import models.graph.ontology.property.{Property, PropertyDAO}
 import models.graph.ontology.relation.Relation
-import models.instance_action.action.InstanceAction
+import models.interaction.action.InstanceAction
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
 /**
@@ -143,6 +143,7 @@ object Concept {
   implicit val connection = NeoDAO.connection
 
   val error = Concept("XXX", List(), List(), List(), DisplayProperty())
+  val any = Concept("Any", List(), List(), List(), DisplayProperty())
 
   /**
    * Create a concept given a list of ids of properties instead of a list of properties directly.

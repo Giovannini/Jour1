@@ -1,7 +1,7 @@
-package models.instance_action.precondition
+package models.interaction.precondition
 
 import models.graph.ontology.Instance
-import models.instance_action.parameter.{Parameter, ParameterReference, ParameterValue}
+import models.interaction.parameter.{Parameter, ParameterReference, ParameterValue}
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
 import scala.util.{Failure, Success, Try}
@@ -89,7 +89,6 @@ case class Precondition(id: Long,
   }*/
 
   def instancesThatFill(source: Instance, instancesList: List[Instance]): Set[Instance] = {
-    println("instanceThatFill: " + source.id + " - " + label)
     //TODO check output
     val result = this.label match {
       case "isNextTo" =>
@@ -148,12 +147,20 @@ object Precondition {
   }
 
   def parseSubConditions(subConditionsToParse: String): List[(Precondition, Map[ParameterReference, Parameter])] = {
-    if(subConditionsToParse != "") {
-      subConditionsToParse.split(";")
-        .map(s => parseSubCondition(s))
-        .toList
-    } else {
-      List()
+    Try {
+      if (subConditionsToParse != "") {
+        subConditionsToParse.split(";")
+          .map(s => parseSubCondition(s))
+          .toList
+      } else {
+        List()
+      }
+    } match {
+      case Success(list) => list
+      case Failure(e) =>
+        println("Error while parsing sub-conditions from string: " + subConditionsToParse)
+        println(e.getStackTrace)
+        List()
     }
   }
 

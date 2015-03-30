@@ -1,8 +1,8 @@
 package forms.instance_action.precondition
 
 import forms.instance_action.parameter.ParameterForm
-import models.instance_action.parameter.{Parameter, ParameterReference}
-import models.instance_action.precondition.{Precondition, PreconditionDAO}
+import models.interaction.parameter.{Parameter, ParameterReference}
+import models.interaction.precondition.{Precondition, PreconditionDAO}
 import play.api.data.Form
 import play.api.data.Forms._
 

@@ -1,8 +1,8 @@
-package models.instance_action.action
+package models.interaction.action
 
 import controllers.Application
 import models.graph.ontology.property.PropertyDAO
-import models.instance_action.parameter.{ParameterReference, ParameterValue}
+import models.interaction.parameter.{ParameterReference, ParameterValue}
 
 /**
  * Hard coded actions that user can make instances do.

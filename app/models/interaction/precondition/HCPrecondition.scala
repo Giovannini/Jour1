@@ -1,8 +1,8 @@
-package models.instance_action.precondition
+package models.interaction.precondition
 
 import controllers.Application
 import models.graph.ontology.property.PropertyDAO
-import models.instance_action.parameter.{ParameterReference, ParameterValue}
+import models.interaction.parameter.{ParameterReference, ParameterValue}
 
 /**
  * List of hard codded preconditions
