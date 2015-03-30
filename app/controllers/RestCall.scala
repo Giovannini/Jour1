@@ -6,7 +6,7 @@ import models.graph.ontology.concept.{Concept, ConceptDAO}
 import models.graph.ontology.relation.Relation
 import models.instance_action.action.{ActionParser, InstanceAction}
 import play.api.libs.json._
-import play.api.mvc.{AnyContent, Action, Controller, Request}
+import play.api.mvc.{Action, AnyContent, Controller, Request}
 
 /**
  * Controller to send Json data to client
@@ -134,6 +134,6 @@ object RestCall extends Controller {
 
   def next() = Action {
     Intelligence.calculate(nrOfWorkers = 4)
-    Ok(views.html.map.index())
+    Redirect(routes.MapController.show())
   }
 }

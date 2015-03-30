@@ -25,7 +25,7 @@ case class Coordinates(x: Int, y: Int) {
    *         false else
    */
   def isNextTo(other: Coordinates): Boolean = {
-    this.getDistanceWith(other) <= math.sqrt(2)
+    Coordinates.getNextCoordinates.map(_ + this).contains(other)
   }
 
   /**
@@ -37,7 +37,8 @@ case class Coordinates(x: Int, y: Int) {
   def getDistanceWith(other: Coordinates): Double = {
     val xDistance = this.x - other.x
     val yDistance = this.y - other.y
-    math.sqrt(math.pow(xDistance, 2) + math.pow(yDistance, 2))
+//    math.sqrt(math.pow(xDistance, 2) + math.pow(yDistance, 2))
+    math.abs(xDistance) + math.abs(yDistance)
   }
 
   /**
@@ -52,16 +53,14 @@ case class Coordinates(x: Int, y: Int) {
       .filter(tuple => (tuple._1 * tuple._1) + (tuple._2 * tuple._2) < radius * radius)
       .map(tuple => Coordinates(tuple._1, tuple._2) + this)
   }
-
-  def getNextCoordinates: List[Coordinates] = {
-    List(this + Coordinates(0, 1),
-          this + Coordinates(0, -1),
-          this + Coordinates(1, 0),
-          this + Coordinates(-1, 0))
-  }
 }
 
 object Coordinates {
+
+  val getNextCoordinates: List[Coordinates] = {
+    List(Coordinates(0, 1), Coordinates(0, -1), Coordinates(1, 0), Coordinates(-1, 0))
+  }
+
   def parseJson(json: JsValue): Coordinates = {
     val x = (json \ "x").as[Int]
     val y = (json \ "y").as[Int]

@@ -62,7 +62,7 @@ case class Precondition(id: Long,
     }
     val args = retrieveGoodArguments()
 
-    this.label match {
+    val result = this.label match {
       // First test if it's among the Hard Coded preconditions
       case "isNextTo" => HCPrecondition.isNextTo(args)
       case "isOnSameTile" => HCPrecondition.isOnSameTile(args)
@@ -75,6 +75,8 @@ case class Precondition(id: Long,
       case _ =>
         this.subConditions.forall(current => current._1.isFilled(current._2, arguments))
     }
+    if(! result) println("Precondition " + this.label + " is not filled.")
+    result
   }
 
   /*
@@ -87,7 +89,9 @@ case class Precondition(id: Long,
   }*/
 
   def instancesThatFill(source: Instance, instancesList: List[Instance]): Set[Instance] = {
-    this.label match {
+    println("instanceThatFill: " + source.id + " - " + label)
+    //TODO check output
+    val result = this.label match {
       case "isNextTo" =>
         PreconditionFiltering.isNextTo(source, instancesList).toSet
       case "isOnSameTile" =>
@@ -100,6 +104,8 @@ case class Precondition(id: Long,
           .map(_._1.instancesThatFill(source, instancesList))
           .foldRight(instancesList.toSet)(_ intersect _)
     }
+
+    result
   }
 
   def toJson = Json.obj(

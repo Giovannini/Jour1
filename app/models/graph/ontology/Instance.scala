@@ -143,9 +143,7 @@ case class Instance(id:             Int,
      * @return a sorted list of needs
      */
     def orderNeedsByImportance: List[Need] = {
-      val result = this.concept.needs.sortBy(- _.evaluate(this))
-      //println("Chosen need: " + result.head.label)
-      result
+      this.concept.needs.sortBy(- _.evaluate(this))
     }
 
     val possibleActions = orderNeedsByImportance.flatMap(_.meansOfSatisfaction).distinct
@@ -167,20 +165,23 @@ case class Instance(id:             Int,
         val destinationList = mean.action.getDestinationList(this, sensedInstances)
         destinationList.filter { instance =>
           val concept = instance.concept
-          relations(mean.action).contains(concept) &&
-          mean.destinationConcepts.contains(concept)
+          if (mean.destinationConcepts.isEmpty) relations(mean.action).contains(concept)
+          else mean.destinationConcepts.contains(concept)
         }
       }
 
-
-      //def retrieveBestAction(possibleActions: List[(InstanceAction, List[Concept]])
       def retrieveBestAction(possibleActions: List[MeanOfSatisfaction])
-      : (InstanceAction, Instance) = possibleActions match {
-        case head::tail =>
-          val destinationsList = destinationList(head)
-          if (destinationsList.nonEmpty) (head.action, destinationsList.head)
-          else retrieveBestAction(tail)
-        case _ => (InstanceAction.error, this)
+      : (InstanceAction, Instance) = {
+        possibleActions match {
+          case head::tail =>
+            //println("Testing action: " + head.action.label)
+            val destinationsList = destinationList(head)
+            if (destinationsList.nonEmpty) (head.action, destinationsList.head)
+            else retrieveBestAction(tail)
+          case _ =>
+            println("No action found for instance " + this.label + this.id)
+            (InstanceAction.error, this)
+        }
       }
 
       retrieveBestAction(possibleActions)

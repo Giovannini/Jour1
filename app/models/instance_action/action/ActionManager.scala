@@ -79,6 +79,31 @@ object ActionManager {
     }
     nameToId += "_addToProperty" -> _addToProperty
 
+    val _modifyProperty = {
+      val p_instanceID = ParameterReference("instanceID", "Long")
+      val p_propertyName = ParameterReference("propertyName", "Property")
+      val p_propertyValue = ParameterReference("propertyValue", "Int")
+      InstanceAction(
+        0L,
+        "addToProperty",
+        // Preconditions
+        List(
+          (
+            PreconditionManager.nameToId("hasProperty"),
+            Map(
+              ParameterReference("instanceID", "Long") -> p_instanceID,
+              ParameterReference("property", "Property") -> p_propertyName
+            )
+          )
+        ),
+        // SubActions
+        List(),
+        // Parameters
+        List(p_instanceID, p_propertyName, p_propertyValue)
+      ).save
+    }
+    nameToId += "_modifyProperty" -> _modifyProperty
+
     /*Function to add to the BDD*/
     val _actionMoveInstanceAt = {
       val p_instanceToMove = ParameterReference("instanceToMove", "Long")
@@ -102,13 +127,13 @@ object ActionManager {
               ParameterReference("instanceToAdd", "Long") -> p_instanceToMove,
               ParameterReference("groundWhereToAddIt", "Long") -> p_groundWhereToMoveIt
             )
-            ),
+          ),
           (
             _removeInstanceAt,
             Map(
               ParameterReference("instanceToRemove", "Long") -> p_instanceToMove
             )
-            )
+          )
         ),
         parameters = List(p_instanceToMove, p_groundWhereToMoveIt)).save
     }
@@ -127,21 +152,7 @@ object ActionManager {
               ParameterReference("instance1ID", "Long") -> p_instanceThatEat,
               ParameterReference("instance2ID", "Long") -> p_instanceThatIsEaten
             )
-            ),
-          (
-            PreconditionManager.nameToId("hasProperty"),
-            Map(
-              ParameterReference("instanceID", "Long") -> p_instanceThatEat,
-              ParameterReference("property", "Property") -> ParameterValue("Hunger", "Property")
-            )
-            ),
-          (
-            PreconditionManager.nameToId("hasProperty"),
-            Map(
-              ParameterReference("instanceID", "Long") -> p_instanceThatIsEaten,
-              ParameterReference("property", "Property") -> ParameterValue("Feed", "Property")
-            )
-            )
+            )//No need to check properties existence, that will be done by actions addToProperty
         ),
         subActions = List(
           (

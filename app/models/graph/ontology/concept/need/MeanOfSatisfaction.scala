@@ -9,7 +9,9 @@ import scala.util.{Failure, Success, Try}
 /**
  * Created by giovannini on 3/25/15.
  */
-case class MeanOfSatisfaction(action: InstanceAction, destinationConcepts: List[Concept]) {
+case class MeanOfSatisfaction(action: InstanceAction, _destinationConcepts: List[Concept]) {
+
+  val destinationConcepts = _destinationConcepts.flatMap(concept => concept :: concept.getDescendance).distinct
 
   override def toString = action.id + " -> " + destinationConcepts.map(_.id).mkString(",")
 

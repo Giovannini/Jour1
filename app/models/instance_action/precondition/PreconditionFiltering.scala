@@ -62,7 +62,7 @@ object PreconditionFiltering {
 
     val propertyWalkingDistance = PropertyDAO.getByName("WalkingDistance")
     val result = getNear(source, source.getValueForProperty(propertyWalkingDistance).asInstanceOf[Int])
-      .distinct
+      //.distinct
     result
   }
 

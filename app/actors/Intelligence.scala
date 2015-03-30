@@ -4,14 +4,14 @@ import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.routing.RoundRobinPool
 import controllers.Application
 import models.graph.ontology.Instance
-import models.instance_action.action.{LogAction, ActionParser}
+import models.instance_action.action.{InstanceAction, LogAction, ActionParser}
 
 /**
  * Actors to deal with parallelization of instance action computation.
  */
 object Intelligence {
 
-  def calculate(nrOfWorkers: Int) = {
+  def calculate(nrOfWorkers: Int): Unit = {
     // Create an Akka system
     val system = ActorSystem("IntelligenceSystem")
 
@@ -19,20 +19,25 @@ object Intelligence {
     val listener = system.actorOf(Props[Listener], name = "listener")
 
     // create the master
-    val master = system.actorOf(Props(new World(
-      nrOfWorkers, listener)),
+    val master = system.actorOf(Props(new World(nrOfWorkers, listener)),
       name = "master")
 
     // start the calculation
     master ! NewTurn
+
   }
 
   class InstanceIntelligence extends Actor {
 
     def getActionFor(instance: Instance, sensedInstances: List[Instance]): List[LogAction] = {
       val (action, destination) = instance.selectAction(sensedInstances)
-      println(instance.label + instance.id + " " + action.label + " " + destination.label + destination.id)
-      ActionParser.parseActionForLog(action.id, List(instance.id, destination.id)) // TODO change that with log
+      if (action != InstanceAction.error) {
+        val logs = ActionParser.parseActionForLog(action.id, List(instance.id, destination.id))
+        logs.foreach(log => println(instance.id + " - " + log.value))
+        logs
+      } else {
+        List()
+      }
     }
 
     override def receive: Receive = {
@@ -62,9 +67,8 @@ object Intelligence {
       case ResultAction(logList) =>
         nrOfResults += 1
         logs = logList ::: logs
-        println((nrOfInstances - nrOfResults) + " remaining.")
         if (nrOfResults == nrOfInstances) {
-          logs.sortBy(_.value).foreach(_.execute)
+          logs /*.sortBy(_.value)*/ .foreach(_.execute)
           val end: Long = System.currentTimeMillis()
           listener ! EndOfTurn(end - start)
           context.stop(self)

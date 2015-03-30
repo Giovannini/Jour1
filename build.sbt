@@ -17,7 +17,8 @@ libraryDependencies ++= Seq( jdbc, anorm , cache, ws,
   "mysql" % "mysql-connector-java" % "5.1.27",
   "org.scalatestplus" %% "play" % "1.2.0" % "test",
   "org.scalatest" % "scalatest_2.11" % "2.2.1" % "test",
-  "com.typesafe.akka" %% "akka-actor" % "2.3.6"
+  "com.typesafe.akka" %% "akka-actor" % "2.3.6",
+  "org.scala-lang.modules" %% "scala-async" % "0.9.2"
 )
 
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )
