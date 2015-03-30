@@ -191,7 +191,8 @@ var EditInstanceFactory = ['$routeParams', '$resource', /*'InstanceFactory',*/ f
                 _instance,
                 function (response) {
                     console.log(response);
-                }, function (response) {
+                },
+                function (response) {
                     _notifyError("Impossible to save instance");
                 }
             )
@@ -218,12 +219,24 @@ var EditInstanceCtrl = ['$scope', '$routeParams', 'EditInstanceFactory', functio
     $scope.back_url = "#/";
 
     /**
+     * Save the concept in $scope and refresh the view
+     * @param concept
+     */
+    var displayConcept = function(concept) {
+        $scope.concept = concept;
+        $scope.$apply();
+    }
+
+    /**
      * Save the instance in $scope and refresh the view
      * @param instance
      */
     var displayInstance = function(instance) {
         $scope.instance = instance;
         $scope.$apply();
+
+        // Get the concept of the instance
+        Graph.getConcept($scope.instance.concept, displayConcept);
     };
 
     // Get the instance to edit
@@ -238,8 +251,8 @@ var EditInstanceCtrl = ['$scope', '$routeParams', 'EditInstanceFactory', functio
 
     // Send the form to the server
     $scope.submitInstance = function() {
-        console.log('ici');
         EditInstanceFactory.setInstance($scope.instance);
+        console.log($scope.instance);
         EditInstanceFactory.submitInstance(baseUrl+'instances/update')();
     };
 }];

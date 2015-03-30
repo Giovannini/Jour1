@@ -13,7 +13,7 @@ import play.api.libs.json._
  * @author Thomas GIOVANNINI
  * @param label of the instance
  */
-case class Instance(id:             Int,
+case class Instance(id:             Long,
                     label:          String,
                     coordinates:    Coordinates,
                     properties:     List[ValuedProperty],
@@ -44,7 +44,7 @@ case class Instance(id:             Int,
    * @param newId to give to the instance
    * @return the same instance with updated id
    */
-  def withId(newId: Int): Instance = {
+  def withId(newId: Long): Instance = {
     Instance(newId, label, coordinates, properties, concept)
   }
 
@@ -83,9 +83,15 @@ case class Instance(id:             Int,
    * @return a new instance looking like this one but with updated properties
    */
   def withProperties(newProperties: List[ValuedProperty]): Instance = {
-    if(newProperties.map(_.property) == this.concept.properties){
-      Instance(id, label, coordinates, newProperties, concept)
-    }else this
+    if(newProperties.map(_.property) == this.concept.properties) {
+      println("update success")
+      println(newProperties)
+      val ins = Instance(id, label, coordinates, newProperties, concept)
+      println(ins)
+      ins
+    }
+    else
+      this
   }
 
   /**
@@ -215,11 +221,11 @@ object Instance {
    * @return the represented instance
    */
   def parseJson(jsonInstance: JsValue): Instance = {
-    val id = (jsonInstance \ "id").as[Int]
+    val id = (jsonInstance \ "id").as[Long]
     val label = (jsonInstance \ "label").as[String]
     val coordinates = Coordinates.parseJson(jsonInstance \ "coordinates")
     val properties = (jsonInstance \ "properties").as[List[JsValue]].map(ValuedProperty.parseJson)
-    val conceptId = (jsonInstance \ "concept").as[Int]
+    val conceptId = (jsonInstance \ "concept").as[Long]
     ConceptDAO.getById(conceptId) match { // TODO better verification
       case Concept.error => error
       case concept => Instance(id, label, coordinates, properties, concept)

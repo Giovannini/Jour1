@@ -1,120 +1,99 @@
 package controllers.ontology
 
 import controllers.Application
-import models.graph.custom_types.Coordinates
-import models.graph.ontology.concept.ConceptDAO
+import forms.graph.ontology.InstanceForm
 import models.graph.ontology.{Instance, ValuedProperty}
 import play.api.data.Form
-import play.api.data.Forms._
-import play.api.data.format.Formats._
-import play.api.data.validation.Constraints._
 import play.api.mvc.{AnyContent, Action, Controller}
 
 /**
  * Object containing tools for instance editing
  */
 object InstanceManager extends Controller {
-
-  val instanceForm = Form(
-    tuple(
-      "idInstance" -> number, //can't be modified
-      "idConcept" -> number, //can't be modified
-      "label" -> nonEmptyText,
-      "coordinateX" -> number.verifying(min(0), max(Application.map.width)),
-      "coordinateY" -> number.verifying(min(0), max(Application.map.height)),
-      "property" -> list(of[Double])
-    )
-  )
-
   /**
    * Print errors contained in a form
    * @author Thomas GIOVANNINI
    */
-  def printErrors(form: Form[(Int, Int, String, Int, Int, List[Double])]) = {
+  def printErrors(form: Form[Instance]) = {
     form.errors.foreach(error => println("###Error:\n" + error.messages.mkString("\n")))
   }
 
   /**
-   * Create a given instance from a received form.
-   * @author Simon RONCIERE
+   * Create a given instance from a received form
+   * @author Simon RONCIERE, Aurélie LORGEOUX
    * @return an action redirecting to the index page of the application
    */
-  def create: Action[AnyContent] = Action { implicit request =>
-
-    /**
-     * Create the relation following a form with no errors in it.
-     * @author Thomas GIOVANNINI
-     */
-    def doCreate(form: (Int, Int, String, Int, Int, List[Double])) = {
-      val oldInstance = Application.map.getInstanceById(form._1)
-      val newInstance = getNewInstance(form, oldInstance)
-      Application.map.createInstance(newInstance)
+  def create = Action(parse.json) {
+    request => {
+      val newInstanceForm = InstanceForm.form.bind(request.body)
+      newInstanceForm.fold(
+        hasErrors = {
+          form => {
+            BadRequest(form.errorsAsJson)
+          }
+        },
+        success = {
+          instance => {
+            val oldInstance = Application.map.getInstanceById(instance.id)
+            val newInstance = getNewInstance(InstanceForm.form, oldInstance)
+            Application.map.createInstance(newInstance)
+            Ok(newInstance.toJson)
+          }
+        }
+      )
     }
-
-    val newTodoForm = instanceForm.bindFromRequest()
-    newTodoForm.fold(
-      hasErrors = { form => printErrors(form)},
-      success = { newInstanceForm => doCreate(newInstanceForm)}
-    )
-    Redirect(controllers.routes.MapController.show())
   }
 
   /**
-   * Update a given instance from a received form.
-   * @author Thomas GIOVANNINI
+   * Update a given instance from a received form
+   * @author Thomas GIOVANNINI, Aurélie LORGEOUX
    * @return an action redirecting to the index page of the application
    */
-  def update: Action[AnyContent] = Action { implicit request =>
-    println("test");
-
-    /**
-     * Update the map following a form with no errors in it.
-     * @author Thomas GIOVANNINI
-     * @return the updated instance
-     */
-    def doUpdate(form: (Int, Int, String, Int, Int, List[Double])): Unit = {
-      val oldInstance = Application.map.getInstanceById(form._1)
-      val newInstance = getNewInstance(form, oldInstance)
-      Application.map.updateInstance(oldInstance, newInstance)
+  def update = Action(parse.json) {
+    request => {
+      println(request.body)
+      val newInstanceForm = InstanceForm.form.bind(request.body)
+      newInstanceForm.fold(
+        hasErrors = {
+          form => {
+            BadRequest(form.errorsAsJson)
+          }
+        },
+        success = {
+          instance => {
+            val oldInstance = Application.map.getInstanceById(instance.id)
+            val newInstance = getNewInstance(newInstanceForm, oldInstance)
+            Application.map.updateInstance(oldInstance, newInstance)
+            Ok(newInstance.toJson)
+          }
+        }
+      )
     }
-
-    val newTodoForm = instanceForm.bindFromRequest()
-    newTodoForm.fold(
-      hasErrors = { form => printErrors(form)},
-      success = { newInstanceForm => doUpdate(newInstanceForm)})
-    Redirect(controllers.routes.MapController.show())
   }
 
+  /**
+   * Delete an instance
+   * @param instanceId instance id
+   * @return an action redirecting to the index page of the application
+   */
   def delete(instanceId: Int): Action[AnyContent] = Action {
     Application.map.removeInstance(instanceId)
     Redirect(controllers.routes.MapController.show())
   }
 
   /**
-   * Get a modified list of an instance properties given a list of new values
-   * @param valuesToString new values to update the list
-   * @param oldInstance instance from which the properties will be updated
-   * @return an updated list of properties
-   */
-  def getUpdatedProperties(valuesToString: List[Double], oldInstance: Instance): List[ValuedProperty] = {
-    oldInstance.properties
-      .zip(valuesToString)
-      .map(tuple => ValuedProperty(tuple._1.property, tuple._2))
-  }
-
-  /**
    * Read a form containing pieces of information to create a new instance from an old one
-   * @author Thomas GIOVANNINI
+   * @author Thomas GIOVANNINI, Aurélie LORGEOUX
    * @param newInstanceForm containing pieces of information on new instance
    * @param oldInstance from which he new one will be created
    * @return a new instance containing attributes from the form
    */
-  def getNewInstance(newInstanceForm: (Int, Int, String, Int, Int, List[Double]), oldInstance: Instance): Instance = {
-    val newProperties = getUpdatedProperties(newInstanceForm._6, oldInstance)
+  def getNewInstance(newInstanceForm: Form[Instance], oldInstance: Instance): Instance = {
+    println(newInstanceForm.get.properties)
     oldInstance
-      .withLabel(newInstanceForm._3)
-      .at(Coordinates(newInstanceForm._4, newInstanceForm._5))
-      .withProperties(newProperties)
-      .ofConcept(ConceptDAO.getById(newInstanceForm._2))
+      .withLabel(newInstanceForm.get.label)
+      .at(newInstanceForm.get.coordinates)
+      .ofConcept(newInstanceForm.get.concept)
+      .withProperties(newInstanceForm.get.properties)
   }
 }
