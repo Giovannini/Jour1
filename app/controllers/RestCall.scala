@@ -30,6 +30,17 @@ object RestCall extends Controller {
   }
 
   /**
+   * Get a concept by its id
+   * @author Aurélie LORGEOUX
+   * @param conceptId id of the concept
+   * @return concept in JSON
+   */
+  def getConceptById(conceptId: Long): Action[AnyContent] = Action {
+    val concept = ConceptDAO.getById(conceptId)
+    Ok(concept.toJson)
+  }
+
+  /**
    * Get all the relation existing for a given concept except for its instances
    * @author Thomas GIOVANNINI
    * @param conceptId of the concept the relations are desired

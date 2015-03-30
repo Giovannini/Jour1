@@ -54,7 +54,8 @@ var RestFactory = function() {
 
     return {
         concepts: {
-            get: getUrl("/concepts")
+            get: getUrl("/concepts"),
+            getById: function(idConcept) { return getUrl("/concepts/"+idConcept); }
         },
         instances: {
             get: getUrl("/instances"),
@@ -222,8 +223,20 @@ var GraphFactory = function(Rest) {
         }
     };
 
+    var getConcept = function(idConcept, callback) {
+        Rest.concepts.getById(idConcept)(
+            function(responseText) {
+                callback(JSON.parse(responseText));
+            },
+            function(status, responseText) {
+                console.log(status, responseText);
+            }
+        );
+    }
+
     // The public methods of the factory
     return {
+        getConcept: getConcept,
         getConcepts: getConcepts,
         addConcept: addConcept,
         initConcepts: initConcepts

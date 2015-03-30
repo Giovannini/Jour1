@@ -1,5 +1,5 @@
 @(instance: models.graph.ontology.Instance, call: Call)
-@import controllers.ontology.InstanceManager
+@import forms.graph.ontology.InstanceForm
 
 <!DOCTYPE html>
 <html>
@@ -10,25 +10,20 @@
 <body>
   <h1>Edition of instance @instance.label @instance.id of concept @instance.concept</h1>
 
+
   @helper.form(action = call){
-    @helper.input(InstanceManager.instanceForm("idInstance")) { (id, name, value, args) =>
+    @helper.input(InstanceForm.form("id")) { (id, name, value, args) =>
       <input type="number" name="@name" id="@id" value="@instance.id" min="0" readonly>
     }
-    @helper.input(InstanceManager.instanceForm("idConcept")) { (id, name, value, args) =>
+    @helper.input(InstanceForm.form("idConcept")) { (id, name, value, args) =>
       <input type="number" name="@name" id="@id" value="@instance.concept.id" min="0" readonly>
     }
-    @helper.input(InstanceManager.instanceForm("label")) { (id, name, value, args) =>
+    @helper.input(InstanceForm.form("label")) { (id, name, value, args) =>
       <input type="text" name="@name" id="@id" value="@instance.label">
-    }
-    @helper.input(InstanceManager.instanceForm("coordinateX")) { (id, name, value, args) =>
-      <input type="number" name="@name" id="@id" value="@instance.coordinates.x" min="0">
-    }
-    @helper.input(InstanceManager.instanceForm("coordinateY")) { (id, name, value, args) =>
-      <input type="number" name="@name" id="@id" value="@instance.coordinates.y" min="0">
     }
 
     @for(property <- instance.properties.zipWithIndex){
-      @helper.input(InstanceManager.instanceForm("property["+property._2+"]")) { (id, name, value, args) =>
+      @helper.input(InstanceForm.form("property["+property._2+"]")) { (id, name, value, args) =>
         <p>@property._2 - @property._1.property.label</p>
         <input type="number" name="@name" id="@id" value="@property._1.value">
       }
