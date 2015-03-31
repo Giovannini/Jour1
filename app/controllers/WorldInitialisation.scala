@@ -57,6 +57,7 @@ object WorldInitialisation extends Controller {
       //this is working
       if (result) {
         if (putInitialConceptsInDB) {
+          Application.map.clear()
           isWorldMapInitialized = false
           Redirect(routes.MapController.show())
         }

@@ -19,6 +19,12 @@ import scala.util.{Success, Failure, Try}
  */
 case class WorldMap(label: Label, description: String, width: Int, height: Int) {
 
+  def clear() = {
+    instances = instances.empty
+    instanceIdCounter = 0
+  }
+
+
   private var instanceIdCounter = 0
 
   /**
@@ -31,7 +37,7 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
     instanceIdCounter
   }
 
-  val instances: collection.mutable.Map[Long, List[Instance]] = collection.mutable.Map.empty[Long, List[Instance]]
+  private var instances: collection.mutable.Map[Long, List[Instance]] = collection.mutable.Map.empty[Long, List[Instance]]
 
   /**
    * Get all the instances existing on the world map
