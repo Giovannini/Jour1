@@ -51,4 +51,8 @@ object LogInteraction {
 
   val nothing = LogInteraction("ERROR")
 
+  def createModifyLog(instanceId: Long, propertyName: String, propertyValue: Double): LogInteraction = {
+    LogInteraction("MODIFY_PROPERTY " + instanceId + " " + propertyName + " " + propertyValue)
+  }
+
 }

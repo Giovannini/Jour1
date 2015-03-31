@@ -34,7 +34,7 @@ case class Relation(id: Long, label: String) {
   }
 
   def isAnAction = label.startsWith("ACTION_")
-  def isAHumor = label.startsWith("HUMOR_")
+  def isAMood = label.startsWith("MOOD_")
 }
 
 object Relation {

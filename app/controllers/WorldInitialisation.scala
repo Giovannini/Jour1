@@ -58,7 +58,7 @@ object WorldInitialisation extends Controller {
       if (result) {
         if (putInitialConceptsInDB) {
           isWorldMapInitialized = false
-          Ok("Le graph a été correctement initialisé")
+          Redirect(routes.MapController.show())
         }
         else {
           Ok("Error while filling the graph")

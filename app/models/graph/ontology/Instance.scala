@@ -4,6 +4,7 @@ import models.graph.custom_types.Coordinates
 import models.graph.ontology.concept.need.{MeanOfSatisfaction, Need}
 import models.graph.ontology.concept.{Concept, ConceptDAO}
 import models.graph.ontology.property.{Property, PropertyType}
+import models.interaction.LogInteraction
 import models.interaction.action.InstanceAction
 import play.api.libs.json._
 
@@ -93,16 +94,20 @@ case class Instance(
     }
   }
 
-  def updateProperties(properties: List[ValuedProperty]): Instance = properties match {
-    case head :: tail => {
-      if (concept.properties.contains(head.property)) {
-        this.modifyValueOfProperty(head)
+  /**
+   * Update a list of needs for an instance
+   * @return a list of logs to update the instance
+   */
+  def applyConsequencies(): List[LogInteraction] = {
+    concept.needs.flatMap { need =>
+      val property = need.affectedProperty
+      val propertyValue = this.getValueForProperty(property)
+      val steps = need.consequencesSteps
+      steps.filter(cs => cs.value <= propertyValue).lastOption match {
+        case Some(consequenceStep) => consequenceStep.consequence.effect.logOn(this)
+        case _ => List()
       }
-      else {
-        this
-      }
-    }.updateProperties(tail)
-    case _ => this
+    }
   }
 
   /**
@@ -170,57 +175,48 @@ case class Instance(
 
     val possibleActions = orderNeedsByImportance.flatMap(_.meansOfSatisfaction).distinct
     val relations = concept.getPossibleActionsAndDestinations
+
     /**
-     * Get best possible action to do for this instance
+     * Check if the instance can do an action or not
      * @author Thomas GIOVANNINI
-     * @return an InstanceAction
+     * @param mean the instance will use
+     * @return true if the instance can do the action
+     *         false else
      */
-    def getBestAction: (InstanceAction, Instance) = {
-      /**
-       * Check if the instance can do an action or not
-       * @author Thomas GIOVANNINI
-       * @param mean the instance will use
-       * @return true if the instance can do the action
-       *         false else
-       */
-      def destinationList(mean: MeanOfSatisfaction): List[Instance] = {
-        val destinationList = mean.action.getDestinationList(this, sensedInstances)
-        //        println("\tDestinationList length: " + destinationList.length)
-        println("\tDestinations: " + mean.destinationConcepts.map(_.label).mkString(", "))
+    def destinationList(mean: MeanOfSatisfaction): List[Instance] = {
+      val destinationList = mean.action.getDestinationList(this, sensedInstances)
+      //        println("\tDestinationList length: " + destinationList.length)
+      //        println("\tDestinations: " + mean.destinationConcepts.map(_.label).mkString(", "))
+      if (mean.destinationConcept == Concept.error) {
+        //TODO change that using any
         destinationList.filter { instance =>
-          val concept = instance.concept
-          if (mean.destinationConcepts.contains(Concept.any)) {
-            println("caca")
-            relations(mean.action).contains(concept)
-          }
-          else {
-            mean.destinationConcepts.contains(concept)
-          }
-        }
+          relations(mean.action).contains(instance.concept) }
       }
-
-      def retrieveBestAction(possibleActions: List[MeanOfSatisfaction])
-      : (InstanceAction, Instance) = {
-        possibleActions match {
-          case head :: tail =>
-            println("\tTesting action: " + head.action.label)
-            val destinationsList = destinationList(head)
-            if (destinationsList.nonEmpty) {
-              (head.action, destinationsList.head)
-            }
-            else {
-              retrieveBestAction(tail)
-            }
-          case _ =>
-            println("No action found for instance " + this.label + this.id)
-            (InstanceAction.error, this)
-        }
+      else {
+        destinationList.filter { instance =>
+        mean.destinationConcepts.contains(instance.concept) }
       }
-
-      retrieveBestAction(possibleActions)
     }
 
-    getBestAction
+    def retrieveBestAction(possibleActions: List[MeanOfSatisfaction])
+    : (InstanceAction, Instance) = {
+      possibleActions match {
+        case head :: tail =>
+          //println("\tTesting action: " + head.action.label)
+          val destinationsList = destinationList(head)
+          if (destinationsList.nonEmpty) {
+            (head.action, destinationsList.head)
+          }
+          else {
+            retrieveBestAction(tail)
+          }
+        case _ =>
+          println("No action found for instance " + this.label + this.id)
+          (InstanceAction.error, this)
+      }
+    }
+
+    retrieveBestAction(possibleActions)
   }
 
   /**

@@ -122,8 +122,8 @@ case class Concept(
     ConceptDAO.getChildren(id).flatMap(concept => concept :: concept.getDescendance)
   }
 
-  def getHumorRelations: List[(Relation, Concept)] = {
-    ConceptDAO.getReachableRelations(id).filter(_._1.isAHumor)
+  def getMoodRelations: List[(Relation, Concept)] = {
+    ConceptDAO.getReachableRelations(id).filter(_._1.isAMood)
   }
 
   def isSubConceptOf(concept: Concept): Boolean = {

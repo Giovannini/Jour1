@@ -1,13 +1,13 @@
 package actors
 
 import actors.Communication._
+import actors.Communication.computing.{ComputeAction, ComputeConsequencies, ComputeNeed}
+import actors.Communication.launcher.{EvaluateNeeds, NewTurn}
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.routing.RoundRobinPool
 import controllers.Application
-import models.graph.ontology.{ValuedProperty, Instance}
+import models.graph.ontology.Instance
 import models.graph.ontology.concept.Concept
-import models.graph.ontology.concept.need.Need
-import models.graph.ontology.property.{PropertyDAO, Property}
 import models.graph.ontology.relation.Relation
 import models.interaction.LogInteraction
 import models.interaction.action.InstanceActionParser
@@ -28,7 +28,7 @@ object Intelligence {
     val master = system.actorOf(Props(new World(nrOfWorkers, listener)),
       name = "master")
 
-    //master ! EvaluateNeeds
+    master ! EvaluateNeeds
     // start the calculation
     master ! NewTurn
 
@@ -38,7 +38,7 @@ object Intelligence {
 
     def getActionFor(instance: Instance, sensedInstances: List[Instance]): List[LogInteraction] = {
       val (action, destination) = instance.selectAction(sensedInstances)
-      if (! action.isError) {
+      if (!action.isError) {
         println(instance.label + instance.id + " is doing " + action.label)
         InstanceActionParser.parseActionForLog(action.id, List(instance.id, destination.id))
       } else {
@@ -46,55 +46,47 @@ object Intelligence {
       }
     }
 
-    //TODO
-    /*
-     * Idea for FEAR property:
-     * Count number of elements related with relation SCARE which is not an action
-     * If property FEAR value is higher than this number, reduce property by one
-     * Else set property value FEAR to this sum
-     */
-    def updateFromSenses(instance: Instance, sensedInstances: List[Instance]): List[LogInteraction] = {
-      def recursiveUpdate(needs: List[Need], instance: Instance): List[LogInteraction] = needs match {
-        case head::tail =>
-          val property = head.affectedProperty
-          val propertyValue = instance.getValueForProperty(property)
-          val steps = head.consequencesSteps
-          val logs = steps.filter(cs => cs.value <= propertyValue).lastOption match {
-            case Some(consequenceStep) => consequenceStep.consequence.effect.logOn(instance)
-            case _ => List()
-          }
-          logs ::: recursiveUpdate(tail, instance)
-        case _ => List()
+    def updatePropertiesFromEnvironment(instance: Instance, environment: List[Instance]): List[LogInteraction] = {
+      /**
+       * Count the number of element of a concept in the environment of the instance to update
+       * @author Thomas GIOVANNINI
+       * @param sourceOfMood concept to look for
+       * @return the number of instance that has the desired type in the given environment
+       */
+      def countHumorSource(sourceOfMood: Concept): Int = {
+        environment.count(_.concept.isSubConceptOf(sourceOfMood))
       }
 
-      def updatePropertiesFromEnvironment(instance: Instance, environment: List[Instance]): Instance = {
-        def countHumorSource(sourceOfHumor: Concept) = {
-          environment.count(_.concept.isSubConceptOf(sourceOfHumor))
-        }
-
-        def getPropertyFromHumor(humorRelation: Relation): Property = {
-          val propertyName = humorRelation.label
-            .drop(6) //HUMOR_ has length 6
-            .toLowerCase
-            .capitalize
-          PropertyDAO.getByName(propertyName)
-        }
-
-        val newHumorProperties = instance.concept
-          .getHumorRelations
-          .map(tuple => ValuedProperty(getPropertyFromHumor(tuple._1), countHumorSource(tuple._2)))
-        instance.updateProperties(newHumorProperties)
-        instance
+      /**
+       * Get the name of the property associated with the mood relation
+       * @author Thomas GIOVANNINI
+       * @param moodRelation relation from which the property name is desired
+       * @return the label of the property
+       */
+      def getPropertyNameFromMood(moodRelation: Relation): String = {
+        moodRelation.label
+          .drop(5) //MOOD_ has length
+          .toLowerCase
+          .capitalize
       }
 
-      recursiveUpdate(instance.concept.needs, instance)
+      instance.concept
+        .getMoodRelations
+        .map { tuple =>
+          val instanceId = instance.id
+          val propertyName = getPropertyNameFromMood(tuple._1)
+          val propertyValue = countHumorSource(tuple._2)
+          LogInteraction.createModifyLog(instanceId, propertyName, propertyValue)
+        }
     }
 
     override def receive: Receive = {
       case ComputeAction(instance, sensedInstances) =>
         sender ! ResultAction(getActionFor(instance, sensedInstances))
+      case ComputeConsequencies(instance) =>
+        sender ! ResultAction(instance.applyConsequencies())
       case ComputeNeed(instance, sensedInstances) => //TODO
-        sender ! ResultAction(updateFromSenses(instance, sensedInstances))
+        sender ! ResultAction(updatePropertiesFromEnvironment(instance, sensedInstances))
     }
   }
 
@@ -109,20 +101,15 @@ object Intelligence {
       Props[InstanceIntelligence].withRouter(RoundRobinPool(nrOfWorkers)), name = "workerRouter")
 
     override def receive: Actor.Receive = {
-      case NewTurn ⇒
+      case launcher: Launcher =>
         val instancesWithNeeds = Application.map.getInstances
           .filter(_.concept.needs.nonEmpty)
         nrOfInstances = instancesWithNeeds.length
-        println("Computing actions for " + nrOfInstances + " instances.")
-        for (instance <- instancesWithNeeds)
-          workerRouter ! ComputeAction(instance, instance.getSensedInstances.flatMap(Application.map.getInstancesAt))
-      case EvaluateNeeds =>
-        val instancesWithNeeds = Application.map.getInstances
-          .filter(_.concept.needs.nonEmpty)
-        nrOfInstances = instancesWithNeeds.length
-        println("Evaluating needs of " + nrOfInstances + " instances.")
-        for (instance <- instancesWithNeeds)
-          workerRouter ! ComputeNeed(instance, instance.getSensedInstances.flatMap(Application.map.getInstancesAt))
+        println(launcher.message + nrOfInstances + " instances.")
+        for (instance <- instancesWithNeeds) {
+          val environment = instance.getSensedInstances.flatMap(Application.map.getInstancesAt)
+          workerRouter ! launcher.computation(instance, environment)
+        }
       case ResultAction(logList) =>
         nrOfResults += 1
         logs = logList ::: logs
