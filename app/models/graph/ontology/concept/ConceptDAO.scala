@@ -19,6 +19,12 @@ object ConceptDAO {
 
   private var mapping = collection.mutable.Map.empty[Long, Concept]
 
+  def clearDB(): Boolean = {
+    mapping = mapping.empty
+    val statement = Statement.clearDB
+    statement.execute()
+  }
+
   /**
    * Read a Neo4J cypher result row from the DB and convert it to a concept object
    * @author Thomas GIOVANNINI
@@ -127,7 +133,7 @@ object ConceptDAO {
    */
   def addConceptToDB(concept: Concept): Boolean = {
     getById(concept.id) == Concept.error &&
-    Statement.createConcept(concept).execute()
+      Statement.createConcept(concept).execute()
   }
 
   /**

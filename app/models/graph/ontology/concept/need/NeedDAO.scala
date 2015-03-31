@@ -39,6 +39,7 @@ object NeedDAO {
   }
 
   def clear: Boolean = {
+    mapping = mapping.empty
     DB.withConnection { implicit connection =>
       val statement = NeedStatement.clearDB
       statement.execute()

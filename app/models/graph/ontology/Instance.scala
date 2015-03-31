@@ -190,30 +190,32 @@ case class Instance(
       if (mean.destinationConcept == Concept.error) {
         //TODO change that using any
         destinationList.filter { instance =>
-          relations(mean.action).contains(instance.concept) }
+          relations(mean.action).contains(instance.concept)
+        }
       }
       else {
         destinationList.filter { instance =>
-        mean.destinationConcepts.contains(instance.concept) }
+          mean.destinationConcepts.contains(instance.concept)
+        }
       }
     }
 
     def retrieveBestAction(possibleActions: List[MeanOfSatisfaction])
-    : (InstanceAction, Instance) = {
-      possibleActions match {
-        case head :: tail =>
-          //println("\tTesting action: " + head.action.label)
-          val destinationsList = destinationList(head)
-          if (destinationsList.nonEmpty) {
-            (head.action, destinationsList.head)
-          }
-          else {
-            retrieveBestAction(tail)
-          }
-        case _ =>
-          println("No action found for instance " + this.label + this.id)
-          (InstanceAction.error, this)
-      }
+    : (InstanceAction, Instance) = possibleActions match {
+      case head :: tail =>
+        println(this.id + "\tTesting action: " + head.action.label)
+        val destinationsList = destinationList(head)
+        if (destinationsList.nonEmpty) {
+          println(this.id + "\t" + head.action.label + " - " + destinationsList.head.concept.label + " good!")
+          (head.action, destinationsList.head)
+        }
+        else {
+          println(this.id + "\t\t" + head.action.label + " - " + head.destinationConcept.label + " failed")
+          retrieveBestAction(tail)
+        }
+      case _ =>
+        println("No action found for instance " + this.label + this.id)
+        (InstanceAction.error, this)
     }
 
     retrieveBestAction(possibleActions)

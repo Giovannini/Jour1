@@ -1,6 +1,7 @@
 package models.graph
 
 import models.graph.custom_types.Statement
+import models.graph.ontology.concept.ConceptDAO
 import org.anormcypher._
 import play.Play
 
@@ -13,8 +14,7 @@ object NeoDAO {
   implicit val connection = Neo4jREST(Play.application.configuration.getString("serverIP"), 7474, "/db/data/")
 
   def clearDB(): Boolean = {
-    val statement = Statement.clearDB
-    statement.execute()
+    ConceptDAO.clearDB
   }
 
   /* Methods to get informations from a concept */

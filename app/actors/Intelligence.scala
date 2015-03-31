@@ -117,7 +117,7 @@ object Intelligence {
           logs.foreach(_.execute())
           val end: Long = System.currentTimeMillis()
           listener ! EndOfTurn(end - start)
-          context.stop(self)
+          //context.stop(self)
         }
     }
   }

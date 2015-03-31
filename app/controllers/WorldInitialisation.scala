@@ -74,8 +74,6 @@ object WorldInitialisation extends Controller {
    * @author Thomas GIOVANNINI
    */
   def putInitialConceptsInDB: Boolean = {
-    NeoDAO.clearDB()
-
     PropertyDAO.clear
     Relation.DBList.clear
     NeedDAO.clear

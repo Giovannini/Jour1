@@ -37,6 +37,7 @@ object PropertyDAO {
    * @return number of properties deleted
    */
   def clear: Int = {
+    mapping = mapping.empty
     DB.withConnection { implicit connection =>
       val statement = PropertyStatement.clearDB
       statement.executeUpdate
