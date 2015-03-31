@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+	<link rel="stylesheet" href="css/stylesheet.css">
+	<meta charset="utf-8" />
+
+	<div class="container">
+		<header class="header">
+			<h1>Documentation</h1>
+		</header>
+
+		<div class="content">
+			<h2>Sommaire</h2>
+			<ul>
+				<li><a href="#global">Présentation du projet</a></li>
+				<li><a href="#objects">Objets du jeu</a></li>
+				<li><a href="#interaction">Interaction des objets</a></li>
+			</ul>
+		</div>
+
+		<div id="global">
+			<h2>Présentation du projet</h2>
+
+			<p>Le but du projet est de permettre à un utilisateur de créer un monde intelligent à partir de briques simples. Ainsi, théoriquement, tout objet peut se mettre à exister dans le monde, et celui-ci peut ^etre enrichi de manière collaborative.</p>
+
+			<p>Idéalement, on pourrait alors se servir de cette base pour meubler un autre moteur de jeu. Ou encore, les créateurs pourraient s'amuser à changer encore et encore les variables qui dirigent ce monde pour etre témoin des modifications drastiques que cela pourrait entrainer.</p>
+		</div>
+		<div id="objects">
+			<h2>Objets du jeu</h2>
+
+			<p>Pour parvenir à nos fins, nous avons définis plusieurs types d'objets :</p>
+
+			<ul>
+				<li>Les concepts et leurs instances</li>
+				<li>Les relations</li>
+			</ul>
+
+			<h3>Les concepts et leurs instances</h3>
+
+			<p>Un concept représente ce qui peut exister dans le monde. Il peut etre instanciable, ou représenter un niveau plus abstrait. Par exemple, un "Loup" est un concept. Mais il existe aussi un concept "Prédateur" qui va permettre de mieux décrire le concept Loup. Loup sera ainsi instanciable, cad placable sur la carte du monde //TODO </p>
+
+			<p>Un concept est décrit par plusieurs choses :</p>
+
+			<ul>
+				<li><em>Des règles :</em> définissent comment répartir dans le monde. Celles ci sont utilisées par le système et font parti d'un ensemble fermé de possibilité (Instanciable, Strength et ZIndex)</li>
+				<li><em>Des propriétés :</em> décrivent chaque instance de ce concept. Celles-ci sont donc uniques pour chaque instance. On aura par exemple la propriété "Walking Distance" qui sera pour les moutons de 4, ou la propriété "Hunger" qui va varier avec le temps sur chaque mouton.</li>
+				<li><em>Les besoins :</em> précisent l'influence d'une propriété sur le comportement d'un concept. Ainsi, l'état de certaines propriétés entraineront des effets (S'il a faim, il va etre plus fatigué au tour suivant), et favorisera l'action du tour suivant (cf intelligence pour plus de précision //TODO)</li>
+			</ul>
+
+			<p>De plus, un concept instanciable va permettre de créer une Instance. Une instance est une entité unique qui va représenter l'existence d'un objet dans le monde. Par exemple, le concept Mouton va faire apparaitre des instances moutons, chacunes différentes et intelligentes de facon propre.</p>
+
+			<h3>Les relations</h3>
+		</div>
+	</div>
+</html>
