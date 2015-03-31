@@ -17,6 +17,8 @@ object ConceptDAO {
 
   implicit val connection = NeoDAO.connection
 
+  private var mapping = collection.mutable.Map.empty[Long, Concept]
+
   /**
    * Read a Neo4J cypher result row from the DB and convert it to a concept object
    * @author Thomas GIOVANNINI
@@ -63,11 +65,17 @@ object ConceptDAO {
    * @return concept if it exists, error otherwise
    */
   def getById(conceptId: Long): Concept = {
-    val cypherResultRowStream = Statement.getConceptById(conceptId)
-      .apply
-    if (cypherResultRowStream.nonEmpty) {
-      ConceptDAO.parseRow(cypherResultRowStream.head)
-    } else Concept.error
+    mapping.getOrElse(conceptId, {
+      val cypherResultRowStream = Statement.getConceptById(conceptId)
+        .apply
+      if (cypherResultRowStream.nonEmpty) {
+        val concept = ConceptDAO.parseRow(cypherResultRowStream.head)
+        mapping += conceptId -> concept
+        concept
+      } else {
+        Concept.error
+      }
+    })
   }
 
   /**
@@ -81,7 +89,9 @@ object ConceptDAO {
       .apply
     if (cypherResultRowStream.nonEmpty) {
       ConceptDAO.parseRow(cypherResultRowStream.head)
-    } else Concept.error
+    } else {
+      Concept.error
+    }
   }
 
   /**
@@ -104,7 +114,7 @@ object ConceptDAO {
   /*########################
       Basic DB transactions
    ########################*/
-  
+
   /**
    * Add a concept into the DB.
    * @author Thomas GIOVANNINI
@@ -113,11 +123,11 @@ object ConceptDAO {
    * @return true if the concept was correctly added
    *         false else
    *
-   * Edit JP : The function now checks if the concept already exists
+   *         Edit JP : The function now checks if the concept already exists
    */
   def addConceptToDB(concept: Concept): Boolean = {
     getById(concept.id) == Concept.error &&
-      Statement.createConcept(concept).execute()
+    Statement.createConcept(concept).execute()
   }
 
   /**
@@ -132,7 +142,7 @@ object ConceptDAO {
     println(statement.toString)
     println()
     val cypherResultRowStream = statement.apply
-    if(cypherResultRowStream.nonEmpty) {
+    if (cypherResultRowStream.nonEmpty) {
       ConceptDAO.parseRow(cypherResultRowStream.head)
     } else {
       Concept.error
@@ -180,7 +190,7 @@ object ConceptDAO {
       .apply
       .toList
       .filter(ConceptDAO.noInstance)
-      .map { row => (Relation.DBGraph.parseRow(row), ConceptDAO.parseRow(row))}
+      .map { row => (Relation.DBGraph.parseRow(row), ConceptDAO.parseRow(row)) }
   }
 
   /**
@@ -253,7 +263,7 @@ object ConceptDAO {
    * @return true if the property was correctly removed
    *         false else
    */
-  def removePropertyFromConcept(concept: Concept, property: Property):Boolean = {
+  def removePropertyFromConcept(concept: Concept, property: Property): Boolean = {
     val statement = Statement.removePropertyFromConcept(concept, property)
     statement.execute
   }
@@ -299,21 +309,17 @@ object ConceptDAO {
    */
   def getReachableRelations(conceptId: Long): List[(Relation, Concept)] = {
     val conceptRelations = getRelationsFrom(conceptId)
-    val parentsRelations = getParentsRelations(conceptId)
+    val parentsRelations =
+      getParents(conceptId).flatMap(getReachableRelations)
     conceptRelations ::: parentsRelations
   }
-
-  /**
-   * Get the relations of parents of a given concept
+  /** SUCRE
+   * Method to retrieve all the possible actions for a given concept
    * @author Thomas GIOVANNINI
-   * @param conceptId the concept from which the parent relations are desired
+   * @param concept the concept
    * @return a list of relations and concepts
    */
-  def getParentsRelations(conceptId: Long): List[(Relation, Concept)] = {
-    getParents(conceptId).flatMap {
-      parent => getReachableRelations(parent.id)
-    }
-  }
+  def getReachableRelations(concept: Concept): List[(Relation, Concept)] =getReachableRelations(concept.id)
 
   /*########################
       Predicates

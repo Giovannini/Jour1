@@ -16,6 +16,8 @@ object PropertyDAO {
 
   implicit val connection = Application.connection
 
+  private var mapping = collection.mutable.Map.empty[Long, Property]
+
   /**
    * Parse property to interact with database
    * @author Thomas GIOVANNINI
@@ -75,11 +77,15 @@ object PropertyDAO {
    * @return property identified by id
    */
   def getById(id: Long): Property = {
-    DB.withConnection { implicit connection =>
-      val statement = PropertyStatement.getById(id)
-      val maybeProperty = statement.as(propertyParser.singleOpt)
-      maybeProperty.getOrElse(Property.error)
-    }
+    mapping.getOrElse(id, {
+      DB.withConnection { implicit connection =>
+        val statement = PropertyStatement.getById(id)
+        val property = statement.as(propertyParser.singleOpt)
+          .getOrElse(Property.error)
+        mapping += id -> property
+        property
+      }
+    })
   }
 
   /**

@@ -43,7 +43,7 @@ object ConceptForm {
                  rules: List[ValuedProperty],
                  needs: List[Need],
                  displayProperty: DisplayProperty) : Concept = {
-    Concept(label, properties, rules, Nil, displayProperty)
+    Concept(label, properties, rules, needs, displayProperty)
   }
 
   /**

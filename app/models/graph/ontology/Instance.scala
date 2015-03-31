@@ -13,11 +13,13 @@ import play.api.libs.json._
  * @author Thomas GIOVANNINI
  * @param label of the instance
  */
-case class Instance(id:             Long,
-                    label:          String,
-                    coordinates:    Coordinates,
-                    properties:     List[ValuedProperty],
-                    concept:        Concept) {
+case class Instance(
+  id: Long,
+  label: String,
+  coordinates: Coordinates,
+  properties: List[ValuedProperty],
+  concept: Concept) {
+
   require(label.matches("^[A-Z][A-Za-z0-9_ ]*$") &&
           concept.properties.toSeq == properties.map(_.property).toSeq)
 
@@ -65,7 +67,7 @@ case class Instance(id:             Long,
   def at(newCoordinates: Coordinates): Instance = {
     Instance(id, label, newCoordinates, properties, concept)
   }
-  
+
   /**
    * Method to add a property to the instance
    * @author Thomas GIOVANNINI
@@ -83,38 +85,52 @@ case class Instance(id:             Long,
    * @return a new instance looking like this one but with updated properties
    */
   def withProperties(newProperties: List[ValuedProperty]): Instance = {
-    if(newProperties.map(_.property) == this.concept.properties) {
-      println("update success")
-      println(newProperties)
-      val ins = Instance(id, label, coordinates, newProperties, concept)
-      println(ins)
-      ins
+    if (newProperties.map(_.property) == this.concept.properties) {
+      Instance(id, label, coordinates, newProperties, concept)
     }
-    else
+    else {
       this
+    }
+  }
+
+  def updateProperties(properties: List[ValuedProperty]): Instance = properties match {
+    case head :: tail => {
+      if (concept.properties.contains(head.property)) {
+        this.modifyValueOfProperty(head)
+      }
+      else {
+        this
+      }
+    }.updateProperties(tail)
+    case _ => this
   }
 
   /**
    * Modify the value of a given property of the instance
    * @author Thomas GIOVANNINI
-   * @param property to update
-   * @param newValue for this property
+   * @param valuedProperty to update
    * @return a new instance looking like this one but with an updated property
    */
-  def modifyValueOfProperty(property: Property, newValue: Double): Instance = {
+  def modifyValueOfProperty(valuedProperty: ValuedProperty): Instance = {
     def modifyPropertyRec(vp: ValuedProperty, remainingProperties: List[ValuedProperty]): List[ValuedProperty] = {
       remainingProperties match {
-        case List() => List()
-        case head::tail =>
-          if (head.property == vp.property) vp :: tail
-          else head :: modifyPropertyRec(vp, tail)
+        case head :: tail =>
+          if (head.property == vp.property) {
+            vp :: tail
+          }
+          else {
+            head :: modifyPropertyRec(vp, tail)
+          }
+        case _ => List()
       }
     }
 
-    if (this.concept.properties.contains(property)){
-      val modifiedProperties = modifyPropertyRec(ValuedProperty(property, newValue), this.properties)
+    if (this.concept.properties.contains(valuedProperty.property)) {
+      val modifiedProperties = modifyPropertyRec(valuedProperty, this.properties)
       Instance(id, label, coordinates, modifiedProperties, concept)
-    } else this
+    } else {
+      this
+    }
   }
 
   /**
@@ -123,8 +139,8 @@ case class Instance(id:             Long,
    * @param newconcept for the instance
    * @return a new instance looking like this one but with an other concept
    */
-  def ofConcept(newconcept:Concept): Instance ={
-    Instance(id, label, coordinates, newconcept.properties.map(_.defaultValuedProperty),newconcept)
+  def ofConcept(newconcept: Concept): Instance = {
+    Instance(id, label, coordinates, newconcept.properties.map(_.defaultValuedProperty), newconcept)
   }
 
   /**
@@ -149,7 +165,7 @@ case class Instance(id:             Long,
      * @return a sorted list of needs
      */
     def orderNeedsByImportance: List[Need] = {
-      this.concept.needs.sortBy(- _.evaluate(this))
+      this.concept.needs.sortBy(-_.evaluate(this))
     }
 
     val possibleActions = orderNeedsByImportance.flatMap(_.meansOfSatisfaction).distinct
@@ -169,24 +185,32 @@ case class Instance(id:             Long,
        */
       def destinationList(mean: MeanOfSatisfaction): List[Instance] = {
         val destinationList = mean.action.getDestinationList(this, sensedInstances)
+        //        println("\tDestinationList length: " + destinationList.length)
+        println("\tDestinations: " + mean.destinationConcepts.map(_.label).mkString(", "))
         destinationList.filter { instance =>
           val concept = instance.concept
           if (mean.destinationConcepts.contains(Concept.any)) {
             println("caca")
             relations(mean.action).contains(concept)
           }
-          else mean.destinationConcepts.contains(concept)
+          else {
+            mean.destinationConcepts.contains(concept)
+          }
         }
       }
 
       def retrieveBestAction(possibleActions: List[MeanOfSatisfaction])
       : (InstanceAction, Instance) = {
         possibleActions match {
-          case head::tail =>
-            //println("Testing action: " + head.action.label)
+          case head :: tail =>
+            println("\tTesting action: " + head.action.label)
             val destinationsList = destinationList(head)
-            if (destinationsList.nonEmpty) (head.action, destinationsList.head)
-            else retrieveBestAction(tail)
+            if (destinationsList.nonEmpty) {
+              (head.action, destinationsList.head)
+            }
+            else {
+              retrieveBestAction(tail)
+            }
           case _ =>
             println("No action found for instance " + this.label + this.id)
             (InstanceAction.error, this)
@@ -212,7 +236,7 @@ case class Instance(id:             Long,
 
 object Instance {
 
-  val error = Instance(0, "XXX", Coordinates(0,0), List(), Concept.error)
+  val error = Instance(0, "XXX", Coordinates(0, 0), List(), Concept.error)
 
   /**
    * Transform a json representing an instance into the Instance it represents
@@ -226,7 +250,8 @@ object Instance {
     val coordinates = Coordinates.parseJson(jsonInstance \ "coordinates")
     val properties = (jsonInstance \ "properties").as[List[JsValue]].map(ValuedProperty.parseJson)
     val conceptId = (jsonInstance \ "concept").as[Long]
-    ConceptDAO.getById(conceptId) match { // TODO better verification
+    ConceptDAO.getById(conceptId) match {
+      // TODO better verification
       case Concept.error => error
       case concept => Instance(id, label, coordinates, properties, concept)
     }
@@ -241,7 +266,7 @@ object Instance {
   def createRandomInstanceOf(concept: Concept): Instance = {
     Instance(0,
       concept.label,
-      Coordinates(0,0),
+      Coordinates(0, 0),
       concept.properties.map(_.defaultValuedProperty),
       concept)
   }

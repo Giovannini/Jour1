@@ -3,7 +3,7 @@ package models
 import models.graph.custom_types.{Label, Coordinates}
 import models.graph.ontology.concept.{ConceptDAO, Concept}
 import models.graph.ontology.property.{PropertyDAO, Property}
-import models.graph.ontology.Instance
+import models.graph.ontology.{ValuedProperty, Instance}
 import play.api.libs.json.{JsValue, Json}
 
 import scala.util.{Success, Failure, Try}
@@ -173,7 +173,7 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
   def modifyProperty(instanceId: Long, propertyString: String, propertyValue: Double): Unit = {
     val instance = getInstanceById(instanceId)
     val property = PropertyDAO.getByName(propertyString)
-    val modifiedInstance = instance.modifyValueOfProperty(property, propertyValue)
+    val modifiedInstance = instance.modifyValueOfProperty(ValuedProperty(property, propertyValue))
 
     val conceptId = instance.concept.id
     instances(conceptId) = modifiedInstance :: (instances.getOrElse(conceptId, List()) diff List(instance))
@@ -184,7 +184,7 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
     val instance = getInstanceById(instanceId)
     val property = PropertyDAO.getByName(propertyString)
     val newValue = instance.getValueForProperty(property) + valueToAdd
-    val modifiedInstance = instance.modifyValueOfProperty(property, newValue)
+    val modifiedInstance = instance.modifyValueOfProperty(ValuedProperty(property, newValue))
 
     val conceptId = instance.concept.id
     instances(conceptId) = modifiedInstance :: (instances.getOrElse(conceptId, List()) diff List(instance))

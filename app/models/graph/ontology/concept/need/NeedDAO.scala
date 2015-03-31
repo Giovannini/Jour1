@@ -17,6 +17,8 @@ object NeedDAO {
 
   implicit val connection = Application.connection
 
+  private var mapping = collection.mutable.Map.empty[Long, Need]
+
   /**
    * Parse property to interact with database
    * @author Thomas GIOVANNINI
@@ -51,10 +53,14 @@ object NeedDAO {
   }
 
   def getById(id: Long): Need = {
-    DB.withConnection { implicit connection =>
-      val statement = NeedStatement.getById(id)
-      statement.as(needParser.singleOpt).getOrElse(Need.error)
-    }
+    mapping.getOrElse(id, {
+      DB.withConnection { implicit connection =>
+        val statement = NeedStatement.getById(id)
+        val need = statement.as(needParser.singleOpt).getOrElse(Need.error)
+        mapping += id -> need
+        need
+      }
+    })
   }
 
   def save(need: Need): Need = {

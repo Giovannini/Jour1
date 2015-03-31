@@ -3,7 +3,7 @@ package models.graph.ontology.concept
 import models.graph.NeoDAO
 import models.graph.custom_types.DisplayProperty
 import models.graph.ontology.ValuedProperty
-import models.graph.ontology.concept.need.{NeedDAO, Need}
+import models.graph.ontology.concept.need.{Need, NeedDAO}
 import models.graph.ontology.property.{Property, PropertyDAO}
 import models.graph.ontology.relation.Relation
 import models.interaction.action.InstanceAction
@@ -23,16 +23,16 @@ case class Concept(
   private val _rules: List[ValuedProperty],
   private val _needs: List[Need],
   displayProperty: DisplayProperty) {
-
   require(label.matches("^[A-Z][A-Za-z0-9_ ]*$"))
 
   /**
    * Retrieve the properties of a Concept but also the one from its parents
    * @author Thomas GIOVANNINI
    */
-  lazy val properties: List[Property] = (_properties ::: getParents.flatMap(_.properties)).distinct
-  lazy val rules: List[ValuedProperty] = ValuedProperty.distinctProperties(_rules ::: getParents.flatMap(_.rules))
-  lazy val needs: List[Need] = (_needs ::: getParents.flatMap(_.needs)).distinct
+  lazy val parents: List[Concept] = getParents
+  lazy val properties: List[Property] = (_properties ::: parents.flatMap(_.properties)).distinct
+  lazy val rules: List[ValuedProperty] = ValuedProperty.distinctProperties(_rules ::: parents.flatMap(_.rules))
+  lazy val needs: List[Need] = (_needs ::: parents.flatMap(_.needs)).distinct
 
   val id: Long = hashCode
 
@@ -120,6 +120,14 @@ case class Concept(
    */
   def getDescendance: List[Concept] = {
     ConceptDAO.getChildren(id).flatMap(concept => concept :: concept.getDescendance)
+  }
+
+  def getHumorRelations: List[(Relation, Concept)] = {
+    ConceptDAO.getReachableRelations(id).filter(_._1.isAHumor)
+  }
+
+  def isSubConceptOf(concept: Concept): Boolean = {
+    (this :: getParents).contains(concept)
   }
 
   /**

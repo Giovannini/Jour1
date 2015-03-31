@@ -1,6 +1,7 @@
 package models.interaction.action
 
 import controllers.Application
+import models.graph.ontology.ValuedProperty
 import models.graph.ontology.property.PropertyDAO
 import models.interaction.parameter.{ParameterReference, ParameterValue}
 
@@ -62,9 +63,9 @@ object HardCodedAction {
 
     val instance = map.getInstanceById(instanceId)
     val property = PropertyDAO.getByName(propertyString)
-
-    val valueOfProperty: Double = instance.getValueForProperty(property)
-    val newInstance = instance.modifyValueOfProperty(property, valueOfProperty + valToAdd)
+    val valueOfProperty: Double = instance.getValueForProperty(property) + valToAdd
+    val newValuedProperty = ValuedProperty(property, valueOfProperty)
+    val newInstance = instance.modifyValueOfProperty(newValuedProperty)
     Application.map.updateInstance(instance, newInstance)
   }
 

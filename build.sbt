@@ -5,7 +5,7 @@ version := "0.1-SNAPSHOT"
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
 
-scalaVersion := "2.11.5"
+scalaVersion := "2.11.6"
 
 resolvers ++= Seq(
   "anormcypher" at "http://repo.anormcypher.org/",

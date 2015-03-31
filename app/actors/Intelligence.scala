@@ -4,8 +4,11 @@ import actors.Communication._
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.routing.RoundRobinPool
 import controllers.Application
-import models.graph.ontology.Instance
+import models.graph.ontology.{ValuedProperty, Instance}
+import models.graph.ontology.concept.Concept
 import models.graph.ontology.concept.need.Need
+import models.graph.ontology.property.{PropertyDAO, Property}
+import models.graph.ontology.relation.Relation
 import models.interaction.LogInteraction
 import models.interaction.action.InstanceActionParser
 
@@ -44,6 +47,12 @@ object Intelligence {
     }
 
     //TODO
+    /*
+     * Idea for FEAR property:
+     * Count number of elements related with relation SCARE which is not an action
+     * If property FEAR value is higher than this number, reduce property by one
+     * Else set property value FEAR to this sum
+     */
     def updateFromSenses(instance: Instance, sensedInstances: List[Instance]): List[LogInteraction] = {
       def recursiveUpdate(needs: List[Need], instance: Instance): List[LogInteraction] = needs match {
         case head::tail =>
@@ -56,6 +65,26 @@ object Intelligence {
           }
           logs ::: recursiveUpdate(tail, instance)
         case _ => List()
+      }
+
+      def updatePropertiesFromEnvironment(instance: Instance, environment: List[Instance]): Instance = {
+        def countHumorSource(sourceOfHumor: Concept) = {
+          environment.count(_.concept.isSubConceptOf(sourceOfHumor))
+        }
+
+        def getPropertyFromHumor(humorRelation: Relation): Property = {
+          val propertyName = humorRelation.label
+            .drop(6) //HUMOR_ has length 6
+            .toLowerCase
+            .capitalize
+          PropertyDAO.getByName(propertyName)
+        }
+
+        val newHumorProperties = instance.concept
+          .getHumorRelations
+          .map(tuple => ValuedProperty(getPropertyFromHumor(tuple._1), countHumorSource(tuple._2)))
+        instance.updateProperties(newHumorProperties)
+        instance
       }
 
       recursiveUpdate(instance.concept.needs, instance)
