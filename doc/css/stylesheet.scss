@@ -1,0 +1,55 @@
+$background-color: #ffffff;
+$color: #222222;
+
+html, body {
+	background-color: $background-color;
+	color: $color;
+	font-family: sans-serif;
+	margin: 0;
+}
+
+.container {
+	margin: 0 10%;
+}
+
+a {
+	color: #5555dd;
+
+	&:hover, &:focus {
+		color: #9933dd;
+	}
+
+	&:active {
+		color: #2222ee;
+	}
+}
+
+h1, h2, h3, h4 {
+	font-family: sans-serif;
+}
+
+h1 {
+	font-size: 2.8em;
+}
+
+h2 {
+	font-size: 1.6em;
+}
+
+h3 {
+	font-size: 1.3em;
+}
+
+h4 {
+	font-size: 1em;
+}
+
+.header {
+	border-bottom: 1px solid darken($background-color, 25);
+	padding: 15px;
+}
+
+.header h1 {
+	margin: 0;
+	text-align: center;
+}
