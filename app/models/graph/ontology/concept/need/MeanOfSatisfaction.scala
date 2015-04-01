@@ -1,7 +1,7 @@
 package models.graph.ontology.concept.need
 
 import models.graph.ontology.concept.{ConceptDAO, Concept}
-import models.interaction.action.{InstanceActionDAO, InstanceAction}
+import models.interaction.action.{InstanceAction, InstanceActionDAO}
 import play.api.libs.json.{Json, JsValue}
 
 import scala.util.{Failure, Success, Try}

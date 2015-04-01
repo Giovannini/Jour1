@@ -3,7 +3,7 @@ package controllers.rules
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.mvc._
-import models.interaction.action.{InstanceActionDAO, InstanceAction}
+import models.interaction.action.{InstanceAction, InstanceActionDAO}
 
 /**
  * Object to create and modify rules

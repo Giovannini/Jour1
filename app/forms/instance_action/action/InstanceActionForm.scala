@@ -2,7 +2,7 @@ package forms.instance_action.action
 
 import forms.instance_action.parameter.ParameterForm
 import forms.instance_action.precondition.PreconditionForm
-import models.interaction.action.{InstanceActionDAO, InstanceAction}
+import models.interaction.action.{InstanceAction, InstanceActionDAO}
 import models.interaction.parameter.{Parameter, ParameterReference}
 import models.interaction.precondition.Precondition
 import play.api.data.Form

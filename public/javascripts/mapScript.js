@@ -396,6 +396,20 @@ var DrawerFactory = function() {
     TiledMap.prototype = new PIXI.DisplayObjectContainer();
     TiledMap.prototype.constructor = TiledMap;
 
+    TiledMap.prototype.overlayPosition = function(coord) {
+        this.overlaySprite.position.x = coord.x * this.tileWidth;
+        this.overlaySprite.position.y = coord.y * this.tileHeight;
+    };
+
+    TiledMap.prototype.overlayRefresh = function() {
+        this.removeChild(this.overlaySprite);
+        this.addChild(this.overlaySprite);
+    };
+
+    TiledMap.prototype.overlayStop = function() {
+        this.removeChild(this.overlaySprite);
+    };
+
     function TiledMap(tileWidth, tileHeight, nbTileX, nbTileY, width, height) {
         var _this = this;
         (function() {
@@ -523,14 +537,8 @@ var DrawerFactory = function() {
             var coord = data.global.clone();
             coord.x = parseInt((coord.x - _this.position.x) / _this.tileWidth);
             coord.y = parseInt((coord.y - _this.position.y) / _this.tileHeight);
-            _this.overlaySprite.position.x = coord.x * _this.tileWidth;
-            _this.overlaySprite.position.y = coord.y * _this.tileHeight;
-            _this.removeChild(_this.overlaySprite);
-            _this.addChild(_this.overlaySprite);
-        }
-
-        function overlayStop() {
-            _this.removeChild(_this.overlaySprite);
+            _this.overlayPosition(coord);
+            _this.overlayRefresh();
         }
     }
 
@@ -647,12 +655,23 @@ var DrawerFactory = function() {
         }
     };
 
+    var overlayMove = function(coord) {
+        tiledMap.overlayPosition(coord);
+        tiledMap.overlayRefresh();
+    };
+
+    var overlayStop = function() {
+        tiledMap.overlayStop();
+    };
+
     return {
         initDrawer: initDrawer,
         render: render,
         createConceptContainers: createConceptContainers,
         drawInstances: drawInstances,
-        drawInstance: drawInstance
+        drawInstance: drawInstance,
+        overlayMove: overlayMove,
+        overlayStop: overlayStop
     }
 };
 
@@ -692,7 +711,21 @@ var MapController = function(Graph, Map, Drawer) {
         selectedInstances.map(function(id) {
             return instances[id];
         });
-    })
+    });
+
+    var highlightInstance = function(instanceId, highlight) {
+        var instance = instances[instanceId];
+        if (highlight) {
+            Drawer.overlayMove(instance.coordinates);
+        }
+        else {
+            Drawer.overlayStop();
+        }
+    };
+
+    return {
+        highlightInstance: highlightInstance
+    }
 };
 
 // Init the objects needed in the controller
@@ -700,5 +733,4 @@ window.Rest = RestFactory();
 window.Graph = GraphFactory(Rest);
 window.Map = MapFactory(Rest);
 window.Drawer = DrawerFactory();
-
-MapController(Graph, Map, Drawer);
+window.MapController = MapController(Graph, Map, Drawer);

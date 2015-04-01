@@ -121,6 +121,11 @@ var ActionController = ['$scope', function($scope) {
         );
     }
 
+    $scope.highlightInstance = function(instanceId, highlight) {
+        console.log("instance : "+instanceId+" -> "+highlight);
+        MapController.highlightInstance(instanceId, highlight);
+    }
+
     /**
      * Try to delete an instance
      * @param instanceId id of the instance among those placed in the same location from the map
