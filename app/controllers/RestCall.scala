@@ -79,10 +79,13 @@ object RestCall extends Controller {
      */
     def execution(request: Request[JsValue]): Boolean = {
       val jsonRequest = Json.toJson(request.body)
+      println("request = " + jsonRequest)
+
       val actionReference = (jsonRequest \ "action").as[Long]
       val actionId = Relation.DBList.getActionIdFromRelationId(actionReference)
       val actionArguments = (jsonRequest \ "instances").as[List[Long]]
       val result = InstanceActionParser.parseAction(actionId, actionArguments)
+      println("res = "+result)
       result
     }
 

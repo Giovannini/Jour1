@@ -23,6 +23,7 @@ object InstanceActionParser {
   def parseAction(actionReference: Long, instancesId: List[Long]): Boolean = {
     Try {
       val action = getAction(actionReference)
+      println("action "+action.label)
       val arguments = getArgumentsList(action, instancesId.map(id => ParameterValue(id, "Long")))
       action.execute(arguments)
     } match {

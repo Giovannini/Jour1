@@ -81,7 +81,7 @@ object InstanceActionManager {
     nameToId += "_addToProperty" -> _addToProperty
 
     val _modifyProperty = {
-      val p_instanceID = ParameterReference("instanceID", "Long")
+      val p_instanceID = ParameterReference("instanceToModify", "Long")
       val p_propertyName = ParameterReference("propertyName", "Property")
       val p_propertyValue = ParameterReference("propertyValue", "Int")
       InstanceAction(
@@ -92,7 +92,7 @@ object InstanceActionManager {
           (
             PreconditionManager.nameToId("hasProperty"),
             Map(
-              ParameterReference("instanceID", "Long") -> p_instanceID,
+              ParameterReference("instanceToModify", "Long") -> p_instanceID,
               ParameterReference("property", "Property") -> p_propertyName
             )
           )
@@ -180,6 +180,140 @@ object InstanceActionManager {
       ).save
     }
     nameToId += "Eat" -> _actionEat
+
+    val _actionProcreate = {
+      val p_instanceThatProcreate = ParameterReference("instanceThatProcreate", "Long")
+      val p_groundWhereToProcreate = ParameterReference("groundWhereToProcreate", "Long")
+      InstanceAction(
+        0L,
+        "ACTION_PROCREATE",
+        preconditions = List(
+          (
+            PreconditionManager.nameToId("hasProperty"),
+            Map(
+              ParameterReference("instanceID", "Long") -> p_instanceThatProcreate,
+              ParameterReference("property", "Property") -> ParameterValue("Desire", "Property")
+            )
+            ),
+          (PreconditionManager.nameToId("propertyIsHigherThan"),
+          Map(
+            ParameterReference("instanceID", "Long") -> p_instanceThatProcreate,
+            ParameterReference("property", "Property") -> ParameterValue("Desire", "Property"),
+            ParameterReference("value", "Int") -> ParameterValue(10, "Int")
+          )),
+            (PreconditionManager.nameToId("isOnSameTile"),
+              Map(
+                ParameterReference("instance1ID", "Long") -> p_instanceThatProcreate,
+                ParameterReference("instance2ID", "Long") -> p_groundWhereToProcreate              )
+        )
+        ),
+        _subActions = List(
+          (
+            _modifyProperty,
+            Map(
+              ParameterReference("instanceToModify", "Long") -> p_instanceThatProcreate,
+              ParameterReference("propertyName", "Property") -> ParameterValue("Desire", "Property"),
+              ParameterReference("propertyValue", "Int") -> ParameterValue(0, "Int")
+            )
+            ),
+          (
+            _addInstanceAt,
+            Map(
+              ParameterReference("instanceToAdd", "Long") -> p_instanceThatProcreate,
+              ParameterReference("groundWhereToAddIt", "Long") -> p_groundWhereToProcreate
+            )
+            )
+        ),
+        parameters = List(
+          p_instanceThatProcreate,
+          p_groundWhereToProcreate
+        )
+      ).save
+    }
+    nameToId += "Procreate" -> _actionProcreate
+
+
+    val _actionSpread = {
+      val p_instanceThatSpread = ParameterReference("instanceThatProcreate", "Long")
+      val p_groundWhereToAddIt = ParameterReference("instanceWhereToAddIt", "Long")
+
+      InstanceAction(
+        0L,
+        "ACTION_SPREAD",
+        preconditions = List(
+          (
+            PreconditionManager.nameToId("hasProperty"),
+            Map(
+              ParameterReference("instanceID", "Long") -> p_instanceThatSpread,
+              ParameterReference("property", "Property") -> ParameterValue("DuplicationSpeed", "Property")
+            )
+            ),
+          (PreconditionManager.nameToId("propertyIsHigherThan"),
+            Map(
+              ParameterReference("instanceID", "Long") -> p_instanceThatSpread,
+              ParameterReference("property", "Property") -> ParameterValue("DuplicationSpeed", "Property"),
+              ParameterReference("value", "Int") -> ParameterValue(5, "Int")
+            )
+            ),
+          (PreconditionManager.nameToId("isNextTo"),
+            Map(
+              ParameterReference("instance1ID", "Long") -> p_instanceThatSpread,
+              ParameterReference("instance2ID", "Long") -> p_groundWhereToAddIt
+            )
+            )
+
+        ),
+        _subActions = List(
+          (
+            _modifyProperty,
+            Map(
+              ParameterReference("instanceToModify", "Long") -> p_instanceThatSpread,
+              ParameterReference("propertyName", "Property") -> ParameterValue("DuplicationSpeed", "Property"),
+              ParameterReference("propertyValue", "Int") -> ParameterValue(0, "Int")
+            )
+            ),
+          (
+            _addInstanceAt,
+            Map(
+              ParameterReference("instanceToAdd", "Long") -> p_instanceThatSpread,
+              ParameterReference("groundWhereToAddIt", "Long") -> p_groundWhereToAddIt
+            )
+            )
+        ),
+        parameters = List(
+          p_instanceThatSpread,
+          p_groundWhereToAddIt
+        )
+      ).save
+    }
+    nameToId += "Spreed" -> _actionSpread
+
+  /*  val _actionRegenerate = {
+      val p_instanceToRegenate = ParameterReference("instanceToDuplicate", "Long")
+      val p_instanceToPutOn = ParameterReference("instanceToPutOn", "Long")
+      InstanceAction(0L,
+        "ACTION_REGENERATE",
+        preconditions = List(
+          (PreconditionManager.nameToId("isNextTo"),
+            Map(
+              ParameterReference("instance1ID", "Long") -> p_instanceToDuplicate,
+              ParameterReference("instance2ID", "Long") -> p_instanceToPutOn
+            )
+            )
+        ),
+        _subActions = List(         (
+          _addInstanceAt,
+          Map(
+            ParameterReference("instanceToAdd", "Long") -> p_instanceToDuplicate,
+            ParameterReference("groundWhereToAddIt", "Long") -> p_instanceToPutOn
+          )
+          )),
+        parameters = List(
+          p_instanceToDuplicate,
+          p_instanceToPutOn
+        )
+      ).save
+    }*/
   }
 }
 

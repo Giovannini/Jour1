@@ -1,0 +1,27 @@
+@(concept: models.graph.ontology.concept.Concept, call: Call)
+@import controllers.ontology.ConceptManager
+
+<!DOCTYPE html>
+<html>
+    <head lang="en">
+        <meta charset="UTF-8">
+        <title></title>
+    </head>
+    <body>
+        <h1>Edition of concept @concept.label @concept.id</h1>
+
+        @helper.form(action = call){
+            @helper.input(ConceptManager.instanceForm("id")) { (id, name, value, args) =>
+                <input type="number" name="@name" id="@id" value="@concept.id" min="0" readonly>
+            }
+            @helper.input(ConceptManager.instanceForm("label")) { (id, name, value, args) =>
+                <input type="text" name="@name" id="@id" value="@concept.label">
+            }
+
+            @helper.input(ConceptManager.instanceForm("color")) { (id, name, value, args) =>
+                <input type="text" name="@name" id="@id" value="@concept.displayProperty">
+            }
+            <input type="submit">
+            }
+    </body>
+</html>

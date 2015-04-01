@@ -88,11 +88,12 @@ object WorldInitialisation extends Controller {
     val propertyStrength = Property("Strength", PropertyType.Int, 0).save
 
     val propertySense = Property("Sense", PropertyType.Int, 5).save
-    val propertyDuplicationSpeed = Property("DuplicationSpeed", PropertyType.Double, 5).save
+    val propertyDuplicationSpeed = Property("DuplicationSpeed", PropertyType.Double, 10).save
     val propertyWalkingDistance = Property("WalkingDistance", PropertyType.Int, 3).save
     val propertyHunger = Property("Hunger", PropertyType.Double, 5).save
     val propertyFeed = Property("Feed", PropertyType.Double, 6).save
     val propertyComfort = Property("Comfort", PropertyType.Double, 3).save
+    val propertyDesire = Property("Desire",PropertyType.Double,11).save
 
     val propertyFear = Property("Fear", PropertyType.Double, 0)
 
@@ -124,6 +125,7 @@ object WorldInitialisation extends Controller {
       List(ValuedProperty(propertyStrength, 2), ValuedProperty(propertyInstanciable, 1)),
       List(),
       DisplayProperty("#A83B36", 20))
+
     val conceptSheep = Concept("Sheep",
       _properties = List(propertySense,propertyFeed, propertyFear),
       _rules = List(ValuedProperty(propertyStrength, 2),
@@ -162,7 +164,7 @@ object WorldInitialisation extends Controller {
       List(),
       DisplayProperty("#1A1A22", 18))
     val conceptAnimal = Concept("Animal",
-      List(propertyWalkingDistance, propertyHunger, propertyFeed, propertySense),
+      List(propertyWalkingDistance, propertyHunger, propertyFeed, propertySense, propertyDesire),
       List(), List(needFood), DisplayProperty())
     val conceptBush = Concept("Bush",
       List(),
@@ -200,6 +202,9 @@ object WorldInitialisation extends Controller {
     val relationProducesId = Relation.DBList.save("ACTION_PRODUCE")
     val relationLiveOnId = Relation.DBList.save("LIVE_ON")
     val relationFear = Relation.DBList.save("MOOD_FEAR")
+    val relationProcreate = Relation.DBList.save("ACTION_PROCREATE")
+    val relationSpread = Relation.DBList.save("ACTION_SPREAD")
+
 
     println("Adding concepts to graph...")
     /*Storage of the concepts in DB*/
@@ -245,7 +250,14 @@ object WorldInitialisation extends Controller {
       NeoDAO.addRelationToDB(conceptGrass.id, relationSubtypeOfId, conceptVegetable.id) &&
       NeoDAO.addRelationToDB(conceptTree.id, relationSubtypeOfId, conceptVegetable.id) &&
       NeoDAO.addRelationToDB(conceptWater.id, relationSubtypeOfId, conceptGround.id) &&
-      NeoDAO.addRelationToDB(conceptEarth.id, relationSubtypeOfId, conceptGround.id)
+      NeoDAO.addRelationToDB(conceptEarth.id, relationSubtypeOfId, conceptGround.id) &&
+        NeoDAO.addRelationToDB(conceptMan.id, relationProcreate, conceptGround.id) &&
+        NeoDAO.addRelationToDB(conceptWolf.id, relationProcreate, conceptGround.id) &&
+        NeoDAO.addRelationToDB(conceptSheep.id, relationProcreate, conceptGround.id) &&
+        NeoDAO.addRelationToDB(conceptGrass.id, relationSpread, conceptGround.id)
+
+
+
     }
     val addLiveOnRelationsVerification = {
       NeoDAO.addRelationToDB(conceptMan.id, relationLiveOnId, conceptEarth.id) &&

@@ -76,10 +76,12 @@ object HCPrecondition {
   def hasProperty(args: Map[ParameterReference, ParameterValue]): Boolean = {
     val instanceId = args(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
     val propertyString = args(ParameterReference("property", "Property")).value.asInstanceOf[String]
+    println("prperty = "+propertyString)
 
     val sourceInstance = map.getInstanceById(instanceId)
-    val property = PropertyDAO.getByName(propertyString)
+    println("instance = "+sourceInstance.label)
 
+    val property = PropertyDAO.getByName(propertyString)
     sourceInstance.properties
       .map(_.property)
       .contains(property)
@@ -88,10 +90,9 @@ object HCPrecondition {
   def isHigherThan(args: Map[ParameterReference, ParameterValue]): Boolean = {
     val instanceId = args(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
     val propertyString = args(ParameterReference("property", "Property")).value.asInstanceOf[String]
-
     val sourceInstance = map.getInstanceById(instanceId)
     val property = PropertyDAO.getByName(propertyString)
-    val value = args(ParameterReference("value", "Int")).value.asInstanceOf[Double]
+    val value = args(ParameterReference("value", "Int")).value.asInstanceOf[String].toDouble
     val instanceValue = sourceInstance.getValueForProperty(property)
     instanceValue > value
   }

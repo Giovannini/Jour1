@@ -7,11 +7,6 @@ import models.interaction.parameter.ParameterReference
  */
 object PreconditionManager {
 
-  /* TODO: preconditions to implement
-   * See
-   * Search "Can I see an apple from there?"
-   */
-
   val nameToId: collection.mutable.Map[String, Precondition] = collection.mutable.Map.empty[String, Precondition]
 
   def initialization() = {

@@ -20,7 +20,7 @@ object HardCodedAction {
   def addInstanceAt(args: Map[ParameterReference, ParameterValue]): Unit = {
     val instanceId = args(ParameterReference("instanceToAdd", "Long")).value.asInstanceOf[Long]
     val groundWhereToAddItId = args(ParameterReference("groundWhereToAddIt", "Long")).value.asInstanceOf[Long]
-
+    println("add done")
     map.addInstance(instanceId, groundWhereToAddItId)
   }
 
@@ -44,8 +44,7 @@ object HardCodedAction {
   def modifyProperty(args: Map[ParameterReference, ParameterValue]): Unit = {
     val instanceId = args(ParameterReference("instanceToModify", "Long")).value.asInstanceOf[Long]
     val propertyString = args(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
-    val newValue = args(ParameterReference("propertyValue", "Int")).value.asInstanceOf[Double]
-
+    val newValue = args(ParameterReference("propertyValue", "Int")).value.toString.toDouble
     map.modifyProperty(instanceId, propertyString, newValue)
   }
 
