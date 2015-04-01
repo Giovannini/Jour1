@@ -23,20 +23,24 @@ libraryDependencies ++= Seq( jdbc, anorm , cache, ws,
 
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )
 
-scalacOptions ++= Seq( "-feature", "-language:reflectiveCalls",
-  "-deprecation",
+scalacOptions ++= Seq(
+  "-feature",                 //safer Scala
+  "-deprecation",             //safer Scala
   "-encoding", "UTF-8",       // yes, this is 2 args
+  "-language:reflectiveCalls",
   "-language:existentials",
   "-language:higherKinds",
-  "-language:implicitConversions"/*,
-  "-unchecked",
-  "-Xfatal-warnings",
-  "-Xlint",
-  "-Yno-adapted-args",
-  "-Ywarn-dead-code",        // N.B. doesn't work well with the ??? hole
+  "-language:implicitConversions",
+  "-unchecked",               //safer Scala
+  "-Xfatal-warnings",         //safer Scala
+  "-Xlint"/*,                 //safer Scala
+  "-Yno-adapted-args",    //Do not adapt an argument list to match the receiver
+  "-Ywarn-dead-code",        //Warn when dead code is identified
+  "-Ywarn-unused",        //Warn when local and private vals, vars, defs and types are unused
   "-Ywarn-numeric-widen",
-  "-Ywarn-value-discard",
+  "-Ywarn-value-discard", //Warn when non-Unit result expressions are unused
   "-Xfuture",
   "-Ywarn-unused-import",     // 2.11 only
+  "-Yno-import",     // Compile without importing scala.*, java.lang.* or Predef
   "-Yno-predef" */  // no automatic import of Predef (removes irritating implicits)
 )

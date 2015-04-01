@@ -20,6 +20,6 @@ object PropertyForm {
   }
 
   def unapplyForm(property: Property): Option[(String, String, Double)] = {
-    Some(property.label, property.propertyType.toString, property.defaultValue)
+    Some((property.label, property.propertyType.toString, property.defaultValue))
   }
 }

@@ -42,6 +42,6 @@ object InstanceForm {
    * @return the different parts of an instance
    */
   private def unapplyForm(instance: Instance) : Option[(Long, String, Coordinates, List[ValuedProperty], Long)] = {
-    Some(instance.id, instance.label, instance.coordinates, instance.properties, instance.concept.id)
+    Some((instance.id, instance.label, instance.coordinates, instance.properties, instance.concept.id))
   }
 }

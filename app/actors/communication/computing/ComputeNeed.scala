@@ -1,4 +1,4 @@
-package actors.Communication.computing
+package actors.communication.computing
 
 import actors.Computing
 import models.graph.ontology.Instance

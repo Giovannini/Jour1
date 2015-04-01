@@ -45,11 +45,11 @@ object InstanceActionForm {
 
   def unapplySubaction(form: (InstanceAction, Map[ParameterReference, Parameter])): Option[(Long, List[Parameter])] = {
     val precondition = form._1
-    val parameters = form._2
+    val parameters = form._2.values.toList
 
-    Some(
+    Some((
       precondition.id,
-      parameters.unzip._2.toList
-    )
+      parameters
+    ))
   }
 }

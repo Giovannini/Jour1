@@ -26,13 +26,13 @@ object PreconditionForm {
   }
 
   def unapplySubcondition(form: (Precondition, Map[ParameterReference, Parameter])): Option[(Long, List[Parameter])] = {
-    val precondition = form._1
-    val parameters = form._2
+    val preconditionId: Long = form._1.id
+    val parameters: List[Parameter] = form._2.values.toList
 
-    Some(
-      precondition.id,
-      parameters.unzip._2.toList
-    )
+    Some((
+      preconditionId,
+      parameters
+    ))
   }
 
 }

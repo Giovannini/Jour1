@@ -23,6 +23,6 @@ object NeedForm {
   }
 
   def unapplyForm(need: Need): Option[(String, Property, Double, List[ConsequenceStep], List[MeanOfSatisfaction])] = {
-    Some(need.label, need.affectedProperty, need.priority, need.consequencesSteps, need.meansOfSatisfaction)
+    Some((need.label, need.affectedProperty, need.priority, need.consequencesSteps, need.meansOfSatisfaction))
   }
 }

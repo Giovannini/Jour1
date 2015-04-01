@@ -195,17 +195,6 @@ object WorldInit {
   }
 
   /**
-   * Get id list of concept to instanciate which are not grounds
-   * @author Simon Roncière
-   * @param grounds list of grounds
-   * @param concepts list of instanciable concept
-   * @return list concept to instanciate
-   */
-  def getInstance(grounds: List[Int], concepts: List[Concept]): List[Long] = {
-    concepts.map(_.id) diff grounds
-  }
-
-  /**
    * get number of tile to put an instance of concept
    * @author Simon Ronciere
    * @param instanciableConcepts list of id to instanciate, 
