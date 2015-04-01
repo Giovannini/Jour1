@@ -51,7 +51,11 @@ object WorldInitialisation extends Controller {
     map
   }
 
-  def initGraph: Action[AnyContent] = {
+  /**
+   * Clear all databases and redirect to the map for a new world
+   * @author
+   */
+  def initialization: Action[AnyContent] = {
     Action {
       val result = NeoDAO.clearDB()
       //this is working
@@ -90,6 +94,8 @@ object WorldInitialisation extends Controller {
     val propertyFeed = Property("Feed", PropertyType.Double, 6).save
     val propertyComfort = Property("Comfort", PropertyType.Double, 3).save
 
+    val propertyFear = Property("Fear", PropertyType.Double, 0)
+
     PreconditionManager.initialization()
     InstanceActionManager.initialization()
 
@@ -118,10 +124,9 @@ object WorldInitialisation extends Controller {
       List(ValuedProperty(propertyStrength, 2), ValuedProperty(propertyInstanciable, 1)),
       List(),
       DisplayProperty("#A83B36", 20))
-
     val conceptSheep = Concept("Sheep",
-      List(propertySense,propertyFeed),
-      List(ValuedProperty(propertyStrength, 2),
+      _properties = List(propertySense,propertyFeed, propertyFear),
+      _rules = List(ValuedProperty(propertyStrength, 2),
         ValuedProperty(propertyInstanciable, 1)),
       List(),
       DisplayProperty("#EEE9D6", 16)
@@ -194,6 +199,7 @@ object WorldInitialisation extends Controller {
     val relationFleeId = Relation.DBList.save("ACTION_FLEE")
     val relationProducesId = Relation.DBList.save("ACTION_PRODUCE")
     val relationLiveOnId = Relation.DBList.save("LIVE_ON")
+    val relationFear = Relation.DBList.save("MOOD_FEAR")
 
     println("Adding concepts to graph...")
     /*Storage of the concepts in DB*/
@@ -221,6 +227,7 @@ object WorldInitialisation extends Controller {
       NeoDAO.addRelationToDB(conceptAnimal.id, relationMoveId, conceptEarth.id) &&
       NeoDAO.addRelationToDB(conceptSheep.id, relationSubtypeOfId, conceptAnimal.id) &&
       NeoDAO.addRelationToDB(conceptSheep.id, relationFleeId, conceptPredator.id) &&
+        NeoDAO.addRelationToDB(conceptSheep.id, relationFear, conceptPredator.id) &&
       NeoDAO.addRelationToDB(conceptSheep.id, relationEatId, conceptEdible.id) &&
       NeoDAO.addRelationToDB(conceptPredator.id, relationEatId, conceptSheep.id) &&
       NeoDAO.addRelationToDB(conceptPredator.id, relationSubtypeOfId, conceptAnimal.id) &&

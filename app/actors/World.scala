@@ -57,7 +57,7 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
       launchComputation(launcher)
     case ResultAction(logList) =>
       nrOfResults += 1
-      logs ::= logList
+      logs = logs ::: logList
       if (nrOfResults == nrOfInstances) {
         logs.foreach(_.execute())
         val end: Long = System.currentTimeMillis()
@@ -69,7 +69,7 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
   /**
    * Launch the computation implied by a given launcher
    * @author Thomas GIOVANNINI
-   * @param launcher containing the informations needed to do the computation
+   * @param launcher containing the information needed to do the computation
    */
   private def launchComputation(launcher: Launcher): Unit = {
     val instancesWithNeeds = getInstancesWithNeeds

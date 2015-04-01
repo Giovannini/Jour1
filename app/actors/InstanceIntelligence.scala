@@ -1,7 +1,7 @@
 package actors
 
 import actors.communication.ResultAction
-import actors.communication.computing.{ComputeNeed, ComputeConsequencies, ComputeAction}
+import actors.communication.computing.{ComputeAction, ComputePropertiesUpdate}
 import akka.actor.Actor
 import models.graph.ontology.Instance
 import models.graph.ontology.concept.Concept
@@ -10,16 +10,6 @@ import models.interaction.LogInteraction
 import models.interaction.action.InstanceActionParser
 
 class InstanceIntelligence extends Actor {
-
-  def getActionFor(instance: Instance, sensedInstances: List[Instance]): List[LogInteraction] = {
-    val (action, destination) = instance.selectAction(sensedInstances)
-    if (!action.isError) {
-      //        println(instance.label + instance.id + " is doing " + action.label)
-      InstanceActionParser.parseActionForLog(action.id, List(instance.id, destination.id))
-    } else {
-      List()
-    }
-  }
 
   def updatePropertiesFromEnvironment(instance: Instance, environment: List[Instance]): List[LogInteraction] = {
     /**
@@ -39,27 +29,46 @@ class InstanceIntelligence extends Actor {
      * @return the label of the property
      */
     def getPropertyNameFromMood(moodRelation: Relation): String = {
-      moodRelation.label
-        .drop(5) //MOOD_ has length
-        .toLowerCase
-        .capitalize
+      moodRelation.label  //MOOD_SCARED
+        .drop(5)          // SCARED
+        .toLowerCase      // scared
+        .capitalize       // Scared
+    }
+
+    /**
+     * Create a LogInteraction making a property modification from a relation by sensing the environment of smart instance
+     * @author Thomas GIOVANNINI
+     * @param tuple containing the relation and the destination concept
+     * @return a LogInteraction
+     */
+    def logModification(tuple: (Relation, Concept)): LogInteraction = {
+      val instanceId = instance.id
+      val propertyName = getPropertyNameFromMood(tuple._1)
+      val propertyValue = countMoodSource(tuple._2)
+      println("Creating log for relation: " + instanceId + " - " + propertyName + ": " + propertyValue)
+      LogInteraction.createModifyLog(instanceId, propertyName, propertyValue)
     }
 
     instance.concept
       .getMoodRelations
-      .map { tuple =>
-      val instanceId = instance.id
-      val propertyName = getPropertyNameFromMood(tuple._1)
-      val propertyValue = countMoodSource(tuple._2)
-      LogInteraction.createModifyLog(instanceId, propertyName, propertyValue)
+      .map(logModification)
+  }
+
+
+  def getActionFor(instance: Instance, sensedInstances: List[Instance]): List[LogInteraction] = {
+    val (action, destination) = instance.selectAction(sensedInstances)
+    if (!action.isError) {
+      //        println(instance.label + instance.id + " is doing " + action.label)
+      InstanceActionParser.parseActionForLog(action.id, List(instance.id, destination.id))
+    } else {
+      List()
     }
   }
 
   override def receive: Receive = {
-    case ComputeConsequencies(instance) =>
-      sender ! ResultAction(instance.applyConsequencies())
-    case ComputeNeed(instance, sensedInstances) => //TODO
-      sender ! ResultAction(updatePropertiesFromEnvironment(instance, sensedInstances))
+    case ComputePropertiesUpdate(instance, sensedInstances) =>
+      val logs = instance.applyConsequencies() ++ updatePropertiesFromEnvironment(instance, sensedInstances)
+      sender ! ResultAction(logs)
     case ComputeAction(instance, sensedInstances) =>
       sender ! ResultAction(getActionFor(instance, sensedInstances))
   }

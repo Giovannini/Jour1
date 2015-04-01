@@ -1,6 +1,6 @@
 package models
 
-import actors.communication.launcher.NewTurn
+import actors.communication.launcher.{ProcessProperties, NewTurn}
 import actors.{Listener, World}
 import akka.actor.{ActorSystem, Props}
 
@@ -22,8 +22,7 @@ object Intelligence {
       name = "master")
 
     // start the calculation
-//    master ! ComputeConsequencies
-//    master ! EvaluateNeeds
+    master ! ProcessProperties
     master ! NewTurn
 
   }
