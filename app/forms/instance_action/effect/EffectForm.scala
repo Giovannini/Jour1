@@ -39,12 +39,12 @@ object EffectForm {
   }
 
   def unapplySubaction(form: (Effect, Map[ParameterReference, Parameter])): Option[(Long, List[Parameter])] = {
-    val precondition = form._1
-    val parameters = form._2
+    val preconditionId = form._1.id
+    val parameters = form._2.values.toList
 
-    Some(
-      precondition.id,
-      parameters.unzip._2.toList
-    )
+    Some((
+      preconditionId,
+      parameters
+    ))
   }
 }

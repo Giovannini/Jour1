@@ -1,6 +1,6 @@
-package actors.Communication.launcher
+package actors.communication.launcher
 
-import actors.Communication.computing.ComputeNeed
+import actors.communication.computing.ComputeNeed
 import actors.{Computing, Launcher}
 import models.graph.ontology.Instance
 

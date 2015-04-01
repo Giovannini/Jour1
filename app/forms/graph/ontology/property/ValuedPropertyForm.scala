@@ -20,6 +20,6 @@ object ValuedPropertyForm {
   }
 
   def unapplyValueForm(valuedProperty: ValuedProperty): Option[(Property, Double)] = {
-    Some(valuedProperty.property, valuedProperty.value)
+    Some((valuedProperty.property, valuedProperty.value))
   }
 }

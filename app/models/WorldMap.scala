@@ -24,7 +24,6 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
     instanceIdCounter = 0
   }
 
-
   private var instanceIdCounter = 0
 
   /**

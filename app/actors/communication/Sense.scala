@@ -1,4 +1,4 @@
-package actors.Communication
+package actors.communication
 
 import actors.WorldCommunication
 import models.graph.ontology.Instance

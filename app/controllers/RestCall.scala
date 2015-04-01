@@ -1,6 +1,6 @@
 package controllers
 
-import actors.Intelligence
+import models.Intelligence
 import models.graph.ontology.Instance
 import models.graph.ontology.concept.{Concept, ConceptDAO}
 import models.graph.ontology.relation.Relation

@@ -203,14 +203,14 @@ case class Instance(
     def retrieveBestAction(possibleActions: List[MeanOfSatisfaction])
     : (InstanceAction, Instance) = possibleActions match {
       case head :: tail =>
-        println(this.id + "\tTesting action: " + head.action.label)
+//        println(this.id + "\tTesting action: " + head.action.label)
         val destinationsList = destinationList(head)
         if (destinationsList.nonEmpty) {
-          println(this.id + "\t" + head.action.label + " - " + destinationsList.head.concept.label + " good!")
+//          println(this.id + "\t" + head.action.label + " - " + destinationsList.head.concept.label + " good!")
           (head.action, destinationsList.head)
         }
         else {
-          println(this.id + "\t\t" + head.action.label + " - " + head.destinationConcept.label + " failed")
+//          println(this.id + "\t\t" + head.action.label + " - " + head.destinationConcept.label + " failed")
           retrieveBestAction(tail)
         }
       case _ =>
