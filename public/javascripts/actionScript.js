@@ -119,12 +119,17 @@ var ActionController = ['$scope', function($scope) {
                 $scope.actionDone = true;
             }
         );
-    }
+    };
 
+    /**
+     * Create an overlay on an instance
+     * Used by example when an instance can do an action on different others instances, on the hover of one of this other instance in the list
+     * @param instanceId id of the instance
+     * @param highlight true to create the overlay, false to destroy it
+     */
     $scope.highlightInstance = function(instanceId, highlight) {
-        console.log("instance : "+instanceId+" -> "+highlight);
         MapController.highlightInstance(instanceId, highlight);
-    }
+    };
 
     /**
      * Try to delete an instance
@@ -257,7 +262,6 @@ var EditInstanceCtrl = ['$scope', '$routeParams', 'EditInstanceFactory', functio
     // Send the form to the server
     $scope.submitInstance = function() {
         EditInstanceFactory.setInstance($scope.instance);
-        console.log($scope.instance);
         EditInstanceFactory.submitInstance(baseUrl+'instances/update')();
     };
 }];

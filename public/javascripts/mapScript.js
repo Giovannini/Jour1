@@ -396,16 +396,28 @@ var DrawerFactory = function() {
     TiledMap.prototype = new PIXI.DisplayObjectContainer();
     TiledMap.prototype.constructor = TiledMap;
 
+    /**
+     * Change the place where we want the overlay
+     * To display it, we need to refresh the view with overlayRefresh
+     * @param coord new place of the overlay
+     */
     TiledMap.prototype.overlayPosition = function(coord) {
         this.overlaySprite.position.x = coord.x * this.tileWidth;
         this.overlaySprite.position.y = coord.y * this.tileHeight;
     };
 
+    /**
+     * Destroy the old overlay on the map and create a new overlay at the position that we know
+     * This position can be changed with overlayPosition
+     */
     TiledMap.prototype.overlayRefresh = function() {
         this.removeChild(this.overlaySprite);
         this.addChild(this.overlaySprite);
     };
 
+    /**
+     * Destroy the overlay on the map
+     */
     TiledMap.prototype.overlayStop = function() {
         this.removeChild(this.overlaySprite);
     };
@@ -533,6 +545,10 @@ var DrawerFactory = function() {
                     tileY * _this.tileHeight + _this.position.y > _this.maxHeight
         }
 
+        /**
+         * Move the overlay when user's mouse is over the map
+         * @param data instance which needs the overlay
+         */
         function overlayMove (data) {
             var coord = data.global.clone();
             coord.x = parseInt((coord.x - _this.position.x) / _this.tileWidth);
@@ -713,6 +729,11 @@ var MapController = function(Graph, Map, Drawer) {
         });
     });
 
+    /**
+     * Create an overlay on an instance
+     * @param instanceId id of the instance
+     * @param highlight true to create the overlay, false to destroy it
+     */
     var highlightInstance = function(instanceId, highlight) {
         var instance = instances[instanceId];
         if (highlight) {
