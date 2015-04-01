@@ -28,7 +28,11 @@
                             <div class="" ng-show="showChoice">
                                 <ul>
                                     <li ng-repeat="choice in choices">
-                                        <a ng-click="sendAction(instance.id, actionId, choice.id)">{{ choice.label }} ({{ choice.coordinates.x}}, {{ choice.coordinates.y}})</a>
+                                        <a ng-click="sendAction(instance.id, actionId, choice.id)"
+                                           ng-mouseenter="highlightInstance(choice.id, true)"
+                                           ng-mouseleave="highlightInstance(choice.id, false)" >
+                                            {{ choice.label }} ({{ choice.coordinates.x}}, {{ choice.coordinates.y}})
+                                        </a>
                                     </li>
                                     <li ng-show="choices.length == 0">No instance</li>
                                 </ul>

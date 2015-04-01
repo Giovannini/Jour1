@@ -6,7 +6,7 @@ import controllers.Application
 import models.graph.NeoDAO
 import models.graph.custom_types.Statement
 import models.graph.ontology.concept.Concept
-import models.interaction.action.{InstanceActionDAO, InstanceAction}
+import models.interaction.action.{InstanceAction, InstanceActionDAO}
 import org.anormcypher.CypherResultRow
 import play.api.Play.current
 import play.api.db.DB

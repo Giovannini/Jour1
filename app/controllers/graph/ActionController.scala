@@ -1,7 +1,7 @@
 package controllers.graph
 
 import forms.instance_action.action.InstanceActionForm
-import models.interaction.action.{InstanceActionDAO, InstanceAction}
+import models.interaction.action.{InstanceAction, InstanceActionDAO}
 import play.api.libs.json.Json
 import play.api.mvc._
 
