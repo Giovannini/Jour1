@@ -2,7 +2,6 @@ package models.interaction.action
 
 import controllers.Application
 import models.interaction.InteractionDAO
-import models.interaction.action.InstanceAction
 import models.interaction.parameter._
 import models.interaction.precondition.PreconditionManager
 

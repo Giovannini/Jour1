@@ -3,10 +3,9 @@ package models.interaction.action
 import anorm.SqlParser._
 import anorm.{RowParser, ~}
 import controllers.Application
-import models.interaction.action.InstanceAction
 import models.interaction.{InteractionDAO, InteractionStatement}
-import play.api.db.DB
 import play.api.Play.current
+import play.api.db.DB
 
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
