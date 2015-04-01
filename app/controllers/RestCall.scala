@@ -3,7 +3,7 @@ package controllers
 import models.Intelligence
 import models.graph.ontology.Instance
 import models.graph.ontology.concept.{Concept, ConceptDAO}
-import models.graph.ontology.relation.Relation
+import models.graph.ontology.relation.{RelationDAO, Relation}
 import models.interaction.action.{InstanceActionParser, InstanceAction}
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, Controller, Request}
@@ -79,14 +79,10 @@ object RestCall extends Controller {
      */
     def execution(request: Request[JsValue]): Boolean = {
       val jsonRequest = Json.toJson(request.body)
-      println("request = " + jsonRequest)
-
       val actionReference = (jsonRequest \ "action").as[Long]
-      val actionId = Relation.DBList.getActionIdFromRelationId(actionReference)
+      val actionId = RelationDAO.getActionIdFromRelationId(actionReference)
       val actionArguments = (jsonRequest \ "instances").as[List[Long]]
-      val result = InstanceActionParser.parseAction(actionId, actionArguments)
-      println("res = "+result)
-      result
+      InstanceActionParser.parseAction(actionId, actionArguments)
     }
 
     val t1 = System.currentTimeMillis()
@@ -106,7 +102,7 @@ object RestCall extends Controller {
   def getPossibleDestinationOfAction(initInstanceId: Long, relationId: Long, conceptId: Long)
   : Action[AnyContent] = Action {
     val sourceInstance = Application.map.getInstanceById(initInstanceId)
-    val actionID = Relation.DBList.getActionIdFromRelationId(relationId)
+    val actionID = RelationDAO.getActionIdFromRelationId(relationId)
     val action = InstanceActionParser.getAction(actionID)
     val destinationInstancesList = Application.map.getInstancesOf(conceptId)
     if (sourceInstance == Instance.error || action == InstanceAction.error){

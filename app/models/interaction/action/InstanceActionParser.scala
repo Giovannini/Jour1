@@ -23,7 +23,6 @@ object InstanceActionParser {
   def parseAction(actionReference: Long, instancesId: List[Long]): Boolean = {
     Try {
       val action = getAction(actionReference)
-      println("action "+action.label)
       val arguments = getArgumentsList(action, instancesId.map(id => ParameterValue(id, "Long")))
       action.execute(arguments)
     } match {
@@ -52,13 +51,12 @@ object InstanceActionParser {
   /**
    * Parse an action from client-side and execute it.
    * @author Thomas GIOVANNINI
-   * @param actionReference the reference of the action, its id
+   * @param action the reference of the action, its id
    * @param instancesId the instances arguments of the action
    * @return true if the execution went well
    *         false else
    */
-  def parseActionForLog(actionReference: Long, instancesId: List[Long]): List[LogInteraction] = {
-    val action = retrieveAction(actionReference)
+  def parseActionForLog(action: InstanceAction, instancesId: List[Long]): List[LogInteraction] = {
     if (action.isError) {
       println("Action not found.")
       List()

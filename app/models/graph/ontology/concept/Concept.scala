@@ -5,7 +5,7 @@ import models.graph.custom_types.DisplayProperty
 import models.graph.ontology.ValuedProperty
 import models.graph.ontology.concept.need.{Need, NeedDAO}
 import models.graph.ontology.property.{Property, PropertyDAO}
-import models.graph.ontology.relation.Relation
+import models.graph.ontology.relation.{RelationDAO, Relation}
 import models.interaction.action.InstanceAction
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
@@ -23,17 +23,19 @@ case class Concept(
   private val _rules: List[ValuedProperty],
   private val _needs: List[Need],
   displayProperty: DisplayProperty) {
-  require(label.matches("^[A-Z][A-Za-z0-9_ ]*$"))
 
+
+  require(label.matches("^[A-Z][A-Za-z0-9_ ]*$"))
   /**
    * Retrieve the properties of a Concept but also the one from its parents
    * @author Thomas GIOVANNINI
    */
   lazy val parents: List[Concept] = getParents
+
+  lazy val descendance: List[Concept] = getDescendance
   lazy val properties: List[Property] = (_properties ::: parents.flatMap(_.properties)).distinct
   lazy val rules: List[ValuedProperty] = ValuedProperty.distinctProperties(_rules ::: parents.flatMap(_.rules))
   lazy val needs: List[Need] = (_needs ::: parents.flatMap(_.needs)).distinct
-
   val id: Long = hashCode
 
   /**
@@ -44,6 +46,8 @@ case class Concept(
   override def hashCode = {
     label.hashCode + "CONCEPT".hashCode()
   }
+
+  def simplify: Concept = Concept(this.label, List(), List(), List(), this.displayProperty)
 
   /**
    * Parse a Concept to Json
@@ -109,7 +113,7 @@ case class Concept(
    * @author Thomas GIOVANNINI
    * @return the list of parent concepts
    */
-  def getParents: List[Concept] = {
+  private def getParents: List[Concept] = {
     ConceptDAO.getParents(id)
   }
 
@@ -118,7 +122,7 @@ case class Concept(
    * @author Thomas GIOVANNINI
    * @return all children of the concept and their children
    */
-  def getDescendance: List[Concept] = {
+  private def getDescendance: List[Concept] = {
     ConceptDAO.getChildren(id).flatMap(concept => concept :: concept.getDescendance)
   }
 
@@ -127,7 +131,7 @@ case class Concept(
   }
 
   def isSubConceptOf(concept: Concept): Boolean = {
-    (this :: getParents).contains(concept)
+    (this :: parents).contains(concept)
   }
 
   /**
@@ -139,7 +143,7 @@ case class Concept(
     ConceptDAO.getReachableRelations(id)
       .groupBy(_._1)
       .map(tuple => (
-        Relation.DBList.getActionFromRelationId(tuple._1.id),
+        RelationDAO.getActionFromRelationId(tuple._1.id),
         tuple._2.unzip._2.flatMap(concept => concept :: concept.getDescendance)
       ))
   }

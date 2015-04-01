@@ -15,7 +15,7 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
   val start: Long = System.currentTimeMillis
 
   val workerRouter = context.actorOf(
-    Props[InstanceIntelligence].withRouter(RoundRobinPool(nrOfWorkers)), name = "workerRouter")
+    Props[SmartInstance].withRouter(RoundRobinPool(nrOfWorkers)), name = "workerRouter")
 
   /**
    * Retrieve all instances that have needs from the application map
@@ -74,7 +74,7 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
   private def launchComputation(launcher: Launcher): Unit = {
     val instancesWithNeeds = getInstancesWithNeeds
     setNumberOfInstancesToCompute(instancesWithNeeds.length)
-    println(launcher.message + nrOfInstances + " instances.")
+//    println(launcher.message + nrOfInstances + " instances.")
     for (instance <- instancesWithNeeds) {
       val environment = getEnvironmentOf(instance)
       workerRouter ! launcher.computation(instance, environment)

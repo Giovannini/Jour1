@@ -20,7 +20,6 @@ object HardCodedAction {
   def addInstanceAt(args: Map[ParameterReference, ParameterValue]): Unit = {
     val instanceId = args(ParameterReference("instanceToAdd", "Long")).value.asInstanceOf[Long]
     val groundWhereToAddItId = args(ParameterReference("groundWhereToAddIt", "Long")).value.asInstanceOf[Long]
-    println("add done")
     map.addInstance(instanceId, groundWhereToAddItId)
   }
 

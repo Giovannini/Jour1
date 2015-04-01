@@ -1,10 +1,10 @@
 package controllers.ontology
 
 import models.graph.NeoDAO
-import models.graph.ontology.relation.Relation
+import models.graph.ontology.relation.RelationDAO
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.mvc.{AnyContent, Action, Controller}
+import play.api.mvc.{Action, AnyContent, Controller}
 
 /**
  * Object to create, delete and modify relations of the graph
@@ -53,7 +53,7 @@ object RelationManager extends Controller{
     def doCreate(form: (Int, String, String, Int, Boolean)): Boolean = {
       val concept1_id = form._1
       val relation = { if (form._3 == "") form._2 else form._3 }
-      val relationID = Relation.DBList.save(relation)
+      val relationID = RelationDAO.save(relation)
       val concept2_id = form._4
       NeoDAO.addRelationToDB(concept1_id, relationID, concept2_id)
     }

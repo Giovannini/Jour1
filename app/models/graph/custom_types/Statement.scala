@@ -3,7 +3,7 @@ package models.graph.custom_types
 import models.graph.ontology._
 import models.graph.ontology.concept.Concept
 import models.graph.ontology.property.Property
-import models.graph.ontology.relation.Relation
+import models.graph.ontology.relation.RelationDAO
 import org.anormcypher.{Cypher, CypherStatement}
 
 /**
@@ -19,11 +19,7 @@ object Statement {
     """
     MATCH n
     WHERE n.type = "CONCEPT"
-    RETURN  n.label as concept_label,
-            n.properties as concept_prop,
-            n.rules as concept_rules,
-            n.needs as concept_needs,
-            n.display as concept_display
+    RETURN  n.id as concept_id
     """
   )
 
@@ -223,12 +219,7 @@ object Statement {
     Cypher("""
              |MATCH (n1 {id: {id}})-[r]->(n2)
              |RETURN type(r) as rel_type,
-             |       n2.label as concept_label,
-             |       n2.properties as concept_prop,
-             |       n2.type as node_type,
-             |       n2.needs as concept_needs,
-             |       n2.rules as concept_rules,
-             |       n2.display as concept_display
+             |       n2.id as concept_id
            """.stripMargin)
       .on("id" -> conceptId)
   }
@@ -243,12 +234,7 @@ object Statement {
     Cypher("""
              |MATCH (n1 {id: {id}})<-[r]-(n2)
              |RETURN type(r) as rel_type,
-             |       n2.label as concept_label,
-             |       n2.properties as concept_prop,
-             |       n2.type as node_type,
-             |       n2.rules as concept_rules,
-             |       n2.needs as concept_needs,
-             |       n2.display as concept_display
+             |       n2.id as concept_id
            """.stripMargin)
       .on("id" -> conceptId)
   }
@@ -260,15 +246,11 @@ object Statement {
    * @return a cypher statement
    */
   def getParentConcepts(conceptId: Long): CypherStatement = {
-    val relationSubtypeName = Relation.DBList.getByName("SUBTYPE_OF")
+    val relationSubtypeName = RelationDAO.getByName("SUBTYPE_OF")
     Cypher("""
         |MATCH (n1 {id: {id}})-[r]->(n2)
         |WHERE type(r)={relationSubtype}
-        |RETURN n2.label as concept_label,
-        |       n2.properties as concept_prop,
-        |       n2.rules as concept_rules,
-        |       n2.needs as concept_needs,
-        |       n2.display as concept_display
+        |RETURN n2.id as concept_id
       """.stripMargin)
       .on("id" -> conceptId, "relationSubtype" -> ("R_" + relationSubtypeName.id))
   }
@@ -280,15 +262,11 @@ object Statement {
    * @return a cypher statement
    */
   def   getChildrenConcepts(conceptId: Long): CypherStatement = {
-    val relationSubtypeName = Relation.DBList.getByName("SUBTYPE_OF")
+    val relationSubtypeName = RelationDAO.getByName("SUBTYPE_OF")
     Cypher("""
         |MATCH (n1 {id: {id}})<-[r]-(n2)
         |WHERE type(r)={relationSubtype}
-        |RETURN n2.label as concept_label,
-        |       n2.properties as concept_prop,
-        |       n2.rules as concept_rules,
-        |       n2.needs as concept_needs,
-        |       n2.display as concept_display
+        |RETURN n2.id as concept_id
       """.stripMargin)
       .on("id" -> conceptId, "relationSubtype" -> ("R_" + relationSubtypeName.id))
   }

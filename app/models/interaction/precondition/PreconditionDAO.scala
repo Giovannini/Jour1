@@ -16,6 +16,8 @@ object PreconditionDAO {
 
   implicit val connection = Application.connection
 
+  private var mapping = collection.mutable.Map.empty[Long, Precondition]
+
   /**
     * Parse rule to interact with database
    * @author Aurélie LORGEOUX
@@ -76,11 +78,15 @@ object PreconditionDAO {
    * @return precondition identified by id
    */
   def getById(id: Long): Precondition = {
-    DB.withConnection { implicit connection =>
-      val statement = PreconditionStatement.getById(id)
-      val maybePrecondition = statement.as(preconditionParser.singleOpt)
-      maybePrecondition.getOrElse(Precondition.error)
-    }
+    mapping.getOrElse(id, {
+      DB.withConnection { implicit connection =>
+        val statement = PreconditionStatement.getById(id)
+        val precondition = statement.as(preconditionParser.singleOpt)
+          .getOrElse(Precondition.error)
+        if(precondition != Precondition.error) mapping += id -> precondition
+        precondition
+      }
+    })
   }
 
   /**

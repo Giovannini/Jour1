@@ -51,17 +51,7 @@ object ConceptDAO {
   }
 
   def parseSimplifiedRow(row: CypherResultRow): Concept = {
-    Try {
-      val label = row[String]("concept_label")
-      val display = DisplayProperty.parseString(row[String]("concept_display"))
-      Concept(label, List(), List(), List(), display)
-    } match {
-      case Success(concept) => concept
-      case Failure(e) =>
-        println("Error while parsing row for a concept.")
-        println(e)
-        Concept.error
-    }
+    parseRow(row).simplify
   }
 
   /**
@@ -107,7 +97,7 @@ object ConceptDAO {
    */
   def getAll: List[Concept] = {
     Statement.getAllConcepts.apply()
-      .map(ConceptDAO.parseRow)
+      .map(row => ConceptDAO.getById(row[Long]("concept_id")))
       .toList
   }
 
@@ -122,18 +112,15 @@ object ConceptDAO {
    ########################*/
 
   /**
-   * Add a concept into the DB.
-   * @author Thomas GIOVANNINI
+   * Add a concept into the DB if it wasn't in it yet
    * @author Julien Pradet
    * @param concept concept to write into the DB
    * @return true if the concept was correctly added
    *         false else
-   *
-   *         Edit JP : The function now checks if the concept already exists
    */
   def addConceptToDB(concept: Concept): Boolean = {
     getById(concept.id) == Concept.error &&
-      Statement.createConcept(concept).execute()
+    Statement.createConcept(concept).execute()
   }
 
   /**
@@ -145,8 +132,6 @@ object ConceptDAO {
    */
   def updateConcept(originalConcept: Concept, concept: Concept): Concept = {
     val statement = Statement.updateConcept(originalConcept, concept)
-    println(statement.toString)
-    println()
     val cypherResultRowStream = statement.apply
     if (cypherResultRowStream.nonEmpty) {
       ConceptDAO.parseRow(cypherResultRowStream.head)
@@ -180,8 +165,11 @@ object ConceptDAO {
   def getRelationsFrom(conceptId: Long): List[(Relation, Concept)] = {
     Statement.getRelationsFrom(conceptId)
       .apply
-      .filter(ConceptDAO.noInstance)
-      .map(row => (Relation.DBGraph.parseRow(row), ConceptDAO.parseRow(row)))
+      .map { row =>
+        val relation = Relation.DBGraph.parseRow(row)
+        val concept = ConceptDAO.getById(row[Long]("concept_id"))
+        (relation, concept)
+      }
       .toList
   }
 
@@ -195,8 +183,11 @@ object ConceptDAO {
     Statement.getRelationsTo(conceptId)
       .apply
       .toList
-      .filter(ConceptDAO.noInstance)
-      .map { row => (Relation.DBGraph.parseRow(row), ConceptDAO.parseRow(row)) }
+      .map { row =>
+        val relation = Relation.DBGraph.parseRow(row)
+        val concept = ConceptDAO.getById(row[Long]("concept_id"))
+        (relation, concept)
+      }
   }
 
   /**
@@ -208,7 +199,7 @@ object ConceptDAO {
   def getParents(conceptId: Long): List[Concept] = {
     val statement = Statement.getParentConcepts(conceptId)
     statement.apply
-      .map(ConceptDAO.parseRow)
+      .map(row => ConceptDAO.getById(row[Long]("concept_id")))
       .toList
   }
 
@@ -221,7 +212,7 @@ object ConceptDAO {
   def getChildren(conceptId: Long): List[Concept] = {
     val statement = Statement.getChildrenConcepts(conceptId)
     statement.apply
-      .map(ConceptDAO.parseRow)
+      .map(row => ConceptDAO.getById(row[Long]("concept_id")))
       .toList
   }
 
@@ -315,30 +306,17 @@ object ConceptDAO {
    */
   def getReachableRelations(conceptId: Long): List[(Relation, Concept)] = {
     val conceptRelations = getRelationsFrom(conceptId)
-    val parentsRelations =
-      getParents(conceptId).flatMap(getReachableRelations)
+    val parentsRelations = ConceptDAO.getById(conceptId)
+      .parents
+      .flatMap(getReachableRelations)
     conceptRelations ::: parentsRelations
   }
+
   /** SUCRE
-   * Method to retrieve all the possible actions for a given concept
-   * @author Thomas GIOVANNINI
-   * @param concept the concept
-   * @return a list of relations and concepts
-   */
-  def getReachableRelations(concept: Concept): List[(Relation, Concept)] =getReachableRelations(concept.id)
-
-  /*########################
-      Predicates
-   ########################*/
-
-  /**
-   * Method to know if a row represents an instance or not
-   * @author Thomas GIOVANNINI
-   * @param row to test
-   * @return true if the row doesn't represent an instance
-   *         false else
-   */
-  def noInstance(row: CypherResultRow): Boolean = {
-    row[String]("node_type") != "INSTANCE"
-  }
+    * Method to retrieve all the possible actions for a given concept
+    * @author Thomas GIOVANNINI
+    * @param concept the concept
+    * @return a list of relations and concepts
+    */
+  def getReachableRelations(concept: Concept): List[(Relation, Concept)] = getReachableRelations(concept.id)
 }

@@ -67,8 +67,6 @@ case class InstanceAction(
    * @return a list of instances under JSON format
    */
   def getDestinationList(sourceInstance: Instance, instances: List[Instance]): List[Instance] = {
-    //TODO problem: only checking preconditions of the action but none of the subactions
-    //println(sourceInstance.id + " destinations: " + (preconditions ++ subConditions).map(_._1.label).mkString(", "))
     val result = (preconditions ++ subConditions)
       .map(_._1.instancesThatFill(sourceInstance, instances))
       .foldRight(instances.toSet)(_ intersect _)

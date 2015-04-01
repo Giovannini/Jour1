@@ -1,7 +1,7 @@
 package actors
 
 import actors.communication.ResultAction
-import actors.communication.computing.{ComputeAction, ComputePropertiesUpdate}
+import actors.communication.computing.ComputeAction
 import akka.actor.Actor
 import models.graph.ontology.Instance
 import models.graph.ontology.concept.Concept
@@ -9,7 +9,7 @@ import models.graph.ontology.relation.Relation
 import models.interaction.LogInteraction
 import models.interaction.action.InstanceActionParser
 
-class InstanceIntelligence extends Actor {
+class SmartInstance extends Actor {
 
   def updatePropertiesFromEnvironment(instance: Instance, environment: List[Instance]): List[LogInteraction] = {
     /**
@@ -45,12 +45,11 @@ class InstanceIntelligence extends Actor {
       val instanceId = instance.id
       val propertyName = getPropertyNameFromMood(tuple._1)
       val propertyValue = countMoodSource(tuple._2)
-      println("Creating log for relation: " + instanceId + " - " + propertyName + ": " + propertyValue)
       LogInteraction.createModifyLog(instanceId, propertyName, propertyValue)
     }
 
     instance.concept
-      .getMoodRelations
+      .getMoodRelations //TODO see if improvements are possible here
       .map(logModification)
   }
 
@@ -58,18 +57,17 @@ class InstanceIntelligence extends Actor {
   def getActionFor(instance: Instance, sensedInstances: List[Instance]): List[LogInteraction] = {
     val (action, destination) = instance.selectAction(sensedInstances)
     if (!action.isError) {
-      //        println(instance.label + instance.id + " is doing " + action.label)
-      InstanceActionParser.parseActionForLog(action.id, List(instance.id, destination.id))
+      InstanceActionParser.parseActionForLog(action, List(instance.id, destination.id))
     } else {
       List()
     }
   }
 
   override def receive: Receive = {
-    case ComputePropertiesUpdate(instance, sensedInstances) =>
-      val logs = instance.applyConsequencies() ++ updatePropertiesFromEnvironment(instance, sensedInstances)
-      sender ! ResultAction(logs)
     case ComputeAction(instance, sensedInstances) =>
-      sender ! ResultAction(getActionFor(instance, sensedInstances))
+      val logs = instance.applyConsequencies() ++
+                 updatePropertiesFromEnvironment(instance, sensedInstances) ++
+                 getActionFor(instance, sensedInstances)
+      sender ! ResultAction(logs)
   }
 }

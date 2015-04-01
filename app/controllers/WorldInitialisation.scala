@@ -4,10 +4,10 @@ import models.graph.NeoDAO
 import models.graph.custom_types.DisplayProperty
 import models.graph.ontology._
 import models.graph.ontology.concept.consequence.{Consequence, ConsequenceStep}
-import models.graph.ontology.concept.need.{MeanOfSatisfaction, NeedDAO, Need}
+import models.graph.ontology.concept.need.{MeanOfSatisfaction, Need, NeedDAO}
 import models.graph.ontology.concept.{Concept, ConceptDAO}
-import models.graph.ontology.property.{PropertyType, Property, PropertyDAO}
-import models.graph.ontology.relation.Relation
+import models.graph.ontology.property.{Property, PropertyDAO, PropertyType}
+import models.graph.ontology.relation.RelationDAO
 import models.interaction.action.InstanceActionManager
 import models.interaction.precondition.PreconditionManager
 import models.{WorldInit, WorldMap}
@@ -80,7 +80,7 @@ object WorldInitialisation extends Controller {
    */
   def putInitialConceptsInDB: Boolean = {
     PropertyDAO.clear
-    Relation.DBList.clear
+    RelationDAO.clear
     NeedDAO.clear
 
     /*Property declaration*/
@@ -94,8 +94,7 @@ object WorldInitialisation extends Controller {
     val propertyFeed = Property("Feed", PropertyType.Double, 6).save
     val propertyComfort = Property("Comfort", PropertyType.Double, 3).save
     val propertyDesire = Property("Desire",PropertyType.Double,11).save
-
-    val propertyFear = Property("Fear", PropertyType.Double, 0)
+    val propertyFear = Property("Fear", PropertyType.Double, 0).save
 
     PreconditionManager.initialization()
     InstanceActionManager.initialization()
@@ -194,16 +193,16 @@ object WorldInitialisation extends Controller {
     println("Relations declaration...")
 
     /*Relations declaration*/
-    val relationSubtypeOfId = Relation.DBList.save("SUBTYPE_OF")
-    val relationEatId = Relation.DBList.save("ACTION_EAT")
-    val relationCutId = Relation.DBList.save("ACTION_CUT")
-    val relationMoveId = Relation.DBList.save("ACTION_MOVE")
-    val relationFleeId = Relation.DBList.save("ACTION_FLEE")
-    val relationProducesId = Relation.DBList.save("ACTION_PRODUCE")
-    val relationLiveOnId = Relation.DBList.save("LIVE_ON")
-    val relationFear = Relation.DBList.save("MOOD_FEAR")
-    val relationProcreate = Relation.DBList.save("ACTION_PROCREATE")
-    val relationSpread = Relation.DBList.save("ACTION_SPREAD")
+    val relationSubtypeOfId = RelationDAO.save("SUBTYPE_OF")
+    val relationEatId = RelationDAO.save("ACTION_EAT")
+    val relationCutId = RelationDAO.save("ACTION_CUT")
+    val relationMoveId = RelationDAO.save("ACTION_MOVE")
+    val relationFleeId = RelationDAO.save("ACTION_FLEE")
+    val relationProducesId = RelationDAO.save("ACTION_PRODUCE")
+    val relationLiveOnId = RelationDAO.save("LIVE_ON")
+    val relationFear = RelationDAO.save("MOOD_FEAR")
+    val relationProcreate = RelationDAO.save("ACTION_PROCREATE")
+    val relationSpread = RelationDAO.save("ACTION_SPREAD")
 
 
     println("Adding concepts to graph...")

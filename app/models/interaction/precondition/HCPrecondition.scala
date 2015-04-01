@@ -76,10 +76,7 @@ object HCPrecondition {
   def hasProperty(args: Map[ParameterReference, ParameterValue]): Boolean = {
     val instanceId = args(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
     val propertyString = args(ParameterReference("property", "Property")).value.asInstanceOf[String]
-    println("prperty = "+propertyString)
-
     val sourceInstance = map.getInstanceById(instanceId)
-    println("instance = "+sourceInstance.label)
 
     val property = PropertyDAO.getByName(propertyString)
     sourceInstance.properties

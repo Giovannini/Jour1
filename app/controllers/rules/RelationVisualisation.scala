@@ -1,6 +1,6 @@
 package controllers.rules
 
-import models.graph.ontology.relation.Relation
+import models.graph.ontology.relation.{RelationDAO, Relation}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.mvc.{AnyContent, Action, Controller}
@@ -62,7 +62,7 @@ object RelationVisualisation extends Controller {
      *         false else
      */
     def doCreate(relation: Relation): Boolean = {
-      Relation.DBList.save(relation.label) != -1L
+      RelationDAO.save(relation.label) != -1L
     }
 
     val form = relationForm.bindFromRequest()
@@ -89,7 +89,7 @@ object RelationVisualisation extends Controller {
    * @return an action displaying a form to update the relation
    */
   def updateForm(id: Long): Action[AnyContent] = Action {
-    val relation = Relation.DBList.getById(id)
+    val relation = RelationDAO.getById(id)
     val relationFormFilled = relationForm.fill(relation)
     Ok(views.html.relations.formEditor(relationFormFilled, id))
   }
@@ -108,7 +108,7 @@ object RelationVisualisation extends Controller {
      *         false else
      */
     def doUpdate(relation: Relation): Boolean = {
-      Relation.DBList.update(id, relation.label) == 1
+      RelationDAO.update(id, relation.label) == 1
     }
 
     val form = relationForm.bindFromRequest()
@@ -135,7 +135,7 @@ object RelationVisualisation extends Controller {
    * @return an action reidrecting to the list of relations
    */
   def delete(id: Long): Action[AnyContent] = Action {
-    Relation.DBList.delete(id)
+    RelationDAO.delete(id)
     Ok(views.html.relations.relations())
   }
 }

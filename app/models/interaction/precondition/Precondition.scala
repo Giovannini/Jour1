@@ -9,10 +9,11 @@ import scala.util.{Failure, Success, Try}
 /**
  * Model for preconditions
  */
-case class Precondition(id: Long,
-                        label: String,
-                        subConditions: List[(Precondition, Map[ParameterReference, Parameter])],
-                        parameters: List[ParameterReference]) {
+case class Precondition(
+  id: Long,
+  label: String,
+  subConditions: List[(Precondition, Map[ParameterReference, Parameter])],
+  parameters: List[ParameterReference]) {
 
 
   /* A precondition can't have itself as a sub-condition. */
@@ -52,12 +53,9 @@ case class Precondition(id: Long,
   def isFilled(parameters: Map[ParameterReference, Parameter], arguments: Map[ParameterReference, ParameterValue])
   : Boolean = {
     def retrieveGoodArguments() = {
-      parameters.map({
-        case (ref, param) =>
-          (ref, param match {
-            case key: ParameterReference => arguments(key)
-            case _ => param.asInstanceOf[ParameterValue]
-          })
+      parameters.mapValues({
+        case key: ParameterReference => arguments(key)
+        case value => value.asInstanceOf[ParameterValue]
       })
     }
     val args = retrieveGoodArguments()
@@ -69,28 +67,20 @@ case class Precondition(id: Long,
       case "isAtWalkingDistance" => HCPrecondition.isAtWalkingDistance(args)
       case "hasProperty" => HCPrecondition.hasProperty(args)
       case "propertyIsHigherThan" => HCPrecondition.isHigherThan(args)
-      case "propertyIsLowerThan" => ! HCPrecondition.isHigherThan(args)
+      case "propertyIsLowerThan" => !HCPrecondition.isHigherThan(args)
       case "hasInstanceOfConcept" => HCPrecondition.hasInstanceOfConcept(args)
       // It's a user-created precondition
       case _ =>
         this.subConditions.forall(current => current._1.isFilled(current._2, arguments))
     }
-    if(! result) println("Precondition " + this.label + " is not filled.")
+    if (!result) {
+      println("Precondition " + this.label + " is not filled.")
+    }
     result
   }
 
-  /*
-   * Get the argument list needed to execute an action
-   * @param args the ids of the instances needed to execute the actions
-   * @return a list of arguments and their values
-   */
-  /*def getArgumentsList(args: List[ParameterValue]): Map[ParameterReference, ParameterValue] = {
-    parameters.zip(args).toMap
-  }*/
-
   def instancesThatFill(source: Instance, instancesList: List[Instance]): Set[Instance] = {
-    //TODO check output
-    val result = this.label match {
+    this.label match {
       case "isNextTo" =>
         PreconditionFiltering.isNextTo(source, instancesList).toSet
       case "isOnSameTile" =>
@@ -103,8 +93,6 @@ case class Precondition(id: Long,
           .map(_._1.instancesThatFill(source, instancesList))
           .foldRight(instancesList.toSet)(_ intersect _)
     }
-
-    result
   }
 
   def toJson = Json.obj(
@@ -174,7 +162,7 @@ object Precondition {
    * @return a Precondition object
    */
   def parse(id: Long, label: String, parametersToParse: String, subConditionsToParse: String): Precondition = {
-    Try{
+    Try {
       Precondition(
         id,
         label,
