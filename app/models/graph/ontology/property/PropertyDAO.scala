@@ -108,7 +108,6 @@ object PropertyDAO {
         val property = statement.as(propertyParser.singleOpt)
           .getOrElse(Property.error)
         if (property != Property.error) {
-          println("Adding a property")
           mappingName += name -> property
         }
         property

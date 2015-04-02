@@ -9,6 +9,8 @@ import scala.util.{Failure, Success, Try}
  */
 case class LogInteraction(value: String){
 
+  class UnknownLogException extends Exception
+
   def execute(): Unit = {
     Try {
 //      println("Executing LOG: " + this.value)
@@ -35,13 +37,13 @@ case class LogInteraction(value: String){
           val propertyValue = splitted(3).toDouble
           Application.map.addToProperty(instanceId, propertyString, propertyValue)
         case error =>/*###################################################*/
-          throw new Exception("Error, log: " + error + " is unknown.")
+          throw new UnknownLogException
       }
     } match {
       case Success(_) => //println("Done")
       case Failure(e) =>
         println("Error while parsing action log:")
-        println(e.getStackTrace)
+        println(e)
     }
   }
 

@@ -62,7 +62,11 @@ object InstanceActionParser {
       List()
     } else {
       val arguments = getArgumentsList(action,instancesId.map(id => ParameterValue(id, "Long")))
-      action.log(arguments)
+//      val t1 = System.currentTimeMillis()
+      val result = action.log(arguments)
+//      val t2 = System.currentTimeMillis()
+//      println("Time to log: " + (t2 -t1))
+      result
     }
   }
 

@@ -20,7 +20,8 @@ import scala.util.{Success, Failure, Try}
 case class WorldMap(label: Label, description: String, width: Int, height: Int) {
 
   def clear() = {
-    instances = instances.empty
+    instancesByConcept = instancesByConcept.empty
+    instancesByCoordinates = instancesByCoordinates.empty
     instanceIdCounter = 0
   }
 
@@ -36,7 +37,8 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
     instanceIdCounter
   }
 
-  private var instances: collection.mutable.Map[Long, List[Instance]] = collection.mutable.Map.empty[Long, List[Instance]]
+  private var instancesByConcept = collection.mutable.Map.empty[Long, List[Instance]]
+  private var instancesByCoordinates = collection.mutable.Map.empty[Coordinates, List[Instance]]
 
   /**
    * Get all the instances existing on the world map
@@ -44,7 +46,7 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
    * @return a list of all the instances existing on the world map
    */
   def getInstances: List[Instance] = {
-    instances.flatMap(_._2).toList
+    instancesByConcept.values.flatten.toList
   }
 
   /**
@@ -54,10 +56,10 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
    * @return a list of instances
    */
   def getInstancesOf(conceptId: Long): List[Instance] = {
-    val conceptInstances = instances.getOrElse(conceptId, List())
+    val conceptInstances = instancesByConcept.getOrElse(conceptId, List())
     val childrenInstances = ConceptDAO.getChildren(conceptId)
       .flatMap {
-      concept => instances.getOrElse(concept.id, List())
+      concept => instancesByConcept.getOrElse(concept.id, List())
     }
     conceptInstances ::: childrenInstances
   }
@@ -82,7 +84,7 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
     Json.obj(
       "width" -> width,
       "height" -> height,
-      "instances" -> instances.map(_._2).flatten.map(_.toJson)
+      "instances" -> getInstances.map(_.toJson)
     )
   }
 
@@ -92,26 +94,17 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
    * @param concept to which the property is added
    * @param property added to the concept
    */
+  //TODO update children
   def updateInstancesOf(concept: Concept, property: Property) = {
-    val updatedInstancesList = instances.getOrElse(concept.id, List())
+    val updatedInstancesList = getInstancesOf(concept.id)
       .map(instance => instance.withProperty(property))
-    instances(concept.id) = updatedInstancesList
+    instancesByConcept(concept.id) = updatedInstancesList
+    instancesByCoordinates = collection.mutable.Map(getInstances.groupBy(_.coordinates).toSeq: _*)
   }
 
-  /*#################*/
-  /* Basic functions */
-  /*#################*/
-  /**
-   * Get the tile at the given coordinates
-   * @author Thomas GIOVANNINI
-   * @param coordX of the wanted tile
-   * @param coordY of the wanted tile
-   * @return the tile at the given coordinates
-   */
-  def getInstancesAt(coordX: Int, coordY: Int): List[Instance] = {
-    getInstances.filter(instance => instance.coordinates == Coordinates(coordX, coordY))
-  }
-
+  /*###########################################################################################################*/
+  /*                            Basic functions                                                                */
+  /*###########################################################################################################*/
   /**
    * Get the tile at the given coordinates
    * @author Thomas GIOVANNINI
@@ -119,17 +112,22 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
    * @return the tile at the given coordinates
    */
   def getInstancesAt(coordinates: Coordinates): List[Instance] = {
-    getInstances.filter(instance => instance.coordinates == coordinates)
+    instancesByCoordinates.getOrElse(coordinates, List())
   }
 
   def createInstance(instance: Instance): Unit = {
     Try {
       val conceptID = instance.concept.id
-      instances(conceptID) = instance.withId(getNewInstanceId) :: instances.getOrElse(conceptID, List())
+      val coordinates = instance.coordinates
+      val createdInstance = instance.withId(getNewInstanceId)
+      instancesByConcept(conceptID) =
+        createdInstance :: instancesByConcept.getOrElse(conceptID, List())
+      instancesByCoordinates(coordinates) =
+        createdInstance :: instancesByCoordinates.getOrElse(coordinates, List())
     } match {
       case Success(_) =>
       case Failure(e) =>
-        println("Failure while adding an instance to the map:")
+        println("Failure while adding an instance to the map in WorldMap.scala:")
         println(e)
     }
   }
@@ -143,16 +141,19 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
   def addInstance(instanceId: Long, groundId: Long): Unit = {
     Try {
       val ground = getInstanceById(groundId)
+      val coordinates = ground.coordinates
       val instance = getInstanceById(instanceId)
         .withId(getNewInstanceId)
-        .at(ground.coordinates)
+        .at(coordinates)
 
       val conceptID = instance.concept.id
-      instances(conceptID) = instance :: instances.getOrElse(conceptID, List())
+      instancesByConcept(conceptID) = instance :: instancesByConcept.getOrElse(conceptID, List())
+      instancesByCoordinates(coordinates) =
+        instance :: instancesByCoordinates.getOrElse(coordinates, List())
     } match {
       case Success(_) =>
       case Failure(e) =>
-        println("Failure while adding an instance to the map:")
+        println("Failure while adding an instance to the map in WorldMap.scala:")
         println(e)
     }
   }
@@ -166,11 +167,13 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
     Try {
       val instance = getInstanceById(instanceId)
       val conceptId = instance.concept.id
-      instances(conceptId) = instances.getOrElse(conceptId, List()) diff List(instance)
+      val coordinates = instance.coordinates
+      instancesByConcept(conceptId) = instancesByConcept.getOrElse(conceptId, List()) diff List(instance)
+      instancesByCoordinates(coordinates) = instancesByCoordinates.getOrElse(coordinates, List()) diff List(instance)
     } match {
       case Success(_) =>
       case Failure(e) =>
-        println("Failure while removing an instance from the map:")
+        println("Failure while removing an instance from the map in WorldMap.scala:")
         println(e)
     }
   }
@@ -181,7 +184,11 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
     val modifiedInstance = instance.modifyValueOfProperty(ValuedProperty(property, propertyValue))
 
     val conceptId = instance.concept.id
-    instances(conceptId) = modifiedInstance :: (instances.getOrElse(conceptId, List()) diff List(instance))
+    val coordinates = instance.coordinates
+    instancesByConcept(conceptId) =
+      modifiedInstance :: (instancesByConcept.getOrElse(conceptId, List()) diff List(instance))
+    instancesByCoordinates(coordinates) =
+      modifiedInstance :: (instancesByCoordinates.getOrElse(coordinates, List()) diff List(instance))
 
   }
 
@@ -192,37 +199,23 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
     val modifiedInstance = instance.modifyValueOfProperty(ValuedProperty(property, newValue))
 
     val conceptId = instance.concept.id
-    instances(conceptId) = modifiedInstance :: (instances.getOrElse(conceptId, List()) diff List(instance))
+    val coordinates = instance.coordinates
+    instancesByConcept(conceptId) = modifiedInstance :: (instancesByConcept.getOrElse(conceptId, List()) diff List(instance))
+    instancesByCoordinates(coordinates) =
+      modifiedInstance :: (instancesByCoordinates.getOrElse(coordinates, List()) diff List(instance))
 
   }
 
   def updateInstance(oldInstance: Instance, newInstance: Instance): Unit = {
     val conceptId = oldInstance.concept.id
-    instances(conceptId) = newInstance.withId(oldInstance.id) ::
-                           (instances.getOrElse(conceptId, List()) diff List(oldInstance))
-  }
-
-  /**
-   * Return whether an instance of a particular concept is on it or not
-   * @author Thomas GIOVANNINI
-   * @param concept desired
-   * @param on the tile where the method search occurs
-   * @return true if the tile contains an instance of the desired concept
-   *         false else
-   */
-  def search(concept: Concept, on: Coordinates) = {
-    getInstancesAt(on).map(_.concept).contains(concept)
-  }
-
-  /**
-   * Return whether the tile has instances on it or not
-   * @author Thomas GIOVANNINI
-   * @param instance desired
-   * @param on the tile where the method search occurs
-   * @return true if the tile contains the desired instance
-   *         false else
-   */
-  def search(instance: Instance, on: Coordinates) = {
-    getInstancesAt(on).contains(instance)
+    val oldCoordinates = oldInstance.coordinates
+    val newCoordinates = newInstance.coordinates
+    val updatedInstance = newInstance.withId(oldInstance.id)
+    instancesByConcept(conceptId) =
+      updatedInstance :: (instancesByConcept.getOrElse(conceptId, List()) diff List(oldInstance))
+    instancesByCoordinates(oldCoordinates) =
+      instancesByCoordinates.getOrElse(oldCoordinates, List()) diff List(oldInstance)
+    instancesByCoordinates(newCoordinates) =
+      updatedInstance :: instancesByCoordinates.getOrElse(newCoordinates, List())
   }
 }

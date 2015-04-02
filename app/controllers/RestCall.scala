@@ -23,7 +23,7 @@ object RestCall extends Controller {
     Ok(Json.toJson(concepts))
   }
 
-  def getAllSimplifiedConcepts() = Action {
+  def getAllSimplifiedConcepts = Action {
     val concepts = ConceptDAO.getAllSimlified
       .map(_.toSimplifiedJson)
     Ok(Json.toJson(concepts))
@@ -62,9 +62,9 @@ object RestCall extends Controller {
    * @return a JsValue representing the relationned concept
    */
   def relationnedConceptToJson(tuple: (Relation, Concept)): JsValue = {
-    Json.obj( "relationID" -> JsNumber(tuple._1.id),
-              "relationLabel" -> JsString(tuple._1.label),
-              "conceptId" -> JsNumber(tuple._2.hashCode()))
+    Json.obj("relationID" -> JsNumber(tuple._1.id),
+      "relationLabel" -> JsString(tuple._1.label),
+      "conceptId" -> JsNumber(tuple._2.hashCode()))
   }
 
   /**
@@ -73,6 +73,7 @@ object RestCall extends Controller {
    * @author Thomas GIOVANNINI
    */
   def executeAction = Action(parse.json) { request =>
+
     /**
      * Parse json request and execute it.
      * @author Thomas GIOVANNINI
@@ -89,8 +90,12 @@ object RestCall extends Controller {
     val result = execution(request)
     val t2 = System.currentTimeMillis()
     println("Executing action took " + (t2 - t1) + "ms.")
-    if(result) Ok("Ok")
-    else Ok("Error while executing this action")
+    if (result) {
+      Ok("Ok")
+    }
+    else {
+      Ok("Error while executing this action")
+    }
   }
 
   /**
@@ -102,18 +107,24 @@ object RestCall extends Controller {
   def getPossibleDestinationOfAction(initInstanceId: Long, relationId: Long, conceptId: Long)
   : Action[AnyContent] = Action {
     val sourceInstance = Application.map.getInstanceById(initInstanceId)
+    println("Source instance: " + sourceInstance)
     val actionID = RelationDAO.getActionIdFromRelationId(relationId)
+    println("ID: " + actionID)
     val action = InstanceActionParser.getAction(actionID)
-    val destinationInstancesList = Application.map.getInstancesOf(conceptId)
-    if (sourceInstance == Instance.error || action == InstanceAction.error){
+    println("Action: " + action.label)
+    if (sourceInstance == Instance.error || action == InstanceAction.error) {
+      println("Bim!")
       Ok(Json.arr())
+    } else {
+      val destinationInstancesList = Application.map.getInstancesOf(conceptId)
+      println("DestinationInstancesList = " + destinationInstancesList.length)
+      val t1 = System.currentTimeMillis()
+      val reducedList = action.getDestinationList(sourceInstance, destinationInstancesList)
+        .map(_.toJson)
+      val t2 = System.currentTimeMillis()
+      println("Getting destinations took " + (t2 - t1) + "ms.")
+      Ok(Json.toJson(reducedList))
     }
-    val t1 = System.currentTimeMillis()
-    val reducedList = action.getDestinationList(sourceInstance, destinationInstancesList)
-      .map(_.toJson)
-    val t2 = System.currentTimeMillis()
-    println("Getting destinations took " + (t2 - t1) + "ms.")
-    Ok(Json.toJson(reducedList))
   }
 
   def editInstance(instanceId: Long): Action[AnyContent] = Action {

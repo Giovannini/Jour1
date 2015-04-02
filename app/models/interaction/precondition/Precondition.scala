@@ -55,7 +55,7 @@ case class Precondition(
     def retrieveGoodArguments() = {
       parameters.mapValues({
         case key: ParameterReference => arguments(key)
-        case value => value.asInstanceOf[ParameterValue]
+        case value: ParameterValue => value
       })
     }
     val args = retrieveGoodArguments()

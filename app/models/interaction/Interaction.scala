@@ -83,7 +83,7 @@ trait Interaction {
       if (arePreconditionsChecked) {
         action.executeGoodAction(arguments)
       } else {
-        println("Precondition not filled for action " + this.label + ".")
+        println("Precondition not filled for " + this.label + ".")
         false
       }
     case effect: Effect =>
@@ -103,21 +103,21 @@ trait Interaction {
     if (preconditionCheck) {
       this.label match {
         case "addInstanceAt" =>
-          val instanceId = arguments(ParameterReference("instanceToAdd", "Long")).value.asInstanceOf[Long]
-          val groundId = arguments(ParameterReference("groundWhereToAddIt", "Long")).value.asInstanceOf[Long]
+          val instanceId = arguments(ParameterReference("instanceToAdd", "Long")).value//.asInstanceOf[Long]
+          val groundId = arguments(ParameterReference("groundWhereToAddIt", "Long")).value//.asInstanceOf[Long]
           List(LogInteraction("ADD " + instanceId + " " + groundId))
         case "removeInstanceAt" =>
-          val instanceId = arguments(ParameterReference("instanceToRemove", "Long")).value.asInstanceOf[Long]
+          val instanceId = arguments(ParameterReference("instanceToRemove", "Long")).value//.asInstanceOf[Long]
           List(LogInteraction("REMOVE " + instanceId))
         case "addToProperty" =>
-          val instanceId = arguments(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
-          val propertyString = arguments(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
-          val valueToAdd = arguments(ParameterReference("valueToAdd", "Int")).value.asInstanceOf[String]
+          val instanceId = arguments(ParameterReference("instanceID", "Long")).value//.asInstanceOf[Long]
+          val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
+          val valueToAdd = arguments(ParameterReference("valueToAdd", "Int")).value//.asInstanceOf[String]
           List(LogInteraction("ADD_TO_PROPERTY " + instanceId + " " + propertyString + " " + valueToAdd))
         case "modifyProperty" =>
-          val instanceId = arguments(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
-          val propertyString = arguments(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
-          val newValue = arguments(ParameterReference("propertyValue", "Int")).value.asInstanceOf[String]
+          val instanceId = arguments(ParameterReference("instanceID", "Long")).value//.asInstanceOf[Long]
+          val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
+          val newValue = arguments(ParameterReference("propertyValue", "Int")).value//.asInstanceOf[String]
           List(LogInteraction("MODIFY_PROPERTY " + instanceId + " " + propertyString + " " + newValue))
         case _ =>
           subInteractions.flatMap(subAction => subAction._1.log(takeGoodArguments(subAction._2, arguments)))
@@ -135,9 +135,9 @@ trait Interaction {
    */
   def takeGoodArguments(parameters: Map[ParameterReference, Parameter], arguments: Map[ParameterReference, ParameterValue]): Map[ParameterReference, ParameterValue] = {
     parameters.mapValues {
-      case reference: ParameterReference => arguments(reference.asInstanceOf[ParameterReference])
-      case value: ParameterValue => value.asInstanceOf[ParameterValue]
-      case e: Parameter =>
+      case reference: ParameterReference => arguments(reference)
+      case value: ParameterValue => value
+      case e =>
         println("Failed to match parameter " + e)
         ParameterValue.error
     }.filter(_._2 != ParameterValue.error)

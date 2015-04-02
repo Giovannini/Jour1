@@ -55,12 +55,19 @@ class SmartInstance extends Actor {
 
 
   def getActionFor(instance: Instance, sensedInstances: List[Instance]): List[LogInteraction] = {
+//    val t1 = System.currentTimeMillis()
     val (action, destination) = instance.selectAction(sensedInstances)
-    if (!action.isError) {
+//    val t2 = System.currentTimeMillis()
+//    println("getActionFor part1: " + (t2 - t1))
+//    val t3 = System.currentTimeMillis()
+    val result = if (!action.isError) {
       InstanceActionParser.parseActionForLog(action, List(instance.id, destination.id))
     } else {
       List()
     }
+//    val t4 = System.currentTimeMillis()
+//    println("getActionFor part2: " + (t4 - t3))
+    result
   }
 
   override def receive: Receive = {

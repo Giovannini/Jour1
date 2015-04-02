@@ -1,5 +1,6 @@
 package models.graph.custom_types
 
+import controllers.Application
 import play.api.libs.json.JsValue
 
 /**
@@ -9,6 +10,8 @@ import play.api.libs.json.JsValue
  * @param y coordinate
  */
 case class Coordinates(x: Int, y: Int) {
+
+  def this(tuple: (Int, Int)) = this(tuple._1, tuple._2)
 
   /**
    * Method to add two coordinates
@@ -50,12 +53,19 @@ case class Coordinates(x: Int, y: Int) {
   def getNearCoordinate(radius: Int): List[Coordinates] = {
     val valueList = ((-radius) to radius).toList
     valueList.flatMap(value => valueList.map((_, value)))
-      .filter(tuple => (tuple._1 * tuple._1) + (tuple._2 * tuple._2) < radius * radius)
-      .map(tuple => Coordinates(tuple._1, tuple._2) + this)
+      .filter(tuple => math.pow(tuple._1, 2) + math.pow(tuple._2, 2) < radius * radius)
+      .map(tuple => new Coordinates(tuple) + this)
+      .filter { coordinate =>
+        coordinate.x >= 0 && coordinate.x < Coordinates.maxWidth &&
+        coordinate.y >= 0 && coordinate.y < Coordinates.maxHeight
+      }
   }
 }
 
 object Coordinates {
+
+  val maxWidth = Application.map.width
+  val maxHeight = Application.map.height
 
   val getNextCoordinates: List[Coordinates] = {
     List(Coordinates(0, 1), Coordinates(0, -1), Coordinates(1, 0), Coordinates(-1, 0))

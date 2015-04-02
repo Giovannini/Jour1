@@ -43,8 +43,7 @@ object HCPrecondition {
     val instance1 = map.getInstanceById(instance1ID)
     val instance2 = map.getInstanceById(instance2ID)
 
-    val result = instance1.coordinates == instance2.coordinates
-    result
+    instance1.coordinates == instance2.coordinates
   }
 
   /**

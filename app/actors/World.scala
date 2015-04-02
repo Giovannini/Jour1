@@ -9,7 +9,7 @@ import models.interaction.LogInteraction
 
 class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
 
-  var logs: List[LogInteraction] = List()
+  var logs: List[List[LogInteraction]] = List()
   var nrOfResults: Int = _
   var nrOfInstances: Int = _
   val start: Long = System.currentTimeMillis
@@ -23,9 +23,13 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
    * @return a list of instances that have needs
    */
   def getInstancesWithNeeds: List[Instance] = {
-    Application.map
+//    val t1 = System.currentTimeMillis()
+    val result = Application.map
       .getInstances
       .filter(_.concept.needs.nonEmpty)
+//    val t2 = System.currentTimeMillis()
+//    println("getInstancesWithNeeds: " + (t2 - t1))
+    result
   }
 
   /**
@@ -33,7 +37,7 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
    * @author Thomas GIOVANNINI
    * @param number value to set
    */
-  def setNumberOfInstancesToCompute(number: Int) = {
+  def setNumberOfInstancesToCompute(number: Int): Unit = {
     nrOfInstances = number
   }
 
@@ -54,12 +58,14 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
    */
   override def receive: Actor.Receive = {
     case launcher: Launcher =>
+      println("Launching new turn computation...")
       launchComputation(launcher)
     case ResultAction(logList) =>
       nrOfResults += 1
-      logs = logs ::: logList
+      logs = logList :: logs
+      print(nrOfInstances - nrOfResults + " ")
       if (nrOfResults == nrOfInstances) {
-        logs.foreach(_.execute())
+        logs.flatten.foreach(_.execute())
         val end: Long = System.currentTimeMillis()
         listener ! EndOfTurn(end - start)
         //context.stop(self)

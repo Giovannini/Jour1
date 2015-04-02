@@ -154,7 +154,11 @@ case class Instance(
    * @return a list of sensed instances.
    */
   def getSensedInstances: List[Coordinates] = {
-    val senseRadius = properties.find(_.property == Property("Sense", PropertyType.Int, 5)).getOrElse(ValuedProperty.error).value.toInt
+    val senseRadius = properties
+      .find(_.property == Property("Sense", PropertyType.Int, 5))
+      .getOrElse(ValuedProperty.error)
+      .value
+      .toInt
     coordinates.getNearCoordinate(senseRadius)
   }
 
@@ -187,7 +191,7 @@ case class Instance(
       val destinationList = mean.action.getDestinationList(this, sensedInstances)
       //TODO change that using any
       if (mean.destinationConcept == Concept.error) {
-        destinationList.filter(instance => relations(mean.action).contains(instance.concept))
+        destinationList.filter(instance => relations.getOrElse(mean.action, List()).contains(instance.concept))
       }
       else {
         destinationList.filter(instance => mean.destinationConcepts.contains(instance.concept))
