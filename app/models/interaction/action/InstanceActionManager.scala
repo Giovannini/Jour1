@@ -139,7 +139,7 @@ object InstanceActionManager {
         parameters = List(p_instanceToMove, p_groundWhereToMoveIt)).save
     }
     nameToId += "Move" -> _actionMoveInstanceAt
-
+//Todo choisir de valeurs judicieuse de consommation et d'envie
     val _actionEat = {
       val p_instanceThatEat = ParameterReference("instanceThatEat", "Long")
       val p_instanceThatIsEaten = ParameterReference("instanceThatIsEaten", "Long")
@@ -288,29 +288,43 @@ object InstanceActionManager {
     }
     nameToId += "Spreed" -> _actionSpread
 
-  /*  val _actionRegenerate = {
-      val p_instanceToRegenate = ParameterReference("instanceToDuplicate", "Long")
-      val p_instanceToPutOn = ParameterReference("instanceToPutOn", "Long")
+/*    val _actionRegenerate = {
+      val p_instanceSelected = ParameterReference("instanceToDuplicate", "Long")
+      val p_instanceToRegenate = ParameterReference("instanceToPutOn", "Long")
       InstanceAction(0L,
         "ACTION_REGENERATE",
         preconditions = List(
-          (PreconditionManager.nameToId("isNextTo"),
+          (
+            PreconditionManager.nameToId("hasProperty"),
             Map(
-              ParameterReference("instance1ID", "Long") -> p_instanceToDuplicate,
-              ParameterReference("instance2ID", "Long") -> p_instanceToPutOn
+              ParameterReference("instanceID", "Long") -> p_instanceSelected,
+              ParameterReference("property", "Property") -> ParameterValue("Feed", "Property")
+            )
+            ),          (
+            PreconditionManager.nameToId("hasProperty"),
+            Map(
+              ParameterReference("instanceID", "Long") -> p_instanceSelected,
+              ParameterReference("property", "Property") -> ParameterValue("FeedMax", "Property")
+            )
+            ),
+          (PreconditionManager.nameToId("isOnSameTile"),
+            Map(
+              ParameterReference("instance1ID", "Long") -> p_instanceSelected,
+              ParameterReference("instance2ID", "Long") -> p_instanceToRegenate
             )
             )
         ),
-        _subActions = List(         (
-          _addInstanceAt,
+        _subActions = List((
+          _modifyProperty,
           Map(
-            ParameterReference("instanceToAdd", "Long") -> p_instanceToDuplicate,
-            ParameterReference("groundWhereToAddIt", "Long") -> p_instanceToPutOn
+            ParameterReference("instanceToModify", "Long") -> p_instanceSelected,
+            ParameterReference("propertyName", "Property") -> ParameterValue("Feed", "Property"),
+            ParameterReference("propertyValue", "Int") -> ParameterValue("FeedMax", "Property")
           )
           )),
         parameters = List(
-          p_instanceToDuplicate,
-          p_instanceToPutOn
+          p_instanceSelected,
+          p_instanceToRegenate
         )
       ).save
     }*/

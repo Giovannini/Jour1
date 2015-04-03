@@ -75,7 +75,10 @@ object HCPrecondition {
   def hasProperty(args: Map[ParameterReference, ParameterValue]): Boolean = {
     val instanceId = args(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
     val propertyString = args(ParameterReference("property", "Property")).value.asInstanceOf[String]
+    println("property = "+propertyString)
+
     val sourceInstance = map.getInstanceById(instanceId)
+    println("instance = "+sourceInstance.label)
 
     val property = PropertyDAO.getByName(propertyString)
     sourceInstance.properties
@@ -102,5 +105,13 @@ object HCPrecondition {
     listInstance.exists(p=>p.concept.id == conceptId)
   }
 
+  def isMe(args: Map[ParameterReference, ParameterValue]):Boolean={
+    println("entre isMe")
+    val instance1ID = args(ParameterReference("instance1ID", "Long")).value.asInstanceOf[Long]
+    val instance2ID = args(ParameterReference("instance2ID", "Long")).value.asInstanceOf[Long]
+    println("paramget : "+instance1ID+"  -  "+instance2ID)
+    println("test = " +    (instance1ID==instance2ID))
+    instance1ID==instance2ID
+  }
 
 }

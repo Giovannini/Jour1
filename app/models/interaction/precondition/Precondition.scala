@@ -69,6 +69,7 @@ case class Precondition(
       case "propertyIsHigherThan" => HCPrecondition.isHigherThan(args)
       case "propertyIsLowerThan" => !HCPrecondition.isHigherThan(args)
       case "hasInstanceOfConcept" => HCPrecondition.hasInstanceOfConcept(args)
+      case "isMe" => HCPrecondition.isMe(args)
       // It's a user-created precondition
       case _ =>
         this.subConditions.forall(current => current._1.isFilled(current._2, arguments))

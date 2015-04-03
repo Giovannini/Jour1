@@ -36,7 +36,7 @@ object ConceptDAO {
   def parseRow(row: CypherResultRow): Concept = {
     Try {
       val label = row[String]("concept_label")
-      val properties = row[Seq[String]]("concept_prop").map(Property.parseString).toList
+      val properties = row[Seq[String]]("concept_prop").map(ValuedProperty.parse).toList
       val rulesProperty = row[Seq[String]]("concept_rules").map(ValuedProperty.parse).toList
       val needs = row[Seq[String]]("concept_needs").map(id => NeedDAO.getById(id.toLong)).toList
       val display = DisplayProperty.parseString(row[String]("concept_display"))

@@ -82,7 +82,7 @@ object WorldInitialisation extends Controller {
     PropertyDAO.clear
     RelationDAO.clear
     NeedDAO.clear
-
+//Todo mettre des valeurs judicieuses au lieu des valeurs arbitraires pour les rules et property
     /*Property declaration*/
     val propertyInstanciable = Property("Instanciable", PropertyType.Bool, 0).save
     val propertyStrength = Property("Strength", PropertyType.Int, 0).save
@@ -91,14 +91,15 @@ object WorldInitialisation extends Controller {
     val propertyDuplicationSpeed = Property("DuplicationSpeed", PropertyType.Double, 10).save
     val propertyWalkingDistance = Property("WalkingDistance", PropertyType.Int, 3).save
     val propertyHunger = Property("Hunger", PropertyType.Double, 5).save
-    val propertyFeed = Property("Feed", PropertyType.Double, 6).save
+    val propertyFeed = Property("Feed", PropertyType.Double, 2).save
     val propertyComfort = Property("Comfort", PropertyType.Double, 3).save
     val propertyDesire = Property("Desire",PropertyType.Double,11).save
+    val propertyFeedMax = Property("FeedMax", PropertyType.Double, 4).save
     val propertyFear = Property("Fear", PropertyType.Double, 0).save
 
     PreconditionManager.initialization()
     InstanceActionManager.initialization()
-
+////////////////////////////////   Environment /////////////////////////////
     val conceptGround = Concept("Ground", List(), List(), List(), DisplayProperty())
     val conceptWater = Concept("Water",
       List(),
@@ -112,26 +113,62 @@ object WorldInitialisation extends Controller {
         ValuedProperty(propertyInstanciable, 1)),
       List(),
       DisplayProperty("#878377", 1))
+
+    ///////////////////////////////  Other  ////////////////////////////////////
     val conceptGrass = Concept("Grass",
-      List(propertyDuplicationSpeed),
-      List(ValuedProperty(propertyStrength, 40),
-        ValuedProperty(propertyInstanciable, 1)),
+      List(
+        ValuedProperty(propertyDuplicationSpeed,10),
+        ValuedProperty(propertyFeed,4),
+        ValuedProperty(propertyFeedMax,4)
+      ),
+      List(
+        ValuedProperty(propertyStrength, 40),
+        ValuedProperty(propertyInstanciable, 1)
+      ),
       List(),
       DisplayProperty("#62A663", 8))
-    val conceptEdible = Concept("Edible", List(propertyFeed), List(), List(), DisplayProperty())
+
+    ///
+
+    val conceptEdible = Concept("Edible", List(), List(), List(), DisplayProperty())
+
+    ///
+
     val conceptApple = Concept("Apple",
-      List(),
-      List(ValuedProperty(propertyStrength, 2), ValuedProperty(propertyInstanciable, 1)),
+      List(
+        ValuedProperty(propertyFeed,4),
+        ValuedProperty(propertyFeedMax,4)
+      ),
+      List(
+        ValuedProperty(propertyStrength, 2),
+        ValuedProperty(propertyInstanciable, 1)
+      ),
       List(),
       DisplayProperty("#A83B36", 20))
 
+    ///
+
     val conceptSheep = Concept("Sheep",
-      _properties = List(propertySense,propertyFeed, propertyFear),
-      _rules = List(ValuedProperty(propertyStrength, 2),
-        ValuedProperty(propertyInstanciable, 1)),
+      _properties = List(
+        ValuedProperty(propertyFeed,12),
+        ValuedProperty(propertyFeedMax,12),
+        ValuedProperty(propertySense,5),
+        ValuedProperty(propertyFear,0),
+        ValuedProperty(propertyHunger,4),
+        ValuedProperty(propertyWalkingDistance,4),
+        ValuedProperty(propertyFeed,12),
+        ValuedProperty(propertyDesire,8)
+      ),
+      _rules = List(
+        ValuedProperty(propertyStrength, 2),
+        ValuedProperty(propertyInstanciable, 1),
+        ValuedProperty(propertyFeedMax, 12)
+      ),
       List(),
       DisplayProperty("#EEE9D6", 16)
     )
+
+    ///
 
     /* Creation of needs */
     val needFood = NeedDAO.save(Need(0L, "Hunger", propertyHunger, priority = 6,
@@ -149,46 +186,100 @@ object WorldInitialisation extends Controller {
 
     /*Concepts declaration*/
     lazy val conceptMan = Concept("Man",
-      List(propertySense, propertyComfort),
-      List(ValuedProperty(propertyStrength, 2), ValuedProperty(propertyInstanciable, 1)),
+      List(
+        ValuedProperty(propertySense,5),
+        ValuedProperty(propertyComfort,3),
+        ValuedProperty(propertyHunger,6),
+        ValuedProperty(propertyWalkingDistance,3),
+        ValuedProperty(propertyFeed,10),
+        ValuedProperty(propertyDesire,7)
+      ),
+      List(
+        ValuedProperty(propertyStrength, 2),
+        ValuedProperty(propertyInstanciable, 1)
+      ),
       List(needSeaAir),
       DisplayProperty("#E3B494", 20))
+
+    ///
+
     val conceptPredator = Concept("Predator",
-      List(propertyHunger, propertySense),
+      List(ValuedProperty(propertySense,5)),
       List(), List(), DisplayProperty())
+
+    ///
+
     val conceptWolf = Concept("Wolf",
-      List(propertySense),
-      List(ValuedProperty(propertyStrength, 2),
-        ValuedProperty(propertyInstanciable, 1)),
+      List(
+        ValuedProperty(propertySense,5),
+        ValuedProperty(propertyHunger,5),
+        ValuedProperty(propertyWalkingDistance,4),
+        ValuedProperty(propertyFeed,10),
+        ValuedProperty(propertyDesire,6)
+      ),
+      List(
+        ValuedProperty(propertyStrength, 2),
+        ValuedProperty(propertyInstanciable, 1)
+      ),
       List(),
       DisplayProperty("#1A1A22", 18))
+
+    ///
+
     val conceptAnimal = Concept("Animal",
-      List(propertyWalkingDistance, propertyHunger, propertyFeed, propertySense, propertyDesire),
+      List(ValuedProperty(propertySense,5)),
       List(), List(needFood), DisplayProperty())
+
+    ///
+
     val conceptBush = Concept("Bush",
-      List(),
-      List(ValuedProperty(propertyStrength, 2),
-        ValuedProperty(propertyInstanciable, 1)),
+      List(
+        ValuedProperty(propertyFeed,6),
+        ValuedProperty(propertyFeedMax,6)
+      ),
+      List(
+        ValuedProperty(propertyStrength, 2),
+        ValuedProperty(propertyInstanciable, 1)
+      ),
       List(),
       DisplayProperty("#2A6E37", 4))
+
+    ///
+
     val conceptAppleTree = Concept("AppleTree",
       List(),
       List(ValuedProperty(propertyStrength, 2),
         ValuedProperty(propertyInstanciable, 1)),
       List(),
       DisplayProperty("#2F1C13", 9))
+
+    ///
+
     val conceptTree = Concept("Tree",
+      List(),
+      List(
+        ValuedProperty(propertyStrength, 4),
+        ValuedProperty(propertyInstanciable, 1)
+      ),
+      List(),
+      DisplayProperty("#483431", 7))
+
+    ///
+
+    val conceptFir = Concept("Fir",
       List(),
       List(ValuedProperty(propertyStrength, 4),
         ValuedProperty(propertyInstanciable, 1)),
       List(),
-      DisplayProperty("#483431", 7))
-    val conceptFir = Concept("Fir",
-      List(),
-      List(ValuedProperty(propertyStrength, 4)),
-      List(),
       DisplayProperty("#221D1D", 8))
-    val conceptVegetable = Concept("Vegetable", List(), List(), List(), DisplayProperty())
+
+    ///
+
+    val conceptVegetable = Concept("Vegetable",
+      List(),
+      List(),
+      List(),
+      DisplayProperty())
 
     println("Relations declaration...")
 
@@ -203,6 +294,7 @@ object WorldInitialisation extends Controller {
     val relationFear = RelationDAO.save("MOOD_FEAR")
     val relationProcreate = RelationDAO.save("ACTION_PROCREATE")
     val relationSpread = RelationDAO.save("ACTION_SPREAD")
+    val relationRegenerate = RelationDAO.save("ACTION_REGENERATE")
 
 
     println("Adding concepts to graph...")
@@ -253,7 +345,8 @@ object WorldInitialisation extends Controller {
         NeoDAO.addRelationToDB(conceptMan.id, relationProcreate, conceptGround.id) &&
         NeoDAO.addRelationToDB(conceptWolf.id, relationProcreate, conceptGround.id) &&
         NeoDAO.addRelationToDB(conceptSheep.id, relationProcreate, conceptGround.id) &&
-        NeoDAO.addRelationToDB(conceptGrass.id, relationSpread, conceptGround.id)
+        NeoDAO.addRelationToDB(conceptGrass.id, relationSpread, conceptGround.id) &&
+      NeoDAO.addRelationToDB(conceptGrass.id, relationRegenerate, conceptGrass.id)
 
 
 

@@ -19,7 +19,7 @@ import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
  */
 case class Concept(
   label: String,
-  private val _properties: List[Property],
+  private val _properties: List[ValuedProperty],
   private val _rules: List[ValuedProperty],
   private val _needs: List[Need],
   displayProperty: DisplayProperty) {
@@ -33,7 +33,8 @@ case class Concept(
   lazy val parents: List[Concept] = getParents
 
   lazy val descendance: List[Concept] = getDescendance
-  lazy val properties: List[Property] = (_properties ::: parents.flatMap(_.properties)).distinct
+  lazy val properties: List[ValuedProperty] = (_properties ::: parents.flatMap(_.properties)).distinct
+
   lazy val rules: List[ValuedProperty] = ValuedProperty.distinctProperties(_rules ::: parents.flatMap(_.rules))
   lazy val needs: List[Need] = (_needs ::: parents.flatMap(_.needs)).distinct
   val id: Long = hashCode
@@ -158,24 +159,6 @@ object Concept {
   val any = Concept("Any", List(), List(), List(), DisplayProperty())
 
   /**
-   * Create a concept given a list of ids of properties instead of a list of properties directly.
-   * @author Thomas GIOVANNINI
-   * @param label of the concept
-   * @param properties id for the concept
-   * @param rules of the concept
-   * @param displayProperty of the concept
-   * @return a concept
-   */
-  def identify(
-    label: String,
-    properties: List[Long],
-    rules: List[ValuedProperty],
-    needs: List[Long],
-    displayProperty: DisplayProperty): Concept = {
-    Concept(label, properties.map(PropertyDAO.getById), rules, needs.map(NeedDAO.getById), displayProperty)
-  }
-
-  /**
    * Parse a Json value to a concept
    * @author Thomas GIOVANNINI
    * @param jsonConcept the json to parse
@@ -183,7 +166,7 @@ object Concept {
    */
   def parseJson(jsonConcept: JsValue): Concept = {
     val label = (jsonConcept \ "label").as[String]
-    val properties = (jsonConcept \ "properties").as[List[Long]].map(PropertyDAO.getById)
+    val properties = (jsonConcept \ "properties").as[List[JsValue]].map(ValuedProperty.parseJson)
     val rules = (jsonConcept \ "rules").as[List[JsValue]].map(ValuedProperty.parseJson)
     val needs = (jsonConcept \ "needs").as[List[Long]].map(NeedDAO.getById)
     val displayProperty = DisplayProperty.parseJson(jsonConcept \ "displayProperty")

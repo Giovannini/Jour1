@@ -22,7 +22,7 @@ case class Instance(
   concept: Concept) {
 
   require(label.matches("^[A-Z][A-Za-z0-9_ ]*$") &&
-          concept.properties.toSeq == properties.map(_.property).toSeq)
+          concept.properties.map(_.property).toSeq == properties.map(_.property).toSeq)
 
   /**
    * Parse an Instance to Json
@@ -129,8 +129,9 @@ case class Instance(
         case _ => List()
       }
     }
+    val listProperties = this.concept.properties.map(_.property)
 
-    if (this.concept.properties.contains(valuedProperty.property)) {
+    if (listProperties.contains(valuedProperty.property)) {
       val modifiedProperties = modifyPropertyRec(valuedProperty, this.properties)
       Instance(id, label, coordinates, modifiedProperties, concept)
     } else {
@@ -145,7 +146,7 @@ case class Instance(
    * @return a new instance looking like this one but with an other concept
    */
   def ofConcept(newconcept: Concept): Instance = {
-    Instance(id, label, coordinates, newconcept.properties.map(_.defaultValuedProperty), newconcept)
+    Instance(id, label, coordinates, newconcept.properties, newconcept)
   }
 
   /**
@@ -260,7 +261,7 @@ object Instance {
     Instance(0,
       concept.label,
       Coordinates(0, 0),
-      concept.properties.map(_.defaultValuedProperty),
+      concept.properties,
       concept)
   }
 }

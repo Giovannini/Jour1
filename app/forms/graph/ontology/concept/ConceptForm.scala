@@ -21,7 +21,7 @@ object ConceptForm {
   val form = Form(
     mapping(
       "label" -> nonEmptyText, //can't be modified
-      "properties" -> list(PropertyForm.form.mapping),
+      "properties" -> list(ValuedPropertyForm.form.mapping),
       "rules" -> list(ValuedPropertyForm.form.mapping),
       "needs" -> list(NeedForm.form.mapping),
       "displayProperty" -> DisplayProperty.form.mapping
@@ -39,7 +39,7 @@ object ConceptForm {
    * @return a concept using these parameters
    */
   private def applyForm(label: String,
-                 properties: List[Property],
+                 properties: List[ValuedProperty],
                  rules: List[ValuedProperty],
                  needs: List[Need],
                  displayProperty: DisplayProperty) : Concept = {
@@ -52,7 +52,7 @@ object ConceptForm {
    * @param concept concept
    * @return the different parts of a concept
    */
-  private def unapplyForm(concept: Concept) : Option[(String, List[Property], List[ValuedProperty], List[Need], DisplayProperty)] = {
+  private def unapplyForm(concept: Concept) : Option[(String, List[ValuedProperty], List[ValuedProperty], List[Need], DisplayProperty)] = {
     Some((concept.label, concept.properties, concept.rules, concept.needs, concept.displayProperty))
   }
 }

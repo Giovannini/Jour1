@@ -256,6 +256,7 @@ object WorldInit {
     val instances = createInstances(concept)
     instances.foreach(Application.map.createInstance)
 
+
   }
 
   /**
@@ -322,6 +323,7 @@ object WorldInit {
     // TODO shuffle take a lot of time and this is where the problem is
     val randomCoordinate = Random.shuffle(instancesOfLivingPlace).head
     val result = Instance.createRandomInstanceOf(concept).at(randomCoordinate)
+
     result
   }
 

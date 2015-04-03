@@ -44,6 +44,7 @@ object HardCodedAction {
     val instanceId = args(ParameterReference("instanceToModify", "Long")).value.asInstanceOf[Long]
     val propertyString = args(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
     val newValue = args(ParameterReference("propertyValue", "Int")).value.toString.toDouble
+
     map.modifyProperty(instanceId, propertyString, newValue)
   }
 
@@ -64,6 +65,8 @@ object HardCodedAction {
     val valueOfProperty: Double = instance.getValueForProperty(property) + valToAdd
     val newValuedProperty = ValuedProperty(property, valueOfProperty)
     val newInstance = instance.modifyValueOfProperty(newValuedProperty)
+    println(instance.toJson)
+    println(newInstance.toJson)
     Application.map.updateInstance(instance, newInstance)
   }
 
