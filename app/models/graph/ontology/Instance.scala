@@ -86,7 +86,7 @@ case class Instance(
    * @return a new instance looking like this one but with updated properties
    */
   def withProperties(newProperties: List[ValuedProperty]): Instance = {
-    if (newProperties.map(_.property) == this.concept.properties) {
+    if (newProperties.map(_.property) == this.concept.properties.map(_.property)) {
       Instance(id, label, coordinates, newProperties, concept)
     }
     else {

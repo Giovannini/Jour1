@@ -288,7 +288,7 @@ object InstanceActionManager {
     }
     nameToId += "Spreed" -> _actionSpread
 
-/*    val _actionRegenerate = {
+ /*   val _actionRegenerate = {
       val p_instanceSelected = ParameterReference("instanceToDuplicate", "Long")
       val p_instanceToRegenate = ParameterReference("instanceToPutOn", "Long")
       InstanceAction(0L,
@@ -319,7 +319,7 @@ object InstanceActionManager {
           Map(
             ParameterReference("instanceToModify", "Long") -> p_instanceSelected,
             ParameterReference("propertyName", "Property") -> ParameterValue("Feed", "Property"),
-            ParameterReference("propertyValue", "Int") -> ParameterValue("FeedMax", "Property")
+            ParameterReference("propertyValue", "Int") -> ParameterValue(ParameterValue("FeedMax", "Property").value,"Int")
           )
           )),
         parameters = List(
