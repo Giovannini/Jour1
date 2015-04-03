@@ -71,7 +71,6 @@ GET           /map                                                     controlle
 POST          /action                                                  controllers.RestCall.executeAction
 GET           /relations/:conceptId                                    controllers.RestCall.getAllActionsOf(conceptId: Int)
 
-GET           /needs/:instanceID                                       controllers.RestCall.getBestAction(instanceID: Long)
 GET           /next                                                    controllers.RestCall.next()
 
 # Map static resources from the /public folder to the /assets URL path

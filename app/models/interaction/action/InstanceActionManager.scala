@@ -27,7 +27,7 @@ object InstanceActionManager {
   def initialization(): Unit = {
     println("Initialization of Action Manager")
     InteractionDAO.clearDB()
-    //TODO thing of a way to create an instance from nothing (using json maybe)
+    //TODO think of a way to create an instance from nothing (using json maybe)
     //nameToId += "_createInstance" -> _createInstance
 
     val _addInstanceAt = {

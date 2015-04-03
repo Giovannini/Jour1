@@ -1,6 +1,6 @@
 package actors
 
-import actors.communication.ResultAction
+import actors.communication.{StopComputing, ResultAction}
 import actors.communication.computing.ComputeAction
 import akka.actor.Actor
 import models.graph.ontology.Instance
@@ -55,26 +55,22 @@ class SmartInstance extends Actor {
 
 
   def getActionFor(instance: Instance, sensedInstances: List[Instance]): List[LogInteraction] = {
-//    val t1 = System.currentTimeMillis()
     val (action, destination) = instance.selectAction(sensedInstances)
-//    val t2 = System.currentTimeMillis()
-//    println("getActionFor part1: " + (t2 - t1))
-//    val t3 = System.currentTimeMillis()
-    val result = if (!action.isError) {
+    if (!action.isError) {
       InstanceActionParser.parseActionForLog(action, List(instance.id, destination.id))
     } else {
       List()
     }
-//    val t4 = System.currentTimeMillis()
-//    println("getActionFor part2: " + (t4 - t3))
-    result
   }
 
   override def receive: Receive = {
     case ComputeAction(instance, sensedInstances) =>
-      val logs = instance.applyConsequencies() ++
-                 updatePropertiesFromEnvironment(instance, sensedInstances) ++
-                 getActionFor(instance, sensedInstances)
+      val consequencies = instance.applyConsequencies()
+      val properties = updatePropertiesFromEnvironment(instance, sensedInstances) //TODO time consuming
+      val actions = getActionFor(instance, sensedInstances)
+      val logs = consequencies ++ properties ++ actions
       sender ! ResultAction(logs)
+    case StopComputing =>
+      context.stop(self)
   }
 }

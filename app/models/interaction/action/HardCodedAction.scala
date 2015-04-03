@@ -23,13 +23,6 @@ object HardCodedAction {
     map.addInstance(instanceId, groundWhereToAddItId)
   }
 
-  //TODO
-  /*def createInstance(args: Map[ParameterReference, ParameterValue]): Unit = {
-    val jsonToParse = args(ParameterReference("instanceToAdd", "Long")).value.asInstanceOf[String]
-
-    map.createInstance(instance)
-  }*/
-
   /**
    * Remove an instance from the map at given coordinates
    * @author Thomas GIOVANNINI

@@ -14,7 +14,7 @@ object NeoDAO {
   implicit val connection = Neo4jREST(Play.application.configuration.getString("serverIP"), 7474, "/db/data/")
 
   def clearDB(): Boolean = {
-    ConceptDAO.clearDB
+    ConceptDAO.clearDB()
   }
 
   /* Methods to get informations from a concept */

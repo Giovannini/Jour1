@@ -168,18 +168,6 @@ object WorldInit {
     }
   }
 
-  /**
-   * Get concept where label = "Ground"
-   * @param concepts List of concept to browse
-   * @return the concept which label is Ground if it exists
-   *         the error concept else
-   */
-  // TODO: pas propre
-  def getGroundConcept(concepts: List[Concept]): Concept = {
-    concepts.find(_.label == "Ground")
-      .getOrElse(Concept.error)
-  }
-
 
   ///////////////////////////:: OBJECT - RANDOM :://///////////////////////////////
   /**

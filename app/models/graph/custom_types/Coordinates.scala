@@ -40,7 +40,6 @@ case class Coordinates(x: Int, y: Int) {
   def getDistanceWith(other: Coordinates): Double = {
     val xDistance = this.x - other.x
     val yDistance = this.y - other.y
-//    math.sqrt(math.pow(xDistance, 2) + math.pow(yDistance, 2))
     math.abs(xDistance) + math.abs(yDistance)
   }
 
@@ -52,12 +51,11 @@ case class Coordinates(x: Int, y: Int) {
    */
   def getNearCoordinate(radius: Int): List[Coordinates] = {
     val valueList = ((-radius) to radius).toList
-    valueList.flatMap(value => valueList.map((_, value)))
-      .filter(tuple => math.pow(tuple._1, 2) + math.pow(tuple._2, 2) < radius * radius)
-      .map(tuple => new Coordinates(tuple) + this)
+    valueList.flatMap(value => valueList.map(Coordinates(_, value) + this))
       .filter { coordinate =>
         coordinate.x >= 0 && coordinate.x < Coordinates.maxWidth &&
-        coordinate.y >= 0 && coordinate.y < Coordinates.maxHeight
+        coordinate.y >= 0 && coordinate.y < Coordinates.maxHeight &&
+        this.getDistanceWith(coordinate) <= radius
       }
   }
 }

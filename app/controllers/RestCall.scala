@@ -24,7 +24,7 @@ object RestCall extends Controller {
   }
 
   def getAllSimplifiedConcepts = Action {
-    val concepts = ConceptDAO.getAllSimlified
+    val concepts = ConceptDAO.getAllSimplified
       .map(_.toSimplifiedJson)
     Ok(Json.toJson(concepts))
   }
@@ -149,15 +149,15 @@ object RestCall extends Controller {
     Ok(instance.toJson)
   }
 
-  def getBestAction(instanceID: Long): Action[AnyContent] = Action {
+  /*def getBestAction(instanceID: Long) = Action {
     val t1 = System.currentTimeMillis()
     val instance = Application.map.getInstanceById(instanceID)
-    val bestAction = instance.selectAction(instance.getSensedInstances.flatMap(Application.map.getInstancesAt))
+    val bestAction = instance.selectAction(instance.getSensedInstances)
     val t2 = System.currentTimeMillis()
     println("Getting best action took " + (t2 - t1) + "ms.")
     Ok("Best action for instance " + instanceID + " - " + instance.label + "\n" +
        bestAction._1.label + " to instance " + bestAction._2.id + " - " + bestAction._2.label)
-  }
+  }*/
 
   def next() = Action {
     Intelligence.calculate(nrOfWorkers = 4)

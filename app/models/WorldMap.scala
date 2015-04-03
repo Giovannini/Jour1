@@ -50,6 +50,19 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
   }
 
   /**
+   * Get all the instances that have needs to fulfill
+   * @author Thomas GIOVANNINI
+   * @return a list of all the instances with needs existing on the world map
+   */
+  def getInstancesWithNeeds: List[Instance] = {
+    instancesByConcept
+      .filterKeys(key => ConceptDAO.getById(key).needs.nonEmpty)
+      .values
+      .flatten
+      .toList
+  }
+
+  /**
    * Get all the instances on a world map of a desired concept
    * @author Thomas GIOVANNINI
    * @param conceptId from which the instances are desired

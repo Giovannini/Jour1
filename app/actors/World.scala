@@ -1,6 +1,6 @@
 package actors
 
-import actors.communication.{EndOfTurn, ResultAction}
+import actors.communication.{StopComputing, EndOfTurn, ResultAction}
 import akka.actor.{Actor, ActorRef, Props}
 import akka.routing.RoundRobinPool
 import controllers.Application
@@ -23,13 +23,7 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
    * @return a list of instances that have needs
    */
   def getInstancesWithNeeds: List[Instance] = {
-//    val t1 = System.currentTimeMillis()
-    val result = Application.map
-      .getInstances
-      .filter(_.concept.needs.nonEmpty)
-//    val t2 = System.currentTimeMillis()
-//    println("getInstancesWithNeeds: " + (t2 - t1))
-    result
+    Application.map.getInstancesWithNeeds
   }
 
   /**
@@ -49,7 +43,6 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
    */
   def getEnvironmentOf(instance: Instance): List[Instance] = {
     instance.getSensedInstances
-      .flatMap(Application.map.getInstancesAt)
   }
 
   /**
@@ -63,12 +56,12 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
     case ResultAction(logList) =>
       nrOfResults += 1
       logs = logList :: logs
-      print(nrOfInstances - nrOfResults + " ")
       if (nrOfResults == nrOfInstances) {
         logs.flatten.foreach(_.execute())
         val end: Long = System.currentTimeMillis()
+        for(worker <- 1 to nrOfWorkers) workerRouter ! StopComputing
         listener ! EndOfTurn(end - start)
-        //context.stop(self)
+        context.stop(self)
       }
   }
 
@@ -80,7 +73,7 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
   private def launchComputation(launcher: Launcher): Unit = {
     val instancesWithNeeds = getInstancesWithNeeds
     setNumberOfInstancesToCompute(instancesWithNeeds.length)
-//    println(launcher.message + nrOfInstances + " instances.")
+    println("Launching computation for " + nrOfInstances + " instances.")
     for (instance <- instancesWithNeeds) {
       val environment = getEnvironmentOf(instance)
       workerRouter ! launcher.computation(instance, environment)

@@ -17,10 +17,14 @@ object ConceptDAO {
 
   implicit val connection = NeoDAO.connection
 
-  private var mapping = collection.mutable.Map.empty[Long, Concept]
+  private var mappingConceptId = collection.mutable.Map.empty[Long, Concept]
+  private var mappingConceptRelationsTo = collection.mutable.Map.empty[Long, List[(Relation, Concept)]]
+  private var mappingConceptRelationsFrom = collection.mutable.Map.empty[Long, List[(Relation, Concept)]]
 
   def clearDB(): Boolean = {
-    mapping = mapping.empty
+    mappingConceptId = mappingConceptId.empty
+    mappingConceptRelationsTo = mappingConceptRelationsTo.empty
+    mappingConceptRelationsFrom = mappingConceptRelationsFrom.empty
     val statement = Statement.clearDB
     statement.execute()
   }
@@ -61,12 +65,12 @@ object ConceptDAO {
    * @return concept if it exists, error otherwise
    */
   def getById(conceptId: Long): Concept = {
-    mapping.getOrElse(conceptId, {
+    mappingConceptId.getOrElse(conceptId, {
       val cypherResultRowStream = Statement.getConceptById(conceptId)
         .apply
       if (cypherResultRowStream.nonEmpty) {
         val concept = ConceptDAO.parseRow(cypherResultRowStream.head)
-        mapping += conceptId -> concept
+        mappingConceptId += conceptId -> concept
         concept
       } else {
         Concept.error
@@ -101,7 +105,7 @@ object ConceptDAO {
       .toList
   }
 
-  def getAllSimlified: List[Concept] = {
+  def getAllSimplified: List[Concept] = {
     Statement.getAllConcepts.apply()
       .map(ConceptDAO.parseSimplifiedRow)
       .toList
@@ -158,36 +162,42 @@ object ConceptDAO {
 
   /**
    * Get all the relations from a given source concept
-   * @author Julien Pradet
+   * @author Thomas GIOVANNINI
    * @param conceptId id of the source concept
    * @return a list of tuple containing the relation and destination concept.
    */
   def getRelationsFrom(conceptId: Long): List[(Relation, Concept)] = {
-    Statement.getRelationsFrom(conceptId)
-      .apply
-      .map { row =>
-        val relation = Relation.DBGraph.parseRow(row)
-        val concept = ConceptDAO.getById(row[Long]("concept_id"))
-        (relation, concept)
-      }
-      .toList
+    mappingConceptRelationsFrom.getOrElse(conceptId, {
+      val result = Statement.getRelationsFrom(conceptId)
+        .apply
+        .map { row =>
+          val relation = Relation.DBGraph.parseRow(row)
+          val concept = ConceptDAO.getById(row[Long]("concept_id"))
+          (relation, concept)
+        }.toList
+      mappingConceptRelationsFrom += conceptId -> result
+      result
+    })
   }
 
   /**
    * Get all the relations to a given destination concept
-   * @author Julien Pradet
+   * @author Thomas GIOVANNINI
    * @param conceptId id of the source concept
    * @return a list of tuple containing the relation and destination concept.
    */
   def getRelationsTo(conceptId: Long): List[(Relation, Concept)] = {
-    Statement.getRelationsTo(conceptId)
-      .apply
-      .toList
-      .map { row =>
-        val relation = Relation.DBGraph.parseRow(row)
-        val concept = ConceptDAO.getById(row[Long]("concept_id"))
-        (relation, concept)
-      }
+    mappingConceptRelationsTo.getOrElse(conceptId, {
+      val result = Statement.getRelationsTo(conceptId)
+        .apply
+        .map { row =>
+          val relation = Relation.DBGraph.parseRow(row)
+          val concept = ConceptDAO.getById(row[Long]("concept_id"))
+          (relation, concept)
+        }.toList
+      mappingConceptRelationsTo += conceptId -> result
+      result
+    })
   }
 
   /**
@@ -304,9 +314,9 @@ object ConceptDAO {
    * @param conceptId the ID of the concept
    * @return a list of relations and concepts
    */
-  def getReachableRelations(conceptId: Long): List[(Relation, Concept)] = {
-    val conceptRelations = getRelationsFrom(conceptId)
-    val parentsRelations = ConceptDAO.getById(conceptId)
+  def getReachableRelations(conceptId: Long): List[(Relation, Concept)] = {//TODO this is where the /next is slowed down
+    val conceptRelations = getRelationsFrom(conceptId)//Slow
+    val parentsRelations = ConceptDAO.getById(conceptId)//Slow
       .parents
       .flatMap(getReachableRelations)
     conceptRelations ::: parentsRelations
