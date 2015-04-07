@@ -107,22 +107,16 @@ object RestCall extends Controller {
   def getPossibleDestinationOfAction(initInstanceId: Long, relationId: Long, conceptId: Long)
   : Action[AnyContent] = Action {
     val sourceInstance = Application.map.getInstanceById(initInstanceId)
-    println("Source instance: " + sourceInstance)
     val actionID = RelationDAO.getActionIdFromRelationId(relationId)
-    println("ID: " + actionID)
     val action = InstanceActionParser.getAction(actionID)
-    println("Action: " + action.label)
     if (sourceInstance == Instance.error || action == InstanceAction.error) {
-      println("Bim!")
       Ok(Json.arr())
     } else {
       val destinationInstancesList = Application.map.getInstancesOf(conceptId)
-      println("DestinationInstancesList = " + destinationInstancesList.length)
       val t1 = System.currentTimeMillis()
       val reducedList = action.getDestinationList(sourceInstance, destinationInstancesList)
         .map(_.toJson)
       val t2 = System.currentTimeMillis()
-      println("Getting destinations took " + (t2 - t1) + "ms.")
       Ok(Json.toJson(reducedList))
     }
   }

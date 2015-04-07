@@ -57,7 +57,7 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
       nrOfResults += 1
       logs = logList :: logs
       if (nrOfResults == nrOfInstances) {
-        logs.flatten.foreach(_.execute())
+        logs.flatten.sortBy(_.priority).foreach(_.execute())
         val end: Long = System.currentTimeMillis()
         for(worker <- 1 to nrOfWorkers) workerRouter ! StopComputing
         listener ! EndOfTurn(end - start)

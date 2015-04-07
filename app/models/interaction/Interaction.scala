@@ -105,20 +105,20 @@ trait Interaction {
         case "addInstanceAt" =>
           val instanceId = arguments(ParameterReference("instanceToAdd", "Long")).value//.asInstanceOf[Long]
           val groundId = arguments(ParameterReference("groundWhereToAddIt", "Long")).value//.asInstanceOf[Long]
-          List(LogInteraction("ADD " + instanceId + " " + groundId))
+          List(LogInteraction("ADD " + instanceId + " " + groundId, 3))
         case "removeInstanceAt" =>
           val instanceId = arguments(ParameterReference("instanceToRemove", "Long")).value//.asInstanceOf[Long]
-          List(LogInteraction("REMOVE " + instanceId))
+          List(LogInteraction("REMOVE " + instanceId, 4))
         case "addToProperty" =>
           val instanceId = arguments(ParameterReference("instanceID", "Long")).value//.asInstanceOf[Long]
           val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
           val valueToAdd = arguments(ParameterReference("valueToAdd", "Int")).value//.asInstanceOf[String]
-          List(LogInteraction("ADD_TO_PROPERTY " + instanceId + " " + propertyString + " " + valueToAdd))
+          List(LogInteraction("ADD_TO_PROPERTY " + instanceId + " " + propertyString + " " + valueToAdd, 2))
         case "modifyProperty" =>
           val instanceId = arguments(ParameterReference("instanceID", "Long")).value//.asInstanceOf[Long]
           val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
           val newValue = arguments(ParameterReference("propertyValue", "Int")).value//.asInstanceOf[String]
-          List(LogInteraction("MODIFY_PROPERTY " + instanceId + " " + propertyString + " " + newValue))
+          List(LogInteraction("MODIFY_PROPERTY " + instanceId + " " + propertyString + " " + newValue, 1))
         case _ =>
           subInteractions.flatMap(subAction => subAction._1.log(takeGoodArguments(subAction._2, arguments)))
       }

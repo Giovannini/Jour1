@@ -102,16 +102,19 @@ object HCPrecondition {
   }
 
   def isSelf(args: Map[ParameterReference, ParameterValue]):Boolean={
-    //println("entre isMe")
     val instance1ID = args(ParameterReference("instance1ID", "Long")).value.asInstanceOf[Long]
     val instance2ID = args(ParameterReference("instance2ID", "Long")).value.asInstanceOf[Long]
-    //println("param : "+instance1ID+"  -  "+instance2ID)
-    //println("test = " +    (instance1ID==instance2ID))
     instance1ID == instance2ID
   }
 
   def notSelf(args: Map[ParameterReference, ParameterValue]):Boolean={
     ! isSelf(args)
+  }
+
+  def isDifferentConcept(args: Map[ParameterReference, ParameterValue]):Boolean={
+    val instance1ID = args(ParameterReference("instance1ID", "Long")).value.asInstanceOf[Long]
+    val instance2ID = args(ParameterReference("instance2ID", "Long")).value.asInstanceOf[Long]
+    Application.map.getInstanceById(instance1ID).concept != Application.map.getInstanceById(instance2ID).concept
   }
 
 }

@@ -71,6 +71,7 @@ case class Precondition(
       case "hasInstanceOfConcept" => HCPrecondition.hasInstanceOfConcept(args)
       case "isSelf" => HCPrecondition.isSelf(args)
       case "notSelf" => HCPrecondition.notSelf(args)
+      case "isDifferentConcept" => HCPrecondition.isDifferentConcept(args)
       // It's a user-created precondition
       case _ =>
         this.subConditions.forall(current => current._1.isFilled(current._2, arguments))
@@ -91,6 +92,8 @@ case class Precondition(
         PreconditionFiltering.isAtWalkingDistance(source, instancesList).toSet
       case "notSelf" =>
         PreconditionFiltering.notSelf(source, instancesList).toSet
+      case "isDifferentConcept" =>
+        PreconditionFiltering.isDifferentConcept(source, instancesList).toSet
       //case "hasInstanceOfConcept" =>PreconditionFiltering.hasInstanceOfConcept(source, instancesList)
       case _ =>
         this.subConditions

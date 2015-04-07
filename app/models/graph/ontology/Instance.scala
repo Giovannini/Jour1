@@ -9,6 +9,8 @@ import models.interaction.LogInteraction
 import models.interaction.action.InstanceAction
 import play.api.libs.json._
 
+import scala.util.Random
+
 
 /**
  * Model for an instance of the ontology
@@ -203,7 +205,9 @@ case class Instance(
       case head :: tail =>
         val destinationsList = destinationList(head)
         if (destinationsList.nonEmpty) {
-          (head.action, destinationsList.head)
+          val destination = Random.shuffle(destinationsList).head
+          println(this.label + this.id + " - " + head.action.label + " - " + destination.label + destination.id)
+          (head.action, destination)
         }
         else {
           retrieveBestAction(tail)

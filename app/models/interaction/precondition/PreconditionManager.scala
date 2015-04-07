@@ -82,6 +82,16 @@ object PreconditionManager {
       )
     )
 
+    val preconditionDifferentConcept = Precondition(
+      0,
+      "isDifferentConcept",
+      List(),
+      List(
+        ParameterReference("instance1ID", "Long"),
+        ParameterReference("instance2ID", "Long")
+      )
+    )
+
     nameToId += "isNextTo" -> preconditionIsNextTo.save
     nameToId += "isOnSameTile" -> preconditionIsOnSameTile.save
     nameToId += "isAtWalkingDistance" -> preconditionIsAtWalkingDistance.save
@@ -89,6 +99,7 @@ object PreconditionManager {
     nameToId += "hasInstanceOfConcept" -> preconditionHasInstanceOfconcept.save
     nameToId += "isSelf" -> preconditionIsSelf.save
     nameToId += "notSelf" -> preconditionNotSelf.save
+    nameToId += "isDifferentConcept" -> preconditionDifferentConcept.save
 
     /*Composed preconditions*/
     val preconditionPropertyIsHigherThan = {

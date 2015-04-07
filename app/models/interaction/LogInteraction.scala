@@ -7,7 +7,7 @@ import scala.util.{Failure, Success, Try}
 /**
  * Class to log an action without executing it.
  */
-case class LogInteraction(value: String){
+case class LogInteraction(value: String, priority: Int){
 
   class UnknownLogException extends Exception
 
@@ -51,10 +51,10 @@ case class LogInteraction(value: String){
 
 object LogInteraction {
 
-  val nothing = LogInteraction("ERROR")
+  val nothing = LogInteraction("ERROR", 0)
 
   def createModifyLog(instanceId: Long, propertyName: String, propertyValue: Double): LogInteraction = {
-    LogInteraction("MODIFY_PROPERTY " + instanceId + " " + propertyName + " " + propertyValue)
+    LogInteraction("MODIFY_PROPERTY " + instanceId + " " + propertyName + " " + propertyValue, 1)
   }
 
 }

@@ -14,6 +14,7 @@ object PreconditionFiltering {
    */
   def allInstances: List[Instance] = Application.map.getInstances
 
+
   /**
    * Get all the instances that are next to the given source
    * OOO
@@ -62,11 +63,14 @@ object PreconditionFiltering {
     val propertyWalkingDistance = PropertyDAO.getByName("WalkingDistance")
     val result = getNear(source, source.getValueForProperty(propertyWalkingDistance).asInstanceOf[Int])
       .filter(_.coordinates != source.coordinates)
-      //.distinct
     result
   }
 
   def notSelf(source: Instance, instancesList: List[Instance]): List[Instance] = {
     instancesList diff List(source)
+  }
+
+  def isDifferentConcept(instance: Instance, listInstances: List[Instance]) = {
+    listInstances.filter(_.concept != instance.concept)
   }
 }

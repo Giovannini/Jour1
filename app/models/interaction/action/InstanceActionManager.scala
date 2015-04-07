@@ -155,7 +155,7 @@ object InstanceActionManager {
             )
             ),
           (
-            PreconditionManager.nameToId("notSelf"),
+            PreconditionManager.nameToId("isDifferentConcept"),
             Map(
               ParameterReference("instance1ID", "Long") -> p_instanceThatEat,
               ParameterReference("instance2ID", "Long") -> p_instanceThatIsEaten
