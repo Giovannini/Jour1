@@ -153,7 +153,14 @@ object InstanceActionManager {
               ParameterReference("instance1ID", "Long") -> p_instanceThatEat,
               ParameterReference("instance2ID", "Long") -> p_instanceThatIsEaten
             )
-            )//No need to check properties existence, that will be done by actions addToProperty
+            ),
+          (
+            PreconditionManager.nameToId("notSelf"),
+            Map(
+              ParameterReference("instance1ID", "Long") -> p_instanceThatEat,
+              ParameterReference("instance2ID", "Long") -> p_instanceThatIsEaten
+            )
+          )
         ),
         _subActions = List(
           (

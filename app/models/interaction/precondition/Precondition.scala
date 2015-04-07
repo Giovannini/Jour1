@@ -69,7 +69,8 @@ case class Precondition(
       case "propertyIsHigherThan" => HCPrecondition.isHigherThan(args)
       case "propertyIsLowerThan" => !HCPrecondition.isHigherThan(args)
       case "hasInstanceOfConcept" => HCPrecondition.hasInstanceOfConcept(args)
-      case "isMe" => HCPrecondition.isMe(args)
+      case "isSelf" => HCPrecondition.isSelf(args)
+      case "notSelf" => HCPrecondition.notSelf(args)
       // It's a user-created precondition
       case _ =>
         this.subConditions.forall(current => current._1.isFilled(current._2, arguments))
@@ -88,6 +89,8 @@ case class Precondition(
         PreconditionFiltering.isOnSameTile(source, instancesList).toSet
       case "isAtWalkingDistance" =>
         PreconditionFiltering.isAtWalkingDistance(source, instancesList).toSet
+      case "notSelf" =>
+        PreconditionFiltering.notSelf(source, instancesList).toSet
       //case "hasInstanceOfConcept" =>PreconditionFiltering.hasInstanceOfConcept(source, instancesList)
       case _ =>
         this.subConditions

@@ -56,6 +56,7 @@ class SmartInstance extends Actor {
 
   def getActionFor(instance: Instance, sensedInstances: List[Instance]): List[LogInteraction] = {
     val (action, destination) = instance.selectAction(sensedInstances)
+    if(instance.concept.label == "Sheep") println("Sheep" + instance.id + " action is " + action.label)
     if (!action.isError) {
       InstanceActionParser.parseActionForLog(action, List(instance.id, destination.id))
     } else {

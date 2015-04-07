@@ -4,8 +4,8 @@ import models.graph.NeoDAO
 import models.graph.custom_types.DisplayProperty
 import models.graph.ontology.ValuedProperty
 import models.graph.ontology.concept.need.{Need, NeedDAO}
-import models.graph.ontology.property.{Property, PropertyDAO}
-import models.graph.ontology.relation.{RelationDAO, Relation}
+import models.graph.ontology.property.Property
+import models.graph.ontology.relation.{Relation, RelationDAO}
 import models.interaction.action.InstanceAction
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
@@ -157,6 +157,7 @@ object Concept {
 
   val error = Concept("XXX", List(), List(), List(), DisplayProperty())
   val any = Concept("Any", List(), List(), List(), DisplayProperty())
+  val self = Concept("Self", List(), List(), List(), DisplayProperty())
 
   /**
    * Parse a Json value to a concept

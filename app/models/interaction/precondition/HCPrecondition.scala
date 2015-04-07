@@ -101,13 +101,17 @@ object HCPrecondition {
     listInstance.exists(p=>p.concept.id == conceptId)
   }
 
-  def isMe(args: Map[ParameterReference, ParameterValue]):Boolean={
-    println("entre isMe")
+  def isSelf(args: Map[ParameterReference, ParameterValue]):Boolean={
+    //println("entre isMe")
     val instance1ID = args(ParameterReference("instance1ID", "Long")).value.asInstanceOf[Long]
     val instance2ID = args(ParameterReference("instance2ID", "Long")).value.asInstanceOf[Long]
-    println("paramget : "+instance1ID+"  -  "+instance2ID)
-    println("test = " +    (instance1ID==instance2ID))
-    instance1ID==instance2ID
+    //println("param : "+instance1ID+"  -  "+instance2ID)
+    //println("test = " +    (instance1ID==instance2ID))
+    instance1ID == instance2ID
+  }
+
+  def notSelf(args: Map[ParameterReference, ParameterValue]):Boolean={
+    ! isSelf(args)
   }
 
 }
