@@ -43,19 +43,30 @@
         </div>
         <div class="form-group highlight" ng-repeat="property in node.properties track by $index">
             <div class="form-group">
-                <label class="form-group__label" for="node_{{$index}}_property">Property:</label>
+                <label class="form-group__label" for="property_{{$index}}_property">Property:</label>
                 <div class="form-group__input">
                     <select
-                        id="node_{{$index}}_property"
-                        name="node_{{$index}}_property"
-                        ng-model="node.properties[$index]"
-                        ng-options="prop as prop.label for prop in properties">
+                            id="property_{{$index}}_property"
+                            name="property_{{$index}}_property"
+                            ng-model="node.properties[$index].property"
+                            ng-options="prop as prop.label for prop in properties"
+                            ng-change="newPropertyValue($index)">
                     </select>
                 </div>
             </div>
             <div class="form-group">
+                <label class="form-group__label" for="property_{{$index}}_value">Value:</label>
                 <div class="form-group__input">
-                    <button type="button" class="button--remove" ng-click="removeProperty($index)">Remove</button>
+                    <input
+                            type="number"
+                            id="property_{{$index}}_value"
+                            name="property_{{$index}}_value"
+                            ng-model="node.properties[$index].value" />
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="form-group__input remove">
+                    <button type="button" ng-click="removeProperty($index)">Remove</button>
                 </div>
             </div>
         </div>
@@ -98,9 +109,10 @@
                     <input type="number" id="rules_{{$index}}_value" name="rules_{{$index}}_value" ng-model="node.rules[$index].value" />
                 </div>
             </div>
+
             <div class="form-group">
-                <div class="form-group__input">
-                    <button type="button" class="button--remove" ng-click="removeRule($index)">Remove</button>
+                <div class="form-group__input remove">
+                    <button type="button" ng-click="removeRule($index)">Remove</button>
                 </div>
             </div>
         </div>
@@ -206,7 +218,9 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <button type="button" class="button--remove" ng-click="removeConsequence($parent.$index, $index)">Remove</button>
+                                    <div class="form-group__input remove">
+                                        <button type="button" class="button--remove" ng-click="removeConsequence($parent.$index, $index)">Remove</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -248,7 +262,11 @@
                                                 ng-options="concept.id as concept.label for concept in concepts"></select>
                                     </div>
                                 </div>
-                                <button type="button" class="button--remove" ng-click="removeMeans($parent.$index, $index)">Remove</button>
+                                <div class="form-group">
+                                    <div class="form-group__input remove">
+                                        <button type="button" ng-click="removeMeans($parent.$index, $index)">Remove</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

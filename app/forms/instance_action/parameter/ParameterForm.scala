@@ -1,5 +1,6 @@
 package forms.instance_action.parameter
 
+import forms.graph.ontology.property.PropertyForm
 import models.graph.ontology.property.{PropertyDAO, Property}
 import models.interaction.parameter._
 import play.api.data.Forms._
@@ -64,14 +65,15 @@ object ParameterForm {
       val isParam = data.get(key+".isParam")
 
       data.get(key+".isParam") match {
-        case None => Left(Seq(FormError(key, "error.isParamUndefined")))
+        case None => Left(Seq(FormError(key+".isParam", "error.isParamUndefined")))
         case Some(v) =>
           if(v.toBoolean) {
+            println(data.get(key+".value.reference"))
             val reference = data.get(key+".value.reference")
             val valueType = data.get(key+".value.type")
             (reference, valueType) match {
-              case (None, _) => Left(Seq(FormError(key, "error.noReference")))
-              case (_, None) => Left(Seq(FormError(key, "error.noType")))
+              case (None, _) => Left(Seq(FormError(key+".value.reference", "error.noReference")))
+              case (_, None) => Left(Seq(FormError(key+".value.type", "error.noType")))
               case (Some(_reference), Some(_type)) =>
                 val result = referenceForm.bind(Json.obj(
                   "reference" -> _reference,
@@ -83,20 +85,52 @@ object ParameterForm {
                 )
             }
           } else {
-            val value = data.get(key+".value.value")
             val valueType = data.get(key+".value.type")
-            (value, valueType) match {
-              case (None, _) => Left(Seq(FormError(key, "error.noValue")))
-              case (_, None) => Left(Seq(FormError(key, "error.noType")))
-              case (Some(_value), Some(_type)) =>
-                val result = valueForm.bind(Json.obj(
-                  "value" -> _value,
-                  "type" -> _type
-                ))
-                result.fold(
-                  hasErrors = form => Left(form.errors),
-                  success = value => Right(value)
-                )
+            valueType match {
+              case None => Left(Seq(FormError(key+".value.type", "error.noType")))
+              case Some("Property") =>
+                (
+                  data.get(key+".value.value.label"),
+                  data.get(key+".value.value.defaultValue"),
+                  data.get(key+".value.value.propertyType")
+                  ) match {
+                  case (Some(label), Some(defaultValue), Some(propertyType)) =>
+                    val result = PropertyForm.form.bind(Json.obj(
+                      "label" -> label,
+                      "defaultValue" -> defaultValue,
+                      "propertyType" -> propertyType
+                    ))
+                    result.fold(
+                      hasErrors = form => {
+                        Left(form.errors.map(err => FormError(key+".value.value."+err.key, err.messages)))
+                      },
+                      success = property => {
+                        if(property == Property.error) {
+                          Left(form.errors.map(err => FormError(key+".value.value", "error.notAProperty")))
+                        } else {
+                          Right(ParameterValue(property.label, "Property"))
+                        }
+                      }
+                    )
+                  case (_, _, _) =>
+                    Left(Seq(FormError(key + ".value.value", "error.NotEnoughParametersForProperty")))
+                }
+              case Some(_type) =>
+                data.get(key+".value.value") match {
+                  case Some(_value) =>
+                    val result = valueForm.bind(Json.obj(
+                      "value" -> _value,
+                      "type" -> _type
+                    ))
+                    result.fold(
+                      hasErrors = form => {
+                        Left(form.errors.map(err => FormError(key+".value.value."+err.key, err.messages)))
+                      },
+                      success = value => Right(value)
+                    )
+                  case None =>
+                    Left(Seq(FormError(key + ".value.value", "error.noValue")))
+                }
             }
           }
       }

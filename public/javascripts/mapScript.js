@@ -9,6 +9,7 @@ const TAG = "GAMEMAP_";
  * and a general method if it's needed elsewhere 
  */
 var RestFactory = function() {
+    var baseUrl = "/";
     var getUrl = function(url) {
         return function (success, error) {
             // Init the AJAX object
@@ -54,18 +55,18 @@ var RestFactory = function() {
 
     return {
         concepts: {
-            get: getUrl("/concepts"),
-            getById: function(idConcept) { return getUrl("/concepts/"+idConcept); }
+            get: getUrl(baseUrl+"concepts"),
+            getById: function(idConcept) { return getUrl(baseUrl+"concepts/"+idConcept); }
         },
         instances: {
-            get: getUrl("/instances"),
-            getById: function(idInstance) { return getUrl("/instances/"+idInstance); },
-            getByConcept: function(idInstance, action, conceptId) { return getUrl("/instances/"+idInstance+"/"+action+"/"+conceptId); },
-            deleteInstance: function(idInstance) { return postUrl("/instances/delete/"+idInstance, {}); }
+            get: getUrl(baseUrl+"instances"),
+            getById: function(idInstance) { return getUrl(baseUrl+"instances/"+idInstance); },
+            getByConcept: function(idInstance, action, conceptId) { return getUrl(baseUrl+"instances/"+idInstance+"/"+action+"/"+conceptId); },
+            deleteInstance: function(idInstance) { return postUrl(baseUrl+"instances/delete/"+idInstance, {}); }
         },
         action: {
             sendAction: function(initInstance, action, destInstance) {
-                return postUrl("/action", {
+                return postUrl(baseUrl+"map/action", {
                     action: action,
                     instances: [initInstance, destInstance]
                 });
@@ -164,7 +165,7 @@ var GraphFactory = function(Rest) {
         } else {
             // We need to fetch the relations
             var _this = this;
-            Rest.all.get("/relations/" + this.id)(
+            Rest.all.get("/map/relations/" + this.id)(
                 function (response) {
                     var relations = JSON.parse(response);
                     _this.addRelation(relations);
@@ -754,4 +755,5 @@ window.Rest = RestFactory();
 window.Graph = GraphFactory(Rest);
 window.Map = MapFactory(Rest);
 window.Drawer = DrawerFactory();
+
 window.MapController = MapController(Graph, Map, Drawer);

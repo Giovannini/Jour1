@@ -8,7 +8,7 @@
 </head>
 <body>
 
-    @helper.form(action = controllers.rules.routes.RulesVisualisation.submit()) {
+@*    @helper.form(action = controllers.rules.routes.RulesVisualisation.submit()) {
         @helper.inputText(form("label"))
         @helper.repeat(form("param"), min = 1) { param =>
             @helper.inputText(param)
@@ -20,7 +20,7 @@
             @helper.inputText(content)
         }
         <input type="submit" value="go" />
-    }
+    }*@
 
 </body>
 </html>

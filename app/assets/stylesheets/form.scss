@@ -32,7 +32,7 @@ input[type="number"] {
   text-align: right;
 }
 
-input.ng-invalid-pattern {
+.ng-invalid-pattern {
   border: 1px solid #cc4850;
 }
 
@@ -172,4 +172,8 @@ input.ng-invalid-pattern {
 
 .form-add {
   text-align: right;
+}
+
+.error {
+  color: #cc4850;
 }

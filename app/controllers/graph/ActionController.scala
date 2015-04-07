@@ -29,7 +29,15 @@ object ActionController extends Controller {
       case Some(accept) if accept.contains("application/json") =>
         action
       case _ =>
-        Redirect("/action")
+        Ok(views.html.action.index())
+    }
+  }
+
+
+  def getActions: Action[AnyContent] = Action { request =>
+    jsonOrRedirectToIndex(request) {
+      val preconditions = InstanceActionDAO.getAll
+      Ok(Json.toJson(preconditions.map(_.toJson)))
     }
   }
 
@@ -104,10 +112,10 @@ object ActionController extends Controller {
           success = {
             newAction => {
               val result = InstanceActionDAO.update(action.id, newAction)
-              if(result > 1) {
+              if(result >= 1) {
                 Ok(Json.obj("result" -> "OK"))
               } else {
-                InternalServerError(Json.obj("result" -> "Impossible to delete action"))
+                InternalServerError(Json.obj("result" -> "Impossible to update action"))
               }
             }
           }

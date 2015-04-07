@@ -1,10 +1,11 @@
 package models.graph
 
 import models.graph.custom_types.Statement
-import models.graph.ontology.concept.ConceptDAO
+import models.graph.ontology.concept.{Concept, ConceptDAO}
 import org.anormcypher._
 import play.Play
 
+import scala.util.{Success, Failure, Try}
 
 /**
  * Model for the NeoDAO class.
@@ -76,4 +77,19 @@ object NeoDAO {
     removeRelationFromDB(sourceId, oldRelationId, destId) && addRelationToDB(sourceId, newRelationId, destId)
   }
 
+  def getRelationsById(id: Long): List[(Concept, Concept)] = {
+    val statement = Statement.getRelationsById(id)
+    statement.apply().map(
+      row => {
+        Try {
+          val source = ConceptDAO.getByLabel(row[String]("source_label"))
+          val destination = ConceptDAO.getByLabel(row[String]("destination_label"))
+          (source, destination)
+        } match {
+          case Success(result) => result
+          case Failure(e) => (Concept.error, Concept.error)
+        }
+      }
+    ).toList
+  }
 }

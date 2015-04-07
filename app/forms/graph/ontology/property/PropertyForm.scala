@@ -16,10 +16,18 @@ object PropertyForm {
   )(applyForm)(unapplyForm))
 
   def applyForm(label: String, propertyType: String, defaultValue: Double): Property = {
-    Property(label, PropertyType.parse(propertyType), defaultValue)
+    if(PropertyType.parse(propertyType) == PropertyType.Error) {
+      Property.error
+    } else {
+      Property(label, PropertyType.parse(propertyType), defaultValue)
+    }
   }
 
   def unapplyForm(property: Property): Option[(String, String, Double)] = {
-    Some((property.label, property.propertyType.toString, property.defaultValue))
+    if(property == Property.error) {
+      None
+    } else {
+      Some((property.label, property.propertyType.toString, property.defaultValue))
+    }
   }
 }

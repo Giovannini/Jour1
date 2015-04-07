@@ -11,7 +11,7 @@
 </head>
 <body>
   Yo!
-    @helper.form(action = controllers.ontology.routes.RelationManager.create()) {
+@*    @helper.form(action = controllers.ontology.routes.RelationManager.create()) {
       @helper.input(RelationManager.relationForm("concept1_id")) { (id, name, value, args) =>
         <select name="@name" id="@id">
         @for(concept <- ConceptDAO.getAll){
@@ -39,6 +39,6 @@
       @helper.checkbox(RelationManager.relationForm("is_action"))
 
       <input type="submit">
-    }
+    }*@
 </body>
 </html>

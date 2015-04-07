@@ -9,6 +9,18 @@ import play.api.data.Form
 import play.api.data.Forms._
 
 object InstanceActionForm {
+  private def applyIdForm(id: Long): InstanceAction = {
+    InstanceActionDAO.getById(id)
+  }
+
+  private def unapplyIdForm(action: InstanceAction): Option[Long] = {
+    Some(action.id)
+  }
+
+  val idForm: Form[InstanceAction] = Form(
+    mapping("id" -> longNumber)(applyIdForm)(unapplyIdForm)
+  )
+
   lazy val subactionForm : Form[(InstanceAction, Map[ParameterReference, Parameter])] = Form(
     mapping(
       "id" -> longNumber,
@@ -21,7 +33,7 @@ object InstanceActionForm {
       "label" -> text,
       "preconditions" -> list(PreconditionForm.subconditionForm.mapping),
       "subActions" -> list(subactionForm.mapping),
-      "parameters" -> list(ParameterForm.referenceForm.mapping)
+      "parameters" -> list(ParameterForm.referenceForm.mapping).verifying("empty parameter list", parameters => !parameters.isEmpty)
     )(applyForm)(unapplyForm)
   )
 

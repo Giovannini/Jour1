@@ -10,7 +10,6 @@ import org.anormcypher.{Cypher, CypherStatement}
  * All values from this objects are CypherStatements used in the Neo4J database
  */
 object Statement {
-
   /**
    * Statement returning all the concepts in the graph database.
    * @author Thomas GIOVANNINI
@@ -207,6 +206,15 @@ object Statement {
 
   def getAllRelations: CypherStatement = {
     Cypher("match n-[r]->m return distinct type(r) as rel_type")
+  }
+
+  def getRelationsById(id: Long): CypherStatement = {
+    val query = "match n-[:R_"+id+"]->m " +
+      "return " +
+      "n.label as source_label, " +
+      "m.label as destination_label"
+    println(query)
+    Cypher(query)
   }
 
   /**
