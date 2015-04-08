@@ -51,7 +51,6 @@ object InstanceManager extends Controller {
    */
   def update = Action(parse.json) {
     request => {
-      println("request = " + request.body)
       val newInstanceForm = InstanceForm.form.bind(request.body)
       newInstanceForm.fold(
         hasErrors = {
@@ -76,9 +75,14 @@ object InstanceManager extends Controller {
    * @param instanceId instance id
    * @return an action redirecting to the index page of the application
    */
-  def delete(instanceId: Int): Action[AnyContent] = Action {
-    Application.map.removeInstance(instanceId)
-    Redirect(controllers.routes.MapController.show())
+  def delete(instanceId: Int) = Action {
+    val result = Application.map.removeInstance(instanceId)
+    if (result) {
+      Ok("deleted")
+    }
+    else {
+      InternalServerError("Impossible to delete instance")
+    }
   }
 
   /**

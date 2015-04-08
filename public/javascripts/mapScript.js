@@ -10,6 +10,7 @@ const TAG = "GAMEMAP_";
  */
 var RestFactory = function() {
     var baseUrl = "/";
+
     var getUrl = function(url) {
         return function (success, error) {
             // Init the AJAX object
@@ -53,6 +54,27 @@ var RestFactory = function() {
         }
     };
 
+    var deleteUrl = function(url) {
+        return function (success, error) {
+            // Init the AJAX object
+            var req = new XMLHttpRequest();
+            req.open("DELETE", url, true);
+            req.onreadystatechange = function () {
+                if (req.readyState === 4) {
+                    if (req.status === 200) {
+                        // if succeeded
+                        success(req.responseText);
+                    } else {
+                        // if error
+                        error(req.status, req.responseText);
+                    }
+                }
+            };
+            // Launch request
+            req.send(null);
+        };
+    };
+
     return {
         concepts: {
             get: getUrl(baseUrl+"concepts"),
@@ -62,7 +84,7 @@ var RestFactory = function() {
             get: getUrl(baseUrl+"instances"),
             getById: function(idInstance) { return getUrl(baseUrl+"instances/"+idInstance); },
             getByConcept: function(idInstance, action, conceptId) { return getUrl(baseUrl+"instances/"+idInstance+"/"+action+"/"+conceptId); },
-            deleteInstance: function(idInstance) { return postUrl(baseUrl+"instances/delete/"+idInstance, {}); }
+            deleteInstance: function(idInstance) { return deleteUrl(baseUrl+"instances/"+idInstance); }
         },
         action: {
             sendAction: function(initInstance, action, destInstance) {

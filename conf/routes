@@ -13,10 +13,12 @@ GET           /instances/:initInstanceId/:actionType/:conceptId        controlle
 #Instances manipulation
 GET           /instances/edit/:instanceId                              controllers.RestCall.editInstance(instanceId: Int)
 GET           /instances/create/:conceptId                             controllers.RestCall.createInstance(conceptId: Int)
-POST          /instances/delete/:instanceId                            controllers.ontology.InstanceManager.delete(instanceId: Int)
+
+GET           /instances/:instanceId                                   controllers.RestCall.getInstanceById(instanceId: Int)
+DELETE        /instances/:instanceId                                   controllers.ontology.InstanceManager.delete(instanceId: Int)
 POST          /instances/update                                        controllers.ontology.InstanceManager.update
 POST          /instances/create                                        controllers.ontology.InstanceManager.create
-GET           /instances/:instanceId                                   controllers.RestCall.getInstanceById(instanceId: Int)
+
 
 #Graph manipulation
 GET           /graph                                                   controllers.graph.GraphVisualisation.index
@@ -68,11 +70,11 @@ DELETE        /relations/:label                                        controlle
 #GET           /relations/delete/:id                                    controllers.rules.RelationVisualisation.delete(id: Long)
 
 # Action CRUD
-GET           /actions                                                  controllers.graph.ActionController.getActions
-GET           /actions/:label                                           controllers.graph.ActionController.readAction(label: String)
-POST          /actions/:label                                           controllers.graph.ActionController.createAction(label: String)
-PUT           /actions/:label                                           controllers.graph.ActionController.updateAction(label: String)
-DELETE        /actions/:label                                           controllers.graph.ActionController.deleteAction(label: String)
+GET           /actions                                                 controllers.graph.ActionController.getActions
+GET           /actions/:label                                          controllers.graph.ActionController.readAction(label: String)
+POST          /actions/:label                                          controllers.graph.ActionController.createAction(label: String)
+PUT           /actions/:label                                          controllers.graph.ActionController.updateAction(label: String)
+DELETE        /actions/:label                                          controllers.graph.ActionController.deleteAction(label: String)
 
 # Rules visualisation
 # TODO :  delete when the action CRUD is done

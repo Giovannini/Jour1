@@ -176,7 +176,7 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
    * @author Thomas GIOVANNINI
    * @param instanceId to remove from the map
    */
-  def removeInstance(instanceId: Long): Unit = {
+  def removeInstance(instanceId: Long): Boolean = {
     Try {
       val instance = getInstanceById(instanceId)
       val conceptId = instance.concept.id
@@ -184,10 +184,11 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
       instancesByConcept(conceptId) = instancesByConcept.getOrElse(conceptId, List()) diff List(instance)
       instancesByCoordinates(coordinates) = instancesByCoordinates.getOrElse(coordinates, List()) diff List(instance)
     } match {
-      case Success(_) =>
+      case Success(_) => true
       case Failure(e) =>
         println("Failure while removing an instance from the map in WorldMap.scala:")
         println(e)
+        false
     }
   }
 

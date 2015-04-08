@@ -170,7 +170,7 @@ var InstanceFactory = ['$resource', function($resource) {
      */
     var setInstance = function(instance) {
         _instance = instance;
-    }
+    };
 
     /**
      * Send of the form to controller
