@@ -105,12 +105,6 @@ object ConceptDAO {
       .toList
   }
 
-  def getAllSimplified: List[Concept] = {
-    Statement.getAllConcepts.apply()
-      .map(ConceptDAO.parseSimplifiedRow)
-      .toList
-  }
-
   /*########################
       Basic DB transactions
    ########################*/

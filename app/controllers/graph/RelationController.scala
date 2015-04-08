@@ -31,6 +31,34 @@ object RelationController extends Controller {
     )
   }
 
+  def addRelationToGraph(label: String, source: Long, target: Long) = Action { request =>
+    val relation = RelationDAO.getByName(label)
+    if(relation == Relation.error) {
+      BadRequest("Unknown relation")
+    } else {
+      val result = NeoDAO.addRelationToDB(source, relation.id, target)
+      if (result) {
+        Ok("Relation added to the graph")
+      } else {
+        InternalServerError("Couldnt add the relation to the graph")
+      }
+    }
+  }
+
+  def removeRelationToGraph(label: String, source: Long, target: Long) = Action { request =>
+    val relation = RelationDAO.getByName(label)
+    if(relation == Relation.error) {
+      BadRequest("Unknown relation")
+    } else {
+      val result = NeoDAO.removeRelationFromDB(source, relation.id, target)
+      if (result) {
+        Ok("Relation removed from the graph")
+      } else {
+        InternalServerError("Couldnt remove the relation from the graph")
+      }
+    }
+  }
+
   def getRelation(label: String) = Action {
     val relation = RelationDAO.getByName(label)
     if(relation == Relation.error) {

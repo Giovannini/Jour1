@@ -37,6 +37,10 @@ GET           /concepts/:label/actions                                 controlle
 GET           /concepts/:label/:deepness                               controllers.graph.ConceptController.readConcept(label: String, deepness: Int)
 
 # Relation CRUD
+# adding relations to the graph
+POST          /graph/relations/:label/:source/:target                  controllers.graph.RelationController.addRelationToGraph(label: String, source: Long, target: Long)
+DELETE        /graph/relations/:label/:source/:target                  controllers.graph.RelationController.removeRelationToGraph(label: String, source: Long, target: Long)
+
 POST          /graph/relations/:label                                  controllers.graph.RelationController.createRelation(label: String)
 GET           /graph/relations/:label                                  controllers.graph.RelationController.getRelation(label: String)
 PUT           /graph/relations/:label                                  controllers.graph.RelationController.updateRelation(label: String)

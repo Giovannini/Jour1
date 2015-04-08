@@ -14,14 +14,15 @@
                 <label class="form-group__label" for="relation_name">Name:</label>
                 <div class="form-group__input">
                     <select
-                        ng-model="relation.type"
-                        ng-options="type in relationTypes"></select>
+                            name="relation_type"
+                            id="relation_type"
+                            ng-model="relation.type"
+                            ng-options="type for type in relationTypes"></select>
                     <input
                             type="text"
                             id="relation_name"
                             name="relation_name"
-                            ng-model="relation.label"
-                            ng-pattern="/^ACTION_[\w]+$/"/>
+                            ng-model="relation.label" />
                 </div>
             </div>
         </div>

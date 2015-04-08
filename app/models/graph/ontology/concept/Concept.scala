@@ -48,7 +48,9 @@ case class Concept(
     label.hashCode + "CONCEPT".hashCode()
   }
 
-  def simplify: Concept = Concept(this.label, List(), List(), List(), this.displayProperty)
+  def simplify: Concept = {
+    Concept(this.label, List(), List(), List(), this.displayProperty)
+  }
 
   /**
    * Parse a Concept to Json

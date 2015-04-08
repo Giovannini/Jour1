@@ -62,7 +62,7 @@ body {
 
 .tile-info-title {
   display: table;
-  width: 100%;
+  width: calc(100% - 60px);
   -moz-box-sizing: padding-box;
   box-sizing: padding-box;
 
