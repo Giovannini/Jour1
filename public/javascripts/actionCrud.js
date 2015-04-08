@@ -497,7 +497,7 @@ var NewActionCtrl = ['$scope', 'EditActionFactory', '$location', function($scope
 /*
 Controller managing the edition of an action
  */
-var EditActionCtrl = ['$scope', '$routeParams', 'RestFactory', 'EditActionFactory', function($scope, $routeParams, RestFactory, EditActionFactory) {
+var EditActionCtrl = ['$scope', '$routeParams', 'RestFactory', 'EditActionFactory', '$location', function($scope, $routeParams, RestFactory, EditActionFactory, $location) {
     $scope.submit_button = "Edit";
     $scope.back_url = "#/"+$routeParams.label;
     $scope.action  = {};

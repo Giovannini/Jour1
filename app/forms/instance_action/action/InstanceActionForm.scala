@@ -35,6 +35,7 @@ object InstanceActionForm {
       "subActions" -> list(subactionForm.mapping),
       "parameters" -> list(ParameterForm.referenceForm.mapping).verifying("empty parameter list", parameters => !parameters.isEmpty)
     )(applyForm)(unapplyForm)
+      .verifying("is Recursive", instanceAction => instanceAction.isValid())
   )
 
   private def applyForm(

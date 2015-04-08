@@ -121,6 +121,12 @@ case class InstanceAction(
   def save: InstanceAction = {
     InstanceActionDAO.save(this)
   }
+
+  def isValid() : Boolean = {
+    _subActions.forall(item => {
+      item._1.id != this.id && item._1.label != this.label
+    })
+  }
 }
 
 /**
