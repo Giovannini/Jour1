@@ -92,6 +92,8 @@ case class Precondition(
         PreconditionFiltering.isAtWalkingDistance(source, instancesList).toSet
       case "notSelf" =>
         PreconditionFiltering.notSelf(source, instancesList).toSet
+      case "isSelf" =>
+        PreconditionFiltering.isSelf(source,instancesList).toSet
       case "isDifferentConcept" =>
         PreconditionFiltering.isDifferentConcept(source, instancesList).toSet
       //case "hasInstanceOfConcept" =>PreconditionFiltering.hasInstanceOfConcept(source, instancesList)

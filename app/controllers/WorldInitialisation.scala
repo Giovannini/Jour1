@@ -175,6 +175,7 @@ object WorldInitialisation extends Controller {
       List(ConsequenceStep(10, Consequence(8, InstanceActionManager.nameToId("_removeInstanceAt").toEffect))),
       List(MeanOfSatisfaction(InstanceActionManager.nameToId("Eat"), conceptSheep),
         MeanOfSatisfaction(InstanceActionManager.nameToId("Eat"), conceptApple),
+        MeanOfSatisfaction(InstanceActionManager.nameToId("Eat"), conceptGrass),
         MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), conceptSheep),
         MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), conceptApple),
         MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.self),

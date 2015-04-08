@@ -119,6 +119,11 @@ trait Interaction {
           val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
           val newValue = arguments(ParameterReference("propertyValue", "Int")).value//.asInstanceOf[String]
           List(LogInteraction("MODIFY_PROPERTY " + instanceId + " " + propertyString + " " + newValue, 1))
+        case "modifyPropertyWithParam" =>
+          val instanceId = arguments(ParameterReference("instanceID", "Long")).value//.asInstanceOf[Long]
+          val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
+          val newValue = arguments(ParameterReference("propertyValue", "Property")).value//.asInstanceOf[String]
+          List(LogInteraction("MODIFY_PROPERTY_WITH_PARAM " + instanceId + " " + propertyString + " " + newValue, 1))
         case _ =>
           subInteractions.flatMap(subAction => subAction._1.log(takeGoodArguments(subAction._2, arguments)))
       }

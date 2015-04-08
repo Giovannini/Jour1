@@ -192,6 +192,23 @@ case class WorldMap(label: Label, description: String, width: Int, height: Int) 
     }
   }
 
+  def modifyPropertyWithParam(instanceId: Long, propertyString: String, propertyValue: String): Unit = {
+    val instance = getInstanceById(instanceId)
+    val property = PropertyDAO.getByName(propertyString)
+    val property2 = PropertyDAO.getByName(propertyValue)
+
+    val valueOfProperty: Double = instance.getValueForProperty(property2)
+    val modifiedInstance = instance.modifyValueOfProperty(ValuedProperty(property,valueOfProperty))
+
+    val conceptId = instance.concept.id
+    val coordinates = instance.coordinates
+    println("======= > "+modifiedInstance)
+    instancesByConcept(conceptId) =
+      modifiedInstance :: (instancesByConcept.getOrElse(conceptId, List()) diff List(instance))
+    instancesByCoordinates(coordinates) =
+      modifiedInstance :: (instancesByCoordinates.getOrElse(coordinates, List()) diff List(instance))
+
+  }
   def modifyProperty(instanceId: Long, propertyString: String, propertyValue: Double): Unit = {
     val instance = getInstanceById(instanceId)
     val property = PropertyDAO.getByName(propertyString)

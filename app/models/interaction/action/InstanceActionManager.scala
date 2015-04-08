@@ -105,6 +105,38 @@ object InstanceActionManager {
     }
     nameToId += "_modifyProperty" -> _modifyProperty
 
+    val _modifyPropertyWithParam = {
+      val p_instanceID = ParameterReference("instanceToModify", "Long")
+      val p_propertyName = ParameterReference("propertyName", "Property")
+      val p_propertyValue = ParameterReference("propertyValue", "Property")
+      InstanceAction(
+        0L,
+        "modifyPropertyWithParam",
+        // Preconditions
+        List(
+          (
+            PreconditionManager.nameToId("hasProperty"),
+            Map(
+              ParameterReference("instanceToModify", "Long") -> p_instanceID,
+              ParameterReference("property", "Property") -> p_propertyName
+            )
+            ),
+          (
+            PreconditionManager.nameToId("hasProperty"),
+            Map(
+              ParameterReference("instanceToModify", "Long") -> p_instanceID,
+              ParameterReference("property", "Property") -> p_propertyValue
+            )
+            )
+        ),
+        // SubActions
+        List(),
+        // Parameters
+        List(p_instanceID, p_propertyName, p_propertyValue)
+      ).save
+    }
+    nameToId += "_modifyPropertyWithParam" -> _modifyPropertyWithParam
+
     /*Function to add to the BDD*/
     val _actionMoveInstanceAt = {
       val p_instanceToMove = ParameterReference("instanceToMove", "Long")
@@ -295,7 +327,7 @@ object InstanceActionManager {
     }
     nameToId += "Spreed" -> _actionSpread
 
- /*   val _actionRegenerate = {
+    val _actionRegenerate = {
       val p_instanceSelected = ParameterReference("instanceToDuplicate", "Long")
       val p_instanceToRegenate = ParameterReference("instanceToPutOn", "Long")
       InstanceAction(0L,
@@ -314,7 +346,7 @@ object InstanceActionManager {
               ParameterReference("property", "Property") -> ParameterValue("FeedMax", "Property")
             )
             ),
-          (PreconditionManager.nameToId("isOnSameTile"),
+          (PreconditionManager.nameToId("isSelf"),
             Map(
               ParameterReference("instance1ID", "Long") -> p_instanceSelected,
               ParameterReference("instance2ID", "Long") -> p_instanceToRegenate
@@ -322,11 +354,11 @@ object InstanceActionManager {
             )
         ),
         _subActions = List((
-          _modifyProperty,
+          _modifyPropertyWithParam,
           Map(
             ParameterReference("instanceToModify", "Long") -> p_instanceSelected,
             ParameterReference("propertyName", "Property") -> ParameterValue("Feed", "Property"),
-            ParameterReference("propertyValue", "Int") -> ParameterValue(ParameterValue("FeedMax", "Property").value,"Int")
+            ParameterReference("propertyValue", "Property") -> ParameterValue("FeedMax", "Property")
           )
           )),
         parameters = List(
@@ -334,7 +366,9 @@ object InstanceActionManager {
           p_instanceToRegenate
         )
       ).save
-    }*/
+    }
+    nameToId += "Regenerate" -> _actionRegenerate
+
   }
 }
 

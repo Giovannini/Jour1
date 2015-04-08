@@ -70,6 +70,10 @@ object PreconditionFiltering {
     instancesList diff List(source)
   }
 
+  def isSelf(source: Instance, instancesList: List[Instance]): List[Instance] = {
+    List(source)
+  }
+
   def isDifferentConcept(instance: Instance, listInstances: List[Instance]) = {
     listInstances.filter(_.concept != instance.concept)
   }

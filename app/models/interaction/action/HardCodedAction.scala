@@ -41,6 +41,17 @@ object HardCodedAction {
     map.modifyProperty(instanceId, propertyString, newValue)
   }
 
+  def modifyPropertyWithParam(args: Map[ParameterReference, ParameterValue]): Unit = {
+    val instanceId = args(ParameterReference("instanceToModify", "Long")).value.asInstanceOf[Long]
+    val propertyString = args(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
+    val propertyToUse = args(ParameterReference("propertyValue", "Property")).value.asInstanceOf[String]
+    val instance = map.getInstanceById(instanceId)
+    val property = PropertyDAO.getByName(propertyToUse)
+
+    val valueOfProperty: Double = instance.getValueForProperty(property)
+    map.modifyProperty(instanceId, propertyString, valueOfProperty)
+  }
+
 
 
   /**
