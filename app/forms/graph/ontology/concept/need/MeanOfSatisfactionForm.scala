@@ -10,7 +10,7 @@ object MeanOfSatisfactionForm {
 
   val form: Form[MeanOfSatisfaction] = Form(mapping(
     "action" -> InstanceActionForm.form.mapping,
-    "concepts" -> ConceptForm.form.mapping
+    "concepts" -> ConceptForm.idForm.mapping
   )(MeanOfSatisfaction.apply)(MeanOfSatisfaction.unapply))
 
 }

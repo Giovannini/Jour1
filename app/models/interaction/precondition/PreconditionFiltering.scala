@@ -1,9 +1,8 @@
 package models.interaction.precondition
 
 import controllers.Application
-import models.WorldMap
 import models.graph.ontology.Instance
-import models.graph.ontology.property.{Property, PropertyDAO}
+import models.graph.ontology.property.PropertyDAO
 
 
 object PreconditionFiltering {
@@ -14,6 +13,7 @@ object PreconditionFiltering {
    * @return all the instances from the world map
    */
   def allInstances: List[Instance] = Application.map.getInstances
+
 
   /**
    * Get all the instances that are next to the given source
@@ -62,27 +62,15 @@ object PreconditionFiltering {
 
     val propertyWalkingDistance = PropertyDAO.getByName("WalkingDistance")
     val result = getNear(source, source.getValueForProperty(propertyWalkingDistance).asInstanceOf[Int])
-      //.distinct
+      .filter(_.coordinates != source.coordinates)
     result
   }
 
-  /**
-   * Precondition to check whether an instance has a property or not.
-   * @param args array containing the instance id and the property name
-   * @param map of the world
-   * @return true if the instance has the desired property
-   *         false else
-   */
-  def hasProperty(args: Array[Any], map: WorldMap): Boolean = {
-    val sourceInstance = map.getInstanceById(args(0).asInstanceOf[Long])
-    val property = Property.parseString(args(1).asInstanceOf[String])
-
-    sourceInstance.concept
-      .properties
-      .contains(property)
+  def notSelf(source: Instance, instancesList: List[Instance]): List[Instance] = {
+    instancesList diff List(source)
   }
 
-  def hasInstanceOfConcept(conceptId:Int,instancesList: List[Instance]): List[Instance] = {
-    instancesList.filter(inst => inst.concept.id==conceptId)
+  def isDifferentConcept(instance: Instance, listInstances: List[Instance]) = {
+    listInstances.filter(_.concept != instance.concept)
   }
 }

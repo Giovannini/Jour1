@@ -1,9 +1,6 @@
 package models.graph.ontology
 
 import models.graph.ontology.property.Property
-import play.api.data.Form
-import play.api.data.Forms._
-import play.api.data.format.Formats._
 import play.api.libs.json._
 
 /**
@@ -33,28 +30,6 @@ case class ValuedProperty(property: Property, value: Double){
 object ValuedProperty {
 
   val error = ValuedProperty(Property.error, 0L)
-
-  /**
-   * Apply method used in the Concept controller
-   * Allows to match a json to a form
-   * @param propertyToParse of the valued property
-   * @param value of the valued property
-   * @return valued property object
-   */
-  def applyForm(propertyToParse: String, value: Double): ValuedProperty = {
-    val property = Property.parseString(propertyToParse)
-    ValuedProperty(property, value)
-  }
-
-  /**
-   * Apply method used in the Concept controller
-   * Allows to match a json to a form
-   * @param valuedProperty valued property object
-   * @return tuple of property and value
-   */
-  def unapplyForm(valuedProperty: ValuedProperty): Option[(String, Double)] = {
-    Some((valuedProperty.property.toString, valuedProperty.value))
-  }
 
   /**
    * Method to parse a json to a ValuedProperty

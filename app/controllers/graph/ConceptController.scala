@@ -17,9 +17,8 @@ object ConceptController extends Controller {
    * Creates a concept in DB from a JSON request
    * @return Satus of the request
    */
-  def createConcept(): Action[JsValue] = {
+  def createConcept(label: String): Action[JsValue] = {
     Action(parse.json) { request =>
-      println(request.body)
       val newConceptForm = form.bind(request.body)
       newConceptForm.fold(
         hasErrors = {
@@ -50,7 +49,7 @@ object ConceptController extends Controller {
           }
         },
         success = {
-          newConcept => println(newConcept)
+          newConcept =>
             val conceptToUpdate = Concept(label, Nil, Nil, Nil, DisplayProperty())
             val updatedConcept = ConceptDAO.updateConcept(conceptToUpdate, newConcept)
             if (updatedConcept == Concept.error) {

@@ -16,17 +16,19 @@ object PropertyDAO {
 
   implicit val connection = Application.connection
 
-  private var mapping = collection.mutable.Map.empty[Long, Property]
+  private var mappingId = collection.mutable.Map.empty[Long, Property]
+  private var mappingName = collection.mutable.Map.empty[String, Property]
 
   /**
    * Parse property to interact with database
    * @author Thomas GIOVANNINI
    */
   private val propertyParser: RowParser[Property] = {
+    get[Long]("id") ~
     get[String]("label") ~
     get[String]("type") ~
     get[Double]("defaultValue") map {
-      case label ~ propertyType ~ defaultValue =>
+      case id ~ label ~ propertyType ~ defaultValue =>
         Property(label, PropertyType.parse(propertyType), defaultValue)
     }
   }
@@ -37,7 +39,8 @@ object PropertyDAO {
    * @return number of properties deleted
    */
   def clear: Int = {
-    mapping = mapping.empty
+    mappingId = mappingId.empty
+    mappingName = mappingName.empty
     DB.withConnection { implicit connection =>
       val statement = PropertyStatement.clearDB
       statement.executeUpdate
@@ -78,12 +81,15 @@ object PropertyDAO {
    * @return property identified by id
    */
   def getById(id: Long): Property = {
-    mapping.getOrElse(id, {
+    mappingId.getOrElse(id, {
       DB.withConnection { implicit connection =>
         val statement = PropertyStatement.getById(id)
         val property = statement.as(propertyParser.singleOpt)
           .getOrElse(Property.error)
-        mapping += id -> property
+        if (property != Property.error) {
+          mappingId += id -> property
+          mappingName += property.label -> property
+        }
         property
       }
     })
@@ -96,11 +102,17 @@ object PropertyDAO {
    * @return property identified by id
    */
   def getByName(name: String): Property = {
-    DB.withConnection { implicit connection =>
-      val statement = PropertyStatement.getByName(name)
-      val maybePrecondition = statement.as(propertyParser.singleOpt)
-      maybePrecondition.getOrElse(Property.error)
-    }
+    mappingName.getOrElse(name, {
+      DB.withConnection { implicit connection =>
+        val statement = PropertyStatement.getByName(name)
+        val property = statement.as(propertyParser.singleOpt)
+          .getOrElse(Property.error)
+        if (property != Property.error) {
+          mappingName += name -> property
+        }
+        property
+      }
+    })
   }
 
   /**

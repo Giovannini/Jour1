@@ -1,5 +1,6 @@
 package models.graph.ontology
 
+import controllers.Application
 import models.graph.custom_types.Coordinates
 import models.graph.ontology.concept.need.{MeanOfSatisfaction, Need}
 import models.graph.ontology.concept.{Concept, ConceptDAO}
@@ -7,6 +8,8 @@ import models.graph.ontology.property.{Property, PropertyType}
 import models.interaction.LogInteraction
 import models.interaction.action.InstanceAction
 import play.api.libs.json._
+
+import scala.util.Random
 
 
 /**
@@ -22,7 +25,7 @@ case class Instance(
   concept: Concept) {
 
   require(label.matches("^[A-Z][A-Za-z0-9_ ]*$") &&
-          concept.properties.toSeq == properties.map(_.property).toSeq)
+          concept.properties.map(_.property).toSeq == properties.map(_.property).toSeq)
 
   /**
    * Parse an Instance to Json
@@ -86,7 +89,7 @@ case class Instance(
    * @return a new instance looking like this one but with updated properties
    */
   def withProperties(newProperties: List[ValuedProperty]): Instance = {
-    if (newProperties.map(_.property) == this.concept.properties) {
+    if (newProperties.map(_.property) == this.concept.properties.map(_.property)) {
       Instance(id, label, coordinates, newProperties, concept)
     }
     else {
@@ -129,8 +132,9 @@ case class Instance(
         case _ => List()
       }
     }
+    val listProperties = this.concept.properties.map(_.property)
 
-    if (this.concept.properties.contains(valuedProperty.property)) {
+    if (listProperties.contains(valuedProperty.property)) {
       val modifiedProperties = modifyPropertyRec(valuedProperty, this.properties)
       Instance(id, label, coordinates, modifiedProperties, concept)
     } else {
@@ -145,7 +149,7 @@ case class Instance(
    * @return a new instance looking like this one but with an other concept
    */
   def ofConcept(newconcept: Concept): Instance = {
-    Instance(id, label, coordinates, newconcept.properties.map(_.defaultValuedProperty), newconcept)
+    Instance(id, label, coordinates, newconcept.properties, newconcept)
   }
 
   /**
@@ -153,9 +157,10 @@ case class Instance(
    * @author Thomas GIOVANNINI
    * @return a list of sensed instances.
    */
-  def getSensedInstances: List[Coordinates] = {
-    val senseRadius = properties.find(_.property == Property("Sense", PropertyType.Int, 5)).getOrElse(ValuedProperty.error).value.toInt
+  def getSensedInstances: List[Instance] = {
+    val senseRadius = getValueForProperty(Property("Sense", PropertyType.Int, 5)).toInt
     coordinates.getNearCoordinate(senseRadius)
+      .flatMap(Application.map.getInstancesAt)
   }
 
   /**
@@ -185,32 +190,26 @@ case class Instance(
      */
     def destinationList(mean: MeanOfSatisfaction): List[Instance] = {
       val destinationList = mean.action.getDestinationList(this, sensedInstances)
-      //        println("\tDestinationList length: " + destinationList.length)
-      //        println("\tDestinations: " + mean.destinationConcepts.map(_.label).mkString(", "))
+      //TODO change that using any
       if (mean.destinationConcept == Concept.error) {
-        //TODO change that using any
-        destinationList.filter { instance =>
-          relations(mean.action).contains(instance.concept)
-        }
+        val remainingDestinationConcepts = relations.getOrElse(mean.action, List())
+        destinationList.filter(instance => remainingDestinationConcepts.contains(instance.concept))
       }
       else {
-        destinationList.filter { instance =>
-          mean.destinationConcepts.contains(instance.concept)
-        }
+        destinationList.filter(instance => mean.destinationConcepts.contains(instance.concept))
       }
     }
 
     def retrieveBestAction(possibleActions: List[MeanOfSatisfaction])
     : (InstanceAction, Instance) = possibleActions match {
       case head :: tail =>
-//        println(this.id + "\tTesting action: " + head.action.label)
         val destinationsList = destinationList(head)
         if (destinationsList.nonEmpty) {
-//          println(this.id + "\t" + head.action.label + " - " + destinationsList.head.concept.label + " good!")
-          (head.action, destinationsList.head)
+          val destination = Random.shuffle(destinationsList).head
+          println(this.label + this.id + " - " + head.action.label + " - " + destination.label + destination.id)
+          (head.action, destination)
         }
         else {
-//          println(this.id + "\t\t" + head.action.label + " - " + head.destinationConcept.label + " failed")
           retrieveBestAction(tail)
         }
       case _ =>
@@ -228,7 +227,7 @@ case class Instance(
    * @return the value of the property
    */
   def getValueForProperty(property: Property): Double = {
-    properties.find(_.property == property).getOrElse(ValuedProperty.error).value
+    this.properties.find(_.property == property).getOrElse(ValuedProperty.error).value
   }
 }
 
@@ -265,7 +264,7 @@ object Instance {
     Instance(0,
       concept.label,
       Coordinates(0, 0),
-      concept.properties.map(_.defaultValuedProperty),
+      concept.properties,
       concept)
   }
 }

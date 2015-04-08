@@ -23,33 +23,11 @@
 
     <div class="form-field">
         <div class="form-group">
-            <h3 class="form-field__legend--single">Parameters :</h3>
+            <h3 class="form-field__legend--single">Existing relations :</h3>
         </div>
-        <div ng-repeat="parameter in relation.parameters" class="form-group highlight">
+        <div ng-repeat="conceptRelation in conceptRelations" class="form-group highlight">
             <div class="form-field__legend--single">
                 {{ parameter.reference }}: {{parameter.type}}
-            </div>
-        </div>
-    </div>
-
-    <div class="form-field">
-        <div class="form-group">
-            <h3 class="form-field__legend--single">Preconditions :</h3>
-        </div>
-        <div ng-repeat="precondition in relation.preconditions" class="form-group highlight">
-            <div class="form-field__legend--single">
-                {{ precondition.label }} ({{ precondition.parameters | displayListParameter }})
-            </div>
-        </div>
-    </div>
-
-    <div class="form-field">
-        <div class="form-group">
-            <h3 class="form-field__legend--single">Actions :</h3>
-        </div>
-        <div ng-repeat="action in relation.subActions" class="form-group highlight">
-            <div class="form-field__legend--single">
-                {{ action.label }} ({{ action.parameters | displayListParameter }})
             </div>
         </div>
     </div>

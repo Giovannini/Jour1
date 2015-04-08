@@ -28,8 +28,8 @@
         <div ng-repeat="property in node.properties" class="form-group highlight">
             <div class="form-field__legend--single">
                 <div class="form-group">
-                    <div class="form-group__label">{{ property.label }}</div>
-                    <div class="form-group__input">({{property.defaultValue}}: {{ property.propertyType }})</div>
+                    <div class="form-group__label">{{ property.property.label }}</div>
+                    <div class="form-group__input">{{property.value}}</div>
                 </div>
             </div>
         </div>

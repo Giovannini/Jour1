@@ -26,7 +26,7 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
     };
 
     var search = $resource(
-        baseUrl+'graph/node/:search/:deepness',
+        baseUrl+'concepts/:search/:deepness',
         { 'search': $routeParams.label, 'deepness': options.deepness },
         { 'get': { method: "GET", Accept: "application/json" } }
     );
@@ -45,7 +45,7 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
             success(_properties[id]);
         } else {
             var request = $resource(
-                baseUrl+'graph/properties/:propertyId',
+                baseUrl+'properties/:propertyId',
                 { 'propertyId': "0" },
                 { 'get': { method: "GET", Accept: "application/json" } }
             );
@@ -131,7 +131,7 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
     var getActionsOfConcept = function getActionsOfConcept(conceptLabel, success, failure) {
         if(conceptLabel != "") {
             var request = $resource(
-                baseUrl + 'graph/node/' + conceptLabel + '/actions',
+                baseUrl + 'concepts/' + conceptLabel + '/actions',
                 {},
                 {
                     'get': {
@@ -184,7 +184,7 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
 
     var getRelation = function(label, success, failure) {
         var request = $resource(
-            baseUrl+'graph/action/:label',
+            baseUrl+'actions/:label',
             { label: "" },
             { 'get': { method: "GET", Accept: "application/json" } }
         );
@@ -197,6 +197,23 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
                 failure(response);
             }
         )
+    };
+
+    var getConceptsFromRelation = function(relationLabel, success, failure) {
+        var request = $resource(
+            baseUrl+'relations/:label',
+            { 'label': relationLabel },
+            { 'get': { method: "GET", Accept: "applicatio/json" } }
+        );
+        request.get(
+            { 'label': relationLabel },
+            function(response) {
+                success(response);
+            },
+            function(response) {
+                failure(response);
+            }
+        );
     };
 
     /**
@@ -267,6 +284,7 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
         getActionsOfConcept: getActionsOfConcept,
         getConcepts: getConcepts,
         getRelation: getRelation,
+        getConceptsFromRelation: getConceptsFromRelation,
         options: options,
         searchNodes: searchNodes
     }
@@ -427,6 +445,41 @@ var OverviewCtrl = ['$scope', '$location', function($scope, $location) {
     $scope.search_node = function() {
         $location.path("/node/"+$scope.node_search);
     };
+
+    $scope.search_relation = function() {
+        $location.path("/relation/"+$scope.relation_search);
+    };
+}];
+
+var ShowNodeCtrl = ['$scope', '$rootScope', '$location', '$routeParams', '$resource', 'Scopes', 'NodesFactory', function($scope, $rootScope, $location, $routeParams, $resource, Scopes, NodesFactory) {
+    $scope.node = NodesFactory.getCurrentNode();
+    $scope.message = "Loading...";
+    $scope.back_url = "#/";
+
+
+    Scopes.get('search').search = $routeParams.label;
+
+    $scope.isShowingNode = function() {
+        return $scope.node != null;
+    };
+
+    var success = function(root, display) {
+        $scope.node = display;
+    };
+
+    var error = function(message) {
+        $scope.message = message;
+    };
+
+    if($routeParams.hasOwnProperty('display')) {
+        if($scope.node == null) {
+            NodesFactory.searchNodes(success, error)($routeParams.label, $routeParams.display, NodesFactory.options.deepness, true);
+        } else {
+            NodesFactory.searchNodes(success, error)($routeParams.display, $routeParams.display, 0, false);
+        }
+    } else {
+        NodesFactory.searchNodes(success, error)($routeParams.label, $routeParams.label, NodesFactory.options.deepness, true);
+    }
 }];
 
 var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($routeParams, $resource, NodesFactory) {
@@ -439,8 +492,7 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
         _updateProperties,
         _updateActions,
         _updateEffects,
-        _updateConcepts,
-        _submitUrl;
+        _updateConcepts;
 
     var init = function(notifyError, updateProperties, updateActions, updateEffects, updateConcepts, nodeLabel) {
         _node = {
@@ -534,15 +586,23 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
         _node = node;
     };
 
+    var newPropertyValue = function(propertyId) {
+        _node.properties[propertyId].value = _node.properties[propertyId].property.defaultValue;
+    };
+
     var addProperty = function() {
-        _node.properties.push({});
+        _node.properties.push({
+            property: _properties[0],
+            value: ""
+        });
+        newPropertyValue(_node.properties.length - 1);
     };
 
     var removeProperty = function(propertyId) {
         _node.properties.splice(propertyId, 1);
     };
 
-    var newRuleType = function(ruleId) {
+    var newRuleValue = function(ruleId) {
         _node.rules[ruleId].value = _node.rules[ruleId].property.defaultValue;
     };
 
@@ -551,7 +611,7 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
             property: _properties[0],
             value: ""
         });
-        newRuleType(_node.rules.length - 1);
+        newRuleValue(_node.rules.length - 1);
     };
 
     var removeRule = function(ruleId) {
@@ -594,6 +654,10 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
         _node.needs[needId].consequenceSteps.splice(consequenceId, 1);
     };
 
+    var cleanNode = function(node) {
+        return node;
+    };
+
     var submitNode = function(url) {
         return function() {
             var submit = $resource(
@@ -608,7 +672,7 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
             );
             submit.save(
                 {},
-                _node,
+                cleanNode(_node),
                 function (response) {
                     console.log(response);
                 }, function (response) {
@@ -626,8 +690,10 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
         concepts: function() { return _concepts; },
         init: init,
         setNode: setNode,
+        newPropertyValue: newPropertyValue,
         addProperty: addProperty,
         removeProperty: removeProperty,
+        newRuleValue: newRuleValue,
         addRule: addRule,
         removeRule: removeRule,
         addNeed: addNeed,
@@ -671,8 +737,10 @@ var NewNodeCtrl = ['$scope', '$routeParams', 'EditNodeFactory', function($scope,
     $scope.node = EditNodeFactory.node();
     $scope.properties = EditNodeFactory.properties();
 
+    $scope.newPropertyValue = EditNodeFactory.newPropertyValue;
     $scope.addProperty = EditNodeFactory.addProperty;
     $scope.removeProperty = EditNodeFactory.removeProperty;
+    $scope.newRuleType = EditNodeFactory.newRuleType;
     $scope.addRule = EditNodeFactory.addRule;
     $scope.removeRule = EditNodeFactory.removeRule;
     $scope.addNeed = EditNodeFactory.addNeed;
@@ -691,7 +759,7 @@ var NewNodeCtrl = ['$scope', '$routeParams', 'EditNodeFactory', function($scope,
             $scope.node.needs = [];
         }
         EditNodeFactory.setNode($scope.node);
-        EditNodeFactory.submitNode(baseUrl+'graph/node/new')();
+        EditNodeFactory.submitNode(baseUrl+'concepts/new')();
     }
 }];
 
@@ -704,9 +772,6 @@ var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', 'NodesFactory', 'EditNod
     var searchNode = function() {
         NodesFactory.searchNodes(
             function (root, display) {
-                console.log(display);
-
-
                 for (var propertyIndex in display.properties) {
                     for (var i = 0; i < $scope.properties.length; i++) {
                         if (display.properties[propertyIndex].label === $scope.properties[i].label) {
@@ -739,6 +804,10 @@ var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', 'NodesFactory', 'EditNod
 
                 function matchEffect(effectId) {
                     return matchAction(effectId, $scope.effects);
+                }
+
+                for (var propertyIndex in display.properties) {
+                    display.properties[propertyIndex].property = matchProperty(display.properties[propertyIndex].property);
                 }
 
                 for (var ruleIndex in display.rules) {
@@ -829,6 +898,7 @@ var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', 'NodesFactory', 'EditNod
 
     function refactorNodeToSubmit(node) {
         console.log(node);
+
         return node;
     }
 
@@ -838,39 +908,44 @@ var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', 'NodesFactory', 'EditNod
         }
         EditNodeFactory.setNode($scope.node);
         var nodeToSubmit = refactorNodeToSubmit($scope.node);
-        //EditNodeFactory.submitNode(baseUrl+'graph/node/'+$routeParams.label+'/edit')(nodeToSubmit);
+        EditNodeFactory.submitNode(baseUrl+'concepts/'+$routeParams.label)(nodeToSubmit);
     }
 }];
 
-var ShowNodeCtrl = ['$scope', '$rootScope', '$location', '$routeParams', '$resource', 'Scopes', 'NodesFactory', function($scope, $rootScope, $location, $routeParams, $resource, Scopes, NodesFactory) {
-    $scope.node = NodesFactory.getCurrentNode();
+var ShowRelationCtrl = ['$scope', '$routeParams', 'NodesFactory', function($scope, $routeParams, NodesFactory) {
+    $scope.relation = {
+        label: $routeParams.label
+    };
+    var showRelation = false;
     $scope.message = "Loading...";
-    $scope.back_url = "#/";
 
-
-    Scopes.get('search').search = $routeParams.label;
-
-    $scope.isShowingNode = function() {
-        return $scope.node != null;
+    $scope.isShowingRelation = function() {
+        return showRelation;
     };
 
-    var success = function(root, display) {
-        $scope.node = display;
-    };
-
-    var error = function(message) {
-        $scope.message = message;
-    };
-
-    if($routeParams.hasOwnProperty('display')) {
-        if($scope.node == null) {
-            NodesFactory.searchNodes(success, error)($routeParams.label, $routeParams.display, NodesFactory.options.deepness, true);
-        } else {
-            NodesFactory.searchNodes(success, error)($routeParams.display, $routeParams.display, 0, false);
+    NodesFactory.getConceptsFromRelation(
+        $scope.relation.label,
+        function(relations) {
+            $scope.conceptRelations = relations;
+            showRelation = true;
+        },
+        function(failure) {
+            $scope.message = $scope.relation.label + " is never used."
+            showRelation = false;
         }
-    } else {
-        NodesFactory.searchNodes(success, error)($routeParams.label, $routeParams.label, NodesFactory.options.deepness, true);
-    }
+    );
+}];
+
+var EditRelationFactory = ['$scope', 'NodesFactory', function($scope, NodesFactory) {
+
+}];
+
+var NewRelationCtrl = ['$scope', '$routeParams', 'EditRelationFactory', function($scope, $routeParams, EditRelationFactory) {
+
+}];
+
+var EditRelationCtrl = ['$scope', '$routeParams', 'EditRelationFactory', function($scope, $routeParams, EditRelationFactory) {
+
 }];
 
 angular.module('graphEditor', ["ngResource", "ngRoute"])
@@ -895,6 +970,18 @@ angular.module('graphEditor', ["ngResource", "ngRoute"])
             when('/node/:label/:display', {
                 templateUrl: 'assets/templates/graph/node/show_node.html',
                 controller: 'ShowNodeCtrl'
+            }).
+            when('/relation/new', {
+                templateUrl: 'assets/templates/graph/relation/edit_relation.html',
+                controller: 'NewRelationCtrl'
+            }).
+            when('/relation/:label', {
+                templateUrl: 'assets/templates/graph/relation/show_relation.html',
+                controller: 'ShowRelationCtrl'
+            }).
+            when('/relation/:label/edit', {
+                templateUrl: 'assets/templates/graph/relation/edit_relation.html',
+                controller: 'EditRelationCtrl'
             }).
             otherwise({
                 redirectTo: '/overview'
@@ -926,4 +1013,8 @@ angular.module('graphEditor', ["ngResource", "ngRoute"])
     .controller('ShowNodeCtrl', ShowNodeCtrl)
     .factory('EditNodeFactory', EditNodeFactory)
     .controller('NewNodeCtrl', NewNodeCtrl)
-    .controller('EditNodeCtrl', EditNodeCtrl);
+    .controller('EditNodeCtrl', EditNodeCtrl)
+    .controller('ShowRelationCtrl', ShowRelationCtrl)
+    .factory('EditRelationFactory', EditRelationFactory)
+    .controller('NewRelationCtrl', NewRelationCtrl)
+    .controller('EditRelationCtrl', EditRelationCtrl);

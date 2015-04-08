@@ -43,8 +43,7 @@ object HCPrecondition {
     val instance1 = map.getInstanceById(instance1ID)
     val instance2 = map.getInstanceById(instance2ID)
 
-    val result = instance1.coordinates == instance2.coordinates
-    result
+    instance1.coordinates == instance2.coordinates
   }
 
   /**
@@ -76,11 +75,7 @@ object HCPrecondition {
   def hasProperty(args: Map[ParameterReference, ParameterValue]): Boolean = {
     val instanceId = args(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
     val propertyString = args(ParameterReference("property", "Property")).value.asInstanceOf[String]
-    println("prperty = "+propertyString)
-
     val sourceInstance = map.getInstanceById(instanceId)
-    println("instance = "+sourceInstance.label)
-
     val property = PropertyDAO.getByName(propertyString)
     sourceInstance.properties
       .map(_.property)
@@ -106,5 +101,20 @@ object HCPrecondition {
     listInstance.exists(p=>p.concept.id == conceptId)
   }
 
+  def isSelf(args: Map[ParameterReference, ParameterValue]):Boolean={
+    val instance1ID = args(ParameterReference("instance1ID", "Long")).value.asInstanceOf[Long]
+    val instance2ID = args(ParameterReference("instance2ID", "Long")).value.asInstanceOf[Long]
+    instance1ID == instance2ID
+  }
+
+  def notSelf(args: Map[ParameterReference, ParameterValue]):Boolean={
+    ! isSelf(args)
+  }
+
+  def isDifferentConcept(args: Map[ParameterReference, ParameterValue]):Boolean={
+    val instance1ID = args(ParameterReference("instance1ID", "Long")).value.asInstanceOf[Long]
+    val instance2ID = args(ParameterReference("instance2ID", "Long")).value.asInstanceOf[Long]
+    Application.map.getInstanceById(instance1ID).concept != Application.map.getInstanceById(instance2ID).concept
+  }
 
 }

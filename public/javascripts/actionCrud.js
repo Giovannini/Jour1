@@ -12,7 +12,7 @@ var RestFactory = ['$resource', function($resource) {
      * Crud resource
      */
     var submitAction = $resource(
-        baseUrl+"action/:label",
+        baseUrl+"actions/:label",
         { label: "" },
         {
             'create': { method: "POST", Accept: "application/json"},
@@ -436,7 +436,7 @@ var EditActionFactory = ['RestFactory', function(RestFactory) {
 /*
 Controller managing the addition of an action
  */
-var NewActionCtrl = ['$scope', 'EditActionFactory', function($scope, EditActionFactory) {
+var NewActionCtrl = ['$scope', 'EditActionFactory', '$location', function($scope, EditActionFactory, $location) {
     $scope.submit_button = "Edit";
     $scope.back_url = "#/";
 
@@ -485,7 +485,9 @@ var NewActionCtrl = ['$scope', 'EditActionFactory', function($scope, EditActionF
             $scope.action,
             function(success) {
                 console.log(success);
+                $location.path("/");
             }, function(failure) {
+                $scope.error = failure.data;
                 console.log(failure);
             }
         );
@@ -559,9 +561,9 @@ var EditActionCtrl = ['$scope', '$routeParams', 'RestFactory', 'EditActionFactor
       */
     function initAction() {
         if(!actionInitialized
-            && $scope.properties.length > 0
-            && $scope.preconditions.length > 0
-            && $scope.actions.length > 0) {
+            && $scope.properties != null && $scope.properties.length > 0
+            && $scope.preconditions != null && $scope.preconditions.length > 0
+            && $scope.actions != null && $scope.actions.length > 0) {
             actionInitialized = true;
             RestFactory.getAction(
                 $routeParams.label,
@@ -574,7 +576,9 @@ var EditActionCtrl = ['$scope', '$routeParams', 'RestFactory', 'EditActionFactor
                         var arguments = {};
                         for (var parameterIndex in currentParameters) {
                             var parameterInitialized = false;
+
                             /* First look in the parameters of the action */
+                            //if(currentParameters[parameterIndex].value.reference)
                             for (var j = 0; j < action.parameters.length && !parameterInitialized; j++) {
                                 if (currentParameters[parameterIndex].value.reference == action.parameters[j].reference) {
                                     arguments[currentParameters[parameterIndex].reference] = {
@@ -587,15 +591,29 @@ var EditActionCtrl = ['$scope', '$routeParams', 'RestFactory', 'EditActionFactor
 
                             /* if it hasn't been found, set the value directly */
                             if (!parameterInitialized) {
+                                var value = currentParameters[parameterIndex].value;
+                                if(value.type == 'Property') {
+                                    for(var propertyIndex in $scope.properties) {
+                                        if($scope.properties[propertyIndex].label == value.value.label) {
+                                            value = {
+                                                type: "Property",
+                                                value: $scope.properties[propertyIndex]
+                                            };
+                                            break;
+                                        }
+                                    }
+                                }
+
                                 arguments[currentParameters[parameterIndex].reference] = {
                                     isParam: false,
-                                    value: action.parameters[j]
-                                }
+                                    value: value
+                                };
                             }
                         }
                         return arguments;
                     }
 
+                    console.log("PRECONDITIONS");
                     /* Treating preconditions */
                     var newPreconditions = [];
                     for(var preconditionIndex in action.preconditions) {
@@ -616,6 +634,7 @@ var EditActionCtrl = ['$scope', '$routeParams', 'RestFactory', 'EditActionFactor
                     }
                     action.preconditions = newPreconditions;
 
+                    console.log("ACTIONS");
                     /* Treating actions */
                     var newActions = [];
                     for(var actionIndex in action.subActions) {
@@ -636,6 +655,7 @@ var EditActionCtrl = ['$scope', '$routeParams', 'RestFactory', 'EditActionFactor
                         }
                     }
                     action.actions = newActions;
+                    console.log(action);
 
                     $scope.action = action;
                     EditActionFactory.setAction(action);
@@ -672,7 +692,9 @@ var EditActionCtrl = ['$scope', '$routeParams', 'RestFactory', 'EditActionFactor
             $scope.action,
             function(success) {
                 console.log(success);
+                $location.path("/");
             }, function(failure) {
+                $scope.error = failure.data;
                 console.log(failure);
             },
             $routeParams.label

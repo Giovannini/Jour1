@@ -3,7 +3,7 @@ package controllers
 import models.Intelligence
 import models.graph.ontology.Instance
 import models.graph.ontology.concept.{Concept, ConceptDAO}
-import models.graph.ontology.relation.Relation
+import models.graph.ontology.relation.{RelationDAO, Relation}
 import models.interaction.action.{InstanceActionParser, InstanceAction}
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, Controller, Request}
@@ -23,8 +23,8 @@ object RestCall extends Controller {
     Ok(Json.toJson(concepts))
   }
 
-  def getAllSimplifiedConcepts() = Action {
-    val concepts = ConceptDAO.getAllSimlified
+  def getAllSimplifiedConcepts = Action {
+    val concepts = ConceptDAO.getAllSimplified
       .map(_.toSimplifiedJson)
     Ok(Json.toJson(concepts))
   }
@@ -62,9 +62,9 @@ object RestCall extends Controller {
    * @return a JsValue representing the relationned concept
    */
   def relationnedConceptToJson(tuple: (Relation, Concept)): JsValue = {
-    Json.obj( "relationID" -> JsNumber(tuple._1.id),
-              "relationLabel" -> JsString(tuple._1.label),
-              "conceptId" -> JsNumber(tuple._2.hashCode()))
+    Json.obj("relationID" -> JsNumber(tuple._1.id),
+      "relationLabel" -> JsString(tuple._1.label),
+      "conceptId" -> JsNumber(tuple._2.hashCode()))
   }
 
   /**
@@ -73,28 +73,29 @@ object RestCall extends Controller {
    * @author Thomas GIOVANNINI
    */
   def executeAction = Action(parse.json) { request =>
+
     /**
      * Parse json request and execute it.
      * @author Thomas GIOVANNINI
      */
     def execution(request: Request[JsValue]): Boolean = {
       val jsonRequest = Json.toJson(request.body)
-      println("request = " + jsonRequest)
-
       val actionReference = (jsonRequest \ "action").as[Long]
-      val actionId = Relation.DBList.getActionIdFromRelationId(actionReference)
+      val actionId = RelationDAO.getActionIdFromRelationId(actionReference)
       val actionArguments = (jsonRequest \ "instances").as[List[Long]]
-      val result = InstanceActionParser.parseAction(actionId, actionArguments)
-      println("res = "+result)
-      result
+      InstanceActionParser.parseAction(actionId, actionArguments)
     }
 
     val t1 = System.currentTimeMillis()
     val result = execution(request)
     val t2 = System.currentTimeMillis()
     println("Executing action took " + (t2 - t1) + "ms.")
-    if(result) Ok("Ok")
-    else Ok("Error while executing this action")
+    if (result) {
+      Ok("Ok")
+    }
+    else {
+      Ok("Error while executing this action")
+    }
   }
 
   /**
@@ -106,18 +107,18 @@ object RestCall extends Controller {
   def getPossibleDestinationOfAction(initInstanceId: Long, relationId: Long, conceptId: Long)
   : Action[AnyContent] = Action {
     val sourceInstance = Application.map.getInstanceById(initInstanceId)
-    val actionID = Relation.DBList.getActionIdFromRelationId(relationId)
+    val actionID = RelationDAO.getActionIdFromRelationId(relationId)
     val action = InstanceActionParser.getAction(actionID)
-    val destinationInstancesList = Application.map.getInstancesOf(conceptId)
-    if (sourceInstance == Instance.error || action == InstanceAction.error){
+    if (sourceInstance == Instance.error || action == InstanceAction.error) {
       Ok(Json.arr())
+    } else {
+      val destinationInstancesList = Application.map.getInstancesOf(conceptId)
+      val t1 = System.currentTimeMillis()
+      val reducedList = action.getDestinationList(sourceInstance, destinationInstancesList)
+        .map(_.toJson)
+      val t2 = System.currentTimeMillis()
+      Ok(Json.toJson(reducedList))
     }
-    val t1 = System.currentTimeMillis()
-    val reducedList = action.getDestinationList(sourceInstance, destinationInstancesList)
-      .map(_.toJson)
-    val t2 = System.currentTimeMillis()
-    println("Getting destinations took " + (t2 - t1) + "ms.")
-    Ok(Json.toJson(reducedList))
   }
 
   def editInstance(instanceId: Long): Action[AnyContent] = Action {
@@ -140,16 +141,6 @@ object RestCall extends Controller {
   def getInstanceById(instanceId: Long) = Action {
     val instance = Application.map.getInstanceById(instanceId)
     Ok(instance.toJson)
-  }
-
-  def getBestAction(instanceID: Long): Action[AnyContent] = Action {
-    val t1 = System.currentTimeMillis()
-    val instance = Application.map.getInstanceById(instanceID)
-    val bestAction = instance.selectAction(instance.getSensedInstances.flatMap(Application.map.getInstancesAt))
-    val t2 = System.currentTimeMillis()
-    println("Getting best action took " + (t2 - t1) + "ms.")
-    Ok("Best action for instance " + instanceID + " - " + instance.label + "\n" +
-       bestAction._1.label + " to instance " + bestAction._2.id + " - " + bestAction._2.label)
   }
 
   def next() = Action {

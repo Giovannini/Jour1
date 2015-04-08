@@ -5,7 +5,7 @@ import models.graph.custom_types.Coordinates
 import models.graph.ontology._
 import models.graph.ontology.concept.{ConceptDAO, Concept}
 import models.graph.ontology.property.PropertyDAO
-import models.graph.ontology.relation.Relation
+import models.graph.ontology.relation.{RelationDAO, Relation}
 
 import scala.util.{Failure, Success, Try, Random}
 
@@ -35,11 +35,10 @@ object WorldInit {
    */
   def worldMapGeneration(): Unit = {
     val groundConcept = ConceptDAO.getByLabel("Ground")
-    val allGroundsConcepts = groundConcept.getDescendance
+    val allGroundsConcepts = groundConcept.descendance
     val instanciableConcepts = getInstanciableConcepts diff allGroundsConcepts
     Try {
       generateGround(allGroundsConcepts)
-      println("After ground generation: " + Application.map.getInstances.length)
       //Take a lot of time
       // TODO: find a way to parallelize the process
       instanciableConcepts.foreach(fillWorldWithInstances)
@@ -52,8 +51,8 @@ object WorldInit {
   }
 
   /**
-   *
-   * @param allGroundsConcepts
+   * Generate all instances corresponding to grounds concepts
+   * @param allGroundsConcepts that have to be created
    */
   def generateGround(allGroundsConcepts: List[Concept]) = {
     val layer = Layer.generateLayer(frequency, octave, persistence, smoothed, outputSize)
@@ -169,18 +168,6 @@ object WorldInit {
     }
   }
 
-  /**
-   * Get concept where label = "Ground"
-   * @param concepts List of concept to browse
-   * @return the concept which label is Ground if it exists
-   *         the error concept else
-   */
-  // TODO: pas propre
-  def getGroundConcept(concepts: List[Concept]): Concept = {
-    concepts.find(_.label == "Ground")
-      .getOrElse(Concept.error)
-  }
-
 
   ///////////////////////////:: OBJECT - RANDOM :://///////////////////////////////
   /**
@@ -257,6 +244,7 @@ object WorldInit {
     val instances = createInstances(concept)
     instances.foreach(Application.map.createInstance)
 
+
   }
 
   /**
@@ -298,7 +286,7 @@ object WorldInit {
    */
   def getLivingPlacesIdsFor(conceptId: Long): List[Long] = {
     ConceptDAO.getRelationsFrom(conceptId)
-      .filter(tuple => tuple._1.id == Relation.DBList.getByName("LIVE_ON").id)
+      .filter(tuple => tuple._1.id == RelationDAO.getByName("LIVE_ON").id)
       .map(_._2.id)
   }
 
@@ -323,6 +311,7 @@ object WorldInit {
     // TODO shuffle take a lot of time and this is where the problem is
     val randomCoordinate = Random.shuffle(instancesOfLivingPlace).head
     val result = Instance.createRandomInstanceOf(concept).at(randomCoordinate)
+
     result
   }
 

@@ -51,7 +51,7 @@ object InstanceManager extends Controller {
    */
   def update = Action(parse.json) {
     request => {
-      println(request.body)
+      println("request = " + request.body)
       val newInstanceForm = InstanceForm.form.bind(request.body)
       newInstanceForm.fold(
         hasErrors = {
@@ -89,9 +89,6 @@ object InstanceManager extends Controller {
    * @return a new instance containing attributes from the form
    */
   def getNewInstance(newInstanceForm: Form[Instance], oldInstance: Instance): Instance = {
-    println("oldInstance " + oldInstance)
-    println("newInstanceForm " + newInstanceForm)
-    println("get " + newInstanceForm.get)
     oldInstance
       .withLabel(newInstanceForm.get.label)
       .at(newInstanceForm.get.coordinates)

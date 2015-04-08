@@ -20,16 +20,8 @@ object HardCodedAction {
   def addInstanceAt(args: Map[ParameterReference, ParameterValue]): Unit = {
     val instanceId = args(ParameterReference("instanceToAdd", "Long")).value.asInstanceOf[Long]
     val groundWhereToAddItId = args(ParameterReference("groundWhereToAddIt", "Long")).value.asInstanceOf[Long]
-    println("add done")
     map.addInstance(instanceId, groundWhereToAddItId)
   }
-
-  //TODO
-  /*def createInstance(args: Map[ParameterReference, ParameterValue]): Unit = {
-    val jsonToParse = args(ParameterReference("instanceToAdd", "Long")).value.asInstanceOf[String]
-
-    map.createInstance(instance)
-  }*/
 
   /**
    * Remove an instance from the map at given coordinates
@@ -45,6 +37,7 @@ object HardCodedAction {
     val instanceId = args(ParameterReference("instanceToModify", "Long")).value.asInstanceOf[Long]
     val propertyString = args(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
     val newValue = args(ParameterReference("propertyValue", "Int")).value.toString.toDouble
+
     map.modifyProperty(instanceId, propertyString, newValue)
   }
 
@@ -65,6 +58,8 @@ object HardCodedAction {
     val valueOfProperty: Double = instance.getValueForProperty(property) + valToAdd
     val newValuedProperty = ValuedProperty(property, valueOfProperty)
     val newInstance = instance.modifyValueOfProperty(newValuedProperty)
+    println(instance.toJson)
+    println(newInstance.toJson)
     Application.map.updateInstance(instance, newInstance)
   }
 

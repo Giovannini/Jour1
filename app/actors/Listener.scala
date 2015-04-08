@@ -7,8 +7,7 @@ class Listener extends Actor {
 
   def receive = {
     case EndOfTurn(time) ⇒
-      println("\n\tAll actions executed in: \t\t%s"
-        .format(time))
+      println(s"\n\tAll actions executed in: $time")
       context.system.shutdown()
   }
 }

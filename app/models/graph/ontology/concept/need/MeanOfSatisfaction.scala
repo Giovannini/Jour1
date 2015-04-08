@@ -13,7 +13,7 @@ import scala.util.{Failure, Success, Try}
  */
 case class MeanOfSatisfaction(action: InstanceAction, destinationConcept: Concept) {
 
-  val destinationConcepts = destinationConcept :: destinationConcept.getDescendance
+  val destinationConcepts = destinationConcept :: destinationConcept.descendance
 
   override def toString = action.id + " -> " + destinationConcepts.map(_.id).mkString(",")
 

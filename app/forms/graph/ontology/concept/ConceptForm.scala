@@ -1,13 +1,11 @@
 package forms.graph.ontology.concept
 
 import forms.graph.ontology.concept.need.NeedForm
-import forms.graph.ontology.property.PropertyForm
 import forms.graph.ontology.property.ValuedPropertyForm
 import models.graph.custom_types.DisplayProperty
 import models.graph.ontology.ValuedProperty
-import models.graph.ontology.concept.Concept
 import models.graph.ontology.concept.need.Need
-import models.graph.ontology.property.Property
+import models.graph.ontology.concept.{Concept, ConceptDAO}
 import play.api.data.Form
 import play.api.data.Forms._
 
@@ -15,15 +13,53 @@ import play.api.data.Forms._
  * Created by vlynn on 23/03/15.
  */
 object ConceptForm {
+  def idApply(id: Long): Concept = {
+    ConceptDAO.getById(id)
+  }
+
+  def idUnapply(concept: Concept): Option[Long] = {
+    concept match {
+      case Concept.error => None
+      case _ => Some(concept.id)
+    }
+  }
+
+  val idForm = Form(
+    mapping(
+      "id" -> longNumber
+    )(idApply)(idUnapply).verifying("Concept not found", {
+      concept => concept != Concept.error
+    })
+  )
+
+  def nameApply(label: String): Concept = {
+    ConceptDAO.getByLabel(label)
+  }
+
+  def nameUnapply(concept: Concept): Option[String] = {
+    concept match {
+      case Concept.error => None
+      case _ => Some(concept.label)
+    }
+  }
+
+  val nameForm = Form(
+    mapping(
+      "id" -> nonEmptyText
+    )(nameApply)(nameUnapply).verifying("Concept not found", {
+      concept => concept != Concept.error
+    })
+  )
+
   /**
    * Concept form
    */
   val form = Form(
     mapping(
       "label" -> nonEmptyText, //can't be modified
-      "properties" -> list(PropertyForm.form.mapping),
+      "properties" -> list(ValuedPropertyForm.form.mapping),
       "rules" -> list(ValuedPropertyForm.form.mapping),
-      "needs" -> list(NeedForm.form.mapping),
+      "needs" -> optional(list(NeedForm.form.mapping)),
       "displayProperty" -> DisplayProperty.form.mapping
     )(applyForm)(unapplyForm)
   )
@@ -39,11 +75,14 @@ object ConceptForm {
    * @return a concept using these parameters
    */
   private def applyForm(label: String,
-                 properties: List[Property],
+                 properties: List[ValuedProperty],
                  rules: List[ValuedProperty],
-                 needs: List[Need],
+                 option_needs: Option[List[Need]],
                  displayProperty: DisplayProperty) : Concept = {
-    Concept(label, properties, rules, needs, displayProperty)
+    option_needs match {
+      case Some(needs) => Concept(label, properties, rules, needs, displayProperty)
+      case None => Concept(label, properties, rules, List(), displayProperty)
+    }
   }
 
   /**
@@ -52,7 +91,7 @@ object ConceptForm {
    * @param concept concept
    * @return the different parts of a concept
    */
-  private def unapplyForm(concept: Concept) : Option[(String, List[Property], List[ValuedProperty], List[Need], DisplayProperty)] = {
-    Some((concept.label, concept.properties, concept.rules, concept.needs, concept.displayProperty))
+  private def unapplyForm(concept: Concept) : Option[(String, List[ValuedProperty], List[ValuedProperty], Option[List[Need]], DisplayProperty)] = {
+    Some((concept.label, concept.properties, concept.rules, Some(concept.needs), concept.displayProperty))
   }
 }

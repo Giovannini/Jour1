@@ -324,19 +324,7 @@ var CreateInstanceCtrl = ['$scope', '$routeParams', 'InstanceFactory', function(
      * That's why we refresh the list of properties when concept changes.
      */
     $scope.refreshProperties = function() {
-        $scope.instance.properties = [];
-        for (var i in $scope.instance.concept.properties) {
-            // foreach property of the concept, we create an element to save as a property for the instance
-            var toAdd = {
-                // property is the property of the concept
-                property: $scope.instance.concept.properties[i],
-                // value is the value of this property
-                value: $scope.instance.concept.properties[i].defaultValue
-            };
-
-            // we add the element to the array of properties of the instance
-            $scope.instance.properties.push(toAdd);
-        }
+        $scope.instance.properties = $scope.instance.concept.properties;
     };
 
     // Initialization of factory to edit an instance

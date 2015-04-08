@@ -14,7 +14,7 @@ case class ParameterValue(value: Any, _type: String) extends Parameter {
     "value" -> jsonValue
   )
 
-  def toDBString = "__val"+value + ": " + _type
+  def toDBString = "__val" + value + ": " + _type
 
   def jsonValue: JsValue = {
     _type match {

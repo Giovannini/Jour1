@@ -1,6 +1,6 @@
 package actors
 
-import actors.communication.{EndOfTurn, ResultAction}
+import actors.communication.{StopComputing, EndOfTurn, ResultAction}
 import akka.actor.{Actor, ActorRef, Props}
 import akka.routing.RoundRobinPool
 import controllers.Application
@@ -9,13 +9,13 @@ import models.interaction.LogInteraction
 
 class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
 
-  var logs: List[LogInteraction] = List()
+  var logs: List[List[LogInteraction]] = List()
   var nrOfResults: Int = _
   var nrOfInstances: Int = _
   val start: Long = System.currentTimeMillis
 
   val workerRouter = context.actorOf(
-    Props[InstanceIntelligence].withRouter(RoundRobinPool(nrOfWorkers)), name = "workerRouter")
+    Props[SmartInstance].withRouter(RoundRobinPool(nrOfWorkers)), name = "workerRouter")
 
   /**
    * Retrieve all instances that have needs from the application map
@@ -23,9 +23,7 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
    * @return a list of instances that have needs
    */
   def getInstancesWithNeeds: List[Instance] = {
-    Application.map
-      .getInstances
-      .filter(_.concept.needs.nonEmpty)
+    Application.map.getInstancesWithNeeds
   }
 
   /**
@@ -33,7 +31,7 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
    * @author Thomas GIOVANNINI
    * @param number value to set
    */
-  def setNumberOfInstancesToCompute(number: Int) = {
+  def setNumberOfInstancesToCompute(number: Int): Unit = {
     nrOfInstances = number
   }
 
@@ -45,7 +43,6 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
    */
   def getEnvironmentOf(instance: Instance): List[Instance] = {
     instance.getSensedInstances
-      .flatMap(Application.map.getInstancesAt)
   }
 
   /**
@@ -54,15 +51,17 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
    */
   override def receive: Actor.Receive = {
     case launcher: Launcher =>
+      println("Launching new turn computation...")
       launchComputation(launcher)
     case ResultAction(logList) =>
       nrOfResults += 1
-      logs = logs ::: logList
+      logs = logList :: logs
       if (nrOfResults == nrOfInstances) {
-        logs.foreach(_.execute())
+        logs.flatten.sortBy(_.priority).foreach(_.execute())
         val end: Long = System.currentTimeMillis()
+        for(worker <- 1 to nrOfWorkers) workerRouter ! StopComputing
         listener ! EndOfTurn(end - start)
-        //context.stop(self)
+        context.stop(self)
       }
   }
 
@@ -74,7 +73,7 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
   private def launchComputation(launcher: Launcher): Unit = {
     val instancesWithNeeds = getInstancesWithNeeds
     setNumberOfInstancesToCompute(instancesWithNeeds.length)
-    println(launcher.message + nrOfInstances + " instances.")
+    println("Launching computation for " + nrOfInstances + " instances.")
     for (instance <- instancesWithNeeds) {
       val environment = getEnvironmentOf(instance)
       workerRouter ! launcher.computation(instance, environment)

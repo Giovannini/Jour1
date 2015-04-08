@@ -7,11 +7,13 @@ import scala.util.{Failure, Success, Try}
 /**
  * Class to log an action without executing it.
  */
-case class LogInteraction(value: String){
+case class LogInteraction(value: String, priority: Int){
+
+  class UnknownLogException extends Exception
 
   def execute(): Unit = {
     Try {
-      //println("Executing LOG: " + this.value)
+//      println("Executing LOG: " + this.value)
       val splitted = value.split(" ")
       splitted(0) match {
         case "ADD" =>/*###################################################*/
@@ -35,13 +37,13 @@ case class LogInteraction(value: String){
           val propertyValue = splitted(3).toDouble
           Application.map.addToProperty(instanceId, propertyString, propertyValue)
         case error =>/*###################################################*/
-          throw new Exception("Error, log: " + error + " is unknown.")
+          throw new UnknownLogException
       }
     } match {
       case Success(_) => //println("Done")
       case Failure(e) =>
         println("Error while parsing action log:")
-        println(e.getStackTrace)
+        println(e)
     }
   }
 
@@ -49,10 +51,10 @@ case class LogInteraction(value: String){
 
 object LogInteraction {
 
-  val nothing = LogInteraction("ERROR")
+  val nothing = LogInteraction("ERROR", 0)
 
   def createModifyLog(instanceId: Long, propertyName: String, propertyValue: Double): LogInteraction = {
-    LogInteraction("MODIFY_PROPERTY " + instanceId + " " + propertyName + " " + propertyValue)
+    LogInteraction("MODIFY_PROPERTY " + instanceId + " " + propertyName + " " + propertyValue, 1)
   }
 
 }
