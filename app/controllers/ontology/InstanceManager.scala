@@ -35,7 +35,7 @@ object InstanceManager extends Controller {
         success = {
           instance => {
             val oldInstance = Application.map.getInstanceById(instance.id)
-            val newInstance = getNewInstance(InstanceForm.form, oldInstance)
+            val newInstance = getNewInstance(newInstanceForm, oldInstance)
             Application.map.createInstance(newInstance)
             Ok(newInstance.toJson)
           }
@@ -89,7 +89,9 @@ object InstanceManager extends Controller {
    * @return a new instance containing attributes from the form
    */
   def getNewInstance(newInstanceForm: Form[Instance], oldInstance: Instance): Instance = {
-    println(newInstanceForm.get.properties)
+    println("oldInstance " + oldInstance)
+    println("newInstanceForm " + newInstanceForm)
+    println("get " + newInstanceForm.get)
     oldInstance
       .withLabel(newInstanceForm.get.label)
       .at(newInstanceForm.get.coordinates)

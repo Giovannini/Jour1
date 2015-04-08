@@ -59,13 +59,26 @@ body {
   background-color: lighten($darkColor, 15);
 }
 
-.tile-info h2 {
-  margin: 0;
+.tile-info-title {
+  display: table;
+  width: 100%;
+  -moz-box-sizing: padding-box;
+  box-sizing: padding-box;
+
   padding: 20px 30px;
-  font-size: 1.2em;
   font-style: normal;
   background-color: lighten($darkColor, 25);
+}
 
+.tile-info-title h2 {
+  display: table-cell;
+  text-align: left;
+  font-size: 1.2em;
+}
+
+.tile-info-title a {
+  display: table-cell;
+  text-align: right;
 }
 
 .tile-info .item, .tile-info .no-item, .loading {

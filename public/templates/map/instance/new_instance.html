@@ -1,6 +1,6 @@
 <div class="tile-info">
     <div class="tile-info-title">
-        <h2>Instance {{ instanceId }}</h2>
+        <h2>Create a new instance</h2>
     </div>
 </div>
 
@@ -16,9 +16,12 @@
             <h3 class="form-field__legend--single">General</h3>
         </div>
         <div class="form-group highlight">
-            <span class="form-group__label">Concept:</span>
+            <label class="form-group__label" for="instance_name">Concept:</label>
             <div class="form-group__input">
-                <span id="instance_concept">{{ concept.label }}</span>
+                <select id="instance_concept"
+                        ng-model="instance.concept"
+                        ng-options="concept as concept.label for concept in concepts"
+                        ng-change="refreshProperties()"></select>
             </div>
         </div>
         <div class="form-group highlight">

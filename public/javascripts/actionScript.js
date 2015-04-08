@@ -147,16 +147,11 @@ var ActionController = ['$scope', function($scope) {
     }
 }];
 
-
-var InstanceFactory = ['$routeParams', 'Scopes', function($routeParams, Scopes) {
-    return {};
-}];
-
 /**
- * Tool to edit an instance
+ * Tool for the CRUD of instances
  * @type {*[]}
  */
-var EditInstanceFactory = ['$routeParams', '$resource', /*'InstanceFactory',*/ function($routeParams, $resource/*, InstanceFactory*/) {
+var InstanceFactory = ['$resource', function($resource) {
     var _instance,
         _notifyError;
 
@@ -165,9 +160,7 @@ var EditInstanceFactory = ['$routeParams', '$resource', /*'InstanceFactory',*/ f
      * @param notifyError
      */
     var init = function(notifyError) {
-        _instance = {
-            label: ""
-        }
+        _instance = {};
         _notifyError = notifyError;
     };
 
@@ -209,12 +202,44 @@ var EditInstanceFactory = ['$routeParams', '$resource', /*'InstanceFactory',*/ f
         };
     };
 
-    // Getters
+    /**
+     * Get a concept
+     * @param idConcept id of the concept
+     * @param callback code to execute once we have the concept
+     */
+    var getConcept = function(idConcept, callback) {
+        Rest.concepts.getById(idConcept)(
+            function(responseText) {
+                callback(JSON.parse(responseText));
+            },
+            function(status, responseText) {
+                console.log(status, responseText);
+            }
+        );
+    };
+
+    /**
+     * Get all concepts
+     * @param callback code to execute once we have concepts
+     */
+    var getConcepts = function(callback) {
+        Rest.concepts.get(
+            function(responseText) {
+                callback(JSON.parse(responseText));
+            },
+            function(status, responseText) {
+                console.log(status, responseText);
+            }
+        );
+    };
+
     return {
         instance: function() { return _instance; },
         init: init,
         setInstance: setInstance,
-        submitInstance: submitInstance
+        submitInstance: submitInstance,
+        getConcept: getConcept,
+        getConcepts: getConcepts
     }
 }];
 
@@ -222,8 +247,7 @@ var EditInstanceFactory = ['$routeParams', '$resource', /*'InstanceFactory',*/ f
  * Controller to edit an instance
  * @type {*[]}
  */
-var EditInstanceCtrl = ['$scope', '$routeParams', 'EditInstanceFactory', function($scope, $routeParams, EditInstanceFactory) {
-    $scope.isEdition = true;
+var EditInstanceCtrl = ['$scope', '$routeParams', 'InstanceFactory', function($scope, $routeParams, InstanceFactory) {
     $scope.instanceId = $routeParams.id;
     $scope.submit_button = "Edit";
     $scope.back_url = "#/";
@@ -235,7 +259,7 @@ var EditInstanceCtrl = ['$scope', '$routeParams', 'EditInstanceFactory', functio
     var displayConcept = function(concept) {
         $scope.concept = concept;
         $scope.$apply();
-    }
+    };
 
     /**
      * Save the instance in $scope and refresh the view
@@ -246,14 +270,14 @@ var EditInstanceCtrl = ['$scope', '$routeParams', 'EditInstanceFactory', functio
         $scope.$apply();
 
         // Get the concept of the instance
-        Graph.getConcept($scope.instance.concept, displayConcept);
+        InstanceFactory.getConcept($scope.instance.concept, displayConcept);
     };
 
     // Get the instance to edit
     Map.getInstance($scope.instanceId, displayInstance);
 
     // Initialization of factory to edit an instance
-    EditInstanceFactory.init(
+    InstanceFactory.init(
         function(error) {
             $scope.error = error;
         }
@@ -261,8 +285,73 @@ var EditInstanceCtrl = ['$scope', '$routeParams', 'EditInstanceFactory', functio
 
     // Send the form to the server
     $scope.submitInstance = function() {
-        EditInstanceFactory.setInstance($scope.instance);
-        EditInstanceFactory.submitInstance(baseUrl+'instances/update')();
+        InstanceFactory.setInstance($scope.instance);
+        InstanceFactory.submitInstance(baseUrl+'instances/update')();
+    };
+}];
+
+/**
+ * Controller to create an instance
+ * @type {*[]}
+ */
+var CreateInstanceCtrl = ['$scope', '$routeParams', 'InstanceFactory', function($scope, $routeParams, InstanceFactory) {
+    $scope.submit_button = "Create";
+    $scope.back_url = "#/";
+    $scope.instance = { id:0 };
+
+    /**
+     * Save concepts in $scope and refresh the view
+     * @param concepts
+     */
+    var displayConcepts = function(concepts) {
+        $scope.concepts = concepts;
+        $scope.$apply();
+    };
+
+    // Get concepts to choice the type of instance
+    $scope.concepts = InstanceFactory.getConcepts(displayConcepts);
+
+    // Case where coordinates already are choisen
+    if (typeof $routeParams.x != "undefined" && typeof $routeParams.y != "undefined") {
+        $scope.instance.coordinates = {};
+        $scope.instance.coordinates.x = $routeParams.x;
+        $scope.instance.coordinates.y = $routeParams.y;
+    }
+
+    /**
+     * Refresh the view according to the concept
+     * When the user choise a concept for his instance, properties to fill are different.
+     * That's why we refresh the list of properties when concept changes.
+     */
+    $scope.refreshProperties = function() {
+        $scope.instance.properties = [];
+        for (var i in $scope.instance.concept.properties) {
+            // foreach property of the concept, we create an element to save as a property for the instance
+            var toAdd = {
+                // property is the property of the concept
+                property: $scope.instance.concept.properties[i],
+                // value is the value of this property
+                value: $scope.instance.concept.properties[i].defaultValue
+            };
+
+            // we add the element to the array of properties of the instance
+            $scope.instance.properties.push(toAdd);
+        }
+    };
+
+    // Initialization of factory to edit an instance
+    InstanceFactory.init(
+        function(error) {
+            $scope.error = error;
+        }
+    );
+
+    // Send the form to the server
+    $scope.submitInstance = function() {
+        // We want just send the id of concept
+        $scope.instance.concept = $scope.instance.concept.id;
+        InstanceFactory.setInstance($scope.instance);
+        InstanceFactory.submitInstance(baseUrl+'instances/create')();
     };
 }];
 
@@ -273,7 +362,15 @@ angular.module('actionManagerApp', ["ngRoute", "ngResource"])
                 templateUrl: 'assets/templates/map/overview.html',
                 controller: 'ActionController'
             }).
-            when('/instance/:id/edit', {
+            when('/instance/new', {
+                templateUrl: 'assets/templates/map/instance/new_instance.html',
+                controller: 'CreateInstanceCtrl'
+            }).
+            when('/instance/new/:x/:y', {
+                templateUrl: 'assets/templates/map/instance/new_instance.html',
+                controller: 'CreateInstanceCtrl'
+            }).
+            when('/instance/:id', {
                 templateUrl: 'assets/templates/map/instance/edit_instance.html',
                 controller: 'EditInstanceCtrl'
             }).
@@ -283,5 +380,5 @@ angular.module('actionManagerApp', ["ngRoute", "ngResource"])
     }])
     .controller('ActionController', ActionController)
     .controller('EditInstanceCtrl', EditInstanceCtrl)
-    .factory('InstanceFactory', InstanceFactory)
-    .factory('EditInstanceFactory', EditInstanceFactory)
+    .controller('CreateInstanceCtrl', CreateInstanceCtrl)
+    .factory('InstanceFactory', InstanceFactory);

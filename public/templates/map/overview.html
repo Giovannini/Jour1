@@ -1,16 +1,25 @@
 <div class="tile-info" ng-show="!isTileSelected">
-    <h2>No tile selected</h2>
+    <div class="tile-info-title">
+        <h2>No tile selected</h2>
+        <a href="#/instance/new">Add an instance</a>
+    </div>
 </div>
+
 <div class="tile-info loading" ng-show="loadingTile">
     Loading...
 </div>
+
 <div class="tile-info" ng-show="isTileSelected">
-    <h2>Selected Tile : {{ tile.x }}, {{ tile.y }}</h2>
+    <div class="tile-info-title">
+        <h2>Selected Tile : {{ tile.x }}, {{ tile.y }}</h2>
+        <a href="#/instance/new/{{ tile.x }}/{{ tile.y }}">Add an instance</a>
+    </div>
+
     <ul>
         <li ng-repeat="(instanceId, instance) in instances">
             <div class="instance-list">
                 <a class="instance-item instance-title" ng-click="selectInstance(instanceId)">{{ instance.label }} {{ instance.id }}</a>
-                <a class="instance-item" href="#/instance/{{ instance.id }}/edit">Edit</a>
+                <a class="instance-item" href="#/instance/{{ instance.id }}">Edit</a>
                 <a class="instance-item" ng-click="deleteInstance(instanceId)">Remove</a>
             </div>
             <div class="instance-info" ng-show="selectedInstance == instanceId">
