@@ -1,4 +1,4 @@
-package controllers.rules
+package controllers.interaction.precondition
 
 import play.api.mvc._
 

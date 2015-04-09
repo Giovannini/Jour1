@@ -3,8 +3,8 @@ package controllers
 import models.Intelligence
 import models.graph.Instance
 import models.graph.concept.{Concept, ConceptDAO}
-import models.graph.relation.{RelationSqlDAO, Relation}
-import models.interaction.action.{InstanceActionParser, InstanceAction}
+import models.graph.relation.{Relation, RelationSqlDAO}
+import models.interaction.action.{InstanceAction, InstanceActionParser}
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, Controller, Request}
 
@@ -143,7 +143,7 @@ object RestCall extends Controller {
 
   def next() = Action {
     Intelligence.calculate(nrOfWorkers = 4)
-    Redirect(routes.MapController.show())
+    Redirect(map.routes.MapController.show())
   }
 
 }

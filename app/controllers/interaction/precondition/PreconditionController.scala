@@ -1,4 +1,4 @@
-package controllers.rules
+package controllers.interaction.precondition
 
 import models.interaction.precondition.PreconditionDAO
 import play.api.libs.json.Json

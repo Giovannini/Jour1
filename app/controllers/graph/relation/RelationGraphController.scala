@@ -1,11 +1,11 @@
-package controllers.graph
+package controllers.graph.relation
 
 import forms.graph.relation.RelationForm
-import models.graph.relation.{RelationGraphDAO, Relation, RelationSqlDAO}
+import models.graph.relation.{Relation, RelationGraphDAO, RelationSqlDAO}
 import play.api.libs.json.Json
 import play.api.mvc._
 
-object RelationController extends Controller {
+object RelationGraphController extends Controller {
   def createRelation(label: String) = Action(parse.json) { request =>
     val relationForm = RelationForm.graphForm.bind(request.body)
     relationForm.fold(

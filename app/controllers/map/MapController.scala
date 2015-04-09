@@ -1,4 +1,4 @@
-package controllers
+package controllers.map
 
 import actors.socket._
 import akka.actor.Props

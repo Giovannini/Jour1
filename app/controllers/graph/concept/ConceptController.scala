@@ -1,9 +1,10 @@
-package controllers.graph
+package controllers.graph.concept
 
 import controllers.Application
+import controllers.graph.GraphVisualisation
 import forms.graph.concept.ConceptForm.form
 import models.graph.DisplayProperty
-import models.graph.concept.{ConceptStatement, Concept, ConceptDAO}
+import models.graph.concept.{Concept, ConceptDAO, ConceptStatement}
 import models.interaction.action.InstanceAction
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._

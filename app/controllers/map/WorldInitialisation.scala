@@ -1,5 +1,6 @@
-package controllers
+package controllers.map
 
+import controllers.Application
 import models.graph.DisplayProperty
 import models.graph.concept.{Concept, ConceptDAO}
 import models.graph.property.{Property, PropertyDAO, PropertyType, ValuedProperty}

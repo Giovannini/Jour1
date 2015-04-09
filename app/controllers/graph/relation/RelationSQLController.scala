@@ -1,8 +1,8 @@
-package controllers.rules
+package controllers.graph.relation
 
 import play.api.mvc._
 
-object RelationController extends Controller {
+object RelationSQLController extends Controller {
   /**
    * Displays the SinglePageApp for CRUDing InstanceAction
    * @return

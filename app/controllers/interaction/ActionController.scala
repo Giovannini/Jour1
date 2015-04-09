@@ -1,4 +1,4 @@
-package controllers.graph
+package controllers.interaction
 
 import forms.instance_action.action.InstanceActionForm
 import models.interaction.action.{InstanceAction, InstanceActionDAO}
