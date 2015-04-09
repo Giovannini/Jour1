@@ -87,6 +87,10 @@ GET           /map                                                     controlle
 POST          /map/action                                              controllers.RestCall.executeAction
 GET           /map/relations/:conceptId                                controllers.RestCall.getAllActionsOf(conceptId: Int)
 
+GET           /map/socket                                              controllers.map.MapController.indexWS
+GET           /map/socket/start                                        controllers.map.MapController.start
+GET           /map/socket/stop                                         controllers.map.MapController.stop
+
 GET           /next                                                    controllers.RestCall.next()
 
 # Map static resources from the /public folder to the /assets URL path

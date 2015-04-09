@@ -1,15 +1,12 @@
 package actors.socket
 
 import akka.actor.Actor
-import models.interaction.LogInteraction
 import play.api.Logger
-import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.iteratee.Concurrent.Channel
 import play.api.libs.iteratee.{Concurrent, Enumerator}
 import play.api.libs.json.Json._
 import play.api.libs.json.{JsValue, _}
 
-import scala.concurrent.duration._
 import scala.language.postfixOps
 
 
@@ -18,12 +15,12 @@ class WebSocketActor extends Actor {
   case class UserChannel(userId: Long, var channelsCount: Int, enumerator: Enumerator[JsValue], channel: Channel[JsValue])
 
   lazy val log = Logger("application." + this.getClass.getName)
-  
+
   /* Create a scheduler to send a message to this actor every second */
-  val cancellable = context.system.scheduler.schedule(0 second, 1 second, self, UpdateMap(List()))
+  //val cancellable = context.system.scheduler.schedule(0 second, 1 second, self, UpdateMap(Json.obj()))
 
   var usersSockets = Map[Long, UserChannel]()
-  var usersLogs = Map[Long, List[LogInteraction]]()
+  var usersLogs = Map[Long, JsValue]()
 
   override def receive = {
 
@@ -52,21 +49,25 @@ class WebSocketActor extends Actor {
       sender ! userChannel.enumerator
 
     case UpdateMap(newLogs) =>
+      println("Receives an update")
       usersLogs.foreach {
         case (userId, logs) =>
-          usersLogs += (userId -> newLogs)
-
-          val json = Map("data" -> toJson(logs.map(log => JsString(log.value))))
-
-          /* Writing data to the channel to send data to all WebSocket opened for every user. */
-          usersSockets.get(userId).get.channel push Json.toJson(json)
+          println("Update for user " + userId)
+          usersLogs += (userId -> mergeLogs(logs, newLogs))
       }
 
+    case UpdateClient(userId) =>
+      /* Writing data to the channel to send data to all WebSocket opened for every user. */
+      val logs = usersLogs(userId)
+      val json = Json.obj("data" -> logs)
+      usersSockets.get(userId).get.channel push json
+      usersLogs += (userId -> Json.obj())
+
     case Start(userId) =>
-      usersLogs += (userId -> List())
+      usersLogs += (userId -> Json.obj())
 
     case Stop(userId) =>
-      removeUserTimer(userId)
+      removeUserLogs(userId)
       val json = Map("data" -> Json.obj())
       usersSockets.get(userId).get.channel push Json.toJson(json)
 
@@ -80,13 +81,23 @@ class WebSocketActor extends Actor {
         log debug s"channel for user : $userId count : ${userChannel.channelsCount}"
       } else {
         removeUserChannel(userId)
-        removeUserTimer(userId)
+        removeUserLogs(userId)
         log debug s"removed channel and timer for $userId"
       }
   }
 
-  def removeUserTimer(userId: Long) = usersLogs -= userId
+  def removeUserLogs(userId: Long) = usersLogs -= userId
+
   def removeUserChannel(userId: Long) = usersSockets -= userId
+
+  def mergeLogs(oldLogs: JsValue, newLogs: JsValue): JsValue = {
+    val jsonAdds = (oldLogs \ "add").as[List[JsValue]] ::: (newLogs \ "add").as[List[JsValue]]
+    val jsonRemoves = (oldLogs \ "remove").as[List[JsValue]] ::: (newLogs \ "remove").as[List[JsValue]]
+    Json.obj(
+      "add" -> jsonAdds,
+      "remove" -> jsonRemoves
+    )
+  }
 
 }
 
@@ -97,7 +108,9 @@ case class StartSocket(userId: Long) extends SocketMessage
 
 case class SocketClosed(userId: Long) extends SocketMessage
 
-case class UpdateMap(logs: List[LogInteraction]) extends SocketMessage
+case class UpdateMap(logs: JsValue) extends SocketMessage
+
+case class UpdateClient(userId: Long) extends SocketMessage
 
 case class Start(userId: Long) extends SocketMessage
 

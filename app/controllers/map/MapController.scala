@@ -27,26 +27,33 @@ object MapController extends Controller with Secured {
   val mapSocketActor = Akka.system.actorOf(Props[WebSocketActor])
 
   /**
-   * This function create a WebSocket using the enumerator linked to the current user,
-   * retrieved from the TaskActor.
+   * This function create a WebSocket using the enumerator linked to the current user.
    */
   def indexWS = withAuthWS {
     userId =>
-
       implicit val timeout = Timeout(3 seconds)
 
       /* Using the ask pattern of Akka to get the enumerator for that user */
       (mapSocketActor ? StartSocket(userId)) map { enumerator =>
-        /* Create an Iteratee which ignore the input and
-         * send a SocketClosed message to the actor when
-         * connection is closed from the client. */
-        (Iteratee.ignore[JsValue] map {
-          _ =>
+        /*
+         * Create an Iteratee which ignore the input and send a SocketClosed message to the actor when
+         * connection is closed from the client.
+         */
+        (Iteratee.foreach[JsValue] {
+          case _: JsValue =>
+            println("Received a JSON from client with ID " + userId)
+            UpdateClient(userId)
+          case _ =>
+            println("Error with socket baby...")
             mapSocketActor ! SocketClosed(userId)
         }, enumerator.asInstanceOf[Enumerator[JsValue]])
       }
   }
 
+  /**
+   *
+   * @return
+   */
   def start = withAuth {
     userId => implicit request =>
       mapSocketActor ! Start(userId)
@@ -59,17 +66,6 @@ object MapController extends Controller with Secured {
       mapSocketActor ! Stop(userId)
       Ok("")
   }
-
-  /*def javascriptRoutes = Action {
-    implicit request =>
-      Ok(
-        Routes.javascriptRouter("jsRoutes")(
-          routes.javascript.MapController.indexWS,
-          routes.javascript.MapController.start,
-          routes.javascript.MapController.stop
-        )
-      ).as("text/javascript")
-  }*/
 
 }
 
@@ -94,7 +90,7 @@ trait Secured {
    * try to retieve the username, call f() if it is present,
    * or unauthF() otherwise
    */
-  def withAuth(f: => Int => Request[_ >: AnyContent] => Result): EssentialAction = {
+  def withAuth(f: => Long => Request[_ >: AnyContent] => Result): EssentialAction = {
     Security.Authenticated(username, unauthF) { username =>
       Action(request => f(username.toInt)(request))
     }
@@ -106,8 +102,7 @@ trait Secured {
    * or create an error Future[(Iteratee[JsValue, Unit], Enumerator[JsValue])])
    * if username is none
    */
-  def withAuthWS(f: => Int => Future[(Iteratee[JsValue, Unit], Enumerator[JsValue])]): WebSocket[JsValue, JsValue] = {
-    println("caca")
+  def withAuthWS(f: => Long => Future[(Iteratee[JsValue, Unit], Enumerator[JsValue])]): WebSocket[JsValue, JsValue] = {
     WebSocket.tryAccept[JsValue] { request =>
       username(request) match {
         case Some(id) =>

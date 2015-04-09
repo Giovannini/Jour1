@@ -1,9 +1,9 @@
 package controllers
 
-import models.Intelligence
 import models.graph.Instance
 import models.graph.concept.{Concept, ConceptDAO}
 import models.graph.relation.{Relation, RelationSqlDAO}
+import models.intelligence.Intelligence
 import models.interaction.action.{InstanceAction, InstanceActionParser}
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, Controller, Request}

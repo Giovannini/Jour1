@@ -220,7 +220,7 @@ case class Instance(
         val destinationsList = destinationList(head)
         if (destinationsList.nonEmpty) {
           val destination = Random.shuffle(destinationsList).head
-          println(this.label + this.id + " - " + head.action.label + " - " + destination.label + destination.id)
+          //println(this.label + this.id + " - " + head.action.label + " - " + destination.label + destination.id)
           (head.action, destination)
         }
         else {

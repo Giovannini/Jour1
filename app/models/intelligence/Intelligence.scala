@@ -1,4 +1,4 @@
-package models
+package models.intelligence
 
 import actors.communication.launcher.NewTurn
 import actors.{Listener, World}

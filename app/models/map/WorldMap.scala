@@ -150,7 +150,7 @@ case class WorldMap(label: String, description: String, width: Int, height: Int)
    * @param instanceId to add to the map
    * @param groundId where to add it
    */
-  def addInstance(instanceId: Long, groundId: Long): Unit = {
+  def addInstance(instanceId: Long, groundId: Long): Instance = {
     Try {
       val ground = getInstanceById(groundId)
       val coordinates = ground.coordinates
@@ -162,11 +162,13 @@ case class WorldMap(label: String, description: String, width: Int, height: Int)
       instancesByConcept(conceptID) = instance :: instancesByConcept.getOrElse(conceptID, List())
       instancesByCoordinates(coordinates) =
         instance :: instancesByCoordinates.getOrElse(coordinates, List())
+      instance
     } match {
-      case Success(_) =>
+      case Success(instance) => instance
       case Failure(e) =>
         println("Failure while adding an instance to the map in WorldMap.scala:")
         println(e)
+        Instance.error
     }
   }
 
@@ -175,23 +177,24 @@ case class WorldMap(label: String, description: String, width: Int, height: Int)
    * @author Thomas GIOVANNINI
    * @param instanceId to remove from the map
    */
-  def removeInstance(instanceId: Long): Boolean = {
+  def removeInstance(instanceId: Long): Instance = {
     Try {
       val instance = getInstanceById(instanceId)
       val conceptId = instance.concept.id
       val coordinates = instance.coordinates
       instancesByConcept(conceptId) = instancesByConcept.getOrElse(conceptId, List()) diff List(instance)
       instancesByCoordinates(coordinates) = instancesByCoordinates.getOrElse(coordinates, List()) diff List(instance)
+      instance
     } match {
-      case Success(_) => true
+      case Success(instance) => instance
       case Failure(e) =>
         println("Failure while removing an instance from the map in WorldMap.scala:")
         println(e)
-        false
+        Instance.error
     }
   }
 
-  def modifyPropertyWithParam(instanceId: Long, propertyString: String, propertyValue: String): Unit = {
+  def modifyPropertyWithParam(instanceId: Long, propertyString: String, propertyValue: String): Instance = {
     val instance = getInstanceById(instanceId)
     val property = PropertyDAO.getByName(propertyString)
     val property2 = PropertyDAO.getByName(propertyValue)
@@ -201,14 +204,14 @@ case class WorldMap(label: String, description: String, width: Int, height: Int)
 
     val conceptId = instance.concept.id
     val coordinates = instance.coordinates
-    println("======= > "+modifiedInstance)
     instancesByConcept(conceptId) =
       modifiedInstance :: (instancesByConcept.getOrElse(conceptId, List()) diff List(instance))
     instancesByCoordinates(coordinates) =
       modifiedInstance :: (instancesByCoordinates.getOrElse(coordinates, List()) diff List(instance))
 
+    modifiedInstance
   }
-  def modifyProperty(instanceId: Long, propertyString: String, propertyValue: Double): Unit = {
+  def modifyProperty(instanceId: Long, propertyString: String, propertyValue: Double): Instance = {
     val instance = getInstanceById(instanceId)
     val property = PropertyDAO.getByName(propertyString)
     val modifiedInstance = instance.modifyValueOfProperty(ValuedProperty(property, propertyValue))
@@ -219,10 +222,10 @@ case class WorldMap(label: String, description: String, width: Int, height: Int)
       modifiedInstance :: (instancesByConcept.getOrElse(conceptId, List()) diff List(instance))
     instancesByCoordinates(coordinates) =
       modifiedInstance :: (instancesByCoordinates.getOrElse(coordinates, List()) diff List(instance))
-
+    modifiedInstance
   }
 
-  def addToProperty(instanceId: Long, propertyString: String, valueToAdd: Double): Unit = {
+  def addToProperty(instanceId: Long, propertyString: String, valueToAdd: Double): Instance = {
     val instance = getInstanceById(instanceId)
     val property = PropertyDAO.getByName(propertyString)
     val newValue = instance.getValueForProperty(property) + valueToAdd
@@ -234,9 +237,10 @@ case class WorldMap(label: String, description: String, width: Int, height: Int)
     instancesByCoordinates(coordinates) =
       modifiedInstance :: (instancesByCoordinates.getOrElse(coordinates, List()) diff List(instance))
 
+    modifiedInstance
   }
 
-  def updateInstance(oldInstance: Instance, newInstance: Instance): Unit = {
+  def updateInstance(oldInstance: Instance, newInstance: Instance): Instance = {
     val conceptId = oldInstance.concept.id
     val oldCoordinates = oldInstance.coordinates
     val newCoordinates = newInstance.coordinates
@@ -247,5 +251,6 @@ case class WorldMap(label: String, description: String, width: Int, height: Int)
       instancesByCoordinates.getOrElse(oldCoordinates, List()) diff List(oldInstance)
     instancesByCoordinates(newCoordinates) =
       updatedInstance :: instancesByCoordinates.getOrElse(newCoordinates, List())
+    updatedInstance
   }
 }

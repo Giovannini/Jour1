@@ -77,7 +77,7 @@ object InstanceManager extends Controller {
    */
   def delete(instanceId: Int) = Action {
     val result = Application.map.removeInstance(instanceId)
-    if (result) {
+    if (result != Instance.error) {
       Ok("deleted")
     }
     else {

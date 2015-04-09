@@ -1,11 +1,14 @@
 package actors
 
 import actors.communication.{StopComputing, EndOfTurn, ResultAction}
+import actors.socket.UpdateMap
 import akka.actor.{Actor, ActorRef, Props}
 import akka.routing.RoundRobinPool
 import controllers.Application
+import controllers.map.MapController
 import models.graph.Instance
 import models.interaction.LogInteraction
+import play.api.libs.json.{JsNumber, Json, JsValue}
 
 class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
 
@@ -57,12 +60,23 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
       nrOfResults += 1
       logs = logList :: logs
       if (nrOfResults == nrOfInstances) {
-        logs.flatten.sortBy(_.priority).foreach(_.execute())
-        val end: Long = System.currentTimeMillis()
-        for(worker <- 1 to nrOfWorkers) workerRouter ! StopComputing
-        listener ! EndOfTurn(end - start)
-        context.stop(self)
+        updateMap(logs)
+        endComputation()
       }
+  }
+
+  private def endComputation(): Unit = {
+    val end: Long = System.currentTimeMillis()
+    for(worker <- 1 to nrOfWorkers) workerRouter ! StopComputing
+    listener ! EndOfTurn(end - start)
+    context.stop(self)
+  }
+
+  private def updateMap(logs: List[List[LogInteraction]]): Unit = {
+    val logList = logs.flatten.sortBy(_.priority)
+    val resultInstances = logList.map(_.execute())
+    val json = getMapModificationJson(logList, resultInstances)
+    MapController.mapSocketActor ! UpdateMap(json)
   }
 
   /**
@@ -78,5 +92,21 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
       val environment = getEnvironmentOf(instance)
       workerRouter ! launcher.computation(instance, environment)
     }
+  }
+
+  private def getMapModificationJson(logs: List[LogInteraction], instances: List[Instance]): JsValue = {
+    val (adds, dels) = logs.zip(instances)
+      .filter {
+      case (log, instance) => log.isAddOrRemove && instance != Instance.error
+    }
+      .partition(_._1.value.startsWith("ADD"))
+    val jsonAdds = adds.map(_._2.toJson)
+    val jsonDels = dels.map {
+      case (log, instance) => JsNumber(instance.id)
+    }
+    Json.obj(
+    "add" -> jsonAdds,
+    "remove" -> jsonDels
+    )
   }
 }
