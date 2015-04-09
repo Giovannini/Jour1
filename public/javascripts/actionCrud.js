@@ -169,6 +169,7 @@ var OverviewCtrl = ['$scope', 'RestFactory', function($scope, RestFactory) {
  */
 var EditActionFactory = ['RestFactory', function(RestFactory) {
     var _action,
+        _actionTypes,
 
         // Vars used for selects
         _paramTypes,
@@ -181,6 +182,46 @@ var EditActionFactory = ['RestFactory', function(RestFactory) {
         _updateProperties,
         _updatePreconditions,
         _updateActions;
+
+    _actionTypes = [ "", "ACTION_", "EFFECT_", "MOOD_" ];
+
+    var changeType = function(type) {
+        console.log(type);
+        switch (type) {
+            case "ACTION_":
+            case "MOOD_": // The Action_ and Mood_ has the same behavior : do not add a break for ACTTION_
+                if(_action.parameters.length > 2) {
+                    _action.parameters = _action.parameters.slice(0, 1);
+                }
+
+                _action.parameters.forEach(function(param) {
+                    param.type = _paramTypes[1].value; // It must be some Ids of instances
+                });
+
+                if(_action.parameters.length < 2) {
+                    for(var i = _action.parameters.length; i < 2; i++) {
+                        _action.parameters.push({
+                            reference: "",
+                            type: _paramTypes[1].value
+                        })
+                    }
+                }
+                break;
+            case "EFFECT_":
+                if(_action.parameters.length > 1) {
+                    _action.parameters = [{
+                        reference: _action.parameters[0].reference,
+                        type: _paramTypes[1].value // It must be some Id of instances
+                    }];
+                }
+                break;
+        }
+        console.log(_action.parameters);
+    };
+
+    var canManageParameters = function() {
+        return _action.type == "";
+    };
 
     /* Types of parameters */
     _paramTypes = [
@@ -327,7 +368,7 @@ var EditActionFactory = ['RestFactory', function(RestFactory) {
             current;
 
         var actionToSubmit = {
-            "label": action.label,
+            "label": action.type + action.label,
             "parameters": action.parameters
         };
 
@@ -367,14 +408,17 @@ var EditActionFactory = ['RestFactory', function(RestFactory) {
         }
         actionToSubmit.subActions = subActions;
 
-        return actionToSubmit;
+        return {
+            type: action.type,
+            action: actionToSubmit
+        };
     }
 
     /*
     submit the action to the rest interface
      */
     var submitAction = function(action, success, failure, oldLabel) {
-        var actionToSubmit = getActionToSubmit(action);
+        var actionToSubmit = getActionToSubmit(_action);
         if(typeof oldLabel !== "undefined") {
             RestFactory.updateAction(actionToSubmit, oldLabel, success, failure);
         } else {
@@ -394,6 +438,7 @@ var EditActionFactory = ['RestFactory', function(RestFactory) {
         updateActions
     ) {
         _action = {
+            type: _actionTypes[0],
             label: "",
             preconditions: [],
             parameters: [],
@@ -409,11 +454,14 @@ var EditActionFactory = ['RestFactory', function(RestFactory) {
     return {
         action: function() { return _action; },
         setAction: function(action) { _action = action; },
+        changeType: changeType,
+        canManageParameters: canManageParameters,
 
         properties: function() { return _properties; },
         preconditions: function() { return _preconditions; },
         actions: function() { return _actions; },
         paramTypes: function() { return _paramTypes; },
+        actionTypes: function() { return _actionTypes; },
 
         init: init,
         parametersFilteredByType: parametersFilteredByType,
@@ -459,6 +507,9 @@ var NewActionCtrl = ['$scope', 'EditActionFactory', '$location', function($scope
     );
 
     $scope.action = EditActionFactory.action();
+    $scope.actionTypes = EditActionFactory.actionTypes();
+    $scope.changeType = EditActionFactory.changeType;
+    $scope.canManageParameters = EditActionFactory.canManageParameters;
 
     $scope.properties = EditActionFactory.properties();
     $scope.preconditions = EditActionFactory.preconditions();
@@ -477,6 +528,10 @@ var NewActionCtrl = ['$scope', 'EditActionFactory', '$location', function($scope
 
     $scope.removeAction = EditActionFactory.removeAction;
     $scope.addAction = EditActionFactory.addAction;
+
+    $scope.isEditController = function() {
+        return false;
+    }
 
     /* Makes the submitAction create a new InstanceAction */
     $scope.submitAction = function() {
@@ -613,7 +668,6 @@ var EditActionCtrl = ['$scope', '$routeParams', 'RestFactory', 'EditActionFactor
                         return arguments;
                     }
 
-                    console.log("PRECONDITIONS");
                     /* Treating preconditions */
                     var newPreconditions = [];
                     for(var preconditionIndex in action.preconditions) {
@@ -634,7 +688,6 @@ var EditActionCtrl = ['$scope', '$routeParams', 'RestFactory', 'EditActionFactor
                     }
                     action.preconditions = newPreconditions;
 
-                    console.log("ACTIONS");
                     /* Treating actions */
                     var newActions = [];
                     for(var actionIndex in action.subActions) {
@@ -655,7 +708,13 @@ var EditActionCtrl = ['$scope', '$routeParams', 'RestFactory', 'EditActionFactor
                         }
                     }
                     action.actions = newActions;
-                    console.log(action);
+
+                    for(var actionTypeId in $scope.actionTypes) {
+                        if(action.label.startsWith($scope.actionTypes[actionTypeId])) {
+                            action.type = $scope.actionTypes[actionTypeId];
+                        }
+                    }
+                    action.label = action.label.substr(action.type.length);
 
                     $scope.action = action;
                     EditActionFactory.setAction(action);
@@ -668,6 +727,9 @@ var EditActionCtrl = ['$scope', '$routeParams', 'RestFactory', 'EditActionFactor
     }
 
     $scope.action = EditActionFactory.action;
+    $scope.actionTypes = EditActionFactory.actionTypes();
+    $scope.changeType = EditActionFactory.changeType;
+    $scope.canManageParameters = EditActionFactory.canManageParameters;
 
     $scope.properties = EditActionFactory.properties();
     $scope.preconditions = EditActionFactory.preconditions();
@@ -700,6 +762,10 @@ var EditActionCtrl = ['$scope', '$routeParams', 'RestFactory', 'EditActionFactor
             $routeParams.label
         );
     };
+
+    $scope.isEditController = function() {
+        return true;
+    }
 
     initAction();
 }];

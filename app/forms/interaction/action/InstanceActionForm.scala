@@ -1,7 +1,7 @@
-package forms.instance_action.action
+package forms.interaction.action
 
-import forms.instance_action.parameter.ParameterForm
-import forms.instance_action.precondition.PreconditionForm
+import forms.interaction.parameter.ParameterForm
+import forms.interaction.precondition.PreconditionForm
 import models.interaction.action.{InstanceAction, InstanceActionDAO}
 import models.interaction.parameter.{Parameter, ParameterReference}
 import models.interaction.precondition.Precondition

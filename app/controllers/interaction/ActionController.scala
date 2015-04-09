@@ -1,6 +1,8 @@
 package controllers.interaction
 
-import forms.instance_action.action.InstanceActionForm
+import forms.interaction.InteractionForm
+import models.graph.relation.RelationSqlDAO
+import models.interaction.InteractionType
 import models.interaction.action.{InstanceAction, InstanceActionDAO}
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -48,7 +50,7 @@ object ActionController extends Controller {
    */
   def createAction(label: String) = Action(parse.json) {
     request => {
-      val newActionForm = InstanceActionForm.form.bind(request.body)
+      val newActionForm = InteractionForm.form.bind(request.body)
       newActionForm.fold(
         hasErrors = {
           form => {
@@ -56,7 +58,8 @@ object ActionController extends Controller {
           }
         },
         success = {
-          newAction => {
+          interaction => {
+            val newAction = interaction._2
             if(InstanceAction.error != InstanceActionDAO.getByName(newAction.label)) {
               BadRequest(Json.obj("global" -> "Label already exists"))
             } else {
@@ -64,6 +67,9 @@ object ActionController extends Controller {
               if(savedAction == InstanceAction.error) {
                 InternalServerError(Json.obj("global" -> "Couldn't add to DB."))
               } else {
+                if(interaction._1 != InteractionType.Simple) {
+                  RelationSqlDAO.save(savedAction.label)
+                }
                 Ok(savedAction.toJson)
               }
             }
@@ -102,7 +108,7 @@ object ActionController extends Controller {
       if(action == InstanceAction.error) {
         NotFound("Label not found")
       } else {
-        val newActionForm = InstanceActionForm.form.bind(request.body)
+        val newActionForm = InteractionForm.form.bind(request.body)
         newActionForm.fold(
           hasErrors = {
             form => {
@@ -110,9 +116,15 @@ object ActionController extends Controller {
             }
           },
           success = {
-            newAction => {
+            interaction => {
+              val newAction = interaction._2
               val result = InstanceActionDAO.update(action.id, newAction)
               if(result >= 1) {
+                if(interaction._1 != InteractionType.Simple) {
+                  val oldRelation = RelationSqlDAO.getByName(label)
+                  RelationSqlDAO.update(oldRelation.id, newAction.label)
+                }
+
                 Ok(Json.obj("result" -> "OK"))
               } else {
                 InternalServerError(Json.obj("result" -> "Impossible to update action"))

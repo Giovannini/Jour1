@@ -1,4 +1,4 @@
-package forms.instance_action.parameter
+package forms.interaction.parameter
 
 import forms.graph.property.PropertyForm
 import models.graph.property.{PropertyDAO, Property}

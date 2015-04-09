@@ -11,15 +11,27 @@
         </div>
         <div class="form-group highlight">
             <div class="form-group">
+                <label class="form-group__label" for="action_type">Type:</label>
+                <div class="form-group__input">
+                    <span ng-show="isEditController()">{{action.type}}</span>
+
+                    <select
+                            ng-show="!isEditController()"
+                            id="action_type"
+                            name="action_type"
+                            ng-model="action.type"
+                            ng-options="actionType for actionType in actionTypes"
+                            ng-change="changeType(action.type)"></select>
+                </div>
+            </div>
+            <div class="form-group">
                 <label class="form-group__label" for="action_name">Name:</label>
                 <div class="form-group__input">
                     <input
                             type="text"
                             id="action_name"
                             name="action_name"
-                            ng-model="action.label"
-                            ng-pattern="/^ACTION_[\w]+$/"/>
-                    <span ng-show="actionForm.action_name.$error.pattern">Must start with "ACTION_"</span>
+                            ng-model="action.label" />
                 </div>
             </div>
         </div>
@@ -59,13 +71,13 @@
             </div>
 
             <!-- delete a parameter -->
-            <div class="form-group">
+            <div class="form-group" ng-show="canManageParameters()">
                 <div class="form-group__input remove">
                     <button type="button" ng-click="removeParameter($index)">Remove</button>
                 </div>
             </div>
         </div>
-        <div class="form-group form-add">
+        <div class="form-group form-add" ng-show="canManageParameters()">
             <button type="button" ng-click="addParameter()">Add a parameter</button>
         </div>
     </fieldset>

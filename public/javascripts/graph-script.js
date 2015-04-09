@@ -1013,6 +1013,10 @@ var ShowRelationCtrl = ['$scope', '$routeParams', '$resource', 'Scopes', 'NodesF
         );
 
     }
+
+    $scope.isAction = function() {
+        return $routeParams.label.startsWith("ACTION_");
+    }
 }];
 
 var EditRelationFactory = ['NodesFactory', 'Scopes', function(NodesFactory, Scopes) {

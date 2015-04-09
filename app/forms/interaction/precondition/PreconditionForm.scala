@@ -1,6 +1,6 @@
-package forms.instance_action.precondition
+package forms.interaction.precondition
 
-import forms.instance_action.parameter.ParameterForm
+import forms.interaction.parameter.ParameterForm
 import models.interaction.parameter.{Parameter, ParameterReference}
 import models.interaction.precondition.{Precondition, PreconditionDAO}
 import play.api.data.Form

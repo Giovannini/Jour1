@@ -284,7 +284,6 @@ object WorldInitialisation extends Controller {
       DisplayProperty())
 
     println("Relations declaration...")
-
     /*Relations declaration*/
     val relationSubtypeOfId = RelationSqlDAO.save("SUBTYPE_OF")
     val relationEatId = RelationSqlDAO.save("ACTION_EAT")
@@ -297,7 +296,6 @@ object WorldInitialisation extends Controller {
     val relationProcreate = RelationSqlDAO.save("ACTION_PROCREATE")
     val relationSpread = RelationSqlDAO.save("ACTION_SPREAD")
     val relationRegenerate = RelationSqlDAO.save("ACTION_REGENERATE")
-
 
     println("Adding concepts to graph...")
     /*Storage of the concepts in DB*/
@@ -325,7 +323,7 @@ object WorldInitialisation extends Controller {
       RelationGraphDAO.addRelationToDB(conceptAnimal.id, relationMoveId, conceptEarth.id) &&
       RelationGraphDAO.addRelationToDB(conceptSheep.id, relationSubtypeOfId, conceptAnimal.id) &&
       RelationGraphDAO.addRelationToDB(conceptSheep.id, relationFleeId, conceptPredator.id) &&
-        RelationGraphDAO.addRelationToDB(conceptSheep.id, relationFear, conceptPredator.id) &&
+      RelationGraphDAO.addRelationToDB(conceptSheep.id, relationFear, conceptPredator.id) &&
       RelationGraphDAO.addRelationToDB(conceptSheep.id, relationEatId, conceptEdible.id) &&
       RelationGraphDAO.addRelationToDB(conceptPredator.id, relationEatId, conceptSheep.id) &&
       RelationGraphDAO.addRelationToDB(conceptPredator.id, relationSubtypeOfId, conceptAnimal.id) &&
@@ -344,10 +342,10 @@ object WorldInitialisation extends Controller {
       RelationGraphDAO.addRelationToDB(conceptTree.id, relationSubtypeOfId, conceptVegetable.id) &&
       RelationGraphDAO.addRelationToDB(conceptWater.id, relationSubtypeOfId, conceptGround.id) &&
       RelationGraphDAO.addRelationToDB(conceptEarth.id, relationSubtypeOfId, conceptGround.id) &&
-        RelationGraphDAO.addRelationToDB(conceptMan.id, relationProcreate, conceptGround.id) &&
-        RelationGraphDAO.addRelationToDB(conceptWolf.id, relationProcreate, conceptGround.id) &&
-        RelationGraphDAO.addRelationToDB(conceptSheep.id, relationProcreate, conceptGround.id) &&
-        RelationGraphDAO.addRelationToDB(conceptGrass.id, relationSpread, conceptGround.id) &&
+      RelationGraphDAO.addRelationToDB(conceptMan.id, relationProcreate, conceptGround.id) &&
+      RelationGraphDAO.addRelationToDB(conceptWolf.id, relationProcreate, conceptGround.id) &&
+      RelationGraphDAO.addRelationToDB(conceptSheep.id, relationProcreate, conceptGround.id) &&
+      RelationGraphDAO.addRelationToDB(conceptGrass.id, relationSpread, conceptGround.id) &&
       RelationGraphDAO.addRelationToDB(conceptGrass.id, relationRegenerate, conceptGrass.id)
 
 

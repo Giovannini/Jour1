@@ -1,7 +1,7 @@
 package forms.graph.concept.need
 
 import forms.graph.concept.ConceptForm
-import forms.instance_action.action.InstanceActionForm
+import forms.interaction.action.InstanceActionForm
 import models.intelligence.MeanOfSatisfaction
 import play.api.data.Form
 import play.api.data.Forms._

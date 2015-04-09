@@ -1,6 +1,6 @@
 package forms.graph.concept.consequence
 
-import forms.instance_action.effect.EffectForm
+import forms.interaction.effect.EffectForm
 import models.intelligence.consequence.Consequence
 import play.api.data.Form
 import play.api.data.Forms._

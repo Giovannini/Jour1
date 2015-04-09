@@ -1,6 +1,6 @@
-package forms.instance_action.effect
+package forms.interaction.effect
 
-import forms.instance_action.parameter.ParameterForm
+import forms.interaction.parameter.ParameterForm
 import models.interaction.effect.{Effect, EffectDAO}
 import models.interaction.parameter.{Parameter, ParameterReference}
 import play.api.data.Form

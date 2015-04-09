@@ -3,6 +3,7 @@ package models.interaction.action
 import controllers.Application
 import models.graph.Instance
 import models.interaction.Interaction
+import models.interaction.InteractionType.InteractionType
 import models.interaction.parameter.{Parameter, ParameterReference, ParameterValue}
 import models.interaction.precondition.Precondition
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
@@ -123,12 +124,6 @@ case class InstanceAction(
    */
   def save: InstanceAction = {
     InstanceActionDAO.save(this)
-  }
-
-  def isValid() : Boolean = {
-    _subActions.forall(item => {
-      item._1.id != this.id && item._1.label != this.label
-    })
   }
 }
 
