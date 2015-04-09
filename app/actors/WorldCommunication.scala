@@ -1,6 +1,6 @@
 package actors
 
-import models.graph.ontology.Instance
+import models.graph.Instance
 
 /**
  * Created by giovannini on 3/23/15.

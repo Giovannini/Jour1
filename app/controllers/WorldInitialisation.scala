@@ -1,16 +1,15 @@
 package controllers
 
-import models.graph.NeoDAO
-import models.graph.custom_types.DisplayProperty
-import models.graph.ontology._
-import models.graph.ontology.concept.consequence.{Consequence, ConsequenceStep}
-import models.graph.ontology.concept.need.{MeanOfSatisfaction, Need, NeedDAO}
-import models.graph.ontology.concept.{Concept, ConceptDAO}
-import models.graph.ontology.property.{Property, PropertyDAO, PropertyType}
-import models.graph.ontology.relation.RelationDAO
+import models.graph.DisplayProperty
+import models.graph.concept.{Concept, ConceptDAO}
+import models.graph.property.{Property, PropertyDAO, PropertyType, ValuedProperty}
+import models.graph.relation.{RelationGraphDAO, RelationSqlDAO}
+import models.intelligence.MeanOfSatisfaction
+import models.intelligence.consequence.{Consequence, ConsequenceStep}
+import models.intelligence.need.{Need, NeedDAO}
 import models.interaction.action.InstanceActionManager
 import models.interaction.precondition.PreconditionManager
-import models.{WorldInit, WorldMap}
+import models.map.{WorldInit, WorldMap}
 import play.api.mvc._
 
 
@@ -57,7 +56,7 @@ object WorldInitialisation extends Controller {
    */
   def initialization: Action[AnyContent] = {
     Action {
-      val result = NeoDAO.clearDB()
+      val result = ConceptDAO.clearDB()
       //this is working
       if (result) {
         if (putInitialConceptsInDB) {
@@ -80,7 +79,7 @@ object WorldInitialisation extends Controller {
    */
   def putInitialConceptsInDB: Boolean = {
     PropertyDAO.clear
-    RelationDAO.clear
+    RelationSqlDAO.clear
     NeedDAO.clear
 //Todo mettre des valeurs judicieuses au lieu des valeurs arbitraires pour les rules et property
     /*Property declaration*/
@@ -286,17 +285,17 @@ object WorldInitialisation extends Controller {
     println("Relations declaration...")
 
     /*Relations declaration*/
-    val relationSubtypeOfId = RelationDAO.save("SUBTYPE_OF")
-    val relationEatId = RelationDAO.save("ACTION_EAT")
-    val relationCutId = RelationDAO.save("ACTION_CUT")
-    val relationMoveId = RelationDAO.save("ACTION_MOVE")
-    val relationFleeId = RelationDAO.save("ACTION_FLEE")
-    val relationProducesId = RelationDAO.save("ACTION_PRODUCE")
-    val relationLiveOnId = RelationDAO.save("LIVE_ON")
-    val relationFear = RelationDAO.save("MOOD_FEAR")
-    val relationProcreate = RelationDAO.save("ACTION_PROCREATE")
-    val relationSpread = RelationDAO.save("ACTION_SPREAD")
-    val relationRegenerate = RelationDAO.save("ACTION_REGENERATE")
+    val relationSubtypeOfId = RelationSqlDAO.save("SUBTYPE_OF")
+    val relationEatId = RelationSqlDAO.save("ACTION_EAT")
+    val relationCutId = RelationSqlDAO.save("ACTION_CUT")
+    val relationMoveId = RelationSqlDAO.save("ACTION_MOVE")
+    val relationFleeId = RelationSqlDAO.save("ACTION_FLEE")
+    val relationProducesId = RelationSqlDAO.save("ACTION_PRODUCE")
+    val relationLiveOnId = RelationSqlDAO.save("LIVE_ON")
+    val relationFear = RelationSqlDAO.save("MOOD_FEAR")
+    val relationProcreate = RelationSqlDAO.save("ACTION_PROCREATE")
+    val relationSpread = RelationSqlDAO.save("ACTION_SPREAD")
+    val relationRegenerate = RelationSqlDAO.save("ACTION_REGENERATE")
 
 
     println("Adding concepts to graph...")
@@ -322,48 +321,48 @@ object WorldInitialisation extends Controller {
     /*Creation of the relations in DB*/
     println("Adding relations to graph...")
     val addRelationVerification = {
-      NeoDAO.addRelationToDB(conceptAnimal.id, relationMoveId, conceptEarth.id) &&
-      NeoDAO.addRelationToDB(conceptSheep.id, relationSubtypeOfId, conceptAnimal.id) &&
-      NeoDAO.addRelationToDB(conceptSheep.id, relationFleeId, conceptPredator.id) &&
-        NeoDAO.addRelationToDB(conceptSheep.id, relationFear, conceptPredator.id) &&
-      NeoDAO.addRelationToDB(conceptSheep.id, relationEatId, conceptEdible.id) &&
-      NeoDAO.addRelationToDB(conceptPredator.id, relationEatId, conceptSheep.id) &&
-      NeoDAO.addRelationToDB(conceptPredator.id, relationSubtypeOfId, conceptAnimal.id) &&
-      NeoDAO.addRelationToDB(conceptWolf.id, relationSubtypeOfId, conceptPredator.id) &&
-      NeoDAO.addRelationToDB(conceptMan.id, relationSubtypeOfId, conceptPredator.id) &&
-      NeoDAO.addRelationToDB(conceptMan.id, relationEatId, conceptApple.id) &&
-      NeoDAO.addRelationToDB(conceptMan.id, relationCutId, conceptTree.id) &&
-      NeoDAO.addRelationToDB(conceptFir.id, relationSubtypeOfId, conceptTree.id) &&
-      NeoDAO.addRelationToDB(conceptAppleTree.id, relationSubtypeOfId, conceptTree.id) &&
-      NeoDAO.addRelationToDB(conceptAppleTree.id, relationProducesId, conceptApple.id) &&
-      NeoDAO.addRelationToDB(conceptApple.id, relationSubtypeOfId, conceptEdible.id) &&
-      NeoDAO.addRelationToDB(conceptBush.id, relationSubtypeOfId, conceptTree.id) &&
-      NeoDAO.addRelationToDB(conceptBush.id, relationSubtypeOfId, conceptEdible.id) &&
-      NeoDAO.addRelationToDB(conceptGrass.id, relationSubtypeOfId, conceptEdible.id) &&
-      NeoDAO.addRelationToDB(conceptGrass.id, relationSubtypeOfId, conceptVegetable.id) &&
-      NeoDAO.addRelationToDB(conceptTree.id, relationSubtypeOfId, conceptVegetable.id) &&
-      NeoDAO.addRelationToDB(conceptWater.id, relationSubtypeOfId, conceptGround.id) &&
-      NeoDAO.addRelationToDB(conceptEarth.id, relationSubtypeOfId, conceptGround.id) &&
-        NeoDAO.addRelationToDB(conceptMan.id, relationProcreate, conceptGround.id) &&
-        NeoDAO.addRelationToDB(conceptWolf.id, relationProcreate, conceptGround.id) &&
-        NeoDAO.addRelationToDB(conceptSheep.id, relationProcreate, conceptGround.id) &&
-        NeoDAO.addRelationToDB(conceptGrass.id, relationSpread, conceptGround.id) &&
-      NeoDAO.addRelationToDB(conceptGrass.id, relationRegenerate, conceptGrass.id)
+      RelationGraphDAO.addRelationToDB(conceptAnimal.id, relationMoveId, conceptEarth.id) &&
+      RelationGraphDAO.addRelationToDB(conceptSheep.id, relationSubtypeOfId, conceptAnimal.id) &&
+      RelationGraphDAO.addRelationToDB(conceptSheep.id, relationFleeId, conceptPredator.id) &&
+        RelationGraphDAO.addRelationToDB(conceptSheep.id, relationFear, conceptPredator.id) &&
+      RelationGraphDAO.addRelationToDB(conceptSheep.id, relationEatId, conceptEdible.id) &&
+      RelationGraphDAO.addRelationToDB(conceptPredator.id, relationEatId, conceptSheep.id) &&
+      RelationGraphDAO.addRelationToDB(conceptPredator.id, relationSubtypeOfId, conceptAnimal.id) &&
+      RelationGraphDAO.addRelationToDB(conceptWolf.id, relationSubtypeOfId, conceptPredator.id) &&
+      RelationGraphDAO.addRelationToDB(conceptMan.id, relationSubtypeOfId, conceptPredator.id) &&
+      RelationGraphDAO.addRelationToDB(conceptMan.id, relationEatId, conceptApple.id) &&
+      RelationGraphDAO.addRelationToDB(conceptMan.id, relationCutId, conceptTree.id) &&
+      RelationGraphDAO.addRelationToDB(conceptFir.id, relationSubtypeOfId, conceptTree.id) &&
+      RelationGraphDAO.addRelationToDB(conceptAppleTree.id, relationSubtypeOfId, conceptTree.id) &&
+      RelationGraphDAO.addRelationToDB(conceptAppleTree.id, relationProducesId, conceptApple.id) &&
+      RelationGraphDAO.addRelationToDB(conceptApple.id, relationSubtypeOfId, conceptEdible.id) &&
+      RelationGraphDAO.addRelationToDB(conceptBush.id, relationSubtypeOfId, conceptTree.id) &&
+      RelationGraphDAO.addRelationToDB(conceptBush.id, relationSubtypeOfId, conceptEdible.id) &&
+      RelationGraphDAO.addRelationToDB(conceptGrass.id, relationSubtypeOfId, conceptEdible.id) &&
+      RelationGraphDAO.addRelationToDB(conceptGrass.id, relationSubtypeOfId, conceptVegetable.id) &&
+      RelationGraphDAO.addRelationToDB(conceptTree.id, relationSubtypeOfId, conceptVegetable.id) &&
+      RelationGraphDAO.addRelationToDB(conceptWater.id, relationSubtypeOfId, conceptGround.id) &&
+      RelationGraphDAO.addRelationToDB(conceptEarth.id, relationSubtypeOfId, conceptGround.id) &&
+        RelationGraphDAO.addRelationToDB(conceptMan.id, relationProcreate, conceptGround.id) &&
+        RelationGraphDAO.addRelationToDB(conceptWolf.id, relationProcreate, conceptGround.id) &&
+        RelationGraphDAO.addRelationToDB(conceptSheep.id, relationProcreate, conceptGround.id) &&
+        RelationGraphDAO.addRelationToDB(conceptGrass.id, relationSpread, conceptGround.id) &&
+      RelationGraphDAO.addRelationToDB(conceptGrass.id, relationRegenerate, conceptGrass.id)
 
 
 
     }
     val addLiveOnRelationsVerification = {
-      NeoDAO.addRelationToDB(conceptMan.id, relationLiveOnId, conceptEarth.id) &&
-      NeoDAO.addRelationToDB(conceptWolf.id, relationLiveOnId, conceptEarth.id) &&
-      NeoDAO.addRelationToDB(conceptSheep.id, relationLiveOnId, conceptEarth.id) &&
-      NeoDAO.addRelationToDB(conceptGrass.id, relationLiveOnId, conceptEarth.id) &&
-      NeoDAO.addRelationToDB(conceptTree.id, relationLiveOnId, conceptEarth.id) &&
-      NeoDAO.addRelationToDB(conceptBush.id, relationLiveOnId, conceptEarth.id) &&
-      NeoDAO.addRelationToDB(conceptAppleTree.id, relationLiveOnId, conceptEarth.id) &&
-      NeoDAO.addRelationToDB(conceptFir.id, relationLiveOnId, conceptEarth.id) &&
-      NeoDAO.addRelationToDB(conceptApple.id, relationLiveOnId, conceptAppleTree.id) &&
-      NeoDAO.addRelationToDB(conceptSheep.id, relationLiveOnId, conceptEarth.id)
+      RelationGraphDAO.addRelationToDB(conceptMan.id, relationLiveOnId, conceptEarth.id) &&
+      RelationGraphDAO.addRelationToDB(conceptWolf.id, relationLiveOnId, conceptEarth.id) &&
+      RelationGraphDAO.addRelationToDB(conceptSheep.id, relationLiveOnId, conceptEarth.id) &&
+      RelationGraphDAO.addRelationToDB(conceptGrass.id, relationLiveOnId, conceptEarth.id) &&
+      RelationGraphDAO.addRelationToDB(conceptTree.id, relationLiveOnId, conceptEarth.id) &&
+      RelationGraphDAO.addRelationToDB(conceptBush.id, relationLiveOnId, conceptEarth.id) &&
+      RelationGraphDAO.addRelationToDB(conceptAppleTree.id, relationLiveOnId, conceptEarth.id) &&
+      RelationGraphDAO.addRelationToDB(conceptFir.id, relationLiveOnId, conceptEarth.id) &&
+      RelationGraphDAO.addRelationToDB(conceptApple.id, relationLiveOnId, conceptAppleTree.id) &&
+      RelationGraphDAO.addRelationToDB(conceptSheep.id, relationLiveOnId, conceptEarth.id)
     }
     val result = addConceptVerification && addRelationVerification && addLiveOnRelationsVerification
     println("Initialization of the graph completed: " + result)

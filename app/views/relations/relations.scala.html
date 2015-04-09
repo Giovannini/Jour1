@@ -1,5 +1,5 @@
 @()
-@import models.graph.ontology.relation.RelationDAO
+@import models.graph.relation.RelationSqlDAO
 
 
 <!DOCTYPE html>
@@ -13,7 +13,7 @@
         <h1>Relations enregistrées</h1>
 
         <ul>
-        @for(relation <- RelationDAO.getAll){
+        @for(relation <- RelationSqlDAO.getAll){
             <li>
                 @relation.id - @relation.label
                 <a href="/relations/update/@relation.id">Editer</a>

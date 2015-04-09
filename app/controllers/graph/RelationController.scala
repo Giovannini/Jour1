@@ -1,8 +1,7 @@
 package controllers.graph
 
-import forms.graph.ontology.relation.RelationForm
-import models.graph.NeoDAO
-import models.graph.ontology.relation.{RelationDAO, Relation}
+import forms.graph.relation.RelationForm
+import models.graph.relation.{RelationGraphDAO, Relation, RelationSqlDAO}
 import play.api.libs.json.Json
 import play.api.mvc._
 
@@ -18,7 +17,7 @@ object RelationController extends Controller {
           val source = tuple._1
           val destination = tuple._2
           val relation = tuple._3
-          val result = NeoDAO.addRelationToDB(source.id, relation.id, destination.id)
+          val result = RelationGraphDAO.addRelationToDB(source.id, relation.id, destination.id)
           if(result) {
             Ok("Relation has been added to the graph")
           } else {
@@ -32,11 +31,11 @@ object RelationController extends Controller {
   }
 
   def addRelationToGraph(label: String, source: Long, target: Long) = Action { request =>
-    val relation = RelationDAO.getByName(label)
+    val relation = RelationSqlDAO.getByName(label)
     if(relation == Relation.error) {
       BadRequest("Unknown relation")
     } else {
-      val result = NeoDAO.addRelationToDB(source, relation.id, target)
+      val result = RelationGraphDAO.addRelationToDB(source, relation.id, target)
       if (result) {
         Ok("Relation added to the graph")
       } else {
@@ -46,11 +45,11 @@ object RelationController extends Controller {
   }
 
   def removeRelationToGraph(label: String, source: Long, target: Long) = Action { request =>
-    val relation = RelationDAO.getByName(label)
+    val relation = RelationSqlDAO.getByName(label)
     if(relation == Relation.error) {
       BadRequest("Unknown relation")
     } else {
-      val result = NeoDAO.removeRelationFromDB(source, relation.id, target)
+      val result = RelationGraphDAO.removeRelationFromDB(source, relation.id, target)
       if (result) {
         Ok("Relation removed from the graph")
       } else {
@@ -60,11 +59,11 @@ object RelationController extends Controller {
   }
 
   def getRelation(label: String) = Action {
-    val relation = RelationDAO.getByName(label)
+    val relation = RelationSqlDAO.getByName(label)
     if(relation == Relation.error) {
       NotFound("Invalid")
     } else {
-      val result = NeoDAO.getRelationsById(relation.id)
+      val result = RelationGraphDAO.getRelationsById(relation.id)
       val unzipped = result.unzip
       val nodes = (unzipped._1 ::: unzipped._2).distinct
       val edges = result.map(
@@ -82,7 +81,7 @@ object RelationController extends Controller {
   }
 
   def updateRelation(label: String) = Action(parse.json) { request =>
-    val oldRelation = RelationDAO.getByName(label)
+    val oldRelation = RelationSqlDAO.getByName(label)
     if(oldRelation == Relation.error) {
       BadRequest("Relation does not exist")
     } else {
@@ -97,17 +96,17 @@ object RelationController extends Controller {
             val destination = tuple._2
             val relation = tuple._3
 
-            val removeResult = NeoDAO.removeRelationFromDB(source.id, oldRelation.id, destination.id)
+            val removeResult = RelationGraphDAO.removeRelationFromDB(source.id, oldRelation.id, destination.id)
             if(!removeResult) {
               InternalServerError(Json.obj(
                 "global" -> "Impossible to update the graph"
               ))
             } else {
-              val result = NeoDAO.addRelationToDB(source.id, relation.id, destination.id)
+              val result = RelationGraphDAO.addRelationToDB(source.id, relation.id, destination.id)
               if (result) {
                 Ok("Relation has been added to the graph")
               } else {
-                NeoDAO.addRelationToDB(source.id, oldRelation.id, destination.id)
+                RelationGraphDAO.addRelationToDB(source.id, oldRelation.id, destination.id)
                 InternalServerError(Json.obj(
                   "global" -> "Impossible to update the graph"
                 ))
@@ -131,7 +130,7 @@ object RelationController extends Controller {
           val destination = tuple._2
           val relation = tuple._3
 
-          val result = NeoDAO.removeRelationFromDB(source.id, relation.id, destination.id)
+          val result = RelationGraphDAO.removeRelationFromDB(source.id, relation.id, destination.id)
           if(result) {
             Ok("Relation deleted")
           } else {

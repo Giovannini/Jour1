@@ -1,7 +1,7 @@
 package models.interaction.precondition
 
 import controllers.Application
-import models.graph.ontology.property.PropertyDAO
+import models.graph.property.PropertyDAO
 import models.interaction.parameter.{ParameterReference, ParameterValue}
 
 /**

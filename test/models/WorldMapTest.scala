@@ -1,8 +1,9 @@
 package models
 
-import models.graph.custom_types.{Label, Coordinates}
-import models.graph.ontology.Instance
-import models.graph.ontology.concept.Concept
+import models.graph.{Coordinates, Instance}
+import models.graph.custom_types.Label
+import models.graph.concept.Concept
+import models.map.WorldMap
 import org.scalatest.FunSuite
 import org.scalatest.BeforeAndAfter
 
@@ -11,7 +12,7 @@ import org.scalatest.BeforeAndAfter
  */
 class WorldMapTest extends FunSuite with BeforeAndAfter{
 
-    val label = Label("Map")
+    val label = "Map"
     val description = "The map of the world"
     val dimension = 5
     val concept1 = Concept("C1", List(), List())

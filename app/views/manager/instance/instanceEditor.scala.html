@@ -1,35 +1,36 @@
-@(instance: models.graph.ontology.Instance, call: Call)
-@import forms.graph.ontology.InstanceForm
+@(instance: models.graph.Instance, call: Call)
+
+  @import forms.graph.InstanceForm
 
 <!DOCTYPE html>
-<html>
-<head lang="en">
-  <meta charset="UTF-8">
-  <title></title>
-</head>
-<body>
-  <h1>Edition of instance @instance.label @instance.id of concept @instance.concept</h1>
+  <html>
+    <head lang="en">
+      <meta charset="UTF-8">
+      <title></title>
+    </head>
+    <body>
+      <h1>Edition of instance @instance.label @instance.id of concept @instance.concept</h1>
 
 
-  @helper.form(action = call){
-    @helper.input(InstanceForm.form("id")) { (id, name, value, args) =>
-      <input type="number" name="@name" id="@id" value="@instance.id" min="0" readonly>
-    }
-    @helper.input(InstanceForm.form("idConcept")) { (id, name, value, args) =>
-      <input type="number" name="@name" id="@id" value="@instance.concept.id" min="0" readonly>
-    }
-    @helper.input(InstanceForm.form("label")) { (id, name, value, args) =>
-      <input type="text" name="@name" id="@id" value="@instance.label">
-    }
+      @helper.form(action = call) {
+        @helper.input(InstanceForm.form("id")) { (id, name, value, args) =>
+          <input type="number" name="@name" id="@id" value="@instance.id" min="0" readonly>
+        }
+        @helper.input(InstanceForm.form("idConcept")) { (id, name, value, args) =>
+          <input type="number" name="@name" id="@id" value="@instance.concept.id" min="0" readonly>
+        }
+        @helper.input(InstanceForm.form("label")) { (id, name, value, args) =>
+          <input type="text" name="@name" id="@id" value="@instance.label">
+        }
 
-    @for(property <- instance.properties.zipWithIndex){
-      @helper.input(InstanceForm.form("property["+property._2+"]")) { (id, name, value, args) =>
-        <p>@property._2 - @property._1.property.label</p>
-        <input type="number" name="@name" id="@id" value="@property._1.value">
-      }
-    }
+        @for(property <- instance.properties.zipWithIndex) {
+          @helper.input(InstanceForm.form("property[" + property._2 + "]")) { (id, name, value, args) =>
+            <p>@property._2 - @property._1.property.label</p>
+            <input type="number" name="@name" id="@id" value="@property._1.value">
+          }
+        }
 
-    <input type="submit">
-    }
-</body>
-</html>
+        <input type="submit">
+        }
+    </body>
+  </html>

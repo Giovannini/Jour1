@@ -1,10 +1,10 @@
 package controllers.ontology
 
 import controllers.Application
-import forms.graph.ontology.InstanceForm
-import models.graph.ontology.{Instance, ValuedProperty}
+import forms.graph.InstanceForm
+import models.graph.Instance
 import play.api.data.Form
-import play.api.mvc.{AnyContent, Action, Controller}
+import play.api.mvc.{Action, Controller}
 
 /**
  * Object containing tools for instance editing

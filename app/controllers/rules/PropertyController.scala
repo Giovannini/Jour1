@@ -1,11 +1,11 @@
 package controllers.rules
 
-import models.graph.ontology.property.PropertyDAO
+import models.graph.property.PropertyDAO
 import play.api.libs.json.Json
 import play.api.mvc._
 
 object PropertyController extends Controller {
-  def getProperties() = Action { request =>
+  def getProperties = Action { request =>
     val properties = PropertyDAO.getAll
     Ok(Json.toJson(properties.map(_.toJson)))
   }

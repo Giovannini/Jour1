@@ -1,9 +1,9 @@
 package models.graph.ontology
 
-import models.graph.custom_types.Statement
-import models.graph.ontology.concept.Concept
-import models.graph.ontology.property.Property
-import models.graph.ontology.relation.Relation
+import models.graph.DisplayProperty
+import models.graph.concept.{ConceptStatement, Concept}
+import models.graph.property.{PropertyType, Property}
+import models.graph.relation.Relation
 import org.anormcypher.Neo4jREST
 import org.scalatest.FunSuite
 
@@ -12,13 +12,13 @@ import org.scalatest.FunSuite
  */
 class RelationTest extends FunSuite {
 
-  val prop1 = Property(0L, "P1", "Int", 0)
-  val concept1 = Concept("C1", List(prop1), List())
-  val concept2 = Concept("C2", List(prop1), List())
+  val prop1 = Property("P1", PropertyType.Int, 0)
+  val concept1 = Concept("C1", List(prop1.defaultValuedProperty), List(), List(), DisplayProperty("#aaaaaa", 0))
+  val concept2 = Concept("C2", List(prop1.defaultValuedProperty), List(), List(), DisplayProperty("#aaaaaa", 0))
   val relation1 = Relation("R1")
 
   implicit val connection = Neo4jREST("localhost", 7474, "/db/data/")
-  Statement.clearDB.execute
+  ConceptStatement.clearDB.execute
 
   /*test("method parseRow"){
     NeoDAO.addConceptToDB(concept1)

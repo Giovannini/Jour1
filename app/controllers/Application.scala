@@ -1,17 +1,19 @@
 package controllers
 
-import models.WorldMap
-import models.graph.custom_types.Label
-import play.api.db.DB
+import models.map.WorldMap
+import org.anormcypher.Neo4jREST
+import play.Play
 import play.api.Play.current
+import play.api.db.DB
 import play.api.libs.json.Json
 import play.api.mvc._
 
 
 object Application extends Controller {
 
-  val map = WorldMap(Label("MapOfTheWorld"), "description", 150, 150)
+  val map = WorldMap("MapOfTheWorld", "description", 50, 50)
   lazy val connection = DB.getConnection()
+  implicit val neoConnection = Neo4jREST(Play.application.configuration.getString("serverIP"), 7474, "/db/data/")
 
   /**
    * Show the different urls of the project

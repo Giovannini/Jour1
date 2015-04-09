@@ -1,9 +1,9 @@
 package controllers.graph
 
-import forms.graph.ontology.concept.ConceptForm.form
-import models.graph.NeoDAO
-import models.graph.custom_types.{DisplayProperty, Statement}
-import models.graph.ontology.concept.{Concept, ConceptDAO}
+import controllers.Application
+import forms.graph.concept.ConceptForm.form
+import models.graph.DisplayProperty
+import models.graph.concept.{ConceptStatement, Concept, ConceptDAO}
 import models.interaction.action.InstanceAction
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
@@ -111,8 +111,8 @@ object ConceptController extends Controller {
         }
 
         /* Get the initial concept */
-        val statement = Statement.getConceptByLabel(search)
-        val cypherResultRowStream = statement.apply()(NeoDAO.connection)
+        val statement = ConceptStatement.getConceptByLabel(search) //TODO is it normal ConceptStatement appears here ?
+        val cypherResultRowStream = statement.apply()(Application.neoConnection)
         if (cypherResultRowStream.nonEmpty) {
           // A concept has been found
           val nodes = cypherResultRowStream.map(ConceptDAO.parseRow)

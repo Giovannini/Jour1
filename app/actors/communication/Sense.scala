@@ -1,7 +1,7 @@
 package actors.communication
 
 import actors.WorldCommunication
-import models.graph.ontology.Instance
+import models.graph.Instance
 
 /**
  * Created by giovannini on 3/30/15.

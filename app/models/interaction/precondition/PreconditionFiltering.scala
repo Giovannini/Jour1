@@ -1,8 +1,8 @@
 package models.interaction.precondition
 
 import controllers.Application
-import models.graph.ontology.Instance
-import models.graph.ontology.property.PropertyDAO
+import models.graph.Instance
+import models.graph.property.PropertyDAO
 
 
 object PreconditionFiltering {

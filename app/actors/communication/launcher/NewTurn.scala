@@ -2,7 +2,7 @@ package actors.communication.launcher
 
 import actors.communication.computing.ComputeAction
 import actors.{Computing, Launcher}
-import models.graph.ontology.Instance
+import models.graph.Instance
 
 
 case object NewTurn extends Launcher {

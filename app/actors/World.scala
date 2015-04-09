@@ -4,7 +4,7 @@ import actors.communication.{StopComputing, EndOfTurn, ResultAction}
 import akka.actor.{Actor, ActorRef, Props}
 import akka.routing.RoundRobinPool
 import controllers.Application
-import models.graph.ontology.Instance
+import models.graph.Instance
 import models.interaction.LogInteraction
 
 class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {

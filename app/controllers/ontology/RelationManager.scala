@@ -1,7 +1,6 @@
 package controllers.ontology
 
-import models.graph.NeoDAO
-import models.graph.ontology.relation.RelationDAO
+import models.graph.relation.{RelationGraphDAO, RelationSqlDAO}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.mvc.{Action, AnyContent, Controller}
@@ -53,9 +52,9 @@ object RelationManager extends Controller{
     def doCreate(form: (Int, String, String, Int, Boolean)): Boolean = {
       val concept1_id = form._1
       val relation = { if (form._3 == "") form._2 else form._3 }
-      val relationID = RelationDAO.save(relation)
+      val relationID = RelationSqlDAO.save(relation)
       val concept2_id = form._4
-      NeoDAO.addRelationToDB(concept1_id, relationID, concept2_id)
+      RelationGraphDAO.addRelationToDB(concept1_id, relationID, concept2_id)
     }
 
     val newTodoForm = relationForm.bindFromRequest()
@@ -73,7 +72,7 @@ object RelationManager extends Controller{
    * @return an action redirecting to index of application
    */
   def delete(src: Long, id: Long, dest: Long): Action[AnyContent] = Action {
-    NeoDAO.removeRelationFromDB(src, id, dest)
+    RelationGraphDAO.removeRelationFromDB(src, id, dest)
     Redirect(controllers.routes.Application.index())
   }
 }

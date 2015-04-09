@@ -1,6 +1,6 @@
 package models.interaction.precondition
 
-import models.graph.ontology.Instance
+import models.graph.Instance
 import models.interaction.parameter.{Parameter, ParameterReference, ParameterValue}
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 

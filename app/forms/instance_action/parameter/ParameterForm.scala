@@ -1,7 +1,7 @@
 package forms.instance_action.parameter
 
-import forms.graph.ontology.property.PropertyForm
-import models.graph.ontology.property.{PropertyDAO, Property}
+import forms.graph.property.PropertyForm
+import models.graph.property.{PropertyDAO, Property}
 import models.interaction.parameter._
 import play.api.data.Forms._
 import play.api.data.format.Formatter

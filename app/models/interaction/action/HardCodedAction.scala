@@ -1,8 +1,7 @@
 package models.interaction.action
 
 import controllers.Application
-import models.graph.ontology.ValuedProperty
-import models.graph.ontology.property.PropertyDAO
+import models.graph.property.{ValuedProperty, PropertyDAO}
 import models.interaction.parameter.{ParameterReference, ParameterValue}
 
 /**

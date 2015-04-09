@@ -1,9 +1,9 @@
 package models.graph.ontology
 
-import models.graph.custom_types.Coordinates
-import models.graph.ontology.concept.Concept
-import models.graph.ontology.property.Property
-import models.graph.ontology.relation.Relation
+import models.graph.{Coordinates, Instance}
+import models.graph.concept.Concept
+import models.graph.property.{ValuedProperty, Property}
+import models.graph.relation.Relation
 import org.anormcypher.Neo4jREST
 import org.scalatest.FunSuite
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}

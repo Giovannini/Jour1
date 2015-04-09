@@ -1,7 +1,7 @@
 package models.interaction.action
 
 import controllers.Application
-import models.graph.ontology.Instance
+import models.graph.Instance
 import models.interaction.Interaction
 import models.interaction.parameter.{Parameter, ParameterReference, ParameterValue}
 import models.interaction.precondition.Precondition
