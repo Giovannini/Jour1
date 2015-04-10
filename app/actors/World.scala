@@ -1,6 +1,7 @@
 package actors
 
-import actors.communication.{StopComputing, EndOfTurn, ResultAction}
+import actors.communication.launcher.NewTurn
+import actors.communication._
 import actors.socket.UpdateMap
 import akka.actor.{Actor, ActorRef, Props}
 import akka.routing.RoundRobinPool
@@ -16,6 +17,8 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
   var nrOfResults: Int = _
   var nrOfInstances: Int = _
   val start: Long = System.currentTimeMillis
+  var ongoing: Boolean = false
+  var looping: Boolean = false
 
   val workerRouter = context.actorOf(
     Props[SmartInstance].withRouter(RoundRobinPool(nrOfWorkers)), name = "workerRouter")
@@ -53,9 +56,14 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
    * @author Thomas GIOVANNINI
    */
   override def receive: Actor.Receive = {
-    case launcher: Launcher =>
+    case StartLoop =>
+      looping = true
+      self ! NewTurn
+    case StopLoop =>
+      looping = false
+    case NewTurn =>
       println("Launching new turn computation...")
-      launchComputation(launcher)
+      launchComputation(NewTurn)
     case ResultAction(logList) =>
       nrOfResults += 1
       logs = logList :: logs
@@ -69,7 +77,14 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
     val end: Long = System.currentTimeMillis()
     for(worker <- 1 to nrOfWorkers) workerRouter ! StopComputing
     listener ! EndOfTurn(end - start)
-    context.stop(self)
+    ongoing = false
+
+    if(looping) {
+      self ! NewTurn
+    } else {
+      listener ! StopComputing
+      context.stop(self)
+    }
   }
 
   private def updateMap(logs: List[List[LogInteraction]]): Unit = {
@@ -85,12 +100,15 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
    * @param launcher containing the information needed to do the computation
    */
   private def launchComputation(launcher: Launcher): Unit = {
-    val instancesWithNeeds = getInstancesWithNeeds
-    setNumberOfInstancesToCompute(instancesWithNeeds.length)
-    println("Launching computation for " + nrOfInstances + " instances.")
-    for (instance <- instancesWithNeeds) {
-      val environment = getEnvironmentOf(instance)
-      workerRouter ! launcher.computation(instance, environment)
+    if(!ongoing) {
+      ongoing = true
+      val instancesWithNeeds = getInstancesWithNeeds
+      setNumberOfInstancesToCompute(instancesWithNeeds.length)
+      println("Launching computation for " + nrOfInstances + " instances.")
+      for (instance <- instancesWithNeeds) {
+        val environment = getEnvironmentOf(instance)
+        workerRouter ! launcher.computation(instance, environment)
+      }
     }
   }
 

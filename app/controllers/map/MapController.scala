@@ -41,8 +41,6 @@ object MapController extends Controller with Secured {
          */
         (Iteratee.foreach[JsValue] {
           case message: JsValue =>
-            println("Received a JSON from client with ID " + userId)
-            println(message)
             Try(((message \ "event").as[String], message \ "data")) match {
 
               case Success(("updateClient", data)) =>

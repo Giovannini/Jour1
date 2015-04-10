@@ -49,10 +49,8 @@ class WebSocketActor extends Actor {
       sender ! userChannel.enumerator
 
     case UpdateMap(newLogs) =>
-      println("Receives an update")
       usersLogs.foreach {
         case (userId, logs) =>
-          println("Update for user " + userId)
           usersLogs += (userId -> mergeLogs(logs, newLogs))
       }
 
@@ -74,7 +72,6 @@ class WebSocketActor extends Actor {
         "add" -> Json.arr(),
         "remove" -> Json.arr()
       ))
-      println(usersSockets.get(userId))
       usersSockets.get(userId).get.channel push Json.obj("event" -> "started", "data" -> Json.obj())
 
     case Stop(userId) =>

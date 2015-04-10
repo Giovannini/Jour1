@@ -122,7 +122,7 @@ object WorldInitialisation extends Controller {
         ValuedProperty(propertyFeedMax,4)
       ),
       List(
-        ValuedProperty(propertyStrength, 40),
+        ValuedProperty(propertyStrength, 400),
         ValuedProperty(propertyInstanciable, 1)
       ),
       List(),
@@ -160,7 +160,7 @@ object WorldInitialisation extends Controller {
         ValuedProperty(propertyDesire,8)
       ),
       _rules = List(
-        ValuedProperty(propertyStrength, 2),
+        ValuedProperty(propertyStrength, 3),
         ValuedProperty(propertyInstanciable, 1),
         ValuedProperty(propertyFeedMax, 12)
       ),
@@ -220,7 +220,7 @@ object WorldInitialisation extends Controller {
         ValuedProperty(propertyDesire,6)
       ),
       List(
-        ValuedProperty(propertyStrength, 2),
+        ValuedProperty(propertyStrength, 1),
         ValuedProperty(propertyInstanciable, 1)
       ),
       List(),
@@ -240,7 +240,7 @@ object WorldInitialisation extends Controller {
         ValuedProperty(propertyFeedMax,6)
       ),
       List(
-        ValuedProperty(propertyStrength, 2),
+        ValuedProperty(propertyStrength, 20),
         ValuedProperty(propertyInstanciable, 1)
       ),
       List(),
@@ -250,7 +250,7 @@ object WorldInitialisation extends Controller {
 
     val conceptAppleTree = Concept("AppleTree",
       List(),
-      List(ValuedProperty(propertyStrength, 2),
+      List(ValuedProperty(propertyStrength, 1),
         ValuedProperty(propertyInstanciable, 1)),
       List(),
       DisplayProperty("#2F1C13", 9))
@@ -260,7 +260,7 @@ object WorldInitialisation extends Controller {
     val conceptTree = Concept("Tree",
       List(),
       List(
-        ValuedProperty(propertyStrength, 4),
+        ValuedProperty(propertyStrength, 3),
         ValuedProperty(propertyInstanciable, 1)
       ),
       List(),
@@ -270,7 +270,7 @@ object WorldInitialisation extends Controller {
 
     val conceptFir = Concept("Fir",
       List(),
-      List(ValuedProperty(propertyStrength, 4),
+      List(ValuedProperty(propertyStrength, 3),
         ValuedProperty(propertyInstanciable, 1)),
       List(),
       DisplayProperty("#221D1D", 8))
