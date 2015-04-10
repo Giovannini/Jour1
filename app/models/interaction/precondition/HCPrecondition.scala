@@ -117,4 +117,6 @@ object HCPrecondition {
     Application.map.getInstanceById(instance1ID).concept != Application.map.getInstanceById(instance2ID).concept
   }
 
+
+
 }

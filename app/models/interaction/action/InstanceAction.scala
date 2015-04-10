@@ -87,6 +87,9 @@ case class InstanceAction(
       case "addInstanceAt" =>
         HardCodedAction.addInstanceAt(arguments)
         true
+      case "createInstanceAt" =>
+        HardCodedAction.createInstanceAt(arguments)
+        true
       case "removeInstanceAt" =>
         HardCodedAction.removeInstanceAt(arguments)
         true

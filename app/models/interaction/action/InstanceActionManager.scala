@@ -43,6 +43,19 @@ object InstanceActionManager {
     }
     nameToId += "_addInstanceAt" -> _addInstanceAt
 
+    val _actionCreateInstanceAt = {
+      val p_conceptToInstanciate = ParameterReference("conceptToInstanciate", "String")
+      val groundWhereToAddIt = ParameterReference("groundWhereToAddIt", "Long")
+      InstanceAction(
+        0L,
+        "createInstanceAt",
+        List(),
+        List(),
+        List(p_conceptToInstanciate, groundWhereToAddIt)
+      ).save
+    }
+    nameToId += "_actionCreateInstanceAt" -> _actionCreateInstanceAt
+
     val _removeInstanceAt = {
       val p_instanceToRemove = ParameterReference("instanceToRemove", "Long")
       InstanceAction(
@@ -368,6 +381,79 @@ object InstanceActionManager {
       ).save
     }
     nameToId += "Regenerate" -> _actionRegenerate
+
+    val _actionCraft = {
+      val p_instanceThatCreate = ParameterReference("instanceID", "Long")
+      val p_conceptLabel = ParameterReference("objectToDo", "String")
+      val p_instanceThatIsUse = ParameterReference("instanceThatIsUse", "Long")
+
+      InstanceAction(
+        0L,
+        "ACTION_CRAFT",
+        preconditions = List(
+          (
+            PreconditionManager.nameToId("isOnSameTile"),
+            Map(
+              ParameterReference("instance1ID", "Long") -> p_instanceThatCreate,
+              ParameterReference("instance2ID", "Long") -> p_instanceThatIsUse
+            )
+            )
+        ),
+        _subActions = List(
+          (_removeInstanceAt,
+            Map(
+              ParameterReference("instanceToRemove", "Long") -> p_instanceThatIsUse
+            )
+            ),
+          (_actionCreateInstanceAt,
+            Map(
+              ParameterReference("conceptToInstanciate", "String") -> p_conceptLabel,
+              ParameterReference("groundWhereToAddIt", "Long") -> p_instanceThatCreate
+            ))
+        ),
+        parameters = List(
+          p_instanceThatCreate,
+          p_conceptLabel,
+          p_instanceThatIsUse
+        )
+      ).save
+
+    }
+    nameToId += "Craft" -> _actionCraft
+
+    val _actionCreateBow = {
+      val p_instanceThatCreate = ParameterReference("instanceThatCreate", "Long")
+      val p_instanceThatIsUse = ParameterReference("instanceThatIsUse", "Long")
+      InstanceAction(
+        0L,
+        "ACTION_CREATE_BOW",
+        preconditions = List(
+          (
+            PreconditionManager.nameToId("isOnSameTile"),
+            Map(
+              ParameterReference("instance1ID", "Long") -> p_instanceThatCreate,
+              ParameterReference("instance2ID", "Long") -> p_instanceThatIsUse
+            )
+            )
+        ),
+        _subActions = List(
+          (_actionCraft,
+            Map(
+              ParameterReference("instanceID", "Long") -> p_instanceThatIsUse,
+              ParameterReference("objectToDo", "String") -> ParameterValue("Sheep","String")
+            ))
+        ),
+        parameters = List(
+          p_instanceThatCreate,
+          p_instanceThatIsUse
+        )
+      ).save
+    }
+    nameToId += "CreateBow" -> _actionCreateBow
+
+
+
+
 
   }
 }

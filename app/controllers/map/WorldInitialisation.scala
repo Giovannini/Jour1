@@ -296,6 +296,7 @@ object WorldInitialisation extends Controller {
     val relationProcreate = RelationSqlDAO.save("ACTION_PROCREATE")
     val relationSpread = RelationSqlDAO.save("ACTION_SPREAD")
     val relationRegenerate = RelationSqlDAO.save("ACTION_REGENERATE")
+    val relationCreateBow = RelationSqlDAO.save("ACTION_CREATE_BOW")
 
     println("Adding concepts to graph...")
     /*Storage of the concepts in DB*/
@@ -346,7 +347,9 @@ object WorldInitialisation extends Controller {
       RelationGraphDAO.addRelationToDB(conceptWolf.id, relationProcreate, conceptGround.id) &&
       RelationGraphDAO.addRelationToDB(conceptSheep.id, relationProcreate, conceptGround.id) &&
       RelationGraphDAO.addRelationToDB(conceptGrass.id, relationSpread, conceptGround.id) &&
-      RelationGraphDAO.addRelationToDB(conceptGrass.id, relationRegenerate, conceptGrass.id)
+      RelationGraphDAO.addRelationToDB(conceptGrass.id, relationRegenerate, conceptGrass.id)&&
+        RelationGraphDAO.addRelationToDB(conceptMan.id, relationCreateBow, conceptTree.id)
+
 
 
 
