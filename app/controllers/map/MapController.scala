@@ -15,7 +15,7 @@ import play.api.mvc._
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.util.Random
+import scala.util.{Try, Random, Failure, Success}
 
 object MapController extends Controller with Secured {
 
@@ -40,9 +40,31 @@ object MapController extends Controller with Secured {
          * connection is closed from the client.
          */
         (Iteratee.foreach[JsValue] {
-          case _: JsValue =>
+          case message: JsValue =>
             println("Received a JSON from client with ID " + userId)
-            UpdateClient(userId)
+            println(message)
+            Try(((message \ "event").as[String], message \ "data")) match {
+
+              case Success(("updateClient", data)) =>
+                mapSocketActor ! UpdateClient(userId)
+
+              case Success(("start", _)) =>
+                mapSocketActor ! Start(userId)
+
+              case Success(("stop", _)) =>
+                mapSocketActor ! Stop(userId)
+
+              case Success(("close", _)) =>
+                mapSocketActor ! SocketClosed(userId)
+
+              case Success((_, _)) =>
+                println("Event doesnt exist")
+
+              case Failure(ex) =>
+                println("Data must match { event: ..., data: ... }")
+                println(ex.getMessage)
+                mapSocketActor ! SocketClosed(userId)
+            }
           case _ =>
             println("Error with socket baby...")
             mapSocketActor ! SocketClosed(userId)

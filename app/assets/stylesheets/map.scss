@@ -26,6 +26,7 @@ body {
 }
 
 .left-panel {
+  position: relative;
   width: 60%;
 }
 
@@ -118,6 +119,23 @@ body {
 .map-container {
   width: 100%;
   height: 500px;
+}
+
+.map-buttons {
+  position: absolute;
+  left: 0;
+}
+
+.map-buttons__item {
+  display: block;
+  height: 50px;
+  width: 50px;
+  border-radius: 25px;
+  text-align: center;
+  margin: 15px 15px;
+  background-color: $darkColor;
+  border: 0px;
+  box-shadow: 0px 5px 10px rgba($darkColor, 0.5);
 }
 
 @import "form.scss";

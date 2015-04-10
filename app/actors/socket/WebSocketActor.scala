@@ -59,17 +59,31 @@ class WebSocketActor extends Actor {
     case UpdateClient(userId) =>
       /* Writing data to the channel to send data to all WebSocket opened for every user. */
       val logs = usersLogs(userId)
-      val json = Json.obj("data" -> logs)
+      val json = Json.obj(
+        "event" -> "update",
+        "data" -> logs
+      )
       usersSockets.get(userId).get.channel push json
-      usersLogs += (userId -> Json.obj())
+      usersLogs += (userId -> Json.obj(
+        "add" -> Json.arr(),
+        "remove" -> Json.arr()
+      ))
 
     case Start(userId) =>
-      usersLogs += (userId -> Json.obj())
+      usersLogs += (userId -> Json.obj(
+        "add" -> Json.arr(),
+        "remove" -> Json.arr()
+      ))
+      println(usersSockets.get(userId))
+      usersSockets.get(userId).get.channel push Json.obj("event" -> "started", "data" -> Json.obj())
 
     case Stop(userId) =>
       removeUserLogs(userId)
-      val json = Map("data" -> Json.obj())
-      usersSockets.get(userId).get.channel push Json.toJson(json)
+      val json = Json.obj(
+        "event" -> "stopped",
+        "data" -> Json.obj()
+      )
+      usersSockets.get(userId).get.channel push json
 
     case SocketClosed(userId) =>
       log debug s"closed socket for $userId"

@@ -91,7 +91,9 @@ GET           /map/socket                                              controlle
 GET           /map/socket/start                                        controllers.map.MapController.start
 GET           /map/socket/stop                                         controllers.map.MapController.stop
 
-GET           /next                                                    controllers.RestCall.next()
+GET           /next                                                    controllers.map.Evolution.next()
+GET           /pause                                                   controllers.map.Evolution.pause()
+GET           /resume                                                  controllers.map.Evolution.resume()
 
 # Map static resources from the /public folder to the /assets URL path
 GET           /assets/*file                                            controllers.Assets.at(path="/public", file)
