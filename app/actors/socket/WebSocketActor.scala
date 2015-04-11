@@ -61,6 +61,7 @@ class WebSocketActor extends Actor {
         "event" -> "update",
         "data" -> logs
       )
+//      println("Pushing " + (logs \ "add").as[List[JsValue]].length + " to socket")
       usersSockets.get(userId).get.channel push json
       usersLogs += (userId -> Json.obj(
         "add" -> Json.arr(),

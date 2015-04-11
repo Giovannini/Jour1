@@ -41,8 +41,12 @@ object MapController extends Controller with Secured {
          */
         (Iteratee.foreach[JsValue] {
           case message: JsValue =>
-            Try(((message \ "event").as[String], message \ "data")) match {
-
+            Try {
+              val event = (message \ "event").as[String]
+              val data = message \ "data"
+//              println("Received event: " + event)
+              (event, data)
+            } match {
               case Success(("updateClient", data)) =>
                 mapSocketActor ! UpdateClient(userId)
 

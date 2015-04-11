@@ -360,14 +360,14 @@ var MapFactory = function(Rest) {
     };
 
     var updateInstances = function(data) {
+        /* Add new instances */
+        addInstance(data.add);
+
         /* Remove instances */
         var instancesToRemove = data.remove;
         for(var id in instancesToRemove) {
             delete instances[instancesToRemove[id]];
         }
-
-        /* Add new instances */
-        addInstance(data.add);
 
         return instances;
     };
@@ -849,6 +849,7 @@ var MapController = function(Rest, Graph, Map, Drawer, Socket) {
         // Render the map
         Drawer.render();
 
+        //TODO less update request should be sent
         // Start to listen for updates
         Socket.setUpdateCalback(function(data) {
             if(data.add.length > 0 || data.remove.length > 0) {
@@ -858,7 +859,8 @@ var MapController = function(Rest, Graph, Map, Drawer, Socket) {
                 ongoingStep = false;
             }
             if(loopSteps || ongoingStep) {
-                Socket.requestUpdate();
+                setTimeout(function(){ Socket.requestUpdate();},1000);
+                //Socket.requestUpdate();
             }
         });
 
