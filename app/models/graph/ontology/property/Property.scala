@@ -8,7 +8,7 @@ import play.api.libs.json._
  * Model for properties
  * @author Thomas GIOVANNINI
  */
-case class Property(label: String, propertyType: PropertyType, defaultValue: Double) {
+case class Property(id: Long, label: String, propertyType: PropertyType, defaultValue: Double) {
   require(label.matches("^[A-Z][A-Za-z0-9]*$"))
 
   override def toString = label + ":" + propertyType + ":" + defaultValue
@@ -25,12 +25,16 @@ case class Property(label: String, propertyType: PropertyType, defaultValue: Dou
 
   def save: Property = {
     PropertyDAO.save(this)
+    this
   }
 }
 
 object Property {
-  val error = Property("Error", PropertyType.Error, 0)
+  val error = Property(-1, "Error", PropertyType.Error, 0)
 
+  def apply(label: String, propertyType: PropertyType, defaultValue: Double): Property = {
+    Property(0, label, propertyType, defaultValue)
+  }
 
   def parseString(stringProperty: String): Property = {
     val splitted = stringProperty.split(":")

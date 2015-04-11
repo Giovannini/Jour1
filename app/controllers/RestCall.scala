@@ -132,17 +132,6 @@ object RestCall extends Controller {
     Ok(views.html.manager.instance.instanceEditor(instance, controllers.ontology.routes.InstanceManager.create()))
   }
 
-  /**
-   * Get an instance with its id
-   * @author Aurélie LORGEOUX
-   * @param instanceId id of the instance
-   * @return instance in JSON
-   */
-  def getInstanceById(instanceId: Long) = Action {
-    val instance = Application.map.getInstanceById(instanceId)
-    Ok(instance.toJson)
-  }
-
   def next() = Action {
     Intelligence.calculate(nrOfWorkers = 4)
     Redirect(routes.MapController.show())

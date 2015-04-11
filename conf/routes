@@ -14,7 +14,7 @@ GET           /instances/:initInstanceId/:actionType/:conceptId        controlle
 GET           /instances/edit/:instanceId                              controllers.RestCall.editInstance(instanceId: Int)
 GET           /instances/create/:conceptId                             controllers.RestCall.createInstance(conceptId: Int)
 
-GET           /instances/:instanceId                                   controllers.RestCall.getInstanceById(instanceId: Int)
+GET           /instances/:instanceId                                   controllers.ontology.InstanceManager.getInstanceById(instanceId: Int)
 DELETE        /instances/:instanceId                                   controllers.ontology.InstanceManager.delete(instanceId: Int)
 POST          /instances/update                                        controllers.ontology.InstanceManager.update
 POST          /instances/create                                        controllers.ontology.InstanceManager.create
@@ -51,10 +51,10 @@ DELETE        /preconditions/:label                                    controlle
 
 # Properties CRUD
 GET           /properties                                              controllers.rules.PropertyController.getProperties
-POST          /properties/:label                                       controllers.rules.PropertyController.createProperty(label: String)
-GET           /properties/:label                                       controllers.rules.PropertyController.getProperty(label: String)
-PUT           /properties/:label                                       controllers.rules.PropertyController.updateProperty(label: String)
-DELETE        /properties/:label                                       controllers.rules.PropertyController.deleteProperty(label: String)
+GET           /properties/:id                                          controllers.rules.PropertyController.getProperty(id: Long)
+POST          /properties/                                             controllers.rules.PropertyController.createProperty
+PUT           /properties/                                             controllers.rules.PropertyController.updateProperty
+DELETE        /properties/:id                                          controllers.rules.PropertyController.deleteProperty(id: Long)
 
 # Relations visualisation
 GET           /relations                                               controllers.rules.RelationController.index

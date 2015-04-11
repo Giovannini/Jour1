@@ -29,7 +29,7 @@ object PropertyDAO {
     get[String]("type") ~
     get[Double]("defaultValue") map {
       case id ~ label ~ propertyType ~ defaultValue =>
-        Property(label, PropertyType.parse(propertyType), defaultValue)
+        Property(id, label, PropertyType.parse(propertyType), defaultValue)
     }
   }
 
@@ -66,11 +66,10 @@ object PropertyDAO {
    * @return true if the property was saved
    *         false else
    */
-  def save(property: Property): Property = {
+  def save(property: Property): Boolean = {
     DB.withConnection { implicit connection =>
       val statement = PropertyStatement.add(property)
       statement.execute()
-      property
     }
   }
 

@@ -19,9 +19,20 @@ object InstanceManager extends Controller {
   }
 
   /**
+   * Get an instance with its id
+   * @author Aurélie LORGEOUX
+   * @param instanceId id of the instance
+   * @return instance in JSON
+   */
+  def getInstanceById(instanceId: Long) = Action {
+    val instance = Application.map.getInstanceById(instanceId)
+    Ok(instance.toJson)
+  }
+
+  /**
    * Create a given instance from a received form
    * @author Simon RONCIERE, Aurélie LORGEOUX
-   * @return an action redirecting to the index page of the application
+   * @return the new instance
    */
   def create = Action(parse.json) {
     request => {
@@ -47,7 +58,7 @@ object InstanceManager extends Controller {
   /**
    * Update a given instance from a received form
    * @author Thomas GIOVANNINI, Aurélie LORGEOUX
-   * @return an action redirecting to the index page of the application
+   * @return the updated instance
    */
   def update = Action(parse.json) {
     request => {

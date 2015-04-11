@@ -46,7 +46,7 @@ object ParameterForm {
 
     override def unbind(key: String, value: Any): Map[String, String] = {
       val string = value match {
-          case Property(label, _, _) => label
+          case Property(_, label, _, _) => label
           case any => any.toString
       }
 
