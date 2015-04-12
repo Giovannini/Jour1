@@ -241,6 +241,44 @@ object InstanceActionManager {
     }
     nameToId += "Eat" -> _actionEat
 
+    val _actionCut = {
+      val p_instanceThatCut = ParameterReference("instanceThatCut", "Long")
+      val p_instanceThatIsCut = ParameterReference("instanceThatIsCut", "Long")
+      InstanceAction(
+        0L,
+        "ACTION_CUT",
+        preconditions = List(
+          (
+            PreconditionManager.nameToId("isOnSameTile"),
+            Map(
+              ParameterReference("instance1ID", "Long") -> p_instanceThatCut,
+              ParameterReference("instance2ID", "Long") -> p_instanceThatIsCut
+            )
+            ),
+          (
+            PreconditionManager.nameToId("isDifferentConcept"),
+            Map(
+              ParameterReference("instance1ID", "Long") -> p_instanceThatCut,
+              ParameterReference("instance2ID", "Long") -> p_instanceThatIsCut
+            )
+            )
+        ),
+        _subActions = List(
+          (
+            _removeInstanceAt,
+            Map(
+              ParameterReference("instanceToRemove", "Long") -> p_instanceThatIsCut
+            )
+            )
+        ),
+        parameters = List(
+          p_instanceThatCut,
+          p_instanceThatIsCut
+        )
+      ).save
+    }
+    nameToId += "Cut" -> _actionCut
+
     val _actionProcreate = {
       val p_instanceThatProcreate = ParameterReference("instanceThatProcreate", "Long")
       val p_groundWhereToProcreate = ParameterReference("groundWhereToProcreate", "Long")
