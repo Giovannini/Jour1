@@ -199,6 +199,13 @@ object InstanceActionManager {
               ParameterReference("instance1ID", "Long") -> p_instanceThatEat,
               ParameterReference("instance2ID", "Long") -> p_instanceThatIsEaten
             )
+            ),          (
+            PreconditionManager.nameToId("propertyIsHigherThan"),
+            Map(
+              ParameterReference("instanceID", "Long") -> p_instanceThatIsEaten,
+              ParameterReference("property", "Property") -> ParameterValue("Feed", "Property"),
+              ParameterReference("value", "Int") -> ParameterValue(0, "Int")
+            )
             ),
           (
             PreconditionManager.nameToId("isDifferentConcept"),
