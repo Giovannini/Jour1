@@ -160,6 +160,8 @@ object Concept {
   val any = Concept("Any", List(), List(), List(), DisplayProperty())
   val self = Concept("Self", List(), List(), List(), DisplayProperty())
 
+  def apply(label: String):Concept = Concept(label, List(), List(), List(), DisplayProperty())
+
   /**
    * Parse a Json value to a concept
    * @author Thomas GIOVANNINI

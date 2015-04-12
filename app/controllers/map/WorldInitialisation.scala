@@ -122,7 +122,7 @@ object WorldInitialisation extends Controller {
         ValuedProperty(propertyFeedMax,4)
       ),
       List(
-        ValuedProperty(propertyStrength, 400),
+        ValuedProperty(propertyStrength, 40),
         ValuedProperty(propertyInstanciable, 1)
       ),
       List(),

@@ -136,9 +136,9 @@ trait Interaction {
           val groundId = arguments(ParameterReference("groundWhereToAddIt", "Long")).value//.asInstanceOf[Long]
           List(LogInteraction("ADD " + instanceId + " " + groundId, 3))
         case "createInstanceAt" =>
-          val instanceId = arguments(ParameterReference("conceptToInstanciate", "Long")).value//.asInstanceOf[Long]
-        val groundId = arguments(ParameterReference("groundWhereToAddIt", "Long")).value//.asInstanceOf[Long]
-          List(LogInteraction("CREATE " + instanceId + " " + groundId, 3))
+          val instanceId = arguments(ParameterReference("conceptID", "Long")).value//.asInstanceOf[Long]
+          val groundId = arguments(ParameterReference("groundWhereToAddIt", "Long")).value//.asInstanceOf[Long]
+          List(LogInteraction("CREATE " + instanceId + " " + groundId, 5))
         case "removeInstanceAt" =>
           val instanceId = arguments(ParameterReference("instanceToRemove", "Long")).value//.asInstanceOf[Long]
           List(LogInteraction("REMOVE " + instanceId, 4))

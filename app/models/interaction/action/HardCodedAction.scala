@@ -1,6 +1,7 @@
 package models.interaction.action
 
 import controllers.Application
+import models.graph.concept
 import models.graph.concept.{ConceptDAO}
 import models.graph.property.{ValuedProperty, PropertyDAO}
 import models.interaction.parameter.{ParameterReference, ParameterValue}
@@ -31,13 +32,11 @@ object HardCodedAction {
    * @param args arguments containing the instance to add and the coordinates where to add it
    */
   def createInstanceAt(args: Map[ParameterReference, ParameterValue]): Unit = {
-    val conceptLabel = args(ParameterReference("instanceToAdd", "String")).value.asInstanceOf[String]
+    val conceptId = args(ParameterReference("conceptID", "Long")).value.toString.toLong
     val groundWhereToAddItId = args(ParameterReference("groundWhereToAddIt", "Long")).value.asInstanceOf[Long]
-    val concept = ConceptDAO.getByLabel(conceptLabel)
-    println("concept to instanciate : "+concept.label+" id = "+concept.id)
-    val instance = models.graph.Instance.createRandomInstanceOf(concept)
-    println("instance "+instance.label+" create at "+instance.coordinates)
-    map.addInstance(instance.id, groundWhereToAddItId)
+    val instance = models.graph.Instance.createRandomInstanceOf(ConceptDAO.getById(conceptId))
+    .at(map.getInstanceById(groundWhereToAddItId).coordinates)
+    map.createInstance(instance)
   }
 
   /**
@@ -47,7 +46,6 @@ object HardCodedAction {
    */
   def removeInstanceAt(args: Map[ParameterReference, ParameterValue]): Unit = {
     val instanceId = args(ParameterReference("instanceToRemove", "Long")).value.asInstanceOf[Long]
-    println("remove instance with id = "+instanceId)
     map.removeInstance(instanceId)
   }
 
@@ -87,8 +85,7 @@ object HardCodedAction {
     val valueOfProperty: Double = instance.getValueForProperty(property) + valToAdd
     val newValuedProperty = ValuedProperty(property, valueOfProperty)
     val newInstance = instance.modifyValueOfProperty(newValuedProperty)
-    println(instance.toJson)
-    println(newInstance.toJson)
+
     Application.map.updateInstance(instance, newInstance)
   }
 
