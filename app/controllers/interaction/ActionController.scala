@@ -35,12 +35,14 @@ object ActionController extends Controller {
     }
   }
 
-
   def getActions: Action[AnyContent] = Action { request =>
-    jsonOrRedirectToIndex(request) {
-      val preconditions = InstanceActionDAO.getAll
-      Ok(Json.toJson(preconditions.map(_.toJson)))
-    }
+    val actions = InstanceActionDAO.getAll
+    Ok(Json.toJson(actions.map(_.toJson)))
+  }
+
+  def getEffects: Action[AnyContent] = Action { request =>
+    val effects = InstanceActionDAO.getAllEffects
+    Ok(Json.toJson(effects.map(_.toJson)))
   }
 
   /**

@@ -180,9 +180,14 @@ object WorldInitialisation extends Controller {
         MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), conceptApple),
         MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.self),
         MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.any))))
-    val needSeaAir = NeedDAO.save(Need(0L, "SeaAir", propertyComfort, priority = 5,
-      List(ConsequenceStep(5, Consequence(5, InstanceActionManager.nameToId("_addToProperty").toEffect))),
-      List(MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.any))))
+    val needSeaAir = NeedDAO.save(
+      Need(
+        0L,
+        "SeaAir",
+        propertyComfort,
+        priority = 5,
+        List(ConsequenceStep(5, Consequence(5, InstanceActionManager.nameToId("_addToProperty").toEffect))),
+        List(MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.any))))
 
     println("Declaration of concepts...")
 

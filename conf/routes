@@ -24,6 +24,7 @@ POST          /instances/create                                        controlle
 GET           /graph                                                   controllers.graph.GraphVisualisation.index
 GET           /graph/properties/:propertyId                            controllers.graph.GraphVisualisation.getProperty(propertyId: Int)
 GET           /graph/actions                                           controllers.interaction.ActionController.getActions
+GET           /graph/effects                                           controllers.interaction.ActionController.getEffects
 
 # Concept CRUD
 GET           /concepts                                                controllers.RestCall.getAllConcepts
@@ -68,7 +69,7 @@ PUT           /relations/:label                                        controlle
 DELETE        /relations/:label                                        controllers.graph.relation.RelationSQLController.deleteRelation(label: String)
 
 # Action CRUD
-GET           /actions                                                 controllers.interaction.ActionController.getActions
+GET           /actions                                                 controllers.interaction.ActionController.index
 GET           /actions/:label                                          controllers.interaction.ActionController.readAction(label: String)
 POST          /actions/:label                                          controllers.interaction.ActionController.createAction(label: String)
 PUT           /actions/:label                                          controllers.interaction.ActionController.updateAction(label: String)
