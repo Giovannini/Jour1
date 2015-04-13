@@ -182,7 +182,7 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
         }
     };
 
-    var getRelation = function(label, success, failure) {
+    var getAction = function(label, success, failure) {
         var request = $resource(
             baseUrl+'actions/:label',
             { label: "" },
@@ -201,9 +201,9 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
 
     var getConceptsFromRelation = function(relationLabel, success, failure) {
         var request = $resource(
-            baseUrl+'relations/:label',
+            baseUrl+'graph/relations/:label',
             { 'label': relationLabel },
-            { 'get': { method: "GET", Accept: "applicatio/json" } }
+            { 'get': { method: "GET", Accept: "application/json" } }
         );
         request.get(
             { 'label': relationLabel },
@@ -283,7 +283,7 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
         getActions: getActions,
         getActionsOfConcept: getActionsOfConcept,
         getConcepts: getConcepts,
-        getRelation: getRelation,
+        getAction: getAction,
         getConceptsFromRelation: getConceptsFromRelation,
         options: options,
         searchNodes: searchNodes
@@ -912,7 +912,7 @@ var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', 'NodesFactory', 'EditNod
     }
 }];
 
-var ShowRelationCtrl = ['$scope', '$routeParams', 'NodesFactory', function($scope, $routeParams, NodesFactory) {
+var ShowRelationCtrl = ['$scope', '$routeParams', '$resource', 'Scopes', 'NodesFactory', function($scope, $routeParams, $resource, Scopes, NodesFactory) {
     $scope.relation = {
         label: $routeParams.label
     };
@@ -923,10 +923,48 @@ var ShowRelationCtrl = ['$scope', '$routeParams', 'NodesFactory', function($scop
         return showRelation;
     };
 
+    $scope.canAddRelation = false;
+
+    NodesFactory.getConcepts(
+        function(concepts) {
+            $scope.concepts = concepts;
+            $scope.canAddRelation = true;
+        },
+        function(failure) {
+            $scope.canAddRelation = false;
+            $scope.errorAddRelation = "Can't get the list of concepts";
+        }
+    );
+
     NodesFactory.getConceptsFromRelation(
         $scope.relation.label,
         function(relations) {
-            $scope.conceptRelations = relations;
+
+            function getNodeById(id, nodes) {
+                for(var nodeId in nodes) {
+                    if(nodes[nodeId].id == id) {
+                        return nodes[nodeId];
+                    }
+                }
+                return null;
+            }
+
+            $scope.conceptRelations = [];
+            for(var edgeId in relations.edges) {
+                var edge = relations.edges[edgeId];
+                var source = getNodeById(edge.source, relations.nodes);
+                var target = getNodeById(edge.target, relations.nodes);
+                $scope.conceptRelations.push({
+                    source: source,
+                    label: relations.edges[edgeId].label,
+                    target: target
+                })
+            }
+
+            NodesFactory.setDisplayedNodes(relations.nodes);
+            NodesFactory.setEdges(relations.edges);
+            Scopes.get('viewer').$emit('Viewer_displayNodes');
+
             showRelation = true;
         },
         function(failure) {
@@ -934,17 +972,114 @@ var ShowRelationCtrl = ['$scope', '$routeParams', 'NodesFactory', function($scop
             showRelation = false;
         }
     );
+
+
+    var request = $resource(
+        baseUrl+'graph/relations/:label/:source/:target',
+        {},
+        {
+            'create': {method: "POST"},
+            'delete': {method: "DELETE"}
+        }
+    );
+
+    $scope.submitNewRelation = function() {
+        request.create(
+            $scope.relation,
+            {},
+            function(result) {
+                console.log(result);
+            },
+            function(failure) {
+                console.log(failure);
+            }
+        );
+    };
+
+    $scope.deleteRelation = function(label, source, target) {
+        request.delete(
+            {
+                label: label,
+                source: source,
+                target: target
+            },
+            {},
+            function(result) {
+                console.log(result);
+            },
+            function(failure) {
+                console.log(failure);
+            }
+        );
+
+    }
+
+    $scope.isAction = function() {
+        return $routeParams.label.startsWith("ACTION_");
+    }
 }];
 
-var EditRelationFactory = ['$scope', 'NodesFactory', function($scope, NodesFactory) {
+var EditRelationFactory = ['NodesFactory', 'Scopes', function(NodesFactory, Scopes) {
+    var relationTypes = ['ACTION_', 'EFFECT_', 'MOOD_'];
 
+    var getRelation = function(label, success, failure) {
+        NodesFactory.getConceptsFromRelation(
+            label,
+            function(relations) {
+                NodesFactory.setDisplayedNodes(relations.nodes);
+                NodesFactory.setEdges(relations.edges);
+                Scopes.get('viewer').$emit('Viewer_displayNodes');
+
+                success(label);
+            },
+            function(failure) {
+                failure(failure);
+            }
+        );
+    };
+
+    return {
+        getRelation: getRelation,
+        relationTypes: relationTypes
+    }
 }];
 
 var NewRelationCtrl = ['$scope', '$routeParams', 'EditRelationFactory', function($scope, $routeParams, EditRelationFactory) {
+    $scope.submit_button = "Create";
+    $scope.relationTypes = EditRelationFactory.relationTypes;
+    $scope.back_url = "#/overview";
 
+    $scope.relation = {
+        type: $scope.relationTypes[0]
+    };
 }];
 
 var EditRelationCtrl = ['$scope', '$routeParams', 'EditRelationFactory', function($scope, $routeParams, EditRelationFactory) {
+    $scope.submit_button = "Edit";
+    $scope.relationTypes = EditRelationFactory.relationTypes;
+    $scope.relation = {};
+    $scope.back_url = "#/relation/"+$routeParams.label;
+
+
+    EditRelationFactory.getRelation(
+        $routeParams.label,
+        function(relation) {
+            console.log(relation);
+        },
+        function(error) {
+            console.log(error);
+        }
+    );
+
+    for(var typeId in $scope.relationTypes) {
+        if((new RegExp("^" + $scope.relationTypes[typeId])).test($routeParams.label)) {
+            $scope.relation.type = $scope.relationTypes[typeId];
+            break;
+        }
+    }
+
+    $scope.relation.label = $routeParams.label.substr($scope.relation.type.length);
+
 
 }];
 

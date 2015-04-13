@@ -1,0 +1,12 @@
+@main("Precondition edition") {
+    <link rel="stylesheet" href="@routes.Assets.at("stylesheets/crud.css")" />
+
+    <div ng-app="preconditionEditor" class="editor">
+        <div ng-view=""></div>
+    </div>
+
+    <script src="@routes.Assets.at("components/angular/angular.min.js")" ></script>
+    <script src="@routes.Assets.at("components/angular-resource/angular-resource.min.js")" ></script>
+    <script src="@routes.Assets.at("components/angular-route/angular-route.min.js")" ></script>
+    <script src="@routes.Assets.at("javascripts/preconditionCrud.js")" ></script>
+}

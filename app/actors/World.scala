@@ -1,21 +1,37 @@
 package actors
 
-import actors.communication.{StopComputing, EndOfTurn, ResultAction}
+import actors.communication.launcher.NewTurn
+import actors.communication._
+import actors.socket.UpdateMap
 import akka.actor.{Actor, ActorRef, Props}
 import akka.routing.RoundRobinPool
 import controllers.Application
-import models.graph.ontology.Instance
+import controllers.map.MapController
+import models.graph.Instance
 import models.interaction.LogInteraction
+import play.api.libs.json.{JsNumber, Json, JsValue}
+
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.postfixOps
 
 class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
 
   var logs: List[List[LogInteraction]] = List()
   var nrOfResults: Int = _
   var nrOfInstances: Int = _
-  val start: Long = System.currentTimeMillis
+  var start: Long = System.currentTimeMillis
+  var ongoing: Boolean = false
+  var looping: Boolean = false
 
   val workerRouter = context.actorOf(
     Props[SmartInstance].withRouter(RoundRobinPool(nrOfWorkers)), name = "workerRouter")
+
+  def reinitialization() = {
+    nrOfResults = 0
+    nrOfInstances = 0
+    start = System.currentTimeMillis()
+  }
 
   /**
    * Retrieve all instances that have needs from the application map
@@ -50,19 +66,47 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
    * @author Thomas GIOVANNINI
    */
   override def receive: Actor.Receive = {
-    case launcher: Launcher =>
-      println("Launching new turn computation...")
-      launchComputation(launcher)
+    case StartLoop =>
+      looping = true
+      println("Starting loop: ongoing = " + ongoing)
+      self ! NewTurn
+    case StopLoop =>
+      println("Stopping loop")
+      looping = false
+      println("Looping = " + looping)
+    case NewTurn =>
+      launchComputation(NewTurn)
     case ResultAction(logList) =>
       nrOfResults += 1
       logs = logList :: logs
       if (nrOfResults == nrOfInstances) {
-        logs.flatten.sortBy(_.priority).foreach(_.execute())
-        val end: Long = System.currentTimeMillis()
-        for(worker <- 1 to nrOfWorkers) workerRouter ! StopComputing
-        listener ! EndOfTurn(end - start)
-        context.stop(self)
+        updateMap(logs)
+        endComputation()
       }
+  }
+
+  private def endComputation(): Unit = {
+    val end: Long = System.currentTimeMillis()
+    listener ! EndOfTurn(end - start)
+    ongoing = false
+
+    if (looping) {
+      reinitialization()
+      context.system.scheduler.scheduleOnce(500 milliseconds, self, NewTurn)
+      //self ! NewTurn
+    } else {
+      listener ! StopComputing
+//      for (worker <- 1 to nrOfWorkers) workerRouter ! StopComputing
+//      context.stop(self)
+    }
+  }
+
+  private def updateMap(logs: List[List[LogInteraction]]): Unit = {
+    val logList = logs.flatten.sortBy(_.priority)
+    val resultInstances = logList.map(_.execute())
+    val json = getMapModificationJson(logList, resultInstances)
+//    println("End of a turn, updating the map.")
+    MapController.mapSocketActor ! UpdateMap(json)
   }
 
   /**
@@ -71,12 +115,30 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
    * @param launcher containing the information needed to do the computation
    */
   private def launchComputation(launcher: Launcher): Unit = {
-    val instancesWithNeeds = getInstancesWithNeeds
-    setNumberOfInstancesToCompute(instancesWithNeeds.length)
-    println("Launching computation for " + nrOfInstances + " instances.")
-    for (instance <- instancesWithNeeds) {
-      val environment = getEnvironmentOf(instance)
-      workerRouter ! launcher.computation(instance, environment)
+    if (!ongoing) {
+      ongoing = true
+      val instancesWithNeeds = getInstancesWithNeeds
+      setNumberOfInstancesToCompute(instancesWithNeeds.length)
+      println("Launching computation for " + nrOfInstances + " instances.")
+      for (instance <- instancesWithNeeds) {
+        val environment = getEnvironmentOf(instance)
+        workerRouter ! launcher.computation(instance, environment)
+      }
     }
+  }
+
+  private def getMapModificationJson(logs: List[LogInteraction], instances: List[Instance]): JsValue = {
+    val (adds, dels) = logs.zip(instances)
+      .filter { case (log, instance) =>
+      log.isAddOrRemove && instance != Instance.error
+    }.partition(_._1.value.startsWith("ADD"))
+    val jsonAdds = adds.map(_._2.toJson)
+    val jsonDels = dels.map {
+      case (log, instance) => JsNumber(instance.id)
+    }
+    Json.obj(
+      "add" -> jsonAdds,
+      "remove" -> jsonDels
+    )
   }
 }

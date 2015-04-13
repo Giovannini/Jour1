@@ -1,9 +1,11 @@
 package models.interaction.action
 
 import controllers.Application
-import models.graph.ontology.ValuedProperty
-import models.graph.ontology.property.PropertyDAO
+import models.graph.concept.{ConceptDAO}
+import models.graph.property.{ValuedProperty, PropertyDAO}
 import models.interaction.parameter.{ParameterReference, ParameterValue}
+
+
 
 /**
  * Hard coded actions that user can make instances do.
@@ -24,12 +26,28 @@ object HardCodedAction {
   }
 
   /**
+   * Create a random Instance of a concept at given coordinates
+   * @author Simon RONCIERE
+   * @param args arguments containing the instance to add and the coordinates where to add it
+   */
+  def createInstanceAt(args: Map[ParameterReference, ParameterValue]): Unit = {
+    val conceptLabel = args(ParameterReference("instanceToAdd", "String")).value.asInstanceOf[String]
+    val groundWhereToAddItId = args(ParameterReference("groundWhereToAddIt", "Long")).value.asInstanceOf[Long]
+    val concept = ConceptDAO.getByLabel(conceptLabel)
+    println("concept to instanciate : "+concept.label+" id = "+concept.id)
+    val instance = models.graph.Instance.createRandomInstanceOf(concept)
+    println("instance "+instance.label+" create at "+instance.coordinates)
+    map.addInstance(instance.id, groundWhereToAddItId)
+  }
+
+  /**
    * Remove an instance from the map at given coordinates
    * @author Thomas GIOVANNINI
    * @param args arguments containing the instance to remove and the coordinates where to remove it
    */
   def removeInstanceAt(args: Map[ParameterReference, ParameterValue]): Unit = {
     val instanceId = args(ParameterReference("instanceToRemove", "Long")).value.asInstanceOf[Long]
+    println("remove instance with id = "+instanceId)
     map.removeInstance(instanceId)
   }
 
@@ -39,6 +57,17 @@ object HardCodedAction {
     val newValue = args(ParameterReference("propertyValue", "Int")).value.toString.toDouble
 
     map.modifyProperty(instanceId, propertyString, newValue)
+  }
+
+  def modifyPropertyWithParam(args: Map[ParameterReference, ParameterValue]): Unit = {
+    val instanceId = args(ParameterReference("instanceToModify", "Long")).value.asInstanceOf[Long]
+    val propertyString = args(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
+    val propertyToUse = args(ParameterReference("propertyValue", "Property")).value.asInstanceOf[String]
+    val instance = map.getInstanceById(instanceId)
+    val property = PropertyDAO.getByName(propertyToUse)
+
+    val valueOfProperty: Double = instance.getValueForProperty(property)
+    map.modifyProperty(instanceId, propertyString, valueOfProperty)
   }
 
 

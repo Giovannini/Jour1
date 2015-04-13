@@ -1,6 +1,6 @@
 package controllers.graph
 
-import models.graph.ontology.property.{Property, PropertyDAO}
+import models.graph.property.{Property, PropertyDAO}
 import models.interaction.action.{InstanceAction, InstanceActionDAO}
 import play.api.mvc._
 

@@ -1,0 +1,56 @@
+<div class="form-field">
+    <div class="form-field__legend--single">
+        <a href="{{ back_url }}">Go back</a>
+    </div>
+</div>
+
+<form class="form" name="propertyForm">
+    <fieldset class="form-field">
+        <div class="form-group">
+            <h3 class="form-field__legend--single">General</h3>
+        </div>
+        <div class="form-group highlight">
+            <div class="form-group">
+                <label class="form-group__label" for="property_name">Name:</label>
+                <div class="form-group__input">
+                    <input
+                        type="text"
+                        id="property_name"
+                        name="property_name"
+                        ng-model="property.label" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-group__label" for="property_type">Type:</label>
+                <div class="form-group__input">
+                    <select
+                            id="property_type"
+                            name="property_type"
+                            ng-model="property.propertyType">
+                        <option value="Int">Int</option>
+                        <option value="Bool">Boolean</option>
+                        <option value="Double">Double</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-group__label" for="property_value">DefaultValue:</label>
+                <div class="form-group__input">
+                    <input
+                            type="number"
+                            id="property_value"
+                            name="property_value"
+                            ng-model="property.defaultValue" />
+                </div>
+            </div>
+        </div>
+    </fieldset>
+
+    <button type="submit" class="form-submit" ng-click="submitProperty()">{{ submit_button }}</button>
+
+    <div class="form-field">
+        <div class="form-group__label--single error">
+            {{ error }}
+        </div>
+    </div>
+</form>

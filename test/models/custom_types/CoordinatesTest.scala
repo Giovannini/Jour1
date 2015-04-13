@@ -1,6 +1,6 @@
 package models.custom_types
 
-import models.graph.custom_types.Coordinates
+import models.graph.Coordinates
 import org.scalatest.FunSuite
 
 /**

@@ -5,76 +5,71 @@
 # Home page
 GET           /                                                        controllers.Application.index
 
-GET           /init                                                    controllers.WorldInitialisation.initialization
+GET           /init                                                    controllers.map.WorldInitialisation.initialization
 
-GET           /instances                                               controllers.WorldInitialisation.getWorld
+GET           /instances                                               controllers.map.WorldInitialisation.getWorld
 GET           /instances/:initInstanceId/:actionType/:conceptId        controllers.RestCall.getPossibleDestinationOfAction(initInstanceId: Long, actionType: Long, conceptId: Long)
 
 #Instances manipulation
-GET           /instances/edit/:instanceId                              controllers.RestCall.editInstance(instanceId: Int)
-GET           /instances/create/:conceptId                             controllers.RestCall.createInstance(conceptId: Int)
-
-GET           /instances/:instanceId                                   controllers.ontology.InstanceManager.getInstanceById(instanceId: Int)
-DELETE        /instances/:instanceId                                   controllers.ontology.InstanceManager.delete(instanceId: Int)
-POST          /instances/update                                        controllers.ontology.InstanceManager.update
-POST          /instances/create                                        controllers.ontology.InstanceManager.create
+GET           /instances/:instanceId                                   controllers.graph.InstanceManager.getInstanceById(instanceId: Int)
+DELETE        /instances/:instanceId                                   controllers.graph.InstanceManager.delete(instanceId: Int)
+POST          /instances/update                                        controllers.graph.InstanceManager.update
+POST          /instances/create                                        controllers.graph.InstanceManager.create
 
 
 #Graph manipulation
 GET           /graph                                                   controllers.graph.GraphVisualisation.index
 GET           /graph/properties/:propertyId                            controllers.graph.GraphVisualisation.getProperty(propertyId: Int)
-GET           /graph/actions                                           controllers.graph.ActionController.getActions
+GET           /graph/actions                                           controllers.interaction.ActionController.getActions
 
 # Concept CRUD
 GET           /concepts                                                controllers.RestCall.getAllConcepts
 GET           /concepts/simple                                         controllers.RestCall.getAllSimplifiedConcepts
 GET           /concepts/:conceptId                                     controllers.RestCall.getConceptById(conceptId: Long)
 
-POST          /concepts/:label                                         controllers.graph.ConceptController.createConcept(label: String)
-DELETE        /concepts/:label                                         controllers.graph.ConceptController.deleteConcept(label: String)
-PUT           /concepts/:label                                         controllers.graph.ConceptController.updateConcept(label: String)
-GET           /concepts/:label/actions                                 controllers.graph.ConceptController.getActions(label: String)
-GET           /concepts/:label/:deepness                               controllers.graph.ConceptController.readConcept(label: String, deepness: Int)
+POST          /concepts/:label                                         controllers.graph.concept.ConceptController.createConcept(label: String)
+DELETE        /concepts/:label                                         controllers.graph.concept.ConceptController.deleteConcept(label: String)
+PUT           /concepts/:label                                         controllers.graph.concept.ConceptController.updateConcept(label: String)
+GET           /concepts/:label/actions                                 controllers.graph.concept.ConceptController.getActions(label: String)
+GET           /concepts/:label/:deepness                               controllers.graph.concept.ConceptController.readConcept(label: String, deepness: Int)
 
 # Relation CRUD
-POST          /graph/relations/:label                                  controllers.graph.RelationController.createRelation(label: String)
-GET           /graph/relations/:label                                  controllers.graph.RelationController.getRelation(label: String)
-PUT           /graph/relations/:label                                  controllers.graph.RelationController.updateRelation(label: String)
-DELETE        /graph/relations/:label                                  controllers.graph.RelationController.deleteRelation(label: String)
+# adding relations to the graph
+POST          /graph/relations/:label/:source/:target                  controllers.graph.relation.RelationGraphController.addRelationToGraph(label: String, source: Long, target: Long)
+DELETE        /graph/relations/:label/:source/:target                  controllers.graph.relation.RelationGraphController.removeRelationToGraph(label: String, source: Long, target: Long)
+
+POST          /graph/relations/:label                                  controllers.graph.relation.RelationGraphController.createRelation(label: String)
+GET           /graph/relations/:label                                  controllers.graph.relation.RelationGraphController.getRelation(label: String)
+PUT           /graph/relations/:label                                  controllers.graph.relation.RelationGraphController.updateRelation(label: String)
+DELETE        /graph/relations/:label                                  controllers.graph.relation.RelationGraphController.deleteRelation(label: String)
 
 # Preconditions CRUD
-GET           /preconditions                                           controllers.rules.PreconditionController.getPreconditions
-POST          /preconditions/:label                                    controllers.rules.PreconditionController.createPrecondition(label: String)
-GET           /preconditions/:label                                    controllers.rules.PreconditionController.getPrecondition(label: String)
-PUT           /preconditions/:label                                    controllers.rules.PreconditionController.updatePrecondition(label: String)
-DELETE        /preconditions/:label                                    controllers.rules.PreconditionController.deletePrecondition(label: String)
+GET           /preconditions                                           controllers.interaction.precondition.PreconditionController.getPreconditions
+GET           /preconditions/:id                                       controllers.interaction.precondition.PreconditionController.getPrecondition(id: Long)
+POST          /preconditions                                           controllers.interaction.precondition.PreconditionController.createPrecondition
+PUT           /preconditions                                           controllers.interaction.precondition.PreconditionController.updatePrecondition
+DELETE        /preconditions/:id                                       controllers.interaction.precondition.PreconditionController.deletePrecondition(id: Long)
 
 # Properties CRUD
-GET           /properties                                              controllers.rules.PropertyController.getProperties
-GET           /properties/:id                                          controllers.rules.PropertyController.getProperty(id: Long)
-POST          /properties/                                             controllers.rules.PropertyController.createProperty
-PUT           /properties/                                             controllers.rules.PropertyController.updateProperty
-DELETE        /properties/:id                                          controllers.rules.PropertyController.deleteProperty(id: Long)
+GET           /properties                                              controllers.graph.property.PropertyController.getProperties
+GET           /properties/:id                                          controllers.graph.property.PropertyController.getProperty(id: Long)
+POST          /properties                                              controllers.graph.property.PropertyController.createProperty
+PUT           /properties                                              controllers.graph.property.PropertyController.updateProperty
+DELETE        /properties/:id                                          controllers.graph.property.PropertyController.deleteProperty(id: Long)
 
 # Relations visualisation
-GET           /relations                                               controllers.rules.RelationController.index
-GET           /relations/:label                                        controllers.rules.RelationController.readAction(label: String)
-POST          /relations/:label                                        controllers.rules.RelationController.createRelation(label: String)
-PUT           /relations/:label                                        controllers.rules.RelationController.updateRelation(label: String)
-DELETE        /relations/:label                                        controllers.rules.RelationController.deleteRelation(label: String)
-#GET           /relations                                               controllers.rules.RelationVisualisation.index
-#GET           /relations/create                                        controllers.rules.RelationVisualisation.createForm
-#POST          /relations/create                                        controllers.rules.RelationVisualisation.createSubmit
-#GET           /relations/update/:id                                    controllers.rules.RelationVisualisation.updateForm(id: Long)
-#POST          /relations/update/:id                                    controllers.rules.RelationVisualisation.updateSubmit(id: Long)
-#GET           /relations/delete/:id                                    controllers.rules.RelationVisualisation.delete(id: Long)
+GET           /relations                                               controllers.graph.relation.RelationSQLController.index
+GET           /relations/:label                                        controllers.graph.relation.RelationSQLController.readAction(label: String)
+POST          /relations/:label                                        controllers.graph.relation.RelationSQLController.createRelation(label: String)
+PUT           /relations/:label                                        controllers.graph.relation.RelationSQLController.updateRelation(label: String)
+DELETE        /relations/:label                                        controllers.graph.relation.RelationSQLController.deleteRelation(label: String)
 
 # Action CRUD
-GET           /actions                                                 controllers.graph.ActionController.getActions
-GET           /actions/:label                                          controllers.graph.ActionController.readAction(label: String)
-POST          /actions/:label                                          controllers.graph.ActionController.createAction(label: String)
-PUT           /actions/:label                                          controllers.graph.ActionController.updateAction(label: String)
-DELETE        /actions/:label                                          controllers.graph.ActionController.deleteAction(label: String)
+GET           /actions                                                 controllers.interaction.ActionController.getActions
+GET           /actions/:label                                          controllers.interaction.ActionController.readAction(label: String)
+POST          /actions/:label                                          controllers.interaction.ActionController.createAction(label: String)
+PUT           /actions/:label                                          controllers.interaction.ActionController.updateAction(label: String)
+DELETE        /actions/:label                                          controllers.interaction.ActionController.deleteAction(label: String)
 
 # Rules visualisation
 # TODO :  delete when the action CRUD is done
@@ -85,11 +80,17 @@ DELETE        /actions/:label                                          controlle
 #POST          /rules/save                                              controllers.rules.RulesVisualisation.submit
 
 # Map routes
-GET           /map                                                     controllers.MapController.show
+GET           /map                                                     controllers.map.MapController.show
 POST          /map/action                                              controllers.RestCall.executeAction
 GET           /map/relations/:conceptId                                controllers.RestCall.getAllActionsOf(conceptId: Int)
 
-GET           /next                                                    controllers.RestCall.next()
+GET           /map/socket                                              controllers.map.MapController.indexWS
+GET           /map/socket/start                                        controllers.map.MapController.start
+GET           /map/socket/stop                                         controllers.map.MapController.stop
+
+GET           /next                                                    controllers.map.Evolution.next()
+GET           /pause                                                   controllers.map.Evolution.pause()
+GET           /resume                                                  controllers.map.Evolution.resume()
 
 # Map static resources from the /public folder to the /assets URL path
 GET           /assets/*file                                            controllers.Assets.at(path="/public", file)

@@ -1,7 +1,7 @@
 package models.interaction.parameter
 
-import models.graph.ontology.Instance
-import models.graph.ontology.property.PropertyDAO
+import models.graph.Instance
+import models.graph.property.PropertyDAO
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
 

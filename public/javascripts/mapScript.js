@@ -96,6 +96,11 @@ var RestFactory = function() {
         },
         all: {
             get: getUrl
+        },
+        map: {
+            pause: getUrl(baseUrl+"pause"),
+            resume: getUrl(baseUrl+"resume"),
+            next: getUrl(baseUrl+"next")
         }
     };
 };
@@ -278,12 +283,13 @@ var MapFactory = function(Rest) {
     var addInstance = function(instance) {
         if(typeof instance === "undefined") {
             return;
-
         }
         if(instance instanceof Array) {
+            var addedInstances = [];
             for (var id in instance) {
-                addInstance(instance[id]);
+                addedInstances.push(addInstance(instance[id]));
             }
+            return addedInstances;
         } else {
             if (!(instance instanceof Instance)) {
                 instance = new Instance(
@@ -299,6 +305,7 @@ var MapFactory = function(Rest) {
                 console.log(instance);
             }
             instances[instance.id] = instance;
+            return instance;
         }
     };
 
@@ -311,6 +318,10 @@ var MapFactory = function(Rest) {
             addInstance(map.instances);
             document.dispatchEvent(new Event(TAG+"initialized"));
         });
+    };
+
+    var setInstances = function(_instances) {
+        instances = _instances;
     };
 
     var getInstance = function(idInstance, callback) {
@@ -348,12 +359,27 @@ var MapFactory = function(Rest) {
         
     };
 
+    var updateInstances = function(data) {
+        /* Add new instances */
+        addInstance(data.add);
+
+        /* Remove instances */
+        var instancesToRemove = data.remove;
+        for(var id in instancesToRemove) {
+            delete instances[instancesToRemove[id]];
+        }
+
+        return instances;
+    };
+
     return {
         getInstance: getInstance,
         getInstances: getInstances,
+        setInstances: setInstances,
         getInstancesByConcept: getInstancesByConcept,
         initInstances: initInstances,
         addInstance: addInstance,
+        updateInstances: updateInstances,
         getWidth: function() { return width; },
         getHeight: function() { return height; }
     };
@@ -369,8 +395,10 @@ var DrawerFactory = function() {
         tiledMap = null,
         conceptContainers = {},
         map = [],
-        tileWidth = 20,
-        tileHeight = 20;
+        mapWidth,
+        mapHeight,
+        tileWidth = 10,
+        tileHeight = 10;
     
     ConceptContainer.prototype = new PIXI.DisplayObjectContainer();
     ConceptContainer.prototype.constructor = ConceptContainer;
@@ -402,6 +430,8 @@ var DrawerFactory = function() {
 
         // add the sprite to the container
         this.addChild(sprite);
+
+        return sprite;
     };
     
     TiledMap.prototype = new PIXI.DisplayObjectContainer();
@@ -569,20 +599,28 @@ var DrawerFactory = function() {
         }
     }
 
+    // Initialize the map
+    function initMap(width, height) {
+        if(typeof width !== "undefined" && typeof height !== "undefined") {
+            mapWidth = width;
+            mapHeight = height;
+        }
+        map = [];
+        for (var i = 0; i < mapWidth; i++) {
+            map[i] = [];
+            for (var j = 0; j < mapHeight; j++) {
+                map[i][j] = [];
+            }
+        }
+    }
+
     // Init the drawer
     var initDrawer = function(width, height, backgroundColor) {
         if(typeof backgroundColor === "undefined")
             backgroundColor = 0xcccccc;
 
-        // Initialize the map
-        map = [];
-        for(var i = 0; i < width; i++) {
-            map[i] = [];
-            for(var j = 0; j < height; j++) {
-                map[i][j] = [];
-            }
-        }
-        
+        initMap(width, height);
+
         // Store the number of tiles needed
         var nbTileX = width;
         var nbTileY = height;
@@ -665,21 +703,41 @@ var DrawerFactory = function() {
     // Draw multiple instances
     var drawInstances = function(instances) {
         for(var id in instances) {
-            drawInstance(instances[id]);
+            var instance = drawInstance(instances[id]);
+            if(instance == null) {
+                delete instances[id];
+            } else {
+                instances[id] = instance;
+            }
         }
+        return instances;
     };
 
     // Draw an instance
     var drawInstance = function(instance) {
         if(typeof conceptContainers[instance.conceptId] !== "undefined") {
             // add the instance to the container
-            conceptContainers[instance.conceptId].addInstance(instance);
+            var sprite = conceptContainers[instance.conceptId].addInstance(instance);
+            instance.sprite = sprite;
 
             // add it to the map
             map[instance.coordinates.x][instance.coordinates.y].push(instance.id);
+
+            return instance;
         } else {
-            console.log("raté")
+            console.log("raté");
+            return null;
         }
+    };
+
+    var updateInstances = function(instances) {
+        initMap();
+
+        for(var id in conceptContainers) {
+            conceptContainers[id].removeChildren();
+        }
+
+        return drawInstances(instances);
     };
 
     var overlayMove = function(coord) {
@@ -697,15 +755,85 @@ var DrawerFactory = function() {
         createConceptContainers: createConceptContainers,
         drawInstances: drawInstances,
         drawInstance: drawInstance,
+        updateInstances: updateInstances,
         overlayMove: overlayMove,
         overlayStop: overlayStop
     }
 };
 
-var MapController = function(Graph, Map, Drawer) {
+/*
+ * Factory for the websocket
+ * Allows to request and handle requests about updating the map
+ */
+var SocketFactory = function() {
+    var baseUrl = window.location.hostname+":9000/";
+    var socketUrl = baseUrl+"map/socket";
+
+    var socket = new WebSocket("ws://"+socketUrl);
+
+    var started = false;
+    var _updateCallback = function() {};
+
+    socket.onmessage = function(message) {
+        var event = JSON.parse(message.data);
+        switch (event.event) {
+            case "update":
+                if(started) {
+                    _updateCallback(event.data);
+                }
+                break;
+            case "started":
+                started = true;
+                break;
+            case "stopped":
+                started = false;
+                break;
+            default:
+                console.log("unhandled event");
+        }
+    };
+
+    var sendData = function(event, data) {
+        socket.send(
+            JSON.stringify({
+                event: event,
+                data: data
+            })
+        );
+    };
+
+    var requestUpdate = function() {
+        sendData("updateClient", {});
+    };
+
+    var setUpdateCallback = function(callback) {
+        _updateCallback = callback;
+    };
+
+    socket.onopen = function() {
+        sendData("start", {});
+    };
+
+    window.onbeforeunload = function() {
+        sendData("close", {});
+    };
+
+    return {
+        requestUpdate: requestUpdate,
+        setUpdateCalback: setUpdateCallback
+    }
+};
+
+var MapController = function(Rest, Graph, Map, Drawer, Socket) {
     Graph.initConcepts();
     Map.initInstances();
-    var concepts, instances, width, height;
+    var concepts,
+        instances,
+        width,
+        height;
+
+    var loopSteps = false,
+        ongoingStep = false;
 
     function initMap() {
         // init main objects
@@ -715,10 +843,27 @@ var MapController = function(Graph, Map, Drawer) {
         Drawer.createConceptContainers(concepts);
 
         // Add each instances
-        Drawer.drawInstances(instances);
+        instances = Drawer.drawInstances(instances);
+        Map.setInstances(instances);
 
         // Render the map
         Drawer.render();
+
+        //TODO less update request should be sent
+        // Start to listen for updates
+        Socket.setUpdateCalback(function(data) {
+            if(data.add.length > 0 || data.remove.length > 0) {
+                instances = Map.updateInstances(data);
+                instances = Drawer.updateInstances(instances);
+                Map.setInstances(instances);
+                ongoingStep = false;
+            }
+            if(loopSteps || ongoingStep) {
+                setTimeout(function(){ Socket.requestUpdate();},1000);
+                //Socket.requestUpdate();
+            }
+        });
+
     }
 
     // Wait for concepts and instances to be initialized
@@ -740,6 +885,56 @@ var MapController = function(Graph, Map, Drawer) {
         });
     });
 
+    var requestPause = function() {
+        Rest.map.pause(
+            function() {
+                loopSteps = false;
+            },
+            function() {
+
+            }
+        );
+    };
+
+    var requestResume = function() {
+        Rest.map.resume(
+            function() {
+                loopSteps = true;
+                requestUpdate();
+            },
+            function() {
+
+            }
+        );
+    };
+
+    var requestNext = function() {
+        Rest.map.next(
+            function() {
+                loopSteps = false;
+                requestUpdate();
+            },
+            function() {
+
+            }
+        );
+    };
+
+    var requestUpdate = function() {
+        ongoingStep = true;
+        Socket.requestUpdate();
+    };
+
+    document.getElementById('map-pause').onclick = function() {
+        requestPause();
+    };
+    document.getElementById('map-resume').onclick = function() {
+        requestResume();
+    };
+    document.getElementById('map-next').onclick = function() {
+        requestNext();
+    };
+
     /**
      * Create an overlay on an instance
      * @param instanceId id of the instance
@@ -756,14 +951,16 @@ var MapController = function(Graph, Map, Drawer) {
     };
 
     return {
-        highlightInstance: highlightInstance
+        highlightInstance: highlightInstance,
+        requestUpdate: requestUpdate
     }
 };
 
 // Init the objects needed in the controller
 window.Rest = RestFactory();
-window.Graph = GraphFactory(Rest);
-window.Map = MapFactory(Rest);
+window.Graph = GraphFactory(window.Rest);
+window.Map = MapFactory(window.Rest);
 window.Drawer = DrawerFactory();
+window.Socket = SocketFactory();
 
-window.MapController = MapController(Graph, Map, Drawer);
+window.MapController = MapController(window.Rest, window.Graph, window.Map, window.Drawer, window.Socket);

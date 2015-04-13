@@ -1,6 +1,6 @@
 <div class="form-field">
     <div class="form-field__legend--single">
-        <a href="{{ back_url }}">Go back</a>
+        <a href="#/overview">Go back</a>
     </div>
 </div>
 
@@ -27,8 +27,49 @@
         </div>
         <div ng-repeat="conceptRelation in conceptRelations" class="form-group highlight">
             <div class="form-field__legend--single">
-                {{ parameter.reference }}: {{parameter.type}}
+                <a href="#/node/{{conceptRelation.source.label}}">{{ conceptRelation.source.label }}</a> -> <a href="#/node/{{conceptRelation.target.label}}">{{ conceptRelation.target.label }}</a>
+                - <a ng-click="deleteRelation(relation.label, conceptRelation.source.id, conceptRelation.target.id)">Delete</a>
             </div>
         </div>
     </div>
+
+    <form class="form" ng-show="canAddRelation" ng-submit="submitNewRelation()">
+        <div class="form-field">
+            <div class="form-group">
+                <h3 class="form-field__legend--single">Add a new relation:</h3>
+            </div>
+            <div class="form-group highlight">
+                <div class="form-group__label">
+                    <label for="source">
+                        <span ng-show="isAction()">Source</span>
+                        <span ng-show="!isAction()">Concept</span>
+                    </label>
+                </div>
+                <div class="form-group__input">
+                    <select
+                            id="source"
+                            name="source"
+                            ng-model="relation.source"
+                            ng-options="concept.id as concept.label for concept in concepts"></select>
+                </div>
+            </div>
+            <div class="form-group highlight" ng-if="isAction()">
+                <div class="form-group__label">
+                    <label for="target">
+                        Target
+                    </label>
+                </div>
+                <div class="form-group__input">
+                    <select
+                            id="target"
+                            name="target"
+                            ng-model="relation.target"
+                            ng-options="concept.id as concept.label for concept in concepts"></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="form-submit">Add new relation</button>
+            </div>
+        </div>
+    </form>
 </div>

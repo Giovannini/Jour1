@@ -3,9 +3,9 @@ package actors
 import actors.communication.{StopComputing, ResultAction}
 import actors.communication.computing.ComputeAction
 import akka.actor.Actor
-import models.graph.ontology.Instance
-import models.graph.ontology.concept.Concept
-import models.graph.ontology.relation.Relation
+import models.graph.Instance
+import models.graph.concept.Concept
+import models.graph.relation.Relation
 import models.interaction.LogInteraction
 import models.interaction.action.InstanceActionParser
 

@@ -1,8 +1,8 @@
 package models.interaction.precondition
 
 import controllers.Application
-import models.graph.ontology.Instance
-import models.graph.ontology.property.PropertyDAO
+import models.graph.Instance
+import models.graph.property.PropertyDAO
 
 
 object PreconditionFiltering {
@@ -68,6 +68,10 @@ object PreconditionFiltering {
 
   def notSelf(source: Instance, instancesList: List[Instance]): List[Instance] = {
     instancesList diff List(source)
+  }
+
+  def isSelf(source: Instance, instancesList: List[Instance]): List[Instance] = {
+    List(source)
   }
 
   def isDifferentConcept(instance: Instance, listInstances: List[Instance]) = {

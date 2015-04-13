@@ -1,7 +1,7 @@
 package models.interaction.precondition
 
 import controllers.Application
-import models.graph.ontology.property.PropertyDAO
+import models.graph.property.PropertyDAO
 import models.interaction.parameter.{ParameterReference, ParameterValue}
 
 /**
@@ -116,5 +116,7 @@ object HCPrecondition {
     val instance2ID = args(ParameterReference("instance2ID", "Long")).value.asInstanceOf[Long]
     Application.map.getInstanceById(instance1ID).concept != Application.map.getInstanceById(instance2ID).concept
   }
+
+
 
 }

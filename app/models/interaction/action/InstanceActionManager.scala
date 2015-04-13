@@ -43,6 +43,19 @@ object InstanceActionManager {
     }
     nameToId += "_addInstanceAt" -> _addInstanceAt
 
+    val _actionCreateInstanceAt = {
+      val p_conceptToInstanciate = ParameterReference("conceptToInstanciate", "String")
+      val groundWhereToAddIt = ParameterReference("groundWhereToAddIt", "Long")
+      InstanceAction(
+        0L,
+        "createInstanceAt",
+        List(),
+        List(),
+        List(p_conceptToInstanciate, groundWhereToAddIt)
+      ).save
+    }
+    nameToId += "_actionCreateInstanceAt" -> _actionCreateInstanceAt
+
     val _removeInstanceAt = {
       val p_instanceToRemove = ParameterReference("instanceToRemove", "Long")
       InstanceAction(
@@ -104,6 +117,38 @@ object InstanceActionManager {
       ).save
     }
     nameToId += "_modifyProperty" -> _modifyProperty
+
+    val _modifyPropertyWithParam = {
+      val p_instanceID = ParameterReference("instanceToModify", "Long")
+      val p_propertyName = ParameterReference("propertyName", "Property")
+      val p_propertyValue = ParameterReference("propertyValue", "Property")
+      InstanceAction(
+        0L,
+        "modifyPropertyWithParam",
+        // Preconditions
+        List(
+          (
+            PreconditionManager.nameToId("hasProperty"),
+            Map(
+              ParameterReference("instanceToModify", "Long") -> p_instanceID,
+              ParameterReference("property", "Property") -> p_propertyName
+            )
+            ),
+          (
+            PreconditionManager.nameToId("hasProperty"),
+            Map(
+              ParameterReference("instanceToModify", "Long") -> p_instanceID,
+              ParameterReference("property", "Property") -> p_propertyValue
+            )
+            )
+        ),
+        // SubActions
+        List(),
+        // Parameters
+        List(p_instanceID, p_propertyName, p_propertyValue)
+      ).save
+    }
+    nameToId += "_modifyPropertyWithParam" -> _modifyPropertyWithParam
 
     /*Function to add to the BDD*/
     val _actionMoveInstanceAt = {
@@ -295,7 +340,7 @@ object InstanceActionManager {
     }
     nameToId += "Spreed" -> _actionSpread
 
- /*   val _actionRegenerate = {
+    val _actionRegenerate = {
       val p_instanceSelected = ParameterReference("instanceToDuplicate", "Long")
       val p_instanceToRegenate = ParameterReference("instanceToPutOn", "Long")
       InstanceAction(0L,
@@ -314,7 +359,7 @@ object InstanceActionManager {
               ParameterReference("property", "Property") -> ParameterValue("FeedMax", "Property")
             )
             ),
-          (PreconditionManager.nameToId("isOnSameTile"),
+          (PreconditionManager.nameToId("isSelf"),
             Map(
               ParameterReference("instance1ID", "Long") -> p_instanceSelected,
               ParameterReference("instance2ID", "Long") -> p_instanceToRegenate
@@ -322,11 +367,11 @@ object InstanceActionManager {
             )
         ),
         _subActions = List((
-          _modifyProperty,
+          _modifyPropertyWithParam,
           Map(
             ParameterReference("instanceToModify", "Long") -> p_instanceSelected,
             ParameterReference("propertyName", "Property") -> ParameterValue("Feed", "Property"),
-            ParameterReference("propertyValue", "Int") -> ParameterValue(ParameterValue("FeedMax", "Property").value,"Int")
+            ParameterReference("propertyValue", "Property") -> ParameterValue("FeedMax", "Property")
           )
           )),
         parameters = List(
@@ -334,7 +379,82 @@ object InstanceActionManager {
           p_instanceToRegenate
         )
       ).save
-    }*/
+    }
+    nameToId += "Regenerate" -> _actionRegenerate
+
+//    val _actionCraft = {
+//      val p_instanceThatCreate = ParameterReference("instanceID", "Long")
+//      val p_conceptLabel = ParameterReference("objectToDo", "String")
+//      val p_instanceThatIsUse = ParameterReference("instanceThatIsUse", "Long")
+//
+//      InstanceAction(
+//        0L,
+//        "ACTION_CRAFT",
+//        preconditions = List(
+//          (
+//            PreconditionManager.nameToId("isOnSameTile"),
+//            Map(
+//              ParameterReference("instance1ID", "Long") -> p_instanceThatCreate,
+//              ParameterReference("instance2ID", "Long") -> p_instanceThatIsUse
+//            )
+//            )
+//        ),
+//        _subActions = List(
+//          (_removeInstanceAt,
+//            Map(
+//              ParameterReference("instanceToRemove", "Long") -> p_instanceThatIsUse
+//            )
+//            ),
+//          (_actionCreateInstanceAt,
+//            Map(
+//              ParameterReference("conceptToInstanciate", "String") -> p_conceptLabel,
+//              ParameterReference("groundWhereToAddIt", "Long") -> p_instanceThatCreate
+//            ))
+//        ),
+//        parameters = List(
+//          p_instanceThatCreate,
+//          p_conceptLabel,
+//          p_instanceThatIsUse
+//        )
+//      ).save
+//
+//    }
+//    nameToId += "Craft" -> _actionCraft
+
+//    val _actionCreateBow = {
+//      val p_instanceThatCreate = ParameterReference("instanceThatCreate", "Long")
+//      val p_instanceThatIsUse = ParameterReference("instanceThatIsUse", "Long")
+//      InstanceAction(
+//        0L,
+//        "ACTION_CREATE_BOW",
+//        preconditions = List(
+//          (
+//            PreconditionManager.nameToId("isOnSameTile"),
+//            Map(
+//              ParameterReference("instance1ID", "Long") -> p_instanceThatCreate,
+//              ParameterReference("instance2ID", "Long") -> p_instanceThatIsUse
+//            )
+//            )
+//        ),
+//        _subActions = List(
+//          (_actionCraft,
+//            Map(
+//              ParameterReference("instanceID", "Long") -> p_instanceThatIsUse,
+//              ParameterReference("objectToDo", "String") -> ParameterValue("Sheep","String")
+//            ))
+//        ),
+//        parameters = List(
+//          p_instanceThatCreate,
+//          p_instanceThatIsUse
+//        )
+//      ).save
+//    }
+//    nameToId += "CreateBow" -> _actionCreateBow
+
+
+
+
+
   }
 }
 

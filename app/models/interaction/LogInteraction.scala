@@ -1,6 +1,7 @@
 package models.interaction
 
 import controllers.Application
+import models.graph.Instance
 
 import scala.util.{Failure, Success, Try}
 
@@ -11,7 +12,7 @@ case class LogInteraction(value: String, priority: Int){
 
   class UnknownLogException extends Exception
 
-  def execute(): Unit = {
+  def execute(): Instance = {
     Try {
 //      println("Executing LOG: " + this.value)
       val splitted = value.split(" ")
@@ -31,20 +32,30 @@ case class LogInteraction(value: String, priority: Int){
           val propertyString = splitted(2)
           val propertyValue = splitted(3).toDouble
           Application.map.modifyProperty(instanceId, propertyString, propertyValue)
+        case "MODIFY_PROPERTY_WITH_PARAM" =>/*#######################################*/
+          val instanceId = splitted(1).toLong
+          val propertyString = splitted(2)
+          val propertyValue = splitted(3)
+          Application.map.modifyPropertyWithParam(instanceId, propertyString, propertyValue)
         case "ADD_TO_PROPERTY" =>/*#######################################*/
           val instanceId = splitted(1).toLong
           val propertyString = splitted(2)
           val propertyValue = splitted(3).toDouble
           Application.map.addToProperty(instanceId, propertyString, propertyValue)
-        case error =>/*###################################################*/
-          throw new UnknownLogException
+        case _ =>/*###################################################*/
+          Instance.error
       }
     } match {
-      case Success(_) => //println("Done")
+      case Success(instance) => instance
       case Failure(e) =>
         println("Error while parsing action log:")
         println(e)
+        Instance.error
     }
+  }
+
+  def isAddOrRemove: Boolean = {
+    value.startsWith("ADD") || value.startsWith("REMOVE")
   }
 
 }

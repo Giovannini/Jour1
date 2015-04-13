@@ -1,5 +1,6 @@
 package models.interaction
 
+import models.interaction.InteractionType.InteractionType
 import models.interaction.action.InstanceAction
 import models.interaction.effect.Effect
 import models.interaction.parameter.{Parameter, ParameterReference, ParameterValue}
@@ -17,6 +18,34 @@ trait Interaction {
   val label: String
   val subInteractions: List[(Interaction, Map[ParameterReference, Parameter])]
   val parameters: List[ParameterReference]
+
+  def isValid() : Boolean = {
+    subInteractions.forall(item => {
+      item._1.id != this.id && item._1.label != this.label
+    })
+  }
+
+  def isValid(_type: InteractionType): Boolean = {
+    this.isValid() && {
+      _type match {
+        case InteractionType.Action =>
+          (this.parameters.length == 2
+            && this.parameters.forall(p => p._type == "Long")
+            && this.label.startsWith("ACTION_"))
+        case InteractionType.Effect =>
+          (this.parameters.length == 1
+            && this.parameters.head._type == "Long"
+            && this.label.startsWith("EFFECT_"))
+        case InteractionType.Mood =>
+          (this.parameters.length == 2
+            && this.parameters.forall(p => p._type == "Long")
+            && this.label.startsWith("MOOD_"))
+        case _ =>
+          val types = Set("ACTION_", "EFFECT_", "MOOD_")
+          types.forall(string => !this.label.startsWith(string))
+      }
+    }
+  }
 
   /*#################
     Json parsing
@@ -106,6 +135,10 @@ trait Interaction {
           val instanceId = arguments(ParameterReference("instanceToAdd", "Long")).value//.asInstanceOf[Long]
           val groundId = arguments(ParameterReference("groundWhereToAddIt", "Long")).value//.asInstanceOf[Long]
           List(LogInteraction("ADD " + instanceId + " " + groundId, 3))
+        case "createInstanceAt" =>
+          val instanceId = arguments(ParameterReference("conceptToInstanciate", "Long")).value//.asInstanceOf[Long]
+        val groundId = arguments(ParameterReference("groundWhereToAddIt", "Long")).value//.asInstanceOf[Long]
+          List(LogInteraction("CREATE " + instanceId + " " + groundId, 3))
         case "removeInstanceAt" =>
           val instanceId = arguments(ParameterReference("instanceToRemove", "Long")).value//.asInstanceOf[Long]
           List(LogInteraction("REMOVE " + instanceId, 4))
@@ -119,6 +152,11 @@ trait Interaction {
           val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
           val newValue = arguments(ParameterReference("propertyValue", "Int")).value//.asInstanceOf[String]
           List(LogInteraction("MODIFY_PROPERTY " + instanceId + " " + propertyString + " " + newValue, 1))
+        case "modifyPropertyWithParam" =>
+          val instanceId = arguments(ParameterReference("instanceID", "Long")).value//.asInstanceOf[Long]
+          val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
+          val newValue = arguments(ParameterReference("propertyValue", "Property")).value//.asInstanceOf[String]
+          List(LogInteraction("MODIFY_PROPERTY_WITH_PARAM " + instanceId + " " + propertyString + " " + newValue, 1))
         case _ =>
           subInteractions.flatMap(subAction => subAction._1.log(takeGoodArguments(subAction._2, arguments)))
       }

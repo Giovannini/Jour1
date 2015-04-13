@@ -1,6 +1,6 @@
 package models.interaction.precondition
 
-import models.graph.ontology.Instance
+import models.graph.Instance
 import models.interaction.parameter.{Parameter, ParameterReference, ParameterValue}
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
@@ -92,6 +92,8 @@ case class Precondition(
         PreconditionFiltering.isAtWalkingDistance(source, instancesList).toSet
       case "notSelf" =>
         PreconditionFiltering.notSelf(source, instancesList).toSet
+      case "isSelf" =>
+        PreconditionFiltering.isSelf(source,instancesList).toSet
       case "isDifferentConcept" =>
         PreconditionFiltering.isDifferentConcept(source, instancesList).toSet
       //case "hasInstanceOfConcept" =>PreconditionFiltering.hasInstanceOfConcept(source, instancesList)
