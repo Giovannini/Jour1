@@ -1,7 +1,7 @@
 package models.interaction.action
 
 import controllers.Application
-import models.graph.concept.{Concept, ConceptDAO}
+import models.graph.concept.{Concept}
 import models.interaction.InteractionDAO
 import models.interaction.parameter._
 import models.interaction.precondition.PreconditionManager
@@ -122,6 +122,8 @@ object InstanceActionManager {
     val _consume = {
       val p_instanceID = ParameterReference("instanceID", "Long")
       val p_propertyName = ParameterReference("propertyName", "Property")
+      val propertyValue = ParameterReference("propertyValue", "Property")
+
       val p_valueToAdd = ParameterReference("valueToAdd", "Int")
       InstanceAction(
         0L,
@@ -139,7 +141,7 @@ object InstanceActionManager {
         // SubActions
         List(),
         // Parameters
-        List(p_instanceID, p_propertyName, p_valueToAdd)
+        List(p_instanceID, p_propertyName, propertyValue, p_valueToAdd)
       ).save
     }
     nameToId += "_consume" -> _consume
@@ -227,13 +229,6 @@ object InstanceActionManager {
               ParameterReference("instance1ID", "Long") -> p_instanceThatEat,
               ParameterReference("instance2ID", "Long") -> p_instanceThatIsEaten
             )
-            ),          (
-            PreconditionManager.nameToId("propertyIsHigherThan"),
-            Map(
-              ParameterReference("instanceID", "Long") -> p_instanceThatIsEaten,
-              ParameterReference("property", "Property") -> ParameterValue("Feed", "Property"),
-              ParameterReference("value", "Int") -> ParameterValue(0, "Int")
-            )
             ),
           (
             PreconditionManager.nameToId("isDifferentConcept"),
@@ -249,15 +244,16 @@ object InstanceActionManager {
             Map(
               ParameterReference("instanceID", "Long") -> p_instanceThatEat,
               ParameterReference("propertyName", "Property") -> ParameterValue("Hunger", "Property"),
-              ParameterReference("valueToAdd", "Int") -> ParameterValue(-1, "Int")
+              ParameterReference("valueToAdd", "Int") -> ParameterValue(-3, "Int")
             )
             ),
           (
             _consume,
             Map(
               ParameterReference("instanceID", "Long") -> p_instanceThatIsEaten,
-              ParameterReference("propertyName", "Property") -> ParameterValue("Feed", "Property"),
-              ParameterReference("valueToAdd", "Int") -> ParameterValue(-2, "Int")
+              ParameterReference("propertyName", "Property") -> ParameterValue("Wound", "Property"),
+              ParameterReference("propertyValue", "Property") -> ParameterValue("WoundMax", "Property"),
+              ParameterReference("valueToAdd", "Int") -> ParameterValue(2, "Int")
             )
             )
         ),
@@ -423,13 +419,13 @@ object InstanceActionManager {
             PreconditionManager.nameToId("hasProperty"),
             Map(
               ParameterReference("instanceID", "Long") -> p_instanceSelected,
-              ParameterReference("property", "Property") -> ParameterValue("Feed", "Property")
+              ParameterReference("property", "Property") -> ParameterValue("Wound", "Property")
             )
             ),          (
             PreconditionManager.nameToId("hasProperty"),
             Map(
               ParameterReference("instanceID", "Long") -> p_instanceSelected,
-              ParameterReference("property", "Property") -> ParameterValue("FeedMax", "Property")
+              ParameterReference("property", "Property") -> ParameterValue("WoundMax", "Property")
             )
             ),
           (PreconditionManager.nameToId("isSelf"),
@@ -440,11 +436,11 @@ object InstanceActionManager {
             )
         ),
         _subActions = List((
-          _modifyPropertyWithParam,
+          _modifyProperty,
           Map(
             ParameterReference("instanceToModify", "Long") -> p_instanceSelected,
-            ParameterReference("propertyName", "Property") -> ParameterValue("Feed", "Property"),
-            ParameterReference("propertyValue", "Property") -> ParameterValue("FeedMax", "Property")
+            ParameterReference("propertyName", "Property") -> ParameterValue("Wound", "Property"),
+            ParameterReference("propertyValue", "Int") -> ParameterValue(0, "Int")
           )
           )),
         parameters = List(

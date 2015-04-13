@@ -82,21 +82,33 @@ object HardCodedAction {
     val instance = map.getInstanceById(instanceId)
     val property = PropertyDAO.getByName(propertyString)
     val valueOfProperty: Double = instance.getValueForProperty(property) + valToAdd
-    val newValuedProperty = ValuedProperty(property, valueOfProperty)
-    val newInstance = instance.modifyValueOfProperty(newValuedProperty)
+    if (valueOfProperty <0) {
+      val newValuedProperty = ValuedProperty(property, 0)
+      val newInstance = instance.modifyValueOfProperty(newValuedProperty)
+      Application.map.updateInstance(instance, newInstance)
+    }else{
+      val newValuedProperty = ValuedProperty(property, valueOfProperty)
+      val newInstance = instance.modifyValueOfProperty(newValuedProperty)
+      Application.map.updateInstance(instance, newInstance)
+    }
 
-    Application.map.updateInstance(instance, newInstance)
+
   }
 
   def consume(args: Map[ParameterReference, ParameterValue]): Unit = {
     val instanceId = args(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
     val propertyString = args(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
+    val propertyToUse = args(ParameterReference("propertyValue", "Property")).value.asInstanceOf[String]
     val valToAdd = args(ParameterReference("valueToAdd", "Int")).value.asInstanceOf[String].toDouble
 
     val instance = map.getInstanceById(instanceId)
+
+    val valueOfPropertyToVerify: Double = instance.getValueForProperty(PropertyDAO.getByName(propertyToUse))
+
     val property = PropertyDAO.getByName(propertyString)
     val valueOfProperty: Double = instance.getValueForProperty(property) + valToAdd
-    if (valueOfProperty < 1){
+
+    if (valueOfProperty >= valueOfPropertyToVerify){
       map.removeInstance(instanceId)
     }else{
       val newValuedProperty = ValuedProperty(property, valueOfProperty)
