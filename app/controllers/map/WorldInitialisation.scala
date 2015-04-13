@@ -91,10 +91,10 @@ object WorldInitialisation extends Controller {
     val propertyDuplicationSpeed = Property("DuplicationSpeed", PropertyType.Double, 10).save
     val propertyWalkingDistance = Property("WalkingDistance", PropertyType.Int, 3).save
     val propertyHunger = Property("Hunger", PropertyType.Double, 5).save
-    val propertyFeed = Property("Feed", PropertyType.Double, 2).save
+    val propertyWound = Property("Wound", PropertyType.Double, 2).save
     val propertyComfort = Property("Comfort", PropertyType.Double, 3).save
     val propertyDesire = Property("Desire",PropertyType.Double,11).save
-    val propertyFeedMax = Property("FeedMax", PropertyType.Double, 4).save
+    val propertyWoundMax = Property("WoundMax", PropertyType.Double, 4).save
     val propertyFear = Property("Fear", PropertyType.Double, 0).save
 
     PreconditionManager.initialization()
@@ -118,8 +118,8 @@ object WorldInitialisation extends Controller {
     val conceptGrass = Concept("Grass",
       List(
         ValuedProperty(propertyDuplicationSpeed,10),
-        ValuedProperty(propertyFeed,4),
-        ValuedProperty(propertyFeedMax,4)
+        ValuedProperty(propertyWound,0),
+        ValuedProperty(propertyWoundMax,4)
       ),
       List(
         ValuedProperty(propertyStrength, 40),
@@ -136,8 +136,8 @@ object WorldInitialisation extends Controller {
 
     val conceptApple = Concept("Apple",
       List(
-        ValuedProperty(propertyFeed,4),
-        ValuedProperty(propertyFeedMax,4)
+        ValuedProperty(propertyWound,0),
+        ValuedProperty(propertyWoundMax,4)
       ),
       List(
         ValuedProperty(propertyStrength, 2),
@@ -150,19 +150,18 @@ object WorldInitialisation extends Controller {
 
     val conceptSheep = Concept("Sheep",
       _properties = List(
-        ValuedProperty(propertyFeed,12),
-        ValuedProperty(propertyFeedMax,12),
+        ValuedProperty(propertyWound,0),
+        ValuedProperty(propertyWoundMax,12),
         ValuedProperty(propertySense,5),
         ValuedProperty(propertyFear,0),
         ValuedProperty(propertyHunger,4),
         ValuedProperty(propertyWalkingDistance,4),
-        ValuedProperty(propertyFeed,12),
         ValuedProperty(propertyDesire,8)
       ),
       _rules = List(
         ValuedProperty(propertyStrength, 3),
         ValuedProperty(propertyInstanciable, 1),
-        ValuedProperty(propertyFeedMax, 12)
+        ValuedProperty(propertyWoundMax, 12)
       ),
       List(),
       DisplayProperty("#EEE9D6", 16)
@@ -198,7 +197,7 @@ object WorldInitialisation extends Controller {
         ValuedProperty(propertyComfort,3),
         ValuedProperty(propertyHunger,6),
         ValuedProperty(propertyWalkingDistance,3),
-        ValuedProperty(propertyFeed,10),
+        ValuedProperty(propertyWound,0),
         ValuedProperty(propertyDesire,7)
       ),
       List(
@@ -221,7 +220,7 @@ object WorldInitialisation extends Controller {
         ValuedProperty(propertySense,5),
         ValuedProperty(propertyHunger,5),
         ValuedProperty(propertyWalkingDistance,4),
-        ValuedProperty(propertyFeed,10),
+        ValuedProperty(propertyWound,0),
         ValuedProperty(propertyDesire,6)
       ),
       List(
@@ -241,8 +240,8 @@ object WorldInitialisation extends Controller {
 
     val conceptBush = Concept("Bush",
       List(
-        ValuedProperty(propertyFeed,6),
-        ValuedProperty(propertyFeedMax,6)
+        ValuedProperty(propertyWound,0),
+        ValuedProperty(propertyWoundMax,6)
       ),
       List(
         ValuedProperty(propertyStrength, 20),

@@ -91,12 +91,18 @@ object HardCodedAction {
   def consume(args: Map[ParameterReference, ParameterValue]): Unit = {
     val instanceId = args(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
     val propertyString = args(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
+    val propertyToUse = args(ParameterReference("propertyValue", "Property")).value.asInstanceOf[String]
     val valToAdd = args(ParameterReference("valueToAdd", "Int")).value.asInstanceOf[String].toDouble
 
     val instance = map.getInstanceById(instanceId)
+
+    val propertyToVerif = PropertyDAO.getByName(propertyToUse)
+    val valueOfPropertyToVerify: Double = instance.getValueForProperty(propertyToVerif)
+
     val property = PropertyDAO.getByName(propertyString)
     val valueOfProperty: Double = instance.getValueForProperty(property) + valToAdd
-    if (valueOfProperty < 1){
+
+    if (valueOfProperty >= valueOfPropertyToVerify){
       map.removeInstance(instanceId)
     }else{
       val newValuedProperty = ValuedProperty(property, valueOfProperty)
