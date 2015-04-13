@@ -1,7 +1,7 @@
 package models.interaction.action
 
 import controllers.Application
-import models.graph.concept.{Concept, ConceptDAO}
+import models.graph.concept.{Concept}
 import models.interaction.InteractionDAO
 import models.interaction.parameter._
 import models.interaction.precondition.PreconditionManager
