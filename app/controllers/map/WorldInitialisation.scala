@@ -301,6 +301,8 @@ object WorldInitialisation extends Controller {
     println("Adding concepts to graph...")
     /*Storage of the concepts in DB*/
     val addConceptVerification = {
+      ConceptDAO.addConceptToDB(Concept.any) &&
+      ConceptDAO.addConceptToDB(Concept.self) &&
       ConceptDAO.addConceptToDB(conceptMan) &&
       ConceptDAO.addConceptToDB(conceptPredator) &&
       ConceptDAO.addConceptToDB(conceptAnimal) &&

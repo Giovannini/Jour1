@@ -205,11 +205,12 @@ case class Instance(
     def destinationList(mean: MeanOfSatisfaction): List[Instance] = {
       val destinationList = mean.action.getDestinationList(this, sensedInstances)
       //TODO change that using any
-      if (mean.destinationConcept == Concept.error) {
+      if (mean.destinationConcept == Concept.any) {
         val remainingDestinationConcepts = relations.getOrElse(mean.action, List())
         destinationList.filter(instance => remainingDestinationConcepts.contains(instance.concept))
-      }
-      else {
+      } else if (mean.destinationConcept == Concept.self) {
+        destinationList.filter(_.concept == this.concept)
+      } else {
         destinationList.filter(instance => mean.destinationConcepts.contains(instance.concept))
       }
     }
@@ -220,7 +221,6 @@ case class Instance(
         val destinationsList = destinationList(head)
         if (destinationsList.nonEmpty) {
           val destination = Random.shuffle(destinationsList).head
-          //println(this.label + this.id + " - " + head.action.label + " - " + destination.label + destination.id)
           (head.action, destination)
         }
         else {
