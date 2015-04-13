@@ -75,6 +75,7 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
       looping = false
       println("Looping = " + looping)
     case NewTurn =>
+      logs = List()
       launchComputation(NewTurn)
     case ResultAction(logList) =>
       nrOfResults += 1

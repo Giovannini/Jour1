@@ -397,8 +397,8 @@ var DrawerFactory = function() {
         map = [],
         mapWidth,
         mapHeight,
-        tileWidth = 10,
-        tileHeight = 10;
+        tileWidth = 12,
+        tileHeight = 12;
     
     ConceptContainer.prototype = new PIXI.DisplayObjectContainer();
     ConceptContainer.prototype.constructor = ConceptContainer;
@@ -859,7 +859,11 @@ var MapController = function(Rest, Graph, Map, Drawer, Socket) {
                 ongoingStep = false;
             }
             if(loopSteps || ongoingStep) {
-                setTimeout(function(){ Socket.requestUpdate();},1000);
+                setTimeout(
+                    function(){
+                        Socket.requestUpdate();
+                    },
+                    1000);
                 //Socket.requestUpdate();
             }
         });

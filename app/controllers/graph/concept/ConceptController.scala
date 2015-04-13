@@ -41,7 +41,6 @@ object ConceptController extends Controller {
 
   def updateConcept(label: String): Action[JsValue] = {
     Action(parse.json) { request =>
-      println(request.body)
       val newConceptForm = form.bind(request.body)
       newConceptForm.fold(
         hasErrors = {

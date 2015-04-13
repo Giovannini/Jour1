@@ -1,6 +1,5 @@
 package models.interaction.parameter
 
-import models.graph.Instance
 import models.graph.property.PropertyDAO
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
@@ -19,7 +18,7 @@ case class ParameterValue(value: Any, _type: String) extends Parameter {
   def jsonValue: JsValue = {
     _type match {
       case "Int" => JsNumber(value.toString.toInt)
-      case "Long" => value.asInstanceOf[Instance].toJson
+      case "Long" => JsNumber(value.toString.toLong)
       case "Property" => PropertyDAO.getByName(value.asInstanceOf[String]).toJson
     }
   }

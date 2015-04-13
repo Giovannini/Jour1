@@ -122,7 +122,7 @@ object WorldInitialisation extends Controller {
         ValuedProperty(propertyFeedMax,4)
       ),
       List(
-        ValuedProperty(propertyStrength, 400),
+        ValuedProperty(propertyStrength, 40),
         ValuedProperty(propertyInstanciable, 1)
       ),
       List(),
@@ -180,9 +180,14 @@ object WorldInitialisation extends Controller {
         MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), conceptApple),
         MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.self),
         MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.any))))
-    val needSeaAir = NeedDAO.save(Need(0L, "SeaAir", propertyComfort, priority = 5,
-      List(ConsequenceStep(5, Consequence(5, InstanceActionManager.nameToId("_addToProperty").toEffect))),
-      List(MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.any))))
+    val needSeaAir = NeedDAO.save(
+      Need(
+        0L,
+        "SeaAir",
+        propertyComfort,
+        priority = 5,
+        List(ConsequenceStep(5, Consequence(5, InstanceActionManager.nameToId("_addToProperty").toEffect))),
+        List(MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.any))))
 
     println("Declaration of concepts...")
 
@@ -200,7 +205,7 @@ object WorldInitialisation extends Controller {
         ValuedProperty(propertyStrength, 2),
         ValuedProperty(propertyInstanciable, 1)
       ),
-      List(needSeaAir),
+      List(needSeaAir, needFood),
       DisplayProperty("#E3B494", 20))
 
     ///
@@ -301,6 +306,8 @@ object WorldInitialisation extends Controller {
     println("Adding concepts to graph...")
     /*Storage of the concepts in DB*/
     val addConceptVerification = {
+      ConceptDAO.addConceptToDB(Concept.any) &&
+      ConceptDAO.addConceptToDB(Concept.self) &&
       ConceptDAO.addConceptToDB(conceptMan) &&
       ConceptDAO.addConceptToDB(conceptPredator) &&
       ConceptDAO.addConceptToDB(conceptAnimal) &&

@@ -56,7 +56,6 @@ input[type="number"] {
 
 .form-group {
   display: block;
-  clear: both;
   width: 100%;
   margin: 10px 0;
 }
@@ -67,8 +66,14 @@ input[type="number"] {
   padding: 7.5px;
 }
 
+.highlight--mega {
+  background-color: lighten($darkColor,15);
+  width: calc(100% - 15px);
+  padding: 7.5px;
+}
+
 .form-field__legend--single, .form-group__label--single {
-  height: 30px;
+  min-height: 30px;
   line-height: 30px;
   margin: 0;
   padding: 0;

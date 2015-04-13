@@ -3,6 +3,7 @@ package models.interaction.action
 import anorm.SqlParser._
 import anorm.{RowParser, ~}
 import controllers.Application
+import models.interaction.effect.Effect
 import models.interaction.{InteractionDAO, InteractionStatement}
 import play.api.Play.current
 import play.api.db.DB
@@ -26,10 +27,10 @@ object InstanceActionDAO {
    */
   private val actionParser: RowParser[InstanceAction] = {
     get[Long]("id") ~
-    get[String]("label") ~
-    get[String]("param") ~
-    get[String]("precond") ~
-    get[String]("content") map {
+      get[String]("label") ~
+      get[String]("param") ~
+      get[String]("precond") ~
+      get[String]("content") map {
       case id ~ label ~ param ~ precond ~ content => InstanceAction.parse(id, label, param, precond, content)
     }
   }
@@ -54,6 +55,18 @@ object InstanceActionDAO {
     DB.withConnection { implicit connection =>
       val statement = InteractionStatement.getAll
       statement.as(actionParser *)
+    }
+  }
+
+  /**
+   * Get all the effects in the rules table
+   * @author Julien PRADET
+   * @return all effects
+   */
+  def getAllEffects: List[Effect] = {
+    DB.withConnection { implicit connection =>
+      val statement = InteractionStatement.getAllEffects
+      statement.as(actionParser *).map(_.toEffect)
     }
   }
 
@@ -148,5 +161,6 @@ object InstanceActionDAO {
    * @param id id of the rule
    */
   def delete(id: Long): Int = InteractionDAO.delete(id)
-  
+
+
 }

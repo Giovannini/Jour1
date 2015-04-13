@@ -179,7 +179,7 @@
                                 id="needs_{{ $index }}_property"
                                 name="needs_{{ $index }}_property"
                                 ng-model="node.needs[$index].affectedProperty"
-                                ng-options="property as property.label for property in node.properties"></select>
+                                ng-options="property.property as property.property.label for property in node.properties"></select>
                     </div>
                 </div>
 
@@ -201,11 +201,9 @@
                                         Effects:
                                     </div>
                                     <div class="form-group__input">
-                                        <div ng-repeat="effect in consequence.consequence.effects">
-                                            <select
-                                                    ng-options="effect as effect.label for effect in effects"
-                                                    ng-model="effect"></select>
-                                        </div>
+                                        <select
+                                                ng-options="effect as effect.label for effect in effects"
+                                                ng-model="consequence.consequence.effects"></select>
                                     </div>
                                 </div>
                                 <div class="form-group">

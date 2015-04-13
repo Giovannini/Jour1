@@ -108,7 +108,7 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
 
     var getActions = function getActions(success, failure) {
         var request = $resource(
-            baseUrl+'actions',
+            baseUrl+'graph/actions',
             {},
             { 'get': {
                 method: "GET",
@@ -119,10 +119,30 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
         request.get(
             {},
             function(response) {
-                _preconditions = response;
                 success(response);
             },
             function(response) {
+                failure(response);
+            }
+        );
+    };
+
+    var getEffects = function getEffects(success, failure) {
+        var request = $resource (
+            baseUrl+'graph/effects',
+            {},
+            { 'get': {
+                method: "GET",
+                isArray: true,
+                Accept: "application/json"
+            }}
+        );
+        request.get(
+            {},
+            function(response) {
+                success(response);
+            },
+            function() {
                 failure(response);
             }
         );
@@ -260,7 +280,7 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
                 function (res) {
                     var message;
                     if (res.status === 404) {
-                        message = searchLabel + " est introuvable.";
+                        message = searchLabel + " not found";
                     } else {
                         message = "Erreur inconnue.";
                     }
@@ -281,6 +301,7 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
         getProperties: getProperties,
         getPreconditions: getPreconditions,
         getActions: getActions,
+        getEffects: getEffects,
         getActionsOfConcept: getActionsOfConcept,
         getConcepts: getConcepts,
         getAction: getAction,
@@ -431,7 +452,6 @@ var SearchController = [
 
         $scope.launchSearch = function() {
             $location.path("/node/"+$scope.search);
-            $rootScope.$apply();
         };
 
         Scopes.get('search').$on('Search_searchNode', function(event, search) {
@@ -461,6 +481,29 @@ var ShowNodeCtrl = ['$scope', '$rootScope', '$location', '$routeParams', '$resou
 
     $scope.isShowingNode = function() {
         return $scope.node != null;
+    };
+
+    $scope.deleteNode = function() {
+        var request = $resource(
+            baseUrl+"concepts/"+$scope.node.label,
+            {},
+            {
+                'delete': {
+                    method: "DELETE",
+                    headers: [{'Content-Type': 'application/json'}]
+                }
+            }
+        );
+        request.delete(
+            {},
+            {},
+            function(response) {
+                $location.path('/overview');
+            },
+            function(response) {
+                $scope.error = "Impossible to delete " + $scope.node.label;
+            }
+        );
     };
 
     var success = function(root, display) {
@@ -560,7 +603,7 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
             }
         );
 
-        NodesFactory.getActions(
+        NodesFactory.getEffects(
             function(effects) {
                 _effects = effects;
                 _updateEffects(_effects);
@@ -658,14 +701,14 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
         return node;
     };
 
-    var submitNode = function(url) {
-        return function() {
+    var submitNode = function(url, method) {
+        return function(success, failure) {
             var submit = $resource(
                 url,
                 {},
                 {
                     'save': {
-                        method: "POST",
+                        method: method,
                         headers: [{'Content-Type': 'application/json'}]
                     }
                 }
@@ -674,9 +717,10 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
                 {},
                 cleanNode(_node),
                 function (response) {
-                    console.log(response);
+                    success(response);
                 }, function (response) {
                     _notifyError("Impossible to save node");
+                    failure(response);
                 }
             )
         }
@@ -711,14 +755,14 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
     };
 }];
 
-var NewNodeCtrl = ['$scope', '$routeParams', 'EditNodeFactory', function($scope, $routeParams, EditNodeFactory) {
+var NewNodeCtrl = ['$scope', '$routeParams', '$location', 'EditNodeFactory', function($scope, $routeParams, $location, EditNodeFactory) {
     $scope.submit_button = "Edit";
     $scope.back_url = "#/";
     $scope.message = "Loading...";
 
     EditNodeFactory.init(
         function(error) {
-            $scope.error = error;
+            $scope.message = error;
         },
         function(properties) {
             $scope.properties = properties;
@@ -759,11 +803,16 @@ var NewNodeCtrl = ['$scope', '$routeParams', 'EditNodeFactory', function($scope,
             $scope.node.needs = [];
         }
         EditNodeFactory.setNode($scope.node);
-        EditNodeFactory.submitNode(baseUrl+'concepts/new')();
+        EditNodeFactory.submitNode(baseUrl+'concepts/new', "POST")(
+            function(response) {
+                $location.path("/node/"+$scope.node.label);
+            },
+            function() {}
+        );
     }
 }];
 
-var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', 'NodesFactory', 'EditNodeFactory', function($scope, $routeParams, Scopes, NodesFactory, EditNodeFactory) {
+var EditNodeCtrl = ['$scope', '$routeParams', '$location', 'Scopes', 'NodesFactory', 'EditNodeFactory', function($scope, $routeParams, $location, Scopes, NodesFactory, EditNodeFactory) {
     Scopes.get('search').search = $routeParams.label;
     $scope.submit_button = "Edit";
     $scope.back_url = "#/node/"+$routeParams.label;
@@ -789,10 +838,8 @@ var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', 'NodesFactory', 'EditNod
                 }
 
                 function matchAction(actionId, actions) {
-                    console.log(actionId);
                     for(var i = 0; i < actions.length; i++) {
                         if(actionId == actions[i].id) {
-                            console.log(actions[i]);
                             return actions[i]
                         }
                     }
@@ -816,20 +863,19 @@ var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', 'NodesFactory', 'EditNod
 
                 for(var needIndex in display.needs) {
                     // Match the property
-                    display.needs[needIndex].affectedProperty = matchProperty(display.needs[needIndex].affectedProperty)
+                    display.needs[needIndex].affectedProperty = matchProperty(display.needs[needIndex].affectedProperty);
 
                     // Match every action in the consequences
                     for(var consequenceIndex in display.needs[needIndex].consequenceSteps) {
-                        for(var effectIndex in display.needs[needIndex].consequenceSteps[consequenceIndex].consequence.effects) {
-                            display.needs[needIndex].consequenceSteps[consequenceIndex].consequence.effects[effectIndex] = matchEffect(display.needs[needIndex].consequenceSteps[consequenceIndex].consequence.effects[effectIndex])
-                        }
+                        console.log(display.needs[needIndex].consequenceSteps[consequenceIndex].consequence);
+                        display.needs[needIndex].consequenceSteps[consequenceIndex].consequence.effects = matchEffect(display.needs[needIndex].consequenceSteps[consequenceIndex].consequence.effects)
                     }
 
                     // Match every action in the means of satisfaction
                     for(var actionIndex in display.needs[needIndex].meansOfSatisfaction) {
                         display.needs[needIndex].meansOfSatisfaction[actionIndex].action = matchMean(display.needs[needIndex].meansOfSatisfaction[actionIndex].action);
                     }
-                }
+                };
 
                 display.displayProperty = display.display;
                 delete display.display;
@@ -838,7 +884,7 @@ var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', 'NodesFactory', 'EditNod
                 EditNodeFactory.setNode(display);
             },
             function (error) {
-                $scope.error = error;
+                $scope.message = error;
             }
         )($routeParams.label, $routeParams.label, NodesFactory.options.deepness, true);
     };
@@ -853,7 +899,8 @@ var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', 'NodesFactory', 'EditNod
 
     EditNodeFactory.init(
         function(error) {
-            $scope.error = error;
+            console.log(errors);
+            $scope.message = error;
         },
         function(properties) {
             $scope.properties = properties;
@@ -896,19 +943,18 @@ var EditNodeCtrl = ['$scope', '$routeParams', 'Scopes', 'NodesFactory', 'EditNod
         return typeof $scope.node !== "undefined" && $scope.node != null;
     };
 
-    function refactorNodeToSubmit(node) {
-        console.log(node);
-
-        return node;
-    }
-
     $scope.submitNode = function() {
         if(!$scope.canAddNeeds) {
             $scope.node.needs = [];
         }
         EditNodeFactory.setNode($scope.node);
-        var nodeToSubmit = refactorNodeToSubmit($scope.node);
-        EditNodeFactory.submitNode(baseUrl+'concepts/'+$routeParams.label)(nodeToSubmit);
+        EditNodeFactory.submitNode(baseUrl+'concepts/'+$routeParams.label, "PUT")(
+            function() {
+                $location.path("/node/"+$scope.node.label);
+            },
+            function() {
+            }
+        );
     }
 }];
 

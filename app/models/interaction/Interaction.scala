@@ -112,7 +112,7 @@ trait Interaction {
       if (arePreconditionsChecked) {
         action.executeGoodAction(arguments)
       } else {
-        println("Precondition not filled for " + this.label + ".")
+//        println("Precondition not filled for " + this.label + ".")
         false
       }
     case effect: Effect =>
@@ -136,9 +136,9 @@ trait Interaction {
           val groundId = arguments(ParameterReference("groundWhereToAddIt", "Long")).value//.asInstanceOf[Long]
           List(LogInteraction("ADD " + instanceId + " " + groundId, 3))
         case "createInstanceAt" =>
-          val instanceId = arguments(ParameterReference("conceptToInstanciate", "Long")).value//.asInstanceOf[Long]
-        val groundId = arguments(ParameterReference("groundWhereToAddIt", "Long")).value//.asInstanceOf[Long]
-          List(LogInteraction("CREATE " + instanceId + " " + groundId, 3))
+          val instanceId = arguments(ParameterReference("conceptID", "Long")).value//.asInstanceOf[Long]
+          val groundId = arguments(ParameterReference("groundWhereToAddIt", "Long")).value//.asInstanceOf[Long]
+          List(LogInteraction("CREATE " + instanceId + " " + groundId, 5))
         case "removeInstanceAt" =>
           val instanceId = arguments(ParameterReference("instanceToRemove", "Long")).value//.asInstanceOf[Long]
           List(LogInteraction("REMOVE " + instanceId, 4))
@@ -147,6 +147,11 @@ trait Interaction {
           val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
           val valueToAdd = arguments(ParameterReference("valueToAdd", "Int")).value//.asInstanceOf[String]
           List(LogInteraction("ADD_TO_PROPERTY " + instanceId + " " + propertyString + " " + valueToAdd, 2))
+        case "consume" =>
+          val instanceId = arguments(ParameterReference("instanceID", "Long")).value//.asInstanceOf[Long]
+        val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
+        val valueToAdd = arguments(ParameterReference("valueToAdd", "Int")).value//.asInstanceOf[String]
+          List(LogInteraction("CONSUME " + instanceId + " " + propertyString + " " + valueToAdd, 2))
         case "modifyProperty" =>
           val instanceId = arguments(ParameterReference("instanceID", "Long")).value//.asInstanceOf[Long]
           val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
@@ -161,7 +166,7 @@ trait Interaction {
           subInteractions.flatMap(subAction => subAction._1.log(takeGoodArguments(subAction._2, arguments)))
       }
     } else {
-      println("Precondition not filled for action " + this.label + ".")
+//      println("Precondition not filled for action " + this.label + ".")
       List(LogInteraction.nothing)
     }
   }

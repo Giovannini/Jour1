@@ -408,6 +408,8 @@ var EditActionFactory = ['RestFactory', function(RestFactory) {
         }
         actionToSubmit.subActions = subActions;
 
+        console.log(actionToSubmit);
+
         return {
             type: action.type,
             action: actionToSubmit

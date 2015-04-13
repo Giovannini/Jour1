@@ -27,6 +27,16 @@ object InteractionStatement {
     SQL("SELECT * FROM rules")
   }
 
+  /**
+   * Request to select all the effects in the rules table
+   * @author Julien PRADET
+   * @return a sql statement
+   */
+  def getAllEffects = {
+    SQL("SELECT * FROM rules WHERE label LIKE 'EFFECT_%'")
+  }
+
+
 
   private def parametersString(interaction: Interaction): String = {
     interaction.parameters.map(_.toString).mkString(",")
