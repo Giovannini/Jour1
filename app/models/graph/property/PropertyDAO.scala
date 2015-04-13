@@ -121,10 +121,14 @@ object PropertyDAO {
    * @param id id of the property
    * @param property property identified by id
    */
-  def update(id: Long, property: Property): Int = {
+  def update(id: Long, property: Property): Long = {
     DB.withConnection { implicit connection =>
       val statement = PropertyStatement.update(id, property)
-      statement.executeUpdate
+      val newId: Long = statement.executeUpdate
+      mappingId += newId -> property
+      mappingId -= id
+      mappingName += property.label -> property
+      newId
     }
   }
 

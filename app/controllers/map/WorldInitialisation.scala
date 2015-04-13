@@ -200,7 +200,7 @@ object WorldInitialisation extends Controller {
         ValuedProperty(propertyStrength, 2),
         ValuedProperty(propertyInstanciable, 1)
       ),
-      List(needSeaAir),
+      List(needSeaAir, needFood),
       DisplayProperty("#E3B494", 20))
 
     ///
