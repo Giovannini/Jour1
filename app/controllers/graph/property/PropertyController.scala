@@ -120,18 +120,19 @@ object PropertyController extends Controller {
    *         error else
    */
   def deleteProperty(id: Long) = Action {
+    // Get all concepts using the property
     val concepts = ConceptDAO.getAll
-    println (concepts)
-    val concepts2 = concepts
       .filter(concept => concept.getOwnProperties
         .exists(property => property.property.id == id)
       )
-    println(concepts2)
+
+    // If one concept at least exists the property can't be deleted
     if (concepts != List()) {
-      InternalServerError("Bou")
+      val listOfConcepts = concepts.map(_.label) mkString (" - ")
+      InternalServerError("This property is used in following concepts : " + listOfConcepts)
     }
     else {
-      val result = 1 //PropertyDAO.delete(id)
+      val result = PropertyDAO.delete(id)
       if (result >= 1) {
         Ok("deleted")
       }
