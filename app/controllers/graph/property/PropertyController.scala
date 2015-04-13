@@ -1,6 +1,7 @@
 package controllers.graph.property
 
 import forms.graph.property.PropertyForm
+import models.graph.concept.{Concept, ConceptDAO}
 import models.graph.property.PropertyDAO
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -119,12 +120,24 @@ object PropertyController extends Controller {
    *         error else
    */
   def deleteProperty(id: Long) = Action {
-    val result = PropertyDAO.delete(id)
-    if (result >= 1) {
-      Ok("deleted")
+    val concepts = ConceptDAO.getAll
+    println (concepts)
+    val concepts2 = concepts
+      .filter(concept => concept.getOwnProperties
+        .exists(property => property.property.id == id)
+      )
+    println(concepts2)
+    if (concepts != List()) {
+      InternalServerError("Bou")
     }
     else {
-      InternalServerError("Impossible to delete property")
+      val result = 1 //PropertyDAO.delete(id)
+      if (result >= 1) {
+        Ok("deleted")
+      }
+      else {
+        InternalServerError("Impossible to delete property")
+      }
     }
   }
 }

@@ -150,6 +150,14 @@ case class Concept(
       ))
   }
 
+  /**
+   * Get only properties of the concept without those of its parents
+   * @author Aurélie LORGEOUX
+   * @return list of properties
+   */
+  def getOwnProperties: List[ValuedProperty] = {
+    _properties
+  }
 }
 
 object Concept {

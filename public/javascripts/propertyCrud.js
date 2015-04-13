@@ -32,7 +32,7 @@ var RestFactory = ['$resource', function($resource) {
      * @param success function to apply in case of success
      * @param failure function to apply in case of failure
      */
-    var getProperties = function getProperties(success, failure) {
+    var getProperties = function(success, failure) {
         urlSource.get(
             {},
             {},
@@ -76,8 +76,8 @@ var RestFactory = ['$resource', function($resource) {
         urlSource.create(
             {},
             property,
-            function(action) {
-                success(action);
+            function(property) {
+                success(property);
             },
             function(response) {
                 failure(response);
@@ -98,8 +98,8 @@ var RestFactory = ['$resource', function($resource) {
                 id: oldId
             },
             property,
-            function(action) {
-                success(action);
+            function(property) {
+                success(property);
             },
             function(response) {
                 failure(response);
@@ -172,14 +172,13 @@ var OverviewCtrl = ['$scope', 'RestFactory', function($scope, RestFactory) {
 
     /**
      * Delete a property
-     * @param id id of the property
+     * @param propertyId id of the property
      */
     $scope.deleteProperty = function(propertyId) {
         RestFactory.deleteProperty(
             propertyId,
             function() {
                 var propertyLocation = searchProperty(propertyId);
-                console.log(propertyLocation);
                 if (propertyLocation != -1) {
                     $scope.properties.splice(propertyLocation, 1);
                 }
@@ -192,7 +191,7 @@ var OverviewCtrl = ['$scope', 'RestFactory', function($scope, RestFactory) {
 }];
 
 /**
- * Factory that manages the action that is currently edited
+ * Factory that manages the property that is currently edited
  * It's used for creation and update
  */
 var PropertyFactory = ['RestFactory', function(RestFactory) {
@@ -201,7 +200,7 @@ var PropertyFactory = ['RestFactory', function(RestFactory) {
 
     /**
      * Inits the factory for the current controller
-     * Must be done in order to notify the correct cotnroller
+     * Must be done in order to notify the correct controller
      */
     var init = function(notifyError) {
         _property = {};

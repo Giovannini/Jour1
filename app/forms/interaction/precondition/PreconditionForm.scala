@@ -14,7 +14,7 @@ object PreconditionForm {
 
   val form: Form[Precondition] = Form(mapping(
     "id" -> longNumber,
-    "label" -> text,
+    "label" -> nonEmptyText,
     "preconditions" -> list(subconditionForm.mapping),
     "parameters" -> list(ParameterForm.referenceForm.mapping)
   )(Precondition.apply)(Precondition.unapply))

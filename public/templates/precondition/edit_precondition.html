@@ -1,0 +1,32 @@
+<div class="form-field">
+    <div class="form-field__legend--single">
+        <a href="{{ back_url }}">Go back</a>
+    </div>
+</div>
+
+<form class="form" name="preconditionForm">
+    <fieldset class="form-field">
+        <div class="form-group">
+            <h3 class="form-field__legend--single">General</h3>
+        </div>
+        <div class="form-group highlight">
+            <div class="form-group">
+                <label class="form-group__label" for="precondition_name">Name:</label>
+                <div class="form-group__input">
+                    <input
+                            type="text"
+                            id="precondition_name"
+                            name="precondition_name"
+                            ng-model="precondition.label" />
+                </div>
+            </div>
+    </fieldset>
+
+    <button type="submit" class="form-submit" ng-click="submitPrecondition()">{{ submit_button }}</button>
+
+    <div class="form-field">
+        <div class="form-group__label--single error">
+            {{ error }}
+        </div>
+    </div>
+</form>
