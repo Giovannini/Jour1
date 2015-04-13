@@ -43,19 +43,7 @@ object ConceptStatement {
   }
 
   def updateConcept(originalConcept: Concept, concept: Concept): CypherStatement = {
-    println("caca");
     val nodeToUpdate = concept.toNodePropertiesString
-    println(nodeToUpdate)
-
-    /* WARNING : If it's switch to Cyper().on(...) it fails - be sure to find a way to fix it before doing so */
-    val query = "MATCH (n {id: "+ originalConcept.id.toString + "}) SET n = "+ nodeToUpdate + """ RETURN  n.label as concept_label,
-                     n.properties as concept_prop,
-                     n.rules as concept_rules,
-                     n.needs as concept_needs,
-                     n.display as concept_display
-            """.stripMargin
-    println(nodeToUpdate)
-    println(query)
     Cypher("""
              |MATCH (n {id: """.stripMargin + originalConcept.id.toString + """})
              |SET n = """.stripMargin + nodeToUpdate + """
@@ -76,9 +64,8 @@ object ConceptStatement {
   def deleteConcept(conceptId: Long): CypherStatement = {
     Cypher("MATCH (n {id: {id1} }) " +
       "OPTIONAL MATCH (n)-[r]-() " +
-      "OPTIONAL MATCH (n)-[r2]-(n2 {type: {type}}) " +
-      "DELETE n, r, r2, n2;")
-      .on("id1" -> conceptId, "type" -> "INSTANCE")
+      "DELETE n, r;")
+      .on("id1" -> conceptId)
   }
 
   /**

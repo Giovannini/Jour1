@@ -949,8 +949,9 @@ var EditNodeCtrl = ['$scope', '$routeParams', '$location', 'Scopes', 'NodesFacto
         }
         EditNodeFactory.setNode($scope.node);
         EditNodeFactory.submitNode(baseUrl+'concepts/'+$routeParams.label, "PUT")(
-            function() {
-                $location.path("/node/"+$scope.node.label);
+            function(response) {
+                console.log(response);
+                //$location.path("/node/"+$scope.node.label);
             },
             function() {
             }

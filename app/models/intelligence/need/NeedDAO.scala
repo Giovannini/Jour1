@@ -65,12 +65,40 @@ object NeedDAO {
     })
   }
 
+  def getNeedsWhereConceptUsed(conceptId: Long): List[Need] = {
+    DB.withConnection { implicit connection =>
+      val statement = NeedStatement.getNeedsWhereConceptUsed(conceptId)
+      statement.as(needParser *)
+    }
+  }
+
   def save(need: Need): Need = {
     DB.withConnection { implicit connection =>
       val statement = NeedStatement.add(need)
       val optionId: Option[Long] = statement.executeInsert()
       val id = optionId.getOrElse(-1L)
       need.withId(id)
+    }
+  }
+
+  def update(needId: Long, need: Need): Need = {
+    DB.withConnection { implicit connection =>
+      val statement = NeedStatement.update(needId, need)
+      val numberRowUpdated = statement.executeUpdate()
+      if(numberRowUpdated < 1) {
+        Need.error
+      } else {
+        val newNeed = NeedDAO.getById(needId)
+        mapping += needId -> newNeed
+        newNeed
+      }
+    }
+  }
+
+  def updateNeedsUsingConcept(oldId: Long, newId: Long): Unit = {
+    DB.withConnection { implicit connection =>
+      val statement = NeedStatement.updateNeedsUsingConcept(oldId, newId)
+      val numberRowUpdated = statement.executeUpdate()
     }
   }
 

@@ -20,6 +20,18 @@ object PropertyDAO {
   private var mappingName = collection.mutable.Map.empty[String, Property]
 
   /**
+   * Adds a property to the caching system
+   * @author Julien PRADET
+   * @param property cached property
+   */
+  def addToMapping(property: Property): Unit = {
+    if (property != Property.error) {
+      mappingId += property.id -> property
+      mappingName += property.label -> property
+    }
+  }
+
+  /**
    * Parse property to interact with database
    * @author Thomas GIOVANNINI
    */
@@ -84,10 +96,7 @@ object PropertyDAO {
         val statement = PropertyStatement.getById(id)
         val property = statement.as(propertyParser.singleOpt)
           .getOrElse(Property.error)
-        if (property != Property.error) {
-          mappingId += id -> property
-          mappingName += property.label -> property
-        }
+        addToMapping(property)
         property
       }
     })
@@ -105,9 +114,7 @@ object PropertyDAO {
         val statement = PropertyStatement.getByName(name)
         val property = statement.as(propertyParser.singleOpt)
           .getOrElse(Property.error)
-        if (property != Property.error) {
-          mappingName += name -> property
-        }
+        addToMapping(property)
         property
       }
     })

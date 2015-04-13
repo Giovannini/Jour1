@@ -2,9 +2,11 @@ package controllers.graph.concept
 
 import controllers.Application
 import controllers.graph.GraphVisualisation
+import controllers.graph.concept.need.NeedController
 import forms.graph.concept.ConceptForm.form
 import models.graph.DisplayProperty
 import models.graph.concept.{Concept, ConceptDAO, ConceptStatement}
+import models.intelligence.need.NeedDAO
 import models.interaction.action.InstanceAction
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
@@ -16,7 +18,8 @@ object ConceptController extends Controller {
 
   /**
    * Creates a concept in DB from a JSON request
-   * @return Satus of the request
+   * @author Julien PRADET
+   * @return Status of the request with explained error or created concept in json
    */
   def createConcept(label: String): Action[JsValue] = {
     Action(parse.json) { request =>
@@ -39,6 +42,12 @@ object ConceptController extends Controller {
     }
   }
 
+  /**
+   * Update a concept from a json
+   * @author Julien PRADET
+   * @param label old label of the concept
+   * @return Status of the request with explained errors or
+   */
   def updateConcept(label: String): Action[JsValue] = {
     Action(parse.json) { request =>
       val newConceptForm = form.bind(request.body)
@@ -51,12 +60,19 @@ object ConceptController extends Controller {
         success = {
           newConcept =>
             val conceptToUpdate = Concept(label, Nil, Nil, Nil, DisplayProperty())
-            val updatedConcept = ConceptDAO.updateConcept(conceptToUpdate, newConcept)
+
+            val updatedNeeds = NeedController.updateNeedsForConcept(conceptToUpdate, newConcept)
+            val conceptToAddToDB = newConcept.withNeeds(updatedNeeds)
+
+            val updatedConcept = ConceptDAO.updateConcept(conceptToUpdate, conceptToAddToDB)
             if (updatedConcept == Concept.error) {
               InternalServerError(Json.obj("global" -> "Couldn't update concept in DB"))
             } else {
+              NeedDAO.updateNeedsUsingConcept(conceptToUpdate.id, updatedConcept.id)
+
               Ok(newConcept.toJson)
             }
+
         }
       )
     }
@@ -64,6 +80,7 @@ object ConceptController extends Controller {
 
   /**
    * Reads a concept in DB (and its relations)
+   * @author Julien PRADET
    * @param search the label of the concept looked for
    * @param deepness the deepness of the children we're looking to display
    * @return a json that contains each nodes in an array, and the list of edges to display on the graph
@@ -139,18 +156,45 @@ object ConceptController extends Controller {
 
   /**
    * Remove a concept from DB (and its relations)
-   * @author Aurélie LORGEOUX
+   * @author Julien PRADET
    * @param label label of concept to remove
    * @return an action redirecting to the main page of application
    */
   def deleteConcept(label: String): Action[AnyContent] = {
     Action {
       val concept = ConceptDAO.getByLabel(label)
-      println(ConceptDAO.removeConceptFromDB(concept))
-      Redirect(controllers.routes.Application.index())
+      val relations = ConceptDAO.getRelationsFromAndTo(concept.id)
+      val needs = NeedDAO.getNeedsWhereConceptUsed(concept.id)
+      if(relations._1.length > 0 || relations._2.length > 0 || needs.length > 0) {
+        BadRequest(
+          Json.obj(
+            "relationsFrom" -> relations._1.map(item => Json.obj(
+              "relation" -> item._1.label,
+              "concept" -> item._2.label
+            )),
+            "relationsTo" -> relations._2.map(item => Json.obj(
+              "relation" -> item._1.label,
+              "concept" -> item._2.label
+            )),
+            "needs" -> needs.map(_.toJson)
+          )
+        )
+      } else {
+        val result = ConceptDAO.removeConceptFromDB(concept)
+        if (result) {
+          Ok("Concept successfully deleted")
+        } else {
+          InternalServerError("Impossible to delete Concept")
+        }
+      }
     }
   }
 
+  /**
+   * Gets all the existing actions that a concept can do
+   * @param label of the concept
+   * @return a list of actions that the concept can do
+   */
   def getActions(label: String) = Action {
     val concept = ConceptDAO.getByLabel(label)
     val actions = concept.getPossibleActionsAndDestinations.filter(_._1 != InstanceAction.error)

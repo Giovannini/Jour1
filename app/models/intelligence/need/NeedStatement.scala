@@ -56,21 +56,49 @@ object NeedStatement {
       .on('id -> id)
   }
 
+  def getNeedsWhereConceptUsed(conceptId: Long) = {
+    SQL("SELECT * FROM NEEDS WHERE meansOfSatisfaction LIKE {concept}")
+      .on("concept" -> ("%" + conceptId + "%"))
+  }
+
   /**
-   * Rename a need in database
-   * @author Thomas GIOVANNINI
-   * @param id id of the need
-   * @param newNeedName new need name
+   * Updates a need in database
+   * @param id of the need
+   * @param need after update
    * @return a sql statement
    */
-  def rename(id: Long, newNeedName: String) = {
+  def update(id: Long, need: Need) = {
     SQL("""
-      UPDATE needs SET
-      label = {label}
-      WHERE id = {id}
-        """).on(
-        'id -> id,
-        'label -> newNeedName
+        |UPDATE  needs
+        |SET
+        |    label = {label},
+        |    property = {property},
+        |    priority = {priority},
+        |    consequencesSteps = {consequencesSteps},
+        |    meansOfSatisfaction = {meansOfSatisfaction}
+        |WHERE id = {id}
+        """.stripMargin)
+      .on(
+        'label -> need.label,
+        'property -> need.affectedProperty.toString,
+        'priority -> need.priority,
+        'consequencesSteps -> need.consequencesSteps.map(_.toDB).mkString(";"),
+        'meansOfSatisfaction -> need.meansOfSatisfaction.map(_.toString).mkString(";")
+      )
+  }
+
+  def updateNeedsUsingConcept(oldId: Long, newId: Long) = {
+    SQL(
+      """
+        |UPDATE needs
+        |SET
+        | meansOfSatisfaction = REPLACE(meansOfSatisfaction, {oldConcept}, {newConcept})
+        | WHERE meansOfSatisfaction LIKE {likeConcept}
+      """.stripMargin)
+    .on(
+      'oldConcept -> oldId.toString,
+      'newConcept -> newId.toString,
+      'likeConcept -> ("%"+oldId+"%")
       )
   }
 

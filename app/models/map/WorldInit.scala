@@ -46,6 +46,7 @@ object WorldInit {
       case Failure(e) =>
         println("Problem while generating the world...")
         println(e)
+        e.printStackTrace()
     }
   }
 

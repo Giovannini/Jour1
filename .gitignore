@@ -15,3 +15,4 @@ dist
 /.settings
 public/components
 /**/.sass-cache/
+.scssc

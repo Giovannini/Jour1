@@ -52,7 +52,7 @@ object ValuedProperty {
     val splitted = string.split(" -> ")
     val property = Property.parseString(splitted(0))
     val value = splitted(1).toDouble
-    ValuedProperty(property, value)
+    ValuedProperty(PropertyDAO.getByName(property.label), value)
   }
 
   /**

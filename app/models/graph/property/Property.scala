@@ -10,7 +10,7 @@ import play.api.libs.json._
 case class Property(id: Long, label: String, propertyType: PropertyType, defaultValue: Double) {
   require(label.matches("^[A-Z][A-Za-z0-9]*$"))
 
-  override def toString = id + ":" + label + ":" + propertyType + ":" + defaultValue
+  override def toString = label + ":" + propertyType + ":" + defaultValue
 
   def toJson : JsValue = Json.obj(
     "id" -> JsNumber(id),

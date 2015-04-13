@@ -102,7 +102,7 @@ case class Concept(
    * @return the value associated to the given property in rules
    */
   def getRuleValueByProperty(property: Property): Double = {
-    rules.find(_.property == property)
+    rules.find(_.property.label == property.label)
       .getOrElse(property.defaultValuedProperty)
       .value
   }
@@ -148,6 +148,16 @@ case class Concept(
         RelationSqlDAO.getActionFromRelationId(tuple._1.id),
         tuple._2.unzip._2.flatMap(concept => concept :: concept.getDescendance)
       ))
+  }
+
+  def withNeeds(needs: List[Need]): Concept = {
+    Concept(
+      this.label,
+      this._properties,
+      this._rules,
+      needs,
+      this.displayProperty
+    )
   }
 
   /**
