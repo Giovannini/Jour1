@@ -112,7 +112,7 @@ trait Interaction {
       if (arePreconditionsChecked) {
         action.executeGoodAction(arguments)
       } else {
-        println("Precondition not filled for " + this.label + ".")
+//        println("Precondition not filled for " + this.label + ".")
         false
       }
     case effect: Effect =>
@@ -161,7 +161,7 @@ trait Interaction {
           subInteractions.flatMap(subAction => subAction._1.log(takeGoodArguments(subAction._2, arguments)))
       }
     } else {
-      println("Precondition not filled for action " + this.label + ".")
+//      println("Precondition not filled for action " + this.label + ".")
       List(LogInteraction.nothing)
     }
   }

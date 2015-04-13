@@ -859,7 +859,11 @@ var MapController = function(Rest, Graph, Map, Drawer, Socket) {
                 ongoingStep = false;
             }
             if(loopSteps || ongoingStep) {
-                setTimeout(function(){ Socket.requestUpdate();},1000);
+                setTimeout(
+                    function(){
+                        Socket.requestUpdate();
+                    },
+                    1000);
                 //Socket.requestUpdate();
             }
         });
