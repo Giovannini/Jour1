@@ -147,6 +147,11 @@ trait Interaction {
           val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
           val valueToAdd = arguments(ParameterReference("valueToAdd", "Int")).value//.asInstanceOf[String]
           List(LogInteraction("ADD_TO_PROPERTY " + instanceId + " " + propertyString + " " + valueToAdd, 2))
+        case "consume" =>
+          val instanceId = arguments(ParameterReference("instanceID", "Long")).value//.asInstanceOf[Long]
+        val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
+        val valueToAdd = arguments(ParameterReference("valueToAdd", "Int")).value//.asInstanceOf[String]
+          List(LogInteraction("CONSUME " + instanceId + " " + propertyString + " " + valueToAdd, 2))
         case "modifyProperty" =>
           val instanceId = arguments(ParameterReference("instanceID", "Long")).value//.asInstanceOf[Long]
           val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]

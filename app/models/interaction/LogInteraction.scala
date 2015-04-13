@@ -42,6 +42,7 @@ case class LogInteraction(value: String, priority: Int){
           val propertyString = splitted(2)
           val propertyValue = splitted(3).toDouble
           Application.map.addToProperty(instanceId, propertyString, propertyValue)
+//TODO LOG CONSUME
         case _ =>/*###################################################*/
           Instance.error
       }
