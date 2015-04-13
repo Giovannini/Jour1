@@ -119,6 +119,32 @@ object InstanceActionManager {
     }
     nameToId += "_modifyProperty" -> _modifyProperty
 
+    val _consume = {
+      val p_instanceID = ParameterReference("instanceID", "Long")
+      val p_propertyName = ParameterReference("propertyName", "Property")
+      val p_valueToAdd = ParameterReference("valueToAdd", "Int")
+      InstanceAction(
+        0L,
+        "consume",
+        // Preconditions
+        List(
+          (
+            PreconditionManager.nameToId("hasProperty"),
+            Map(
+              ParameterReference("instanceID", "Long") -> p_instanceID,
+              ParameterReference("property", "Property") -> p_propertyName
+            )
+            )
+        ),
+        // SubActions
+        List(),
+        // Parameters
+        List(p_instanceID, p_propertyName, p_valueToAdd)
+      ).save
+    }
+    nameToId += "_consume" -> _consume
+
+
     val _modifyPropertyWithParam = {
       val p_instanceID = ParameterReference("instanceToModify", "Long")
       val p_propertyName = ParameterReference("propertyName", "Property")
@@ -150,6 +176,8 @@ object InstanceActionManager {
       ).save
     }
     nameToId += "_modifyPropertyWithParam" -> _modifyPropertyWithParam
+
+
 
     /*Function to add to the BDD*/
     val _actionMoveInstanceAt = {
@@ -225,7 +253,7 @@ object InstanceActionManager {
             )
             ),
           (
-            _addToProperty,
+            _consume,
             Map(
               ParameterReference("instanceID", "Long") -> p_instanceThatIsEaten,
               ParameterReference("propertyName", "Property") -> ParameterValue("Feed", "Property"),
