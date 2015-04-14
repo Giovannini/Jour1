@@ -8,12 +8,18 @@ import models.graph.Instance
  */
 trait WorldCommunication
 
-// TODO DOC
+/**
+ * Trait to characterize messages asking for a computation
+ * @author Thomas GIOVANNINI
+ */
 trait Computing extends WorldCommunication {
   val message: String
 }
 
-// TODO DOC
+/**
+ * Trait to characterize messages launching a turn
+ * @author Thomas GIOVANNINI
+ */
 trait Launcher extends WorldCommunication {
   val message: String
   def computation(instance: Instance, environment: List[Instance]): Computing

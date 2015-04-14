@@ -9,7 +9,7 @@ import models.interaction.LogInteraction
 import models.interaction.action.InstanceAction
 import play.api.libs.json._
 
-import scala.util.Random
+import scala.util.{Try, Failure, Success, Random}
 
 
 /**
@@ -104,25 +104,16 @@ case class Instance(
    * @return a new instance looking like this one but with an updated property
    */
   def modifyValueOfProperty(valuedProperty: ValuedProperty): Instance = {
-    def modifyPropertyRec(vp: ValuedProperty, remainingProperties: List[ValuedProperty]): List[ValuedProperty] = {
-      remainingProperties match {
-        case head :: tail =>
-          if (head.property == vp.property) {
-            vp :: tail
-          }
-          else {
-            head :: modifyPropertyRec(vp, tail)
-          }
-        case _ => List()
-      }
-    }
-    val listProperties = this.concept.properties.map(_.property)
-
-    if (listProperties.contains(valuedProperty.property)) {
-      val modifiedProperties = modifyPropertyRec(valuedProperty, this.properties)
+    Try {
+      val index = this.properties.map(_.property).indexOf(valuedProperty.property)
+      val modifiedProperties = this.properties.updated(index, valuedProperty)
       Instance(id, label, coordinates, modifiedProperties, concept)
-    } else {
-      this
+    } match {
+      case Success(instance) => instance
+      case Failure(e) =>
+        println("Error while modifying value for a property:")
+        println(e)
+        this
     }
   }
 
@@ -143,7 +134,13 @@ case class Instance(
    * @return the value of the property
    */
   def getValueForProperty(property: Property): Double = {
-    this.properties.find(_.property == property).getOrElse(ValuedProperty.error).value
+    //TODO issue with equality here, comparing label for test to success
+    this.properties.find(vp => vp.property.label == property.label)
+      .getOrElse {
+      println(this.label + " says property " + property.label + " not found...")
+      ValuedProperty.error
+    }
+      .value
   }
 
 
@@ -168,111 +165,138 @@ case class Instance(
   def applyConsequencies(): List[LogInteraction] = {
     concept.needs.flatMap { need =>
       val property = need.affectedProperty
-      val propertyValue = this.getValueForProperty(property) + 1
+      val propertyValue = this.getValueForProperty(property)
       val steps = need.consequencesSteps
-      val needEffectLog = LogInteraction.createModifyLog(this.id, property.label, propertyValue)
-      val consequenceLogs = steps.filter(cs => cs.value <= propertyValue).lastOption match {
+      val consequenceLogs = steps.filter(cs => cs.value <= propertyValue).sortBy(_.value).lastOption match {
         case Some(consequenceStep) =>
+          println("caca " + consequenceStep.consequence.effect.label)
           consequenceStep.consequence.effect.logOn(this)
         case _ => List()
       }
-      needEffectLog :: consequenceLogs
+      consequenceLogs
     }
   }
 
-  /**
-   * Choose the better action an action has to do to fulfill its needs.
-   * @author Thomas GIOVANNINI
-   * @return an InstanceAction that the instance should do.
-   */
-  def selectAction(sensedInstances: List[Instance]): (InstanceAction, Instance) = {
-    /*
-     * Sort needs by order of importance
+    /**
+     * Choose the better action an action has to do to fulfill its needs.
      * @author Thomas GIOVANNINI
-     * @return a sorted list of needs
+     * @return an InstanceAction that the instance should do.
      */
-    def orderNeedsByImportance: List[Need] = {
-      this.concept.needs.sortBy(-_.evaluate(this))
+    def selectAction(sensedInstances: List[Instance]): (InstanceAction, Instance) = {
+      /*
+       * Sort needs by order of importance
+       * @author Thomas GIOVANNINI
+       * @return a sorted list of needs
+       */
+      def orderNeedsByImportance: List[Need] = {
+        this.concept.needs.sortBy(-_.evaluate(this))
+      }
+
+      val sortedNeeds = orderNeedsByImportance
+      val possibleActions = sortedNeeds.flatMap(_.meansOfSatisfaction).distinct
+      val relations = concept.getPossibleActionsAndDestinations
+
+      /*
+       * Check if the instance can do an action or not
+       * @author Thomas GIOVANNINI
+       * @param mean the instance will use
+       * @return true if the instance can do the action
+       *         false else
+       */
+      def destinationList(mean: MeanOfSatisfaction): List[Instance] = {
+        val destinationList = mean.action.getDestinationList(this, sensedInstances)
+        if (mean.destinationConcept == Concept.any) {
+          val remainingDestinationConcepts = relations.getOrElse(mean.action, List())
+          destinationList.filter(instance => remainingDestinationConcepts.contains(instance.concept))
+        } else if (mean.destinationConcept == Concept.self) {
+          destinationList.filter(_.concept == this.concept)
+        } else {
+          destinationList.filter(instance => mean.destinationConcepts.contains(instance.concept))
+        }
+      }
+
+      def retrieveBestAction(possibleActions: List[MeanOfSatisfaction])
+      : (InstanceAction, Instance) = {
+        def getPseudoRandomly(list: List[((InstanceAction, List[Instance]), Double)])
+        : (InstanceAction, List[Instance]) = list match {
+          case first :: second :: tail =>
+            if (Random.nextDouble() > first._2) {
+              first._1
+            }
+            else {
+              getPseudoRandomly(second :: tail)
+            }
+          case first :: Nil => first._1
+          case _ => (InstanceAction.error, List())
+        }
+
+        val allDestinations = possibleActions.map(mean => (mean.action, destinationList(mean)))
+          .zipWithIndex
+          .filter(_._1._2.nonEmpty)
+        if (allDestinations.nonEmpty) {
+          val prioritySum = allDestinations.map(_._2).sum.toDouble
+          val chosenAction = getPseudoRandomly(allDestinations.map(dest => (dest._1, dest._2.toDouble / prioritySum)))
+          (chosenAction._1, Random.shuffle(chosenAction._2).head)
+        } else {
+//          println("No action found for instance " + this.label + this.id)
+          (InstanceAction.error, this)
+        }
+
+        /*possibleActions match {
+          case head :: tail =>
+            val destinationsList = destinationList(head)
+            if (destinationsList.nonEmpty) {
+              val destination = Random.shuffle(destinationsList).head
+              (head.action, destination)
+            }
+            else {
+              retrieveBestAction(tail)
+            }
+          case _ =>
+            println("No action found for instance " + this.label + this.id)
+            (InstanceAction.error, this)
+        }*/
+      }
+
+      retrieveBestAction(possibleActions)
     }
+  }
 
-    val sortedNeeds = orderNeedsByImportance
-    val possibleActions = sortedNeeds.flatMap(_.meansOfSatisfaction).distinct
-    val relations = concept.getPossibleActionsAndDestinations
+  object Instance {
 
-    /*
-     * Check if the instance can do an action or not
+    val error = Instance(0, "XXX", Coordinates(0, 0), List(), Concept.error)
+
+    /**
+     * Transform a json representing an instance into the Instance it represents
      * @author Thomas GIOVANNINI
-     * @param mean the instance will use
-     * @return true if the instance can do the action
-     *         false else
+     * @param jsonInstance the instance to parse
+     * @return the represented instance
      */
-    def destinationList(mean: MeanOfSatisfaction): List[Instance] = {
-      val destinationList = mean.action.getDestinationList(this, sensedInstances)
-      if (mean.destinationConcept == Concept.any) {
-        val remainingDestinationConcepts = relations.getOrElse(mean.action, List())
-        destinationList.filter(instance => remainingDestinationConcepts.contains(instance.concept))
-      } else if (mean.destinationConcept == Concept.self) {
-        destinationList.filter(_.concept == this.concept)
-      } else {
-        destinationList.filter(instance => mean.destinationConcepts.contains(instance.concept))
+    def parseJson(jsonInstance: JsValue): Instance = {
+      val id = (jsonInstance \ "id").as[Long]
+      val label = (jsonInstance \ "label").as[String]
+      val coordinates = Coordinates.parseJson(jsonInstance \ "coordinates")
+      val properties = (jsonInstance \ "properties").as[List[JsValue]].map(ValuedProperty.parseJson)
+      val conceptId = (jsonInstance \ "concept").as[Long]
+      ConceptDAO.getById(conceptId) match {
+        // TODO better verification
+        case Concept.error => error
+        case concept => Instance(id, label, coordinates, properties, concept)
       }
     }
 
-    def retrieveBestAction(possibleActions: List[MeanOfSatisfaction])
-    : (InstanceAction, Instance) = possibleActions match {
-      case head :: tail =>
-        val destinationsList = destinationList(head)
-        if (destinationsList.nonEmpty) {
-          val destination = Random.shuffle(destinationsList).head
-          (head.action, destination)
-        }
-        else {
-          retrieveBestAction(tail)
-        }
-      case _ =>
-        println("No action found for instance " + this.label + this.id)
-        (InstanceAction.error, this)
-    }
-
-    retrieveBestAction(possibleActions)
-  }
-}
-
-object Instance {
-
-  val error = Instance(0, "XXX", Coordinates(0, 0), List(), Concept.error)
-
-  /**
-   * Transform a json representing an instance into the Instance it represents
-   * @author Thomas GIOVANNINI
-   * @param jsonInstance the instance to parse
-   * @return the represented instance
-   */
-  def parseJson(jsonInstance: JsValue): Instance = {
-    val id = (jsonInstance \ "id").as[Long]
-    val label = (jsonInstance \ "label").as[String]
-    val coordinates = Coordinates.parseJson(jsonInstance \ "coordinates")
-    val properties = (jsonInstance \ "properties").as[List[JsValue]].map(ValuedProperty.parseJson)
-    val conceptId = (jsonInstance \ "concept").as[Long]
-    ConceptDAO.getById(conceptId) match {
-      // TODO better verification
-      case Concept.error => error
-      case concept => Instance(id, label, coordinates, properties, concept)
+    /**
+     * Create an instance of a certain concept with random attributes
+     * @author Thomas GIOVANNINI
+     * @param concept the concept of which the instance is desired
+     * @return a new instance
+     */
+    def createRandomInstanceOf(concept: Concept): Instance = {
+      Instance(0,
+        concept.label,
+        Coordinates(0, 0),
+        concept.properties,
+        concept)
     }
   }
-
-  /**
-   * Create an instance of a certain concept with random attributes
-   * @author Thomas GIOVANNINI
-   * @param concept the concept of which the instance is desired
-   * @return a new instance
-   */
-  def createRandomInstanceOf(concept: Concept): Instance = {
-    Instance(0,
-      concept.label,
-      Coordinates(0, 0),
-      concept.properties,
-      concept)
-  }
-}
 

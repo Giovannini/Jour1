@@ -1,9 +1,8 @@
 package models.interaction.action
 
 import controllers.Application
-import models.graph.concept
-import models.graph.concept.{ConceptDAO}
-import models.graph.property.{ValuedProperty, PropertyDAO}
+import models.graph.concept.ConceptDAO
+import models.graph.property.PropertyDAO
 import models.interaction.parameter.{ParameterReference, ParameterValue}
 
 
@@ -57,19 +56,6 @@ object HardCodedAction {
     map.modifyProperty(instanceId, propertyString, newValue)
   }
 
-  def modifyPropertyWithParam(args: Map[ParameterReference, ParameterValue]): Unit = {
-    val instanceId = args(ParameterReference("instanceToModify", "Long")).value.asInstanceOf[Long]
-    val propertyString = args(ParameterReference("propertyName", "Property")).value.asInstanceOf[String]
-    val propertyToUse = args(ParameterReference("propertyValue", "Property")).value.asInstanceOf[String]
-    val instance = map.getInstanceById(instanceId)
-    val property = PropertyDAO.getByName(propertyToUse)
-
-    val valueOfProperty: Double = instance.getValueForProperty(property)
-    map.modifyProperty(instanceId, propertyString, valueOfProperty)
-  }
-
-
-
   /**
    * Add one to a number property
    * @param args array containing id of the instance to update and property to string to modify
@@ -81,19 +67,8 @@ object HardCodedAction {
 
     val instance = map.getInstanceById(instanceId)
     val property = PropertyDAO.getByName(propertyString)
-    val valueOfProperty: Double = instance.getValueForProperty(property) + valToAdd
-    if (valueOfProperty <0) {
-      val newValuedProperty = ValuedProperty(property, 0)
-      val newInstance = instance.modifyValueOfProperty(newValuedProperty)
-      Application.map.updateInstance(instance, newInstance)
-    }else{
-      val newValuedProperty = ValuedProperty(property, valueOfProperty)
-      val newInstance = instance.modifyValueOfProperty(newValuedProperty)
-      Application.map.updateInstance(instance, newInstance)
-    }
-
-
+    val valueOfProperty: Double = math.max(0, instance.getValueForProperty(property) + valToAdd)
+    map.modifyProperty(instanceId, propertyString, valueOfProperty)
   }
-
 
 }

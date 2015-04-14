@@ -11,12 +11,6 @@ import models.interaction.precondition.PreconditionManager
  */
 object InstanceActionManager {
 
-  /* TODO: actions to implement
-   * Eat do not remove the object but only a part of it [Simon]
-   * Kill -> an action that is killed can't act anymore
-   * Procreate: isProcreationLevelSufficient
-   */
-
   val map = Application.map
 
   val nameToInstanceAction: collection.mutable.Map[String, InstanceAction] = collection.mutable.Map.empty[String, InstanceAction]
@@ -167,41 +161,6 @@ object InstanceActionManager {
     }
     nameToInstanceAction += "_consume" -> _consume
 
-
-    val _modifyPropertyWithParam = {
-      val p_instanceID = ParameterReference("instanceToModify", "Long")
-      val p_propertyName = ParameterReference("propertyName", "Property")
-      val p_propertyValue = ParameterReference("propertyValue", "Property")
-      InstanceAction(
-        0L,
-        "modifyPropertyWithParam",
-        // Preconditions
-        List(
-          (
-            PreconditionManager.nameToId("hasProperty"),
-            Map(
-              ParameterReference("instanceToModify", "Long") -> p_instanceID,
-              ParameterReference("property", "Property") -> p_propertyName
-            )
-            ),
-          (
-            PreconditionManager.nameToId("hasProperty"),
-            Map(
-              ParameterReference("instanceToModify", "Long") -> p_instanceID,
-              ParameterReference("property", "Property") -> p_propertyValue
-            )
-            )
-        ),
-        // SubActions
-        List(),
-        // Parameters
-        List(p_instanceID, p_propertyName, p_propertyValue)
-      ).save
-    }
-    nameToInstanceAction += "_modifyPropertyWithParam" -> _modifyPropertyWithParam
-
-
-
     /*Function to add to the BDD*/
     val _actionMoveInstanceAt = {
       val p_instanceToMove = ParameterReference("instanceToMove", "Long")
@@ -346,11 +305,11 @@ object InstanceActionManager {
             )
             ),
           (PreconditionManager.nameToId("propertyIsHigherThan"),
-          Map(
-            ParameterReference("instanceID", "Long") -> p_instanceThatProcreate,
-            ParameterReference("property", "Property") -> ParameterValue("Desire", "Property"),
-            ParameterReference("propertyToCompare", "Property") -> ParameterValue("DesireMax", "Property")
-          )),
+            Map(
+              ParameterReference("instanceID", "Long") -> p_instanceThatProcreate,
+              ParameterReference("property", "Property") -> ParameterValue("Desire", "Property"),
+              ParameterReference("propertyToCompare", "Property") -> ParameterValue("DesireMax", "Property")
+            )),
             (PreconditionManager.nameToId("isOnSameTile"),
               Map(
                 ParameterReference("instance1ID", "Long") -> p_instanceThatProcreate,
@@ -359,11 +318,11 @@ object InstanceActionManager {
         ),
         _subActions = List(
           (
-            _modifyProperty,
+            _addToProperty,
             Map(
               ParameterReference("instanceToModify", "Long") -> p_instanceThatProcreate,
               ParameterReference("propertyName", "Property") -> ParameterValue("Desire", "Property"),
-              ParameterReference("propertyValue", "Int") -> ParameterValue(0, "Int")
+              ParameterReference("propertyValue", "Int") -> ParameterValue(-10, "Int")
             )
             ),
           (
@@ -416,9 +375,9 @@ object InstanceActionManager {
           (
             _modifyProperty,
             Map(
-              ParameterReference("instanceToModify", "Long") -> p_instanceThatSpread,
+              ParameterReference("instanceID", "Long") -> p_instanceThatSpread,
               ParameterReference("propertyName", "Property") -> ParameterValue("DuplicationSpeed", "Property"),
-              ParameterReference("propertyValue", "Int") -> ParameterValue(0, "Int")
+              ParameterReference("valueToAdd", "Int") -> ParameterValue(-5, "Int")
             )
             ),
           (

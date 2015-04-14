@@ -10,7 +10,7 @@ import play.api.mvc._
 
 object Application extends Controller {
 
-  val map = WorldMap("MapOfTheWorld", "description", 50, 50)
+  val map = WorldMap("MapOfTheWorld", "description", 15, 15)
   lazy val connection = DB.getConnection()
   implicit val neoConnection = Neo4jREST(Play.application.configuration.getString("serverIP"), 7474, "/db/data/")
 

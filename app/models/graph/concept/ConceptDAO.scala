@@ -307,7 +307,7 @@ object ConceptDAO {
    * @param conceptId the ID of the concept
    * @return a list of relations and concepts
    */
-  def getReachableRelations(conceptId: Long): List[(Relation, Concept)] = {//TODO this is where the /next is slowed down
+  def getReachableRelations(conceptId: Long): List[(Relation, Concept)] = {
     val conceptRelations = getRelationsFrom(conceptId)//Slow
     val parentsRelations = ConceptDAO.getById(conceptId)//Slow
       .parents

@@ -169,8 +169,9 @@ object MapController extends Controller with Secured {
   }
 }
 
-/*
- * TODO
+/**
+ * Trait using to characterize authentified socket connections
+ * @author Thomas GIOVANNINI
  */
 trait Secured {
 

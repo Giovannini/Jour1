@@ -3,7 +3,6 @@ package models.interaction.action
 import controllers.Application
 import models.graph.Instance
 import models.interaction.Interaction
-import models.interaction.InteractionType.InteractionType
 import models.interaction.parameter.{Parameter, ParameterReference, ParameterValue}
 import models.interaction.precondition.Precondition
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
@@ -98,9 +97,6 @@ case class InstanceAction(
         true
       case "modifyProperty" =>
         HardCodedAction.modifyProperty(arguments)
-        true
-      case "modifyPropertyWithParam" =>
-        HardCodedAction.modifyPropertyWithParam(arguments)
         true
       case _ =>
         subInteractions.forall(subAction => subAction._1.execute(takeGoodArguments(subAction._2, arguments)))

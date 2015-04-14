@@ -65,5 +65,7 @@ case class Need(
 }
 
 object Need {
+
   val error = Need(-1L, "error", Property.error, 0, List(), List())
+
 }

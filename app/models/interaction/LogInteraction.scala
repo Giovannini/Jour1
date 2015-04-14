@@ -64,4 +64,8 @@ object LogInteraction {
     LogInteraction("MODIFY_PROPERTY " + instanceId + " " + propertyName + " " + propertyValue, 1)
   }
 
+  def createAddLog(instanceId: Long, propertyName: String, valueToAdd: Double): LogInteraction = {
+    LogInteraction("ADD_TO_PROPERTY " + instanceId + " " + propertyName + " " + valueToAdd, 2)
+  }
+
 }

@@ -59,9 +59,7 @@ case class Effect(
   }
 
   def logOn(instance: Instance): List[LogInteraction] = {
-    //TODO problem here with zipping
     val arguments = parameters.zip(List(ParameterValue(instance.id, "Long"))).toMap
-//    println("LogOn called for " + this.label)
     this.log(arguments)
   }
 }

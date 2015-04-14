@@ -1,7 +1,7 @@
 package models.map
 
-import models.graph.concept.{Concept, ConceptDAO}
-import models.graph.property.{ValuedProperty, Property, PropertyDAO}
+import models.graph.concept.ConceptDAO
+import models.graph.property.{PropertyDAO, ValuedProperty}
 import models.graph.{Coordinates, Instance}
 import play.api.libs.json.{JsValue, Json}
 
@@ -98,20 +98,6 @@ case class WorldMap(label: String, description: String, width: Int, height: Int)
       "height" -> height,
       "instances" -> getInstances.map(_.toJson)
     )
-  }
-
-  /**
-   * Update all instances of a given concept if a new property is added to it.
-   * @author Thomas GIOVANNINI
-   * @param concept to which the property is added
-   * @param property added to the concept
-   */
-  //TODO update children
-  def updateInstancesOf(concept: Concept, property: Property) = {
-    val updatedInstancesList = getInstancesOf(concept.id)
-      .map(instance => instance.withProperty(property))
-    instancesByConcept(concept.id) = updatedInstancesList
-    instancesByCoordinates = collection.mutable.Map(getInstances.groupBy(_.coordinates).toSeq: _*)
   }
 
   /*###########################################################################################################*/
@@ -228,7 +214,7 @@ case class WorldMap(label: String, description: String, width: Int, height: Int)
   def addToProperty(instanceId: Long, propertyString: String, valueToAdd: Double): Instance = {
     val instance = getInstanceById(instanceId)
     val property = PropertyDAO.getByName(propertyString)
-    val newValue = instance.getValueForProperty(property) + valueToAdd
+    val newValue = math.max(0, instance.getValueForProperty(property) + valueToAdd)
     val modifiedInstance = instance.modifyValueOfProperty(ValuedProperty(property, newValue))
 
     val conceptId = instance.concept.id
