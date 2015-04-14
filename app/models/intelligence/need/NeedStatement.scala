@@ -79,6 +79,7 @@ object NeedStatement {
         |WHERE id = {id}
         """.stripMargin)
       .on(
+        'id -> id,
         'label -> need.label,
         'property -> need.affectedProperty.toString,
         'priority -> need.priority,

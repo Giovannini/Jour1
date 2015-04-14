@@ -62,7 +62,7 @@ object ConceptController extends Controller {
           }
         },
         success = {
-          newConcept => println(newConcept)
+          newConcept =>
             if (ConceptDAO.addConceptToDB(newConcept)) {
               Ok(newConcept.toJson)
             } else {

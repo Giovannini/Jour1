@@ -26,11 +26,9 @@
             <h3 class="form-field__legend--single">Properties :</h3>
         </div>
         <div ng-repeat="property in node.properties" class="form-group highlight">
-            <div class="form-field__legend--single">
-                <div class="form-group">
-                    <div class="form-group__label">{{ property.property.label }}</div>
-                    <div class="form-group__input">{{property.value}}</div>
-                </div>
+            <div class="form-group">
+                <div class="form-group__label">{{ property.property.label }}</div>
+                <div class="form-group__input">{{ property.value }}</div>
             </div>
         </div>
     </div>
@@ -66,6 +64,26 @@
             <div class="form-group__input">
                 {{ node.display.zindex }}
             </div>
+        </div>
+    </div>
+
+    <div class="form-field">
+        <div class="form-group">
+            <h3 class="form-field__legend--single">Needs :</h3>
+            <div ng-repeat="need in node.needs" class="form-group highlight">
+                <div class="form-group__label--single">
+                    {{ need.label }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-field">
+        <div class="form-group">
+            <h3 class="form-field__legend--single">Relations :</h3>
+        </div>
+        <div ng-repeat="edge in edges" class="form-group highlight">
+            {{ edge.label }} -> {{ edge.target.label }}
         </div>
     </div>
 </div>

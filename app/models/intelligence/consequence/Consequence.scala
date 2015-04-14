@@ -15,7 +15,7 @@ case class Consequence(severity: Double, effect: Effect){
 
   def toJson = Json.obj(
     "severity" -> severity,
-    "effects" -> effect.id
+    "effect" -> effect.id
   )
 }
 

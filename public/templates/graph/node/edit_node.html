@@ -13,7 +13,7 @@
     </div>
 </div>
 <!-- Form to edit the current node -->
-<form ng-show="isShowingNode()" class="form" ng-submit="submitNode()">
+<form class="form" ng-submit="submitNode()">
     <!--
         General :
             node.label
@@ -153,12 +153,12 @@
                 It also provides information to the node to know how to change the affected property.
             </p>
         </div>
-        <div ng-show="!canAddNeeds()">
-            <p class="form-field__description error">
-                You need to add some actions to the concept before settings its needs.
-            </p>
-        </div>
-        <div ng-show="canAddNeeds()">
+        <!--<div ng-hide="canAddNeeds()">-->
+            <!--<p class="form-field__description error">-->
+                <!--You need to add some actions to the concept before settings its needs.-->
+            <!--</p>-->
+        <!--</div>-->
+        <div ><!--ng-show="canAddNeeds()"-->
             <div class="form-group highlight" ng-repeat="need in node.needs track by $index">
                 <div class="form-group">
                     <label class="form-group__label" for="needs_{{ $index }}_label">Name:</label>
@@ -178,8 +178,8 @@
                         <select
                                 id="needs_{{ $index }}_property"
                                 name="needs_{{ $index }}_property"
-                                ng-model="node.needs[$index].affectedProperty"
-                                ng-options="property.property as property.property.label for property in node.properties"></select>
+                                ng-model="node.needs[$index].affectedProperty.label"
+                                ng-options="property.property.label as property.property.label for property in node.properties"></select>
                     </div>
                 </div>
 
@@ -193,17 +193,17 @@
                                         Severity:
                                     </div>
                                     <div class="form-group__input">
-                                        <input type="number" ng-model="consequence.consequence.severity" />
+                                        <input type="number" ng-model="node.needs[$parent.$index].consequenceSteps[$index].consequence.severity" />
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <div class="form-group__label">
-                                        Effects:
+                                        Effect:
                                     </div>
                                     <div class="form-group__input">
                                         <select
-                                                ng-options="effect as effect.label for effect in effects"
-                                                ng-model="consequence.consequence.effects"></select>
+                                                ng-options="effect.id as effect.label for effect in effects"
+                                                ng-model="node.needs[$parent.$index].consequenceSteps[$index].consequence.effect.id"></select>
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -211,7 +211,7 @@
                                         Activation:
                                     </div>
                                     <div class="form-group__input">
-                                        <input type="number" ng-model="consequence.value" />
+                                        <input type="number" ng-model="node.needs[$parent.$index].consequenceSteps[$index].value" />
                                     </div>
                                 </div>
 
@@ -242,13 +242,11 @@
                                         <select
                                                 id="needs_{{ $parent.$index }}_means_{{ $index }}_action"
                                                 name="needs_{{ $parent.$index }}_means_{{ $index }}_action"
-                                                ng-model="node.needs[$parent.$index].meansOfSatisfaction[$index].action"
-                                                ng-options="action as action.label for action in actions"></select>
+                                                ng-model="node.needs[$parent.$index].meansOfSatisfaction[$index].action.id"
+                                                ng-options="action.id as action.label for action in actions"></select>
                                     </div>
                                 </div>
-                                <div
-                                        ng-repeat="destination in node.needs[$parent.$index].meansOfSatisfaction[$index].destinationConcepts"
-                                        class="form-group">
+                                <div class="form-group">
                                     <label for="needs_{{ $parent.$index }}_means_{{ $index }}_concept" class="form-group__label">
                                         Destination
                                     </label>
@@ -256,7 +254,7 @@
                                         <select
                                                 id="needs_{{ $parent.$index }}_means_{{ $index }}_concept"
                                                 name="needs_{{ $parent.$index }}_means_{{ $index }}_concept"
-                                                ng-model="destination"
+                                                ng-model="node.needs[$parent.$index].meansOfSatisfaction[$index].concept.id"
                                                 ng-options="concept.id as concept.label for concept in concepts"></select>
                                     </div>
                                 </div>

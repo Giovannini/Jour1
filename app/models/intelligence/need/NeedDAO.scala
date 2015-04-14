@@ -89,6 +89,7 @@ object NeedDAO {
         Need.error
       } else {
         val newNeed = NeedDAO.getById(needId)
+        mapping.remove(needId)
         mapping += needId -> newNeed
         newNeed
       }

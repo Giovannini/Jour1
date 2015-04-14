@@ -9,6 +9,7 @@ import models.intelligence.MeanOfSatisfaction
 import models.intelligence.consequence.{Consequence, ConsequenceStep}
 import models.intelligence.need.{Need, NeedDAO}
 import models.interaction.action.InstanceActionManager
+import models.interaction.effect.EffectManager
 import models.interaction.precondition.PreconditionManager
 import models.map.{WorldInit, WorldMap}
 import play.api.mvc._
@@ -103,6 +104,8 @@ object WorldInitialisation extends Controller {
 
     PreconditionManager.initialization()
     InstanceActionManager.initialization()
+    EffectManager.initialization()
+
     ////////////////////////////////   Environment /////////////////////////////
     val conceptGround = Concept("Ground", List(), List(), List(), DisplayProperty())
     val conceptWater = Concept("Water",
@@ -175,19 +178,19 @@ object WorldInitialisation extends Controller {
 
     /* Creation of needs */
     val needFood = NeedDAO.save(Need(0L, "Hunger", propertyHunger, priority = 6,
-      List(ConsequenceStep(10, Consequence(8, InstanceActionManager.nameToId("_removeInstanceAt").toEffect))),
-      List(MeanOfSatisfaction(InstanceActionManager.nameToId("Eat"), conceptApple),
-        MeanOfSatisfaction(InstanceActionManager.nameToId("Eat"), conceptGrass),
-        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), conceptApple),
-        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), conceptGrass),
-        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.self),
-        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.any))))
+      List(ConsequenceStep(10, Consequence(8, InstanceActionManager.nameToInstanceAction("_removeInstanceAt").toEffect))),
+      List(MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Eat"), conceptApple),
+        MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Eat"), conceptGrass),
+        MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Move"), conceptApple),
+        MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Move"), conceptGrass),
+        MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Move"), Concept.self),
+        MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Move"), Concept.any))))
     val needMeat = NeedDAO.save(Need(0L, "Hunger", propertyHunger, priority = 6,
-      List(ConsequenceStep(10, Consequence(8, InstanceActionManager.nameToId("_removeInstanceAt").toEffect))),
-      List(MeanOfSatisfaction(InstanceActionManager.nameToId("Eat"), conceptSheep),
-        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), conceptSheep),
-        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.self),
-        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.any))))
+      List(ConsequenceStep(10, Consequence(8, InstanceActionManager.nameToInstanceAction("_removeInstanceAt").toEffect))),
+      List(MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Eat"), conceptSheep),
+        MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Move"), conceptSheep),
+        MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Move"), Concept.self),
+        MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Move"), Concept.any))))
 
     println("Declaration of concepts...")
 

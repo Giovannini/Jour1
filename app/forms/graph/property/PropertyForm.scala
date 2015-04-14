@@ -1,6 +1,6 @@
 package forms.graph.property
 
-import models.graph.property.{Property, PropertyType}
+import models.graph.property.{PropertyDAO, Property, PropertyType}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.format.Formats
@@ -27,5 +27,18 @@ object PropertyForm {
     } else {
       Some((property.id, property.label, property.propertyType.toString, property.defaultValue))
     }
+  }
+
+  val labelForm: Form[Property] = Form(mapping(
+    "label" -> nonEmptyText .verifying("Label has to begin with a capital", label => label.matches("^[A-Z][A-Za-z0-9]*$"))
+  )(applyLabelForm)(unapplyLabelForm))
+
+  def applyLabelForm(label: String): Property = {
+    PropertyDAO.getByName(label)
+  }
+
+  def unapplyLabelForm(property: Property): Option[(String)] = {
+    if(property == Property.error) None
+    else Some(property.label)
   }
 }

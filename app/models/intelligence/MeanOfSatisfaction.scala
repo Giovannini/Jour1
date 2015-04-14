@@ -19,7 +19,7 @@ case class MeanOfSatisfaction(action: InstanceAction, destinationConcept: Concep
 
   def toJson : JsValue = Json.obj(
     "action" -> action.id,
-    "destinationConcepts" -> destinationConcepts.map(_.id)
+    "concept" -> destinationConcepts.map(_.id).head
   )
 }
 

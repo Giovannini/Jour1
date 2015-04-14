@@ -33,7 +33,7 @@ var RestFactory = function() {
         };
     };
     
-    var postUrl = function(url, data) {
+    var fetchUrl = function(url, data, method) {
         return function(success, error) {
             var req = new XMLHttpRequest();
             req.open("POST", url, true);
@@ -53,6 +53,8 @@ var RestFactory = function() {
             req.send(JSON.stringify(data));
         }
     };
+
+    var postUrl = function(url, data) { return fetchUrl(url, data, "POST"); };
 
     var deleteUrl = function(url) {
         return function (success, error) {

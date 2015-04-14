@@ -22,6 +22,12 @@ object EffectForm {
     )(applyForm)(unapplyForm)
   )
 
+  val idForm: Form[Effect] = Form(
+    mapping(
+      "id" -> longNumber
+    )(applyIdForm)(unapplyIdForm)
+  )
+
   private def applyForm(label: String,
                         subactions: List[(Effect, Map[ParameterReference, Parameter])],
                         parameters: List[ParameterReference]): Effect = {
@@ -46,5 +52,14 @@ object EffectForm {
       preconditionId,
       parameters
     ))
+  }
+
+  def applyIdForm(id: Long): Effect = {
+    EffectDAO.getById(id)
+  }
+
+  def unapplyIdForm(effect: Effect): Option[(Long)] = {
+    if(effect == Effect.error) None
+    else Some(effect.id)
   }
 }

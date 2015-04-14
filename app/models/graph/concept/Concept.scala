@@ -144,10 +144,12 @@ case class Concept(
   lazy val getPossibleActionsAndDestinations: Map[InstanceAction, List[Concept]] = {
     ConceptDAO.getReachableRelations(id)
       .groupBy(_._1)
-      .map(tuple => (
-        RelationSqlDAO.getActionFromRelationId(tuple._1.id),
-        tuple._2.unzip._2.flatMap(concept => concept :: concept.getDescendance)
-      ))
+      .map(tuple =>
+        (
+          RelationSqlDAO.getActionFromRelationId(tuple._1.id),
+          tuple._2.unzip._2.flatMap(concept => concept :: concept.getDescendance)
+        )
+      )
   }
 
   def withNeeds(needs: List[Need]): Concept = {

@@ -13,7 +13,9 @@
             <div class="form-group">
                 <label class="form-group__label" for="action_type">Type:</label>
                 <div class="form-group__input">
-                    <span ng-show="isEditController()">{{action.type}}</span>
+                    <span ng-show="isEditController()">
+                        {{ action.type || "Simple action" }}
+                    </span>
 
                     <select
                             ng-show="!isEditController()"

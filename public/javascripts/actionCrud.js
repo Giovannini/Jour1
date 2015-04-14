@@ -28,7 +28,8 @@ var RestFactory = ['$resource', function($resource) {
             {label: action.label},
             action,
             function(action) {
-                success(action);
+                console.log(action);
+                //success(action);
             },
             function(response) {
                 failure(response);
@@ -115,7 +116,7 @@ var RestFactory = ['$resource', function($resource) {
     /* Get all the actions available in the DB */
     var getActions = function getActions(success, failure) {
         var request = $resource(
-            baseUrl+'actions',
+            baseUrl+'graph/actions',
             {},
             { 'get': {
                 method: "GET",
@@ -156,9 +157,11 @@ var OverviewCtrl = ['$scope', 'RestFactory', function($scope, RestFactory) {
     RestFactory.getActions(
         function(actions) {
             $scope.actions = actions;
+            $scope.loading = false;
         },
         function(failure) {
             $scope.error = "Impossible to load actions.";
+            $scope.loading = false;
         }
     );
 }];
@@ -556,7 +559,7 @@ Controller managing the edition of an action
  */
 var EditActionCtrl = ['$scope', '$routeParams', 'RestFactory', 'EditActionFactory', '$location', function($scope, $routeParams, RestFactory, EditActionFactory, $location) {
     $scope.submit_button = "Edit";
-    $scope.back_url = "#/"+$routeParams.label;
+    $scope.back_url = "#/";
     $scope.action  = {};
     var actionInitialized = false;
 

@@ -236,10 +236,20 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
         );
     };
 
+    function matchNode(nodes, val) {
+        for(var id in nodes) {
+            if(nodes[id].id == val) {
+                return nodes[id];
+            }
+        }
+        return null;
+    }
+
     /**
      * Triggers a research to display a new set of nodes
      */
     var searchNodes = function(success, error) {
+
         return function (searchLabel, displayLabel, deepness, updateGraph) {
             search.get(
                 {'search': searchLabel, 'deepness': deepness},
@@ -264,8 +274,14 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
                     });
 
                     var edges = [];
+                    var relations = [];
+
                     res.edges.forEach(function (val) {
                         edges.push(val);
+                        relations.push({
+                            label: val.label,
+                            target: matchNode(nodes, val.target)
+                        })
                     });
 
                     if(updateGraph) {
@@ -275,7 +291,7 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
                         Scopes.get('viewer').$emit('Viewer_displayNodes');
                     }
 
-                    success(root, display);
+                    success(root, display, relations);
                 },
                 function (res) {
                     var message;
@@ -311,7 +327,7 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
     }
 }];
 
-var ViewerController = ['$scope', '$location', '$rootScope', 'Scopes', 'NodesFactory', function($scope, $location, $rootScope, Scopes, NodesFactory) {
+var ViewerController = ['$scope', '$location', 'Scopes', 'NodesFactory', function($scope, $location, Scopes, NodesFactory) {
     Scopes.add('viewer', $scope);
     $scope.deepness = NodesFactory.options.deepness;
 
@@ -321,12 +337,10 @@ var ViewerController = ['$scope', '$location', '$rootScope', 'Scopes', 'NodesFac
 
     var selectNode = function(label) {
         $location.path('/node/'+Scopes.get('search').search+'/'+label);
-        $rootScope.$apply();
     };
 
     var selectEdge = function(label) {
         $location.path('/relation/'+label);
-        $rootScope.$apply();
     };
 
     var lastClick = 0;
@@ -444,10 +458,9 @@ var PropertyDirective = ['NodesFactory', function(NodesFactory) {
 
 var SearchController = [
     '$scope',
-    '$rootScope',
     '$location',
     'Scopes',
-    function($scope, $rootScope, $location, Scopes) {
+    function($scope, $location, Scopes) {
         Scopes.add('search', $scope);
 
         $scope.launchSearch = function() {
@@ -471,8 +484,8 @@ var OverviewCtrl = ['$scope', '$location', function($scope, $location) {
     };
 }];
 
-var ShowNodeCtrl = ['$scope', '$rootScope', '$location', '$routeParams', '$resource', 'Scopes', 'NodesFactory', function($scope, $rootScope, $location, $routeParams, $resource, Scopes, NodesFactory) {
-    $scope.node = NodesFactory.getCurrentNode();
+var ShowNodeCtrl = ['$scope', '$location', '$routeParams', '$resource', 'Scopes', 'NodesFactory', function($scope, $location, $routeParams, $resource, Scopes, NodesFactory) {
+    $scope.node = null;
     $scope.message = "Loading...";
     $scope.back_url = "#/";
 
@@ -506,8 +519,17 @@ var ShowNodeCtrl = ['$scope', '$rootScope', '$location', '$routeParams', '$resou
         );
     };
 
-    var success = function(root, display) {
+    var success = function(root, display, edges) {
         $scope.node = display;
+        $scope.edges = edges.sort(function(a, b) {
+            if(a.label < b.label) {
+                return -1;
+            } else if(a.label == b.label) {
+                return 0;
+            } else {
+                return 1;
+            }
+        });
     };
 
     var error = function(message) {
@@ -686,7 +708,7 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
     var addConsequence = function(needId) {
         _node.needs[needId].consequenceSteps.push({
             consequence: {
-                effects: [$scope.effects[0]],
+                effects: [_effects[0]],
                 severity: ""
             },
             value: ""
@@ -701,7 +723,7 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
         return node;
     };
 
-    var submitNode = function(url, method) {
+    var submitNode = function(node, url, method) {
         return function(success, failure) {
             var submit = $resource(
                 url,
@@ -715,7 +737,7 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
             );
             submit.save(
                 {},
-                cleanNode(_node),
+                node,
                 function (response) {
                     success(response);
                 }, function (response) {
@@ -746,12 +768,8 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
         removeMeans: removeMeans,
         addConsequence: addConsequence,
         removeConsequence: removeConsequence,
-        canAddNeeds: function() {
-            return typeof _actions != "undefined"
-                    && _actions != null
-                    && _actions.length > 0;
-        },
-        submitNode: submitNode
+        submitNode: submitNode,
+        cleanNode: cleanNode
     };
 }];
 
@@ -792,17 +810,17 @@ var NewNodeCtrl = ['$scope', '$routeParams', '$location', 'EditNodeFactory', fun
 
     $scope.addMeans = EditNodeFactory.addMeans;
     $scope.removeMeans = EditNodeFactory.removeMeans;
-    $scope.canAddNeeds = EditNodeFactory.canAddNeeds;
+    $scope.canAddNeeds = function() {
+        return typeof $scope.actions != "undefined"
+            && $scope.actions != null
+            && $scope.actions.length > 0;
+    };
 
     $scope.isShowingNode = function() {
         return typeof $scope.node !== "undefined" && $scope.node != null;
     };
 
     $scope.submitNode = function() {
-        if(!$scope.canAddNeeds) {
-            $scope.node.needs = [];
-        }
-        EditNodeFactory.setNode($scope.node);
         EditNodeFactory.submitNode(baseUrl+'concepts/new', "POST")(
             function(response) {
                 $location.path("/node/"+$scope.node.label);
@@ -813,7 +831,7 @@ var NewNodeCtrl = ['$scope', '$routeParams', '$location', 'EditNodeFactory', fun
 }];
 
 var EditNodeCtrl = ['$scope', '$routeParams', '$location', 'Scopes', 'NodesFactory', 'EditNodeFactory', function($scope, $routeParams, $location, Scopes, NodesFactory, EditNodeFactory) {
-    Scopes.get('search').search = $routeParams.label;
+    Scopes.get('search').search = ""+$routeParams.label;
     $scope.submit_button = "Edit";
     $scope.back_url = "#/node/"+$routeParams.label;
     $scope.message = "Loading...";
@@ -837,7 +855,7 @@ var EditNodeCtrl = ['$scope', '$routeParams', '$location', 'Scopes', 'NodesFacto
                     }
                 }
 
-                function matchAction(actionId, actions) {
+                function matchIdFromArray(actionId, actions) {
                     for(var i = 0; i < actions.length; i++) {
                         if(actionId == actions[i].id) {
                             return actions[i]
@@ -846,11 +864,15 @@ var EditNodeCtrl = ['$scope', '$routeParams', '$location', 'Scopes', 'NodesFacto
                 }
 
                 function matchMean(actionId) {
-                    return matchAction(actionId, $scope.actions);
+                    return matchIdFromArray(actionId, $scope.actions);
                 }
 
                 function matchEffect(effectId) {
-                    return matchAction(effectId, $scope.effects);
+                    return matchIdFromArray(effectId, $scope.effects);
+                }
+
+                function matchConcept(conceptId) {
+                    return matchIdFromArray(conceptId, $scope.concepts);
                 }
 
                 for (var propertyIndex in display.properties) {
@@ -862,20 +884,22 @@ var EditNodeCtrl = ['$scope', '$routeParams', '$location', 'Scopes', 'NodesFacto
                 }
 
                 for(var needIndex in display.needs) {
+                    console.log(display.needs[needIndex].id);
+
                     // Match the property
                     display.needs[needIndex].affectedProperty = matchProperty(display.needs[needIndex].affectedProperty);
 
                     // Match every action in the consequences
                     for(var consequenceIndex in display.needs[needIndex].consequenceSteps) {
-                        console.log(display.needs[needIndex].consequenceSteps[consequenceIndex].consequence);
-                        display.needs[needIndex].consequenceSteps[consequenceIndex].consequence.effects = matchEffect(display.needs[needIndex].consequenceSteps[consequenceIndex].consequence.effects)
+                        display.needs[needIndex].consequenceSteps[consequenceIndex].consequence.effect = matchEffect(display.needs[needIndex].consequenceSteps[consequenceIndex].consequence.effect)
                     }
 
                     // Match every action in the means of satisfaction
                     for(var actionIndex in display.needs[needIndex].meansOfSatisfaction) {
                         display.needs[needIndex].meansOfSatisfaction[actionIndex].action = matchMean(display.needs[needIndex].meansOfSatisfaction[actionIndex].action);
+                        display.needs[needIndex].meansOfSatisfaction[actionIndex].concept = matchConcept(display.needs[needIndex].meansOfSatisfaction[actionIndex].concept);
                     }
-                };
+                }
 
                 display.displayProperty = display.display;
                 delete display.display;
@@ -899,7 +923,7 @@ var EditNodeCtrl = ['$scope', '$routeParams', '$location', 'Scopes', 'NodesFacto
 
     EditNodeFactory.init(
         function(error) {
-            console.log(errors);
+            console.log(error);
             $scope.message = error;
         },
         function(properties) {
@@ -931,7 +955,11 @@ var EditNodeCtrl = ['$scope', '$routeParams', '$location', 'Scopes', 'NodesFacto
     $scope.removeRule = EditNodeFactory.removeRule;
     $scope.addNeed = EditNodeFactory.addNeed;
     $scope.removeNeed = EditNodeFactory.removeNeed;
-    $scope.canAddNeeds = EditNodeFactory.canAddNeeds;
+    $scope.canAddNeeds = function() {
+        return typeof $scope.actions != "undefined"
+            && $scope.actions != null
+            && $scope.actions.length > 0;
+    };
 
     $scope.addMeans = EditNodeFactory.addMeans;
     $scope.removeMeans = EditNodeFactory.removeMeans;
@@ -944,11 +972,9 @@ var EditNodeCtrl = ['$scope', '$routeParams', '$location', 'Scopes', 'NodesFacto
     };
 
     $scope.submitNode = function() {
-        if(!$scope.canAddNeeds) {
-            $scope.node.needs = [];
-        }
-        EditNodeFactory.setNode($scope.node);
-        EditNodeFactory.submitNode(baseUrl+'concepts/'+$routeParams.label, "PUT")(
+        // It's needed to send a copy of $scope.node, otherwise it'll triggers some unwanted $apply/$eval/$digest
+        var nodeToSend = EditNodeFactory.cleanNode($scope.node);
+        EditNodeFactory.submitNode(nodeToSend, baseUrl+'concepts/'+$routeParams.label, "PUT")(
             function(response) {
                 console.log(response);
                 //$location.path("/node/"+$scope.node.label);

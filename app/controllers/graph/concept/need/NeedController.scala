@@ -17,23 +17,24 @@ object NeedController {
    * @return list of needs after the update
    */
   def updateNeedsForConcept(oldConcept: Concept, newConcept: Concept): List[Need] = {
-    /* Delete unused needs */
-    oldConcept.needs.map(oldNeed => {
-      if(!newConcept.needs.exists(newNeed => oldNeed.id == newNeed.id)) {
-        NeedDAO.delete(oldNeed.id)
-      }
-    })
+      /* Delete unused needs */
+      oldConcept.needs.map(oldNeed => {
+        if (!newConcept.needs.exists(newNeed => oldNeed.id == newNeed.id)) {
+          NeedDAO.delete(oldNeed.id)
+        }
+      })
 
-    // Update or create new needs
-    newConcept.needs.map(need => {
-      need.id match {
-        case 0 =>
-          // The need is new
-          NeedDAO.save(need)
-        case id =>
-          // The need is updated
-          NeedDAO.update(id, need)
-      }
-    })
+      // Update or create new needs
+      newConcept.needs.map(need => {
+        need.id match {
+          case 0 =>
+            // The need is new
+            NeedDAO.save(need)
+          case id =>
+            println(id)
+            // The need is updated
+            NeedDAO.update(id, need)
+        }
+      })
   }
 }

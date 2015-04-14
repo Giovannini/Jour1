@@ -20,7 +20,7 @@ case class Effect(
   id: Long,
   label: String,
   _subActions: List[(Effect, Map[ParameterReference, Parameter])],
-  parameters: List[ParameterReference]) extends Interaction{
+  parameters: List[ParameterReference]) extends Interaction {
 
   val subInteractions = _subActions.map(tuple => (tuple._1.asInstanceOf[Effect], tuple._2))
 

@@ -19,7 +19,7 @@ object InstanceActionManager {
 
   val map = Application.map
 
-  val nameToId: collection.mutable.Map[String, InstanceAction] = collection.mutable.Map.empty[String, InstanceAction]
+  val nameToInstanceAction: collection.mutable.Map[String, InstanceAction] = collection.mutable.Map.empty[String, InstanceAction]
 
   /**
    * Initialize the action manager by creating basic actions.
@@ -42,7 +42,7 @@ object InstanceActionManager {
         List(p_instanceToAdd, groundWhereToAddIt)
       ).save
     }
-    nameToId += "_addInstanceAt" -> _addInstanceAt
+    nameToInstanceAction += "_addInstanceAt" -> _addInstanceAt
 
     val _actionCreateInstanceAt = {
       val p_conceptToInstanciate = ParameterReference("conceptID", "Long")
@@ -55,7 +55,7 @@ object InstanceActionManager {
         List(p_conceptToInstanciate, groundWhereToAddIt)
       ).save
     }
-    nameToId += "_actionCreateInstanceAt" -> _actionCreateInstanceAt
+    nameToInstanceAction += "_actionCreateInstanceAt" -> _actionCreateInstanceAt
 
     val _removeInstanceAt = {
       val p_instanceToRemove = ParameterReference("instanceToRemove", "Long")
@@ -67,7 +67,7 @@ object InstanceActionManager {
         List(p_instanceToRemove)
       ).save
     }
-    nameToId += "_removeInstanceAt" -> _removeInstanceAt
+    nameToInstanceAction += "_removeInstanceAt" -> _removeInstanceAt
 
     val _addToProperty = {
       val p_instanceID = ParameterReference("instanceID", "Long")
@@ -92,7 +92,7 @@ object InstanceActionManager {
         List(p_instanceID, p_propertyName, p_valueToAdd)
       ).save
     }
-    nameToId += "_addToProperty" -> _addToProperty
+    nameToInstanceAction += "_addToProperty" -> _addToProperty
 
     val _modifyProperty = {
       val p_instanceID = ParameterReference("instanceToModify", "Long")
@@ -117,7 +117,7 @@ object InstanceActionManager {
         List(p_instanceID, p_propertyName, p_propertyValue)
       ).save
     }
-    nameToId += "_modifyProperty" -> _modifyProperty
+    nameToInstanceAction += "_modifyProperty" -> _modifyProperty
 
     val _consume = {
       val p_instanceID = ParameterReference("instanceID", "Long")
@@ -165,7 +165,7 @@ object InstanceActionManager {
         List(p_instanceID, p_propertyName, p_propertyValue, p_valueToAdd)
       ).save
     }
-    nameToId += "_consume" -> _consume
+    nameToInstanceAction += "_consume" -> _consume
 
 
     val _modifyPropertyWithParam = {
@@ -198,7 +198,7 @@ object InstanceActionManager {
         List(p_instanceID, p_propertyName, p_propertyValue)
       ).save
     }
-    nameToId += "_modifyPropertyWithParam" -> _modifyPropertyWithParam
+    nameToInstanceAction += "_modifyPropertyWithParam" -> _modifyPropertyWithParam
 
 
 
@@ -242,7 +242,7 @@ object InstanceActionManager {
         ),
         parameters = List(p_instanceToMove, p_groundWhereToMoveIt)).save
     }
-    nameToId += "Move" -> _actionMoveInstanceAt
+    nameToInstanceAction += "Move" -> _actionMoveInstanceAt
 //Todo choisir de valeurs judicieuse de consommation et d'envie
     val _actionEat = {
       val p_instanceThatEat = ParameterReference("instanceThatEat", "Long")
@@ -291,7 +291,7 @@ object InstanceActionManager {
         )
       ).save
     }
-    nameToId += "Eat" -> _actionEat
+    nameToInstanceAction += "Eat" -> _actionEat
 
     val _actionCut = {
       val p_instanceThatCut = ParameterReference("instanceThatCut", "Long")
@@ -329,7 +329,7 @@ object InstanceActionManager {
         )
       ).save
     }
-    nameToId += "Cut" -> _actionCut
+    nameToInstanceAction += "Cut" -> _actionCut
 
     val _actionProcreate = {
       val p_instanceThatProcreate = ParameterReference("instanceThatProcreate", "Long")
@@ -380,7 +380,7 @@ object InstanceActionManager {
         )
       ).save
     }
-    nameToId += "Procreate" -> _actionProcreate
+    nameToInstanceAction += "Procreate" -> _actionProcreate
 
     val _actionSpread = {
       val p_instanceThatSpread = ParameterReference("instanceThatProcreate", "Long")
@@ -435,7 +435,7 @@ object InstanceActionManager {
         )
       ).save
     }
-    nameToId += "Spreed" -> _actionSpread
+    nameToInstanceAction += "Spreed" -> _actionSpread
 
     val _actionRegenerate = {
       val p_instanceSelected = ParameterReference("instanceToDuplicate", "Long")
@@ -477,7 +477,7 @@ object InstanceActionManager {
         )
       ).save
     }
-    nameToId += "Regenerate" -> _actionRegenerate
+    nameToInstanceAction += "Regenerate" -> _actionRegenerate
 
     val _actionCraft = {
       val p_instanceThatCreate = ParameterReference("instanceID", "Long")
@@ -516,7 +516,7 @@ object InstanceActionManager {
       ).save
 
     }
-    nameToId += "Craft" -> _actionCraft
+    nameToInstanceAction += "Craft" -> _actionCraft
 
     val _actionCreateBow = {
       val p_instanceThatCreate = ParameterReference("instanceThatCreate", "Long")
@@ -547,11 +547,7 @@ object InstanceActionManager {
         )
       ).save
     }
-    nameToId += "CreateBow" -> _actionCreateBow
-
-
-
-
+    nameToInstanceAction += "CreateBow" -> _actionCreateBow
 
   }
 }
