@@ -17,6 +17,37 @@ import play.api.mvc._
 object ConceptController extends Controller {
 
   /**
+   * Get all the concepts existing in the graph
+   * @author Thomas GIOVANNINI
+   */
+  def getAllConcepts: Action[AnyContent] = Action {
+    val concepts = ConceptDAO.getAll
+      .map(_.toJson)
+    Ok(Json.toJson(concepts))
+  }
+
+  /**
+   * Get all the concepts existing in the graph with a simplified JSON
+   * @author Julien PRADET
+   */
+  def getAllSimplifiedConcepts = Action {
+    val concepts = ConceptDAO.getAll
+      .map(_.toSimplifiedJson)
+    Ok(Json.toJson(concepts))
+  }
+
+  /**
+   * Get a concept by its id
+   * @author Aurélie LORGEOUX
+   * @param conceptId id of the concept
+   * @return concept in JSON
+   */
+  def getConceptById(conceptId: Long): Action[AnyContent] = Action {
+    val concept = ConceptDAO.getById(conceptId)
+    Ok(concept.toJson)
+  }
+
+  /**
    * Creates a concept in DB from a JSON request
    * @author Julien PRADET
    * @return Status of the request with explained error or created concept in json

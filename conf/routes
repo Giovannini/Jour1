@@ -8,7 +8,7 @@ GET           /                                                        controlle
 GET           /init                                                    controllers.map.WorldInitialisation.initialization
 
 GET           /instances                                               controllers.map.WorldInitialisation.getWorld
-GET           /instances/:initInstanceId/:actionType/:conceptId        controllers.RestCall.getPossibleDestinationOfAction(initInstanceId: Long, actionType: Long, conceptId: Long)
+GET           /instances/:initInstanceId/:actionType/:conceptId        controllers.map.MapController.getPossibleDestinationOfAction(initInstanceId: Long, actionType: Long, conceptId: Long)
 
 #Instances manipulation
 GET           /instances/:instanceId                                   controllers.graph.InstanceManager.getInstanceById(instanceId: Int)
@@ -24,9 +24,9 @@ GET           /graph/actions                                           controlle
 GET           /graph/effects                                           controllers.interaction.ActionController.getEffects
 
 # Concept CRUD
-GET           /concepts                                                controllers.RestCall.getAllConcepts
-GET           /concepts/simple                                         controllers.RestCall.getAllSimplifiedConcepts
-GET           /concepts/:conceptId                                     controllers.RestCall.getConceptById(conceptId: Long)
+GET           /concepts                                                controllers.graph.concept.ConceptController.getAllConcepts
+GET           /concepts/simple                                         controllers.graph.concept.ConceptController.getAllSimplifiedConcepts
+GET           /concepts/:conceptId                                     controllers.graph.concept.ConceptController.getConceptById(conceptId: Long)
 
 POST          /concepts/:label                                         controllers.graph.concept.ConceptController.createConcept(label: String)
 DELETE        /concepts/:label                                         controllers.graph.concept.ConceptController.deleteConcept(label: String)
@@ -56,6 +56,7 @@ PUT           /properties                                              controlle
 DELETE        /properties/:id                                          controllers.graph.property.PropertyController.deleteProperty(id: Long)
 
 # Relations visualisation
+# Not needed since it's supposed to be done in the controller of actions
 GET           /relations                                               controllers.graph.relation.RelationSQLController.index
 #GET           /relations/:label                                        controllers.graph.relation.RelationSQLController.readAction(label: String)
 #POST          /relations/:label                                        controllers.graph.relation.RelationSQLController.createRelation(label: String)
@@ -79,8 +80,8 @@ DELETE        /actions/:label                                          controlle
 
 # Map routes
 GET           /map                                                     controllers.map.MapController.show
-POST          /map/action                                              controllers.RestCall.executeAction
-GET           /map/relations/:conceptId                                controllers.RestCall.getAllActionsOf(conceptId: Int)
+POST          /map/action                                              controllers.map.MapController.executeAction
+GET           /map/relations/:conceptId                                controllers.map.MapController.getAllActionsOf(conceptId: Int)
 
 GET           /map/socket                                              controllers.map.MapController.indexWS
 
@@ -90,17 +91,3 @@ GET           /resume                                                  controlle
 
 # Map static resources from the /public folder to the /assets URL path
 GET           /assets/*file                                            controllers.Assets.at(path="/public", file)
-
-# Thomas :  /map/...
-#           /next
-#           /init
-#
-# Aurélie : /map/...
-#           /instances
-#
-# Julien : /instances
-#          /concepts
-#          /relations
-#          /actions/...
-#          /graph/relations/...
-#          /rules
