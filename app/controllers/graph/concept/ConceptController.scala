@@ -91,7 +91,7 @@ object ConceptController extends Controller {
       GraphVisualisation.jsonOrRedirectToIndex(request) {
         require(deepness >= 0)
 
-        /**
+        /*
          * Gets the concepts related to a list of concept
          * These concepts can be children or parents
          * @param nodes Source nodes
@@ -106,7 +106,7 @@ object ConceptController extends Controller {
           }).unzip
         }
 
-        /**
+        /*
          * Gets all the concepts related
          * @param nodes source concepts, we're willing to find their relations
          * @param deepness how far we want to reach the related concepts

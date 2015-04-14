@@ -15,18 +15,28 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
 
+/**
+ * Master actor that manages the whole world movements
+ * @param nrOfWorkers nr of workers used for the pool of instance actors (basically it's the number of cores available if it's not distributed
+ * @param listener listener actor that allows to send pack information to the main thread of the app
+ */
 class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
 
-  var logs: List[List[LogInteraction]] = List()
-  var nrOfResults: Int = _
-  var nrOfInstances: Int = _
-  var start: Long = System.currentTimeMillis
-  var ongoing: Boolean = false
-  var looping: Boolean = false
+  var logs: List[List[LogInteraction]] = List() /* Logs for a single turn */
+  var nrOfResults: Int = _ /* Number of results received */
+  var nrOfInstances: Int = _ /* Number of instances that needs to be calculated */
+  var start: Long = System.currentTimeMillis /* Starting point of the turn */
+  var ongoing: Boolean = false /* Boolean that says if a turn is running */
+  var looping: Boolean = false /* Boolean that says if a loop is running */
 
+  /* Pool of workers that will calculate for each instances */
   val workerRouter = context.actorOf(
     Props[SmartInstance].withRouter(RoundRobinPool(nrOfWorkers)), name = "workerRouter")
 
+  /**
+   * Reinitilize the informations for the beginning of a turn
+   * @author Thomas GIOVANNINI
+   */
   def reinitialization() = {
     nrOfResults = 0
     nrOfInstances = 0
@@ -75,7 +85,6 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
       looping = false
       println("Looping = " + looping)
     case NewTurn =>
-      logs = List()
       launchComputation(NewTurn)
     case ResultAction(logList) =>
       nrOfResults += 1
@@ -86,6 +95,11 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
       }
   }
 
+  /**
+   * End a computation at the end of a turn
+   * If it needs to launch a new turn because it's looping, it sends a new message to trigger a new one
+   * @author Thomas GIOVANNINI
+   */
   private def endComputation(): Unit = {
     val end: Long = System.currentTimeMillis()
     listener ! EndOfTurn(end - start)
@@ -102,6 +116,11 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
     }
   }
 
+  /**
+   * Update the current map from the list of logs the world gets at the end of computation
+   * @author Thomas GIOVANNINI
+   * @param logs logs about all the actions triggered durring a turn
+   */
   private def updateMap(logs: List[List[LogInteraction]]): Unit = {
     val logList = logs.flatten.sortBy(_.priority)
     val resultInstances = logList.map(_.execute())
@@ -117,6 +136,7 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
    */
   private def launchComputation(launcher: Launcher): Unit = {
     if (!ongoing) {
+      logs = List()
       ongoing = true
       val instancesWithNeeds = getInstancesWithNeeds
       setNumberOfInstancesToCompute(instancesWithNeeds.length)
@@ -128,6 +148,13 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
     }
   }
 
+  /**
+   * Create a json that is readable by the client in order to update the view of the map
+   * @author Thomas GIOVANNINI
+   * @param logs of the actions done during the turn
+   * @param instances all the instances of the map
+   * @return Json Object that contains "add" -> all the new instances, and "remove" all the ids of the removed instances
+   */
   private def getMapModificationJson(logs: List[LogInteraction], instances: List[Instance]): JsValue = {
     val (adds, dels) = logs.zip(instances)
       .filter { case (log, instance) =>

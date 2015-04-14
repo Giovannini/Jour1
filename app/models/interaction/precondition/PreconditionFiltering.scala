@@ -46,7 +46,7 @@ object PreconditionFiltering {
    * @return a list of instances that are at walking distance from the source
    */
   def isAtWalkingDistance(source: Instance, instancesList: List[Instance]): List[Instance] = {
-    /**
+    /*
      * Recursively run through all the instances to get a coordinates list of all the tile the source instance can go.
      * @param source instance
      * @param remainingDistance the instance can walk

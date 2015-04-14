@@ -62,7 +62,7 @@ object ValuedProperty {
    * @return A new list which contains the first occurrence of every property of this list. 
    */
   def distinctProperties(rulesList: List[ValuedProperty])= {
-    /**
+    /*
      * Remove from a long list of rules the recurrent ones, keeping the first coming.
      * @author Thomas GIOVANNINI
      * @param rulesList the list to reduce

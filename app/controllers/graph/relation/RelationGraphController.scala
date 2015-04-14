@@ -5,7 +5,15 @@ import models.graph.relation.{Relation, RelationGraphDAO, RelationSqlDAO}
 import play.api.libs.json.Json
 import play.api.mvc._
 
+/**
+ * CRUD of the relations in the graph
+ */
 object RelationGraphController extends Controller {
+  /**
+   * Create a new kind of relations in the graph
+   * @param label label of the relation
+   * @return Status of the request with explained errors in JSON or Ok message
+   */
   def createRelation(label: String) = Action(parse.json) { request =>
     val relationForm = RelationForm.graphForm.bind(request.body)
     relationForm.fold(
@@ -30,6 +38,13 @@ object RelationGraphController extends Controller {
     )
   }
 
+  /**
+   * Action that adds a new relation to the graph
+   * @param label of the relation
+   * @param source id of the source concept
+   * @param target id of the target concept
+   * @return Status of the request with explained errors in JSON or Ok message
+   */
   def addRelationToGraph(label: String, source: Long, target: Long) = Action { request =>
     val relation = RelationSqlDAO.getByName(label)
     if(relation == Relation.error) {
@@ -44,6 +59,13 @@ object RelationGraphController extends Controller {
     }
   }
 
+  /**
+   * Action that removes a new relation to the graph
+   * @param label of the relation
+   * @param source id of the source concept
+   * @param target id of the target concept
+   * @return Status of the request with explained errors in JSON or Ok message
+   */
   def removeRelationToGraph(label: String, source: Long, target: Long) = Action { request =>
     val relation = RelationSqlDAO.getByName(label)
     if(relation == Relation.error) {

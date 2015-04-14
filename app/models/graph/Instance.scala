@@ -183,7 +183,7 @@ case class Instance(
    * @return an InstanceAction that the instance should do.
    */
   def selectAction(sensedInstances: List[Instance]): (InstanceAction, Instance) = {
-    /**
+    /*
      * Sort needs by order of importance
      * @author Thomas GIOVANNINI
      * @return a sorted list of needs
@@ -192,10 +192,12 @@ case class Instance(
       this.concept.needs.sortBy(-_.evaluate(this))
     }
 
-    val possibleActions = orderNeedsByImportance.flatMap(_.meansOfSatisfaction).distinct
+    val possibleActions = orderNeedsByImportance.flatMap(item => {
+      item.meansOfSatisfaction
+    }).distinct
     val relations = concept.getPossibleActionsAndDestinations
 
-    /**
+    /*
      * Check if the instance can do an action or not
      * @author Thomas GIOVANNINI
      * @param mean the instance will use
@@ -206,6 +208,7 @@ case class Instance(
       val destinationList = mean.action.getDestinationList(this, sensedInstances)
       //TODO change that using any
       if (mean.destinationConcept == Concept.any) {
+        val test = mean.action
         val remainingDestinationConcepts = relations.getOrElse(mean.action, List())
         destinationList.filter(instance => remainingDestinationConcepts.contains(instance.concept))
       } else if (mean.destinationConcept == Concept.self) {

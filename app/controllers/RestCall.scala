@@ -1,6 +1,5 @@
 package controllers
 
-import controllers.graph.InstanceManager
 import models.graph.Instance
 import models.graph.concept.{Concept, ConceptDAO}
 import models.graph.relation.{Relation, RelationSqlDAO}
@@ -74,7 +73,7 @@ object RestCall extends Controller {
    */
   def executeAction = Action(parse.json) { request =>
 
-    /**
+    /*
      * Parse json request and execute it.
      * @author Thomas GIOVANNINI
      */

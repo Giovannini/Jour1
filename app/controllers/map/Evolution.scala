@@ -9,9 +9,7 @@ import play.api.mvc._
 object Evolution extends Controller {
   private val nrOfWorkers = 4
 
-  var master: ActorRef = _
-
-  private def getMaster() = {
+  private val master = {
     // Create an Akka system
     val system = ActorSystem("IntelligenceSystem")
 
@@ -19,12 +17,10 @@ object Evolution extends Controller {
     val listener = system.actorOf(Props[Listener], name = "listener")
 
     // create the master
-    master = system.actorOf(Props(new World(nrOfWorkers, listener)),
-      name = "master")
+    system.actorOf(Props(new World(nrOfWorkers, listener)), name = "master")
   }
 
   def next() = Action {
-    getMaster()
     master ! NewTurn
     Ok("OK")
   }
@@ -35,7 +31,6 @@ object Evolution extends Controller {
   }
 
   def resume() = Action {
-    getMaster()
     master ! StartLoop
     Ok("OK")
   }
