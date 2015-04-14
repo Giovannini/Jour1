@@ -1,6 +1,7 @@
 package controllers.interaction.precondition
 
 import forms.interaction.precondition.PreconditionForm
+import models.interaction.action.InstanceActionDAO
 import models.interaction.precondition.{Precondition, PreconditionDAO}
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -121,12 +122,35 @@ object PreconditionController extends Controller {
    *         error else
    */
   def deletePrecondition(id: Long) = Action {
-    val result = PreconditionDAO.delete(id)
-    if (result >= 1) {
-      Ok("deleted")
+    // Get all actions and preconditions using the precondition
+    val actions = InstanceActionDAO.getAll
+      .filter(action => action.preconditions
+      .exists(precondition => precondition._1.id == id)
+      )
+    val preconditions = PreconditionDAO.getAll
+      .filter(precondition => precondition.subConditions
+      .exists(subcondition => subcondition._1.id == id)
+      )
+
+    // If one action at least exists the precondition can't be deleted
+    if (actions != List()) {
+      val listOfActions = actions.map(_.label) mkString (" - ")
+      InternalServerError("This precondition is used in following actions : " + listOfActions)
     }
+    // if one precondition at least exists with the precondition that we want to delete as a subcondition, the precondition can't be deleted
+    else if (preconditions != List()) {
+      val listOfPreconditions = preconditions.map(_.label) mkString (" - ")
+      InternalServerError("This precondition is used in following preconditions : " + listOfPreconditions)
+    }
+    // Try to delete the precondition
     else {
-      InternalServerError("Impossible to delete precondition")
+      val result = PreconditionDAO.delete(id)
+      if (result >= 1) {
+        Ok("deleted")
+      }
+      else {
+        InternalServerError("Impossible to delete precondition")
+      }
     }
   }
 }

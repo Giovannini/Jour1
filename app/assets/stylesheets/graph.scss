@@ -78,6 +78,24 @@ body {
   padding: 15px;
 }
 
+.page-title {
+  display: table;
+  width: calc(100% - 20px);
+  -moz-box-sizing: padding-box;
+  -webkit-box-sizing: padding-box;
+  box-sizing: padding-box;
+}
+
+.page-title h2 {
+  display: table-cell;
+  text-align: left;
+}
+
+.page-title a {
+  display: table-cell;
+  text-align: right;
+}
+
 svg {
   cursor: grab;
   height: 100%;
