@@ -32,11 +32,6 @@ case class LogInteraction(value: String, priority: Int){
           val propertyString = splitted(2)
           val propertyValue = splitted(3).toDouble
           Application.map.modifyProperty(instanceId, propertyString, propertyValue)
-        case "MODIFY_PROPERTY_WITH_PARAM" =>/*#######################################*/
-          val instanceId = splitted(1).toLong
-          val propertyString = splitted(2)
-          val propertyValue = splitted(3)
-          Application.map.modifyPropertyWithParam(instanceId, propertyString, propertyValue)
         case "ADD_TO_PROPERTY" =>/*#######################################*/
           val instanceId = splitted(1).toLong
           val propertyString = splitted(2)

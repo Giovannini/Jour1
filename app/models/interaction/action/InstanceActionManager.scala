@@ -122,8 +122,7 @@ object InstanceActionManager {
     val _consume = {
       val p_instanceID = ParameterReference("instanceID", "Long")
       val p_propertyName = ParameterReference("propertyName", "Property")
-      val propertyValue = ParameterReference("propertyValue", "Property")
-
+      val p_propertyValue = ParameterReference("propertyValue", "Property")
       val p_valueToAdd = ParameterReference("valueToAdd", "Int")
       InstanceAction(
         0L,
@@ -136,12 +135,34 @@ object InstanceActionManager {
               ParameterReference("instanceID", "Long") -> p_instanceID,
               ParameterReference("property", "Property") -> p_propertyName
             )
+            ),
+          (PreconditionManager.nameToId("hasProperty"),
+          Map(
+            ParameterReference("instanceID", "Long") -> p_instanceID,
+            ParameterReference("property", "Property") -> p_propertyValue
             )
+          ),(PreconditionManager.nameToId("propertyIsLowerThan"),
+            Map(
+              ParameterReference("instanceID", "Long") -> p_instanceID,
+              ParameterReference("property", "Property") -> p_propertyName,
+              ParameterReference("propertyToCompare", "Property") -> p_propertyValue
+            ))
+
         ),
         // SubActions
-        List(),
+        List(
+          (
+            _addToProperty,
+            Map(
+              ParameterReference("instanceID", "Long") -> p_instanceID,
+              ParameterReference("propertyName", "Property") -> p_propertyName,
+              ParameterReference("valueToAdd", "Int") -> p_valueToAdd
+            )
+            )
+
+        ),
         // Parameters
-        List(p_instanceID, p_propertyName, propertyValue, p_valueToAdd)
+        List(p_instanceID, p_propertyName, p_propertyValue, p_valueToAdd)
       ).save
     }
     nameToId += "_consume" -> _consume
@@ -328,7 +349,7 @@ object InstanceActionManager {
           Map(
             ParameterReference("instanceID", "Long") -> p_instanceThatProcreate,
             ParameterReference("property", "Property") -> ParameterValue("Desire", "Property"),
-            ParameterReference("value", "Int") -> ParameterValue(10, "Int")
+            ParameterReference("propertyToCompare", "Property") -> ParameterValue("DesireMax", "Property")
           )),
             (PreconditionManager.nameToId("isOnSameTile"),
               Map(
@@ -380,7 +401,7 @@ object InstanceActionManager {
             Map(
               ParameterReference("instanceID", "Long") -> p_instanceThatSpread,
               ParameterReference("property", "Property") -> ParameterValue("DuplicationSpeed", "Property"),
-              ParameterReference("value", "Int") -> ParameterValue(5, "Int")
+              ParameterReference("propertyToCompare", "Property") -> ParameterValue("DuplicaSpeedVal", "Property")
             )
             ),
           (PreconditionManager.nameToId("isNextTo"),

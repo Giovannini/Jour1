@@ -102,9 +102,6 @@ case class InstanceAction(
       case "modifyPropertyWithParam" =>
         HardCodedAction.modifyPropertyWithParam(arguments)
         true
-      case "consume" =>
-        HardCodedAction.consume(arguments)
-        true
       case _ =>
         subInteractions.forall(subAction => subAction._1.execute(takeGoodArguments(subAction._2, arguments)))
     }

@@ -147,21 +147,11 @@ trait Interaction {
           val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
           val valueToAdd = arguments(ParameterReference("valueToAdd", "Int")).value//.asInstanceOf[String]
           List(LogInteraction("ADD_TO_PROPERTY " + instanceId + " " + propertyString + " " + valueToAdd, 2))
-        case "consume" => //TODO Shouldn't be here
-          val instanceId = arguments(ParameterReference("instanceID", "Long")).value//.asInstanceOf[Long]
-        val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
-        val valueToAdd = arguments(ParameterReference("valueToAdd", "Int")).value//.asInstanceOf[String]
-          List(LogInteraction("CONSUME " + instanceId + " " + propertyString + " " + valueToAdd, 2))
         case "modifyProperty" =>
           val instanceId = arguments(ParameterReference("instanceID", "Long")).value//.asInstanceOf[Long]
           val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
           val newValue = arguments(ParameterReference("propertyValue", "Int")).value//.asInstanceOf[String]
           List(LogInteraction("MODIFY_PROPERTY " + instanceId + " " + propertyString + " " + newValue, 1))
-        case "modifyPropertyWithParam" => //TODO not sure this should be here neither
-          val instanceId = arguments(ParameterReference("instanceID", "Long")).value//.asInstanceOf[Long]
-          val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
-          val newValue = arguments(ParameterReference("propertyValue", "Property")).value//.asInstanceOf[String]
-          List(LogInteraction("MODIFY_PROPERTY_WITH_PARAM " + instanceId + " " + propertyString + " " + newValue, 1))
         case otherLabel =>
           subInteractions.flatMap(subAction => subAction._1.log(takeGoodArguments(subAction._2, arguments)))
       }

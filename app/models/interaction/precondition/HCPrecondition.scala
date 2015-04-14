@@ -85,13 +85,26 @@ object HCPrecondition {
   def isHigherThan(args: Map[ParameterReference, ParameterValue]): Boolean = {
     val instanceId = args(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
     val propertyString = args(ParameterReference("property", "Property")).value.asInstanceOf[String]
+    val propertyToCompareString = args(ParameterReference("propertyToCompare", "Property")).value.asInstanceOf[String]
     val sourceInstance = map.getInstanceById(instanceId)
     val property = PropertyDAO.getByName(propertyString)
-    val value = args(ParameterReference("value", "Int")).value.asInstanceOf[String].toDouble
+    val propertyToCompare = PropertyDAO.getByName(propertyToCompareString)
+    val value = sourceInstance.getValueForProperty(propertyToCompare)
     val instanceValue = sourceInstance.getValueForProperty(property)
-    instanceValue > value
+    instanceValue >= value
   }
 
+  def isLowerThan(args: Map[ParameterReference, ParameterValue]): Boolean = {
+    val instanceId = args(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
+    val propertyString = args(ParameterReference("property", "Property")).value.asInstanceOf[String]
+    val propertyToCompareString = args(ParameterReference("propertyToCompare", "Property")).value.asInstanceOf[String]
+    val sourceInstance = map.getInstanceById(instanceId)
+    val property = PropertyDAO.getByName(propertyString)
+    val propertyToCompare = PropertyDAO.getByName(propertyToCompareString)
+    val value = sourceInstance.getValueForProperty(propertyToCompare)
+    val instanceValue = sourceInstance.getValueForProperty(property)
+    instanceValue <= value
+  }
   def hasInstanceOfConcept(args: Map[ParameterReference, ParameterValue]):Boolean={
     val instanceId = args(ParameterReference("instanceID", "Long")).value.asInstanceOf[Long]
     val conceptId = args(ParameterReference("ConceptID", "Long")).value.asInstanceOf[Long]

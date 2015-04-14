@@ -105,19 +105,50 @@ object PreconditionManager {
     val preconditionPropertyIsHigherThan = {
       val p_instanceID = ParameterReference("instanceID", "Long")
       val p_propertyID = ParameterReference("property", "Property")
-      val p_value = ParameterReference("value", "Int")
+      val p_propertyValueID = ParameterReference("propertyToCompare", "Property")
       Precondition(
         0,
         "propertyIsHigherThan",
-        List((nameToId("hasProperty"), Map(
-          ParameterReference("instanceID", "Long") -> p_instanceID,
-          ParameterReference("property", "Property") -> p_propertyID
-        ))),
-        List(p_instanceID, p_propertyID, p_value)
+        List(
+          (
+            nameToId("hasProperty"),
+            Map(
+              ParameterReference("instanceID", "Long") -> p_instanceID,
+              ParameterReference("property", "Property") -> p_propertyID
+          )),
+          (nameToId("hasProperty"),
+            Map(
+              ParameterReference("instanceID", "Long") -> p_instanceID,
+              ParameterReference("property", "Property") -> p_propertyValueID
+            ))),
+        List(p_instanceID, p_propertyID, p_propertyValueID)
       )
     }
 
     val preconditionPropertyIsLowerThan = {
+      val p_instanceID = ParameterReference("instanceID", "Long")
+      val p_propertyID = ParameterReference("property", "Property")
+      val p_propertyValueID = ParameterReference("propertyToCompare", "Property")
+      Precondition(
+        0,
+        "propertyIsLowerThan",
+        List(
+          (
+            nameToId("hasProperty"),
+            Map(
+              ParameterReference("instanceID", "Long") -> p_instanceID,
+              ParameterReference("property", "Property") -> p_propertyID
+            )),
+          (nameToId("hasProperty"),
+            Map(
+              ParameterReference("instanceID", "Long") -> p_instanceID,
+              ParameterReference("property", "Property") -> p_propertyValueID
+            ))),
+        List(p_instanceID, p_propertyID, p_propertyValueID)
+      )
+    }
+
+/*    val preconditionPropertyIsLowerThan = {
       val p_instanceID = ParameterReference("instanceID", "Long")
       val p_propertyID = ParameterReference("property", "Property")
       val p_value = ParameterReference("value", "Int")
@@ -130,7 +161,7 @@ object PreconditionManager {
         ))),
         List(p_instanceID, p_propertyID, p_value)
       )
-    }
+    }*/
 
     nameToId += "propertyIsHigherThan" -> preconditionPropertyIsHigherThan.save
     nameToId += "propertyIsLowerThan" -> preconditionPropertyIsLowerThan.save

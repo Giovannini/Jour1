@@ -89,11 +89,15 @@ object WorldInitialisation extends Controller {
 
     val propertySense = Property("Sense", PropertyType.Int, 5).save
     val propertyDuplicationSpeed = Property("DuplicationSpeed", PropertyType.Double, 10).save
+    val propertyDuplicaSpeedVal = Property("DuplicaSpeedVal", PropertyType.Double, 5).save
+
     val propertyWalkingDistance = Property("WalkingDistance", PropertyType.Int, 3).save
     val propertyHunger = Property("Hunger", PropertyType.Double, 5).save
     val propertyWound = Property("Wound", PropertyType.Double, 2).save
     val propertyComfort = Property("Comfort", PropertyType.Double, 3).save
     val propertyDesire = Property("Desire", PropertyType.Double, 11).save
+    val propertyDesireMax = Property("DesireMax", PropertyType.Double, 10).save
+
     val propertyWoundMax = Property("WoundMax", PropertyType.Double, 4).save
     val propertyFear = Property("Fear", PropertyType.Double, 0).save
 
@@ -118,6 +122,7 @@ object WorldInitialisation extends Controller {
     val conceptGrass = Concept("Grass",
       List(
         ValuedProperty(propertyDuplicationSpeed, 10),
+        ValuedProperty(propertyDuplicaSpeedVal, 10),
         ValuedProperty(propertyWound, 0),
         ValuedProperty(propertyWoundMax, 4)
       ),
@@ -229,7 +234,7 @@ object WorldInitialisation extends Controller {
     ///
 
     val conceptAnimal = Concept("Animal",
-      List(ValuedProperty(propertySense, 5), ValuedProperty(propertyComfort, 5)),
+      List(ValuedProperty(propertySense, 5), ValuedProperty(propertyComfort, 5), ValuedProperty(propertyDesireMax, 10)),
       List(), List(needFood), DisplayProperty())
 
     ///
