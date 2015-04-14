@@ -82,7 +82,7 @@ object WorldInitialisation extends Controller {
     PropertyDAO.clear
     RelationSqlDAO.clear
     NeedDAO.clear
-//Todo mettre des valeurs judicieuses au lieu des valeurs arbitraires pour les rules et property
+    //Todo mettre des valeurs judicieuses au lieu des valeurs arbitraires pour les rules et property
     /*Property declaration*/
     val propertyInstanciable = Property("Instanciable", PropertyType.Bool, 0).save
     val propertyStrength = Property("Strength", PropertyType.Int, 0).save
@@ -93,13 +93,13 @@ object WorldInitialisation extends Controller {
     val propertyHunger = Property("Hunger", PropertyType.Double, 5).save
     val propertyWound = Property("Wound", PropertyType.Double, 2).save
     val propertyComfort = Property("Comfort", PropertyType.Double, 3).save
-    val propertyDesire = Property("Desire",PropertyType.Double,11).save
+    val propertyDesire = Property("Desire", PropertyType.Double, 11).save
     val propertyWoundMax = Property("WoundMax", PropertyType.Double, 4).save
     val propertyFear = Property("Fear", PropertyType.Double, 0).save
 
     PreconditionManager.initialization()
     InstanceActionManager.initialization()
-////////////////////////////////   Environment /////////////////////////////
+    ////////////////////////////////   Environment /////////////////////////////
     val conceptGround = Concept("Ground", List(), List(), List(), DisplayProperty())
     val conceptWater = Concept("Water",
       List(),
@@ -117,12 +117,12 @@ object WorldInitialisation extends Controller {
     ///////////////////////////////  Other  ////////////////////////////////////
     val conceptGrass = Concept("Grass",
       List(
-        ValuedProperty(propertyDuplicationSpeed,10),
-        ValuedProperty(propertyWound,0),
-        ValuedProperty(propertyWoundMax,4)
+        ValuedProperty(propertyDuplicationSpeed, 10),
+        ValuedProperty(propertyWound, 0),
+        ValuedProperty(propertyWoundMax, 4)
       ),
       List(
-        ValuedProperty(propertyStrength, 40),
+        ValuedProperty(propertyStrength, 150),
         ValuedProperty(propertyInstanciable, 1)
       ),
       List(),
@@ -136,8 +136,8 @@ object WorldInitialisation extends Controller {
 
     val conceptApple = Concept("Apple",
       List(
-        ValuedProperty(propertyWound,0),
-        ValuedProperty(propertyWoundMax,4)
+        ValuedProperty(propertyWound, 0),
+        ValuedProperty(propertyWoundMax, 4)
       ),
       List(
         ValuedProperty(propertyStrength, 2),
@@ -150,13 +150,12 @@ object WorldInitialisation extends Controller {
 
     val conceptSheep = Concept("Sheep",
       _properties = List(
-        ValuedProperty(propertyWound,0),
-        ValuedProperty(propertyWoundMax,12),
-        ValuedProperty(propertySense,5),
-        ValuedProperty(propertyFear,0),
-        ValuedProperty(propertyHunger,4),
-        ValuedProperty(propertyWalkingDistance,4),
-        ValuedProperty(propertyDesire,8)
+        ValuedProperty(propertyWound, 0),
+        ValuedProperty(propertyWoundMax, 12),
+        ValuedProperty(propertyFear, 0),
+        ValuedProperty(propertyHunger, 4),
+        ValuedProperty(propertyWalkingDistance, 4),
+        ValuedProperty(propertyDesire, 8)
       ),
       _rules = List(
         ValuedProperty(propertyStrength, 3),
@@ -172,59 +171,56 @@ object WorldInitialisation extends Controller {
     /* Creation of needs */
     val needFood = NeedDAO.save(Need(0L, "Hunger", propertyHunger, priority = 6,
       List(ConsequenceStep(10, Consequence(8, InstanceActionManager.nameToId("_removeInstanceAt").toEffect))),
-      List(MeanOfSatisfaction(InstanceActionManager.nameToId("Eat"), conceptSheep),
-        MeanOfSatisfaction(InstanceActionManager.nameToId("Eat"), conceptApple),
+      List(MeanOfSatisfaction(InstanceActionManager.nameToId("Eat"), conceptApple),
         MeanOfSatisfaction(InstanceActionManager.nameToId("Eat"), conceptGrass),
-        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), conceptSheep),
         MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), conceptApple),
+        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), conceptGrass),
         MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.self),
         MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.any))))
-    val needSeaAir = NeedDAO.save(
-      Need(
-        0L,
-        "SeaAir",
-        propertyComfort,
-        priority = 5,
-        List(ConsequenceStep(5, Consequence(5, InstanceActionManager.nameToId("_addToProperty").toEffect))),
-        List(MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.any))))
+    val needMeat = NeedDAO.save(Need(0L, "Hunger", propertyHunger, priority = 6,
+      List(ConsequenceStep(10, Consequence(8, InstanceActionManager.nameToId("_removeInstanceAt").toEffect))),
+      List(MeanOfSatisfaction(InstanceActionManager.nameToId("Eat"), conceptSheep),
+        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), conceptSheep),
+        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.self),
+        MeanOfSatisfaction(InstanceActionManager.nameToId("Move"), Concept.any))))
 
     println("Declaration of concepts...")
 
     /*Concepts declaration*/
-    lazy val conceptMan = Concept("Man",
+    /*lazy val conceptMan = Concept("Man",
       List(
-        ValuedProperty(propertySense,5),
-        ValuedProperty(propertyComfort,3),
-        ValuedProperty(propertyHunger,6),
-        ValuedProperty(propertyWalkingDistance,3),
-        ValuedProperty(propertyWound,0),
-        ValuedProperty(propertyDesire,7)
+        /*ValuedProperty(propertySense, 5),*/
+        ValuedProperty(propertyComfort, 3),
+        ValuedProperty(propertyHunger, 6),
+        ValuedProperty(propertyWalkingDistance, 3),
+        ValuedProperty(propertyWound, 0),
+        ValuedProperty(propertyDesire, 7)
       ),
       List(
         ValuedProperty(propertyStrength, 2),
         ValuedProperty(propertyInstanciable, 1)
       ),
-      List(needSeaAir, needFood),
-      DisplayProperty("#E3B494", 20))
+      List(),
+      DisplayProperty("#E3B494", 20))*/
 
     ///
 
     val conceptPredator = Concept("Predator",
-      List(ValuedProperty(propertySense,5)),
-      List(), List(), DisplayProperty())
+      List(/*ValuedProperty(propertySense, 5)*/),
+      List(), List(needMeat), DisplayProperty())
 
     ///
 
     val conceptWolf = Concept("Wolf",
       List(
-        ValuedProperty(propertySense,5),
-        ValuedProperty(propertyHunger,5),
-        ValuedProperty(propertyWalkingDistance,4),
-        ValuedProperty(propertyWound,0),
-        ValuedProperty(propertyDesire,6)
+        ValuedProperty(propertySense, 5),
+        ValuedProperty(propertyHunger, 5),
+        ValuedProperty(propertyWalkingDistance, 4),
+        ValuedProperty(propertyWound, 0),
+        ValuedProperty(propertyDesire, 6)
       ),
       List(
-        ValuedProperty(propertyStrength, 1),
+        ValuedProperty(propertyStrength, 2),
         ValuedProperty(propertyInstanciable, 1)
       ),
       List(),
@@ -233,18 +229,18 @@ object WorldInitialisation extends Controller {
     ///
 
     val conceptAnimal = Concept("Animal",
-      List(ValuedProperty(propertySense,5)),
+      List(ValuedProperty(propertySense, 5), ValuedProperty(propertyComfort, 5)),
       List(), List(needFood), DisplayProperty())
 
     ///
 
     val conceptBush = Concept("Bush",
       List(
-        ValuedProperty(propertyWound,0),
-        ValuedProperty(propertyWoundMax,6)
+        ValuedProperty(propertyWound, 0),
+        ValuedProperty(propertyWoundMax, 6)
       ),
       List(
-        ValuedProperty(propertyStrength, 20),
+        ValuedProperty(propertyStrength, 10),
         ValuedProperty(propertyInstanciable, 1)
       ),
       List(),
@@ -264,8 +260,7 @@ object WorldInitialisation extends Controller {
     val conceptTree = Concept("Tree",
       List(),
       List(
-        ValuedProperty(propertyStrength, 3),
-        ValuedProperty(propertyInstanciable, 1)
+        ValuedProperty(propertyStrength, 3)
       ),
       List(),
       DisplayProperty("#483431", 7))
@@ -274,10 +269,10 @@ object WorldInitialisation extends Controller {
 
     val conceptFir = Concept("Fir",
       List(),
-      List(ValuedProperty(propertyStrength, 3),
+      List(ValuedProperty(propertyStrength, 2),
         ValuedProperty(propertyInstanciable, 1)),
       List(),
-      DisplayProperty("#221D1D", 8))
+      DisplayProperty("#93634C", 8))
 
     ///
 
@@ -291,7 +286,7 @@ object WorldInitialisation extends Controller {
     /*Relations declaration*/
     val relationSubtypeOfId = RelationSqlDAO.save("SUBTYPE_OF")
     val relationEatId = RelationSqlDAO.save("ACTION_EAT")
-    val relationCutId = RelationSqlDAO.save("ACTION_CUT")
+    //    val relationCutId = RelationSqlDAO.save("ACTION_CUT")
     val relationMoveId = RelationSqlDAO.save("ACTION_MOVE")
     val relationFleeId = RelationSqlDAO.save("ACTION_FLEE")
     val relationProducesId = RelationSqlDAO.save("ACTION_PRODUCE")
@@ -300,14 +295,14 @@ object WorldInitialisation extends Controller {
     val relationProcreate = RelationSqlDAO.save("ACTION_PROCREATE")
     val relationSpread = RelationSqlDAO.save("ACTION_SPREAD")
     val relationRegenerate = RelationSqlDAO.save("ACTION_REGENERATE")
-    val relationCreateBow = RelationSqlDAO.save("ACTION_CREATE_BOW")
+    //    val relationCreateBow = RelationSqlDAO.save("ACTION_CREATE_BOW")
 
     println("Adding concepts to graph...")
     /*Storage of the concepts in DB*/
     val addConceptVerification = {
       ConceptDAO.addConceptToDB(Concept.any) &&
       ConceptDAO.addConceptToDB(Concept.self) &&
-      ConceptDAO.addConceptToDB(conceptMan) &&
+      //      ConceptDAO.addConceptToDB(conceptMan) &&
       ConceptDAO.addConceptToDB(conceptPredator) &&
       ConceptDAO.addConceptToDB(conceptAnimal) &&
       ConceptDAO.addConceptToDB(conceptWolf) &&
@@ -335,9 +330,9 @@ object WorldInitialisation extends Controller {
       RelationGraphDAO.addRelationToDB(conceptPredator.id, relationEatId, conceptSheep.id) &&
       RelationGraphDAO.addRelationToDB(conceptPredator.id, relationSubtypeOfId, conceptAnimal.id) &&
       RelationGraphDAO.addRelationToDB(conceptWolf.id, relationSubtypeOfId, conceptPredator.id) &&
-      RelationGraphDAO.addRelationToDB(conceptMan.id, relationSubtypeOfId, conceptPredator.id) &&
-      RelationGraphDAO.addRelationToDB(conceptMan.id, relationEatId, conceptApple.id) &&
-      RelationGraphDAO.addRelationToDB(conceptMan.id, relationCutId, conceptTree.id) &&
+      //      RelationGraphDAO.addRelationToDB(conceptMan.id, relationSubtypeOfId, conceptPredator.id) &&
+      //      RelationGraphDAO.addRelationToDB(conceptMan.id, relationEatId, conceptApple.id) &&
+      //      RelationGraphDAO.addRelationToDB(conceptMan.id, relationCutId, conceptTree.id) &&
       RelationGraphDAO.addRelationToDB(conceptFir.id, relationSubtypeOfId, conceptTree.id) &&
       RelationGraphDAO.addRelationToDB(conceptAppleTree.id, relationSubtypeOfId, conceptTree.id) &&
       RelationGraphDAO.addRelationToDB(conceptAppleTree.id, relationProducesId, conceptApple.id) &&
@@ -349,19 +344,15 @@ object WorldInitialisation extends Controller {
       RelationGraphDAO.addRelationToDB(conceptTree.id, relationSubtypeOfId, conceptVegetable.id) &&
       RelationGraphDAO.addRelationToDB(conceptWater.id, relationSubtypeOfId, conceptGround.id) &&
       RelationGraphDAO.addRelationToDB(conceptEarth.id, relationSubtypeOfId, conceptGround.id) &&
-      RelationGraphDAO.addRelationToDB(conceptMan.id, relationProcreate, conceptGround.id) &&
+      //      RelationGraphDAO.addRelationToDB(conceptMan.id, relationProcreate, conceptGround.id) &&
       RelationGraphDAO.addRelationToDB(conceptWolf.id, relationProcreate, conceptGround.id) &&
       RelationGraphDAO.addRelationToDB(conceptSheep.id, relationProcreate, conceptGround.id) &&
       RelationGraphDAO.addRelationToDB(conceptGrass.id, relationSpread, conceptGround.id) &&
-      RelationGraphDAO.addRelationToDB(conceptGrass.id, relationRegenerate, conceptGrass.id)&&
-        RelationGraphDAO.addRelationToDB(conceptMan.id, relationCreateBow, conceptTree.id)
-
-
-
-
+      RelationGraphDAO.addRelationToDB(conceptGrass.id, relationRegenerate, conceptGrass.id) // &&
+      //      RelationGraphDAO.addRelationToDB(conceptMan.id, relationCreateBow, conceptTree.id)
     }
     val addLiveOnRelationsVerification = {
-      RelationGraphDAO.addRelationToDB(conceptMan.id, relationLiveOnId, conceptEarth.id) &&
+      //      RelationGraphDAO.addRelationToDB(conceptMan.id, relationLiveOnId, conceptEarth.id) &&
       RelationGraphDAO.addRelationToDB(conceptWolf.id, relationLiveOnId, conceptEarth.id) &&
       RelationGraphDAO.addRelationToDB(conceptSheep.id, relationLiveOnId, conceptEarth.id) &&
       RelationGraphDAO.addRelationToDB(conceptGrass.id, relationLiveOnId, conceptEarth.id) &&

@@ -2,9 +2,8 @@ package models.interaction.effect
 
 import controllers.Application
 import models.graph.Instance
-import models.interaction.InteractionType.InteractionType
-import models.interaction.{LogInteraction, Interaction}
 import models.interaction.parameter.{Parameter, ParameterReference, ParameterValue}
+import models.interaction.{Interaction, LogInteraction}
 
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
@@ -60,7 +59,9 @@ case class Effect(
   }
 
   def logOn(instance: Instance): List[LogInteraction] = {
+    //TODO problem here with zipping
     val arguments = parameters.zip(List(ParameterValue(instance.id, "Long"))).toMap
+//    println("LogOn called for " + this.label)
     this.log(arguments)
   }
 }

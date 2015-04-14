@@ -33,9 +33,9 @@ object InstanceActionForm {
       "label" -> text,
       "preconditions" -> list(PreconditionForm.subconditionForm.mapping),
       "subActions" -> list(subactionForm.mapping),
-      "parameters" -> list(ParameterForm.referenceForm.mapping).verifying("empty parameter list", parameters => !parameters.isEmpty)
+      "parameters" -> list(ParameterForm.referenceForm.mapping).verifying("empty parameter list", parameters => parameters.nonEmpty)
     )(applyForm)(unapplyForm)
-      .verifying("is Recursive", instanceAction => instanceAction.isValid())
+      .verifying("is Recursive", instanceAction => instanceAction.isValid)
   )
 
   private def applyForm(

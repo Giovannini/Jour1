@@ -1,7 +1,7 @@
 package models.interaction.action
 
 import controllers.Application
-import models.graph.concept.{Concept}
+import models.graph.concept.Concept
 import models.interaction.InteractionDAO
 import models.interaction.parameter._
 import models.interaction.precondition.PreconditionManager
@@ -189,6 +189,13 @@ object InstanceActionManager {
         0L,
         "ACTION_MOVE",
         preconditions = List(
+          (
+            PreconditionManager.nameToId("notSelf"),
+            Map(
+              ParameterReference("instance1ID", "Long") -> p_instanceToMove,
+              ParameterReference("instance2ID", "Long") -> p_groundWhereToMoveIt
+            )
+          ),
           (
             PreconditionManager.nameToId("isAtWalkingDistance"),
             Map(

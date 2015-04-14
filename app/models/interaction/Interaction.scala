@@ -19,14 +19,14 @@ trait Interaction {
   val subInteractions: List[(Interaction, Map[ParameterReference, Parameter])]
   val parameters: List[ParameterReference]
 
-  def isValid() : Boolean = {
+  def isValid: Boolean = {
     subInteractions.forall(item => {
       item._1.id != this.id && item._1.label != this.label
     })
   }
 
   def isValid(_type: InteractionType): Boolean = {
-    this.isValid() && {
+    this.isValid && {
       _type match {
         case InteractionType.Action =>
           (this.parameters.length == 2
@@ -115,7 +115,7 @@ trait Interaction {
 //        println("Precondition not filled for " + this.label + ".")
         false
       }
-    case effect: Effect =>
+    case effect: Effect => //Problem with effects
       effect.execute(arguments)
   }
 
@@ -129,7 +129,7 @@ trait Interaction {
   def log(arguments: Map[ParameterReference, ParameterValue]): List[LogInteraction] = {
     val preconditionCheck = checkPreconditions(arguments)
 
-    if (preconditionCheck) {
+    if (preconditionCheck) { //Problem with effects
       this.label match {
         case "addInstanceAt" =>
           val instanceId = arguments(ParameterReference("instanceToAdd", "Long")).value//.asInstanceOf[Long]
@@ -147,7 +147,7 @@ trait Interaction {
           val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
           val valueToAdd = arguments(ParameterReference("valueToAdd", "Int")).value//.asInstanceOf[String]
           List(LogInteraction("ADD_TO_PROPERTY " + instanceId + " " + propertyString + " " + valueToAdd, 2))
-        case "consume" =>
+        case "consume" => //TODO Shouldn't be here
           val instanceId = arguments(ParameterReference("instanceID", "Long")).value//.asInstanceOf[Long]
         val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
         val valueToAdd = arguments(ParameterReference("valueToAdd", "Int")).value//.asInstanceOf[String]
@@ -157,12 +157,12 @@ trait Interaction {
           val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
           val newValue = arguments(ParameterReference("propertyValue", "Int")).value//.asInstanceOf[String]
           List(LogInteraction("MODIFY_PROPERTY " + instanceId + " " + propertyString + " " + newValue, 1))
-        case "modifyPropertyWithParam" =>
+        case "modifyPropertyWithParam" => //TODO not sure this should be here neither
           val instanceId = arguments(ParameterReference("instanceID", "Long")).value//.asInstanceOf[Long]
           val propertyString = arguments(ParameterReference("propertyName", "Property")).value//.asInstanceOf[String]
           val newValue = arguments(ParameterReference("propertyValue", "Property")).value//.asInstanceOf[String]
           List(LogInteraction("MODIFY_PROPERTY_WITH_PARAM " + instanceId + " " + propertyString + " " + newValue, 1))
-        case _ =>
+        case otherLabel =>
           subInteractions.flatMap(subAction => subAction._1.log(takeGoodArguments(subAction._2, arguments)))
       }
     } else {

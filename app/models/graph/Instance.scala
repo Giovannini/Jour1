@@ -1,10 +1,10 @@
 package models.graph
 
 import controllers.Application
+import models.graph.concept.{Concept, ConceptDAO}
+import models.graph.property.{Property, PropertyDAO, ValuedProperty}
 import models.intelligence.MeanOfSatisfaction
 import models.intelligence.need.Need
-import models.graph.concept.{Concept, ConceptDAO}
-import models.graph.property.{ValuedProperty, Property, PropertyType}
 import models.interaction.LogInteraction
 import models.interaction.action.InstanceAction
 import play.api.libs.json._
@@ -156,7 +156,7 @@ case class Instance(
    * @return a list of sensed instances.
    */
   def getSensedInstances: List[Instance] = {
-    val senseRadius = getValueForProperty(Property("Sense", PropertyType.Int, 5)).toInt
+    val senseRadius = getValueForProperty(PropertyDAO.getByName("Sense")).toInt
     coordinates.getNearCoordinate(senseRadius)
       .flatMap(Application.map.getInstancesAt)
   }
@@ -168,12 +168,15 @@ case class Instance(
   def applyConsequencies(): List[LogInteraction] = {
     concept.needs.flatMap { need =>
       val property = need.affectedProperty
-      val propertyValue = this.getValueForProperty(property)
+      val propertyValue = this.getValueForProperty(property) + 1
       val steps = need.consequencesSteps
-      steps.filter(cs => cs.value <= propertyValue).lastOption match {
-        case Some(consequenceStep) => consequenceStep.consequence.effect.logOn(this)
+      val needEffectLog = LogInteraction.createModifyLog(this.id, property.label, propertyValue)
+      val consequenceLogs = steps.filter(cs => cs.value <= propertyValue).lastOption match {
+        case Some(consequenceStep) =>
+          consequenceStep.consequence.effect.logOn(this)
         case _ => List()
       }
+      needEffectLog :: consequenceLogs
     }
   }
 
@@ -192,9 +195,8 @@ case class Instance(
       this.concept.needs.sortBy(-_.evaluate(this))
     }
 
-    val possibleActions = orderNeedsByImportance.flatMap(item => {
-      item.meansOfSatisfaction
-    }).distinct
+    val sortedNeeds = orderNeedsByImportance
+    val possibleActions = sortedNeeds.flatMap(_.meansOfSatisfaction).distinct
     val relations = concept.getPossibleActionsAndDestinations
 
     /*
@@ -206,9 +208,7 @@ case class Instance(
      */
     def destinationList(mean: MeanOfSatisfaction): List[Instance] = {
       val destinationList = mean.action.getDestinationList(this, sensedInstances)
-      //TODO change that using any
       if (mean.destinationConcept == Concept.any) {
-        val test = mean.action
         val remainingDestinationConcepts = relations.getOrElse(mean.action, List())
         destinationList.filter(instance => remainingDestinationConcepts.contains(instance.concept))
       } else if (mean.destinationConcept == Concept.self) {
