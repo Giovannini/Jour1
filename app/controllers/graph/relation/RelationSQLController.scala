@@ -12,7 +12,7 @@ object RelationSQLController extends Controller {
    * @return
    */
   def index = Action {
-    Ok(views.html.action.index())
+    Ok(views.html.graph.relation.relations())
   }
 
   /**

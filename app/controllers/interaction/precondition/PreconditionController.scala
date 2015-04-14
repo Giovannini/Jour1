@@ -12,7 +12,7 @@ object PreconditionController extends Controller {
    * @return
    */
   def index = Action {
-    Ok(views.html.precondition.index())
+    Ok(views.html.interaction.precondition.index())
   }
 
   /**
@@ -28,7 +28,7 @@ object PreconditionController extends Controller {
       case Some(accept) if accept.contains("application/json") =>
         action
       case _ =>
-        Ok(views.html.precondition.index())
+        Ok(views.html.interaction.precondition.index())
     }
   }
 

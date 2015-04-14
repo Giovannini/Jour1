@@ -15,7 +15,7 @@ object NeedForm {
   val form = Form(mapping(
     "id" -> optional[Long](longNumber),
     "label" -> text,
-    "affectedProperty" -> PropertyForm.labelForm.mapping.verifying("unfound property", property => property != Property.error),
+    "affectedProperty" -> of(PropertyForm.PropertyLabelFormat),
     "priority" -> of[Double](Formats.doubleFormat),
     "consequenceSteps" -> list(ConsequenceStepForm.form.mapping),
     "meansOfSatisfaction" -> list(MeanOfSatisfactionForm.form.mapping)

@@ -12,6 +12,6 @@ import play.api.data.format.Formats
 object ConsequenceForm {
   val form = Form(mapping(
     "severity" -> of(Formats.doubleFormat),
-    "effect" -> EffectForm.idForm.mapping
+    "effect" -> of(EffectForm.EffectIdFormat)
   )(Consequence.apply)(Consequence.unapply))
 }

@@ -6,13 +6,15 @@ import models.graph.DisplayProperty
 import models.intelligence.need.Need
 import models.graph.concept.{Concept, ConceptDAO}
 import models.graph.property.ValuedProperty
-import play.api.data.Form
+import play.api.data.{FormError, Form}
 import play.api.data.Forms._
+import play.api.data.format.Formatter
 
 /**
  * Created by vlynn on 23/03/15.
  */
 object ConceptForm {
+
   def idApply(id: Long): Concept = {
     ConceptDAO.getById(id)
   }
@@ -56,7 +58,7 @@ object ConceptForm {
    */
   val form = Form(
     mapping(
-      "label" -> nonEmptyText, //can't be modified
+      "label" -> nonEmptyText.verifying("incorrectCase", input => input.matches("^[A-Z][A-Za-z0-9_ ]*$")), //can't be modified
       "properties" -> list(ValuedPropertyForm.form.mapping),
       "rules" -> list(ValuedPropertyForm.form.mapping),
       "needs" -> optional(list(NeedForm.form.mapping)),
@@ -93,5 +95,24 @@ object ConceptForm {
    */
   private def unapplyForm(concept: Concept) : Option[(String, List[ValuedProperty], List[ValuedProperty], Option[List[Need]], DisplayProperty)] = {
     Some((concept.label, concept.properties, concept.rules, Some(concept.needs), concept.displayProperty))
+  }
+
+
+
+  def ConceptIdFormat: Formatter[Concept] = new Formatter[Concept] {
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Concept] = {
+      data.get(key) match {
+        case None => Left(Seq(FormError(key, "error.required")))
+        case Some(id) =>
+          ConceptDAO.getById(id.toLong) match {
+            case Concept.error => Left(Seq(FormError(key, "notFound")))
+            case concept => Right(concept)
+          }
+      }
+    }
+
+    override def unbind(key: String, value: Concept): Map[String, String] = {
+      Map(key -> value.id.toString)
+    }
   }
 }

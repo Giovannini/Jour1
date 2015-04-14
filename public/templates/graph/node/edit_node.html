@@ -49,7 +49,7 @@
                             id="property_{{$index}}_property"
                             name="property_{{$index}}_property"
                             ng-model="node.properties[$index].property"
-                            ng-options="prop as prop.label for prop in properties"
+                            ng-options="prop.label as prop.label for prop in properties"
                             ng-change="newPropertyValue($index)">
                     </select>
                 </div>
@@ -98,7 +98,7 @@
                             name="rules_{{$index}}_property"
                             ng-model="node.rules[$index].property"
                             ng-change="newRuleType($index)"
-                            ng-options="prop as prop.label for prop in properties">
+                            ng-options="prop.label as prop.label for prop in properties">
                     </select>
                 </div>
             </div>
@@ -153,12 +153,12 @@
                 It also provides information to the node to know how to change the affected property.
             </p>
         </div>
-        <!--<div ng-hide="canAddNeeds()">-->
-            <!--<p class="form-field__description error">-->
-                <!--You need to add some actions to the concept before settings its needs.-->
-            <!--</p>-->
-        <!--</div>-->
-        <div ><!--ng-show="canAddNeeds()"-->
+        <div ng-hide="canAddNeeds()">
+            <p class="form-field__description error">
+                You need to add some actions to the concept before settings its needs.
+            </p>
+        </div>
+        <div ng-show="canAddNeeds()">
             <div class="form-group highlight" ng-repeat="need in node.needs track by $index">
                 <div class="form-group">
                     <label class="form-group__label" for="needs_{{ $index }}_label">Name:</label>
@@ -178,8 +178,8 @@
                         <select
                                 id="needs_{{ $index }}_property"
                                 name="needs_{{ $index }}_property"
-                                ng-model="node.needs[$index].affectedProperty.label"
-                                ng-options="property.property.label as property.property.label for property in node.properties"></select>
+                                ng-model="node.needs[$index].affectedProperty"
+                                ng-options="p.property as p.property for p in node.properties"></select>
                     </div>
                 </div>
 
@@ -203,7 +203,7 @@
                                     <div class="form-group__input">
                                         <select
                                                 ng-options="effect.id as effect.label for effect in effects"
-                                                ng-model="node.needs[$parent.$index].consequenceSteps[$index].consequence.effect.id"></select>
+                                                ng-model="node.needs[$parent.$index].consequenceSteps[$index].consequence.effect"></select>
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -242,7 +242,7 @@
                                         <select
                                                 id="needs_{{ $parent.$index }}_means_{{ $index }}_action"
                                                 name="needs_{{ $parent.$index }}_means_{{ $index }}_action"
-                                                ng-model="node.needs[$parent.$index].meansOfSatisfaction[$index].action.id"
+                                                ng-model="node.needs[$parent.$index].meansOfSatisfaction[$index].action"
                                                 ng-options="action.id as action.label for action in actions"></select>
                                     </div>
                                 </div>
@@ -254,7 +254,7 @@
                                         <select
                                                 id="needs_{{ $parent.$index }}_means_{{ $index }}_concept"
                                                 name="needs_{{ $parent.$index }}_means_{{ $index }}_concept"
-                                                ng-model="node.needs[$parent.$index].meansOfSatisfaction[$index].concept.id"
+                                                ng-model="node.needs[$parent.$index].meansOfSatisfaction[$index].concept"
                                                 ng-options="concept.id as concept.label for concept in concepts"></select>
                                     </div>
                                 </div>
@@ -306,4 +306,14 @@
     </fieldset>
 
     <button type="submit" class="form-submit">{{ submit_button }}</button>
+
+    <fieldset class="form-field">
+        <div class="form-group">
+            <div class="form-group__label--single error">
+                <ul>
+                    <li ng-repeat="(key, error) in errors">{{ key | formKeyFiltering }}: {{ error | formErrorFiltering }}</li>
+                </ul>
+            </div>
+        </div>
+    </fieldset>
 </form>

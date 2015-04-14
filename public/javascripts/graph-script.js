@@ -652,12 +652,17 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
     };
 
     var newPropertyValue = function(propertyId) {
-        _node.properties[propertyId].value = _node.properties[propertyId].property.defaultValue;
+        for(var id in _properties) {
+            if(_node.properties[propertyId].property == _properties[id].label) {
+                _node.properties[propertyId].value = _properties[id].defaultValue;
+                break;
+            }
+        }
     };
 
     var addProperty = function() {
         _node.properties.push({
-            property: _properties[0],
+            property: _properties[0].label,
             value: ""
         });
         newPropertyValue(_node.properties.length - 1);
@@ -668,12 +673,17 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
     };
 
     var newRuleValue = function(ruleId) {
-        _node.rules[ruleId].value = _node.rules[ruleId].property.defaultValue;
+        for(var id in _properties) {
+            if(_node.rules[ruleId].property == _properties[id].label) {
+                _node.rules[ruleId].value = _properties[id].defaultValue;
+                break;
+            }
+        }
     };
 
     var addRule = function() {
         _node.rules.push({
-            property: _properties[0],
+            property: _properties[0].label,
             value: ""
         });
         newRuleValue(_node.rules.length - 1);
@@ -686,7 +696,7 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
     var addNeed = function() {
         _node.needs.push({
             label: "",
-            affectedProperty: _node.properties[0],
+            affectedProperty: _node.properties[0].label,
             priority: 0,
             consequenceSteps: [],
             meansOfSatisfaction: []
@@ -774,7 +784,7 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
 }];
 
 var NewNodeCtrl = ['$scope', '$routeParams', '$location', 'EditNodeFactory', function($scope, $routeParams, $location, EditNodeFactory) {
-    $scope.submit_button = "Edit";
+    $scope.submit_button = "Create";
     $scope.back_url = "#/";
     $scope.message = "Loading...";
 
@@ -821,11 +831,16 @@ var NewNodeCtrl = ['$scope', '$routeParams', '$location', 'EditNodeFactory', fun
     };
 
     $scope.submitNode = function() {
-        EditNodeFactory.submitNode(baseUrl+'concepts/new', "POST")(
+        var nodeToSend = EditNodeFactory.cleanNode($scope.node);
+        EditNodeFactory.submitNode(nodeToSend, baseUrl+'concepts/new', "POST")(
             function(response) {
                 $location.path("/node/"+$scope.node.label);
             },
-            function() {}
+            function(errors) {
+                console.log(errors);
+                $scope.message = "Failed to create node";
+                $scope.errors = errors.data;
+            }
         );
     }
 }];
@@ -840,65 +855,16 @@ var EditNodeCtrl = ['$scope', '$routeParams', '$location', 'Scopes', 'NodesFacto
         NodesFactory.searchNodes(
             function (root, display) {
                 for (var propertyIndex in display.properties) {
-                    for (var i = 0; i < $scope.properties.length; i++) {
-                        if (display.properties[propertyIndex].label === $scope.properties[i].label) {
-                            display.properties[propertyIndex] = $scope.properties[i];
-                        }
-                    }
-                }
-
-                function matchProperty(property) {
-                    for (var i = 0; i < $scope.properties.length; i++) {
-                        if (property.label == $scope.properties[i].label) {
-                            return $scope.properties[i];
-                        }
-                    }
-                }
-
-                function matchIdFromArray(actionId, actions) {
-                    for(var i = 0; i < actions.length; i++) {
-                        if(actionId == actions[i].id) {
-                            return actions[i]
-                        }
-                    }
-                }
-
-                function matchMean(actionId) {
-                    return matchIdFromArray(actionId, $scope.actions);
-                }
-
-                function matchEffect(effectId) {
-                    return matchIdFromArray(effectId, $scope.effects);
-                }
-
-                function matchConcept(conceptId) {
-                    return matchIdFromArray(conceptId, $scope.concepts);
-                }
-
-                for (var propertyIndex in display.properties) {
-                    display.properties[propertyIndex].property = matchProperty(display.properties[propertyIndex].property);
+                    display.properties[propertyIndex].property = display.properties[propertyIndex].property.label;
                 }
 
                 for (var ruleIndex in display.rules) {
-                    display.rules[ruleIndex].property = matchProperty(display.rules[ruleIndex].property);
+                    display.rules[ruleIndex].property = display.rules[ruleIndex].property.label;
                 }
 
                 for(var needIndex in display.needs) {
-                    console.log(display.needs[needIndex].id);
-
                     // Match the property
-                    display.needs[needIndex].affectedProperty = matchProperty(display.needs[needIndex].affectedProperty);
-
-                    // Match every action in the consequences
-                    for(var consequenceIndex in display.needs[needIndex].consequenceSteps) {
-                        display.needs[needIndex].consequenceSteps[consequenceIndex].consequence.effect = matchEffect(display.needs[needIndex].consequenceSteps[consequenceIndex].consequence.effect)
-                    }
-
-                    // Match every action in the means of satisfaction
-                    for(var actionIndex in display.needs[needIndex].meansOfSatisfaction) {
-                        display.needs[needIndex].meansOfSatisfaction[actionIndex].action = matchMean(display.needs[needIndex].meansOfSatisfaction[actionIndex].action);
-                        display.needs[needIndex].meansOfSatisfaction[actionIndex].concept = matchConcept(display.needs[needIndex].meansOfSatisfaction[actionIndex].concept);
-                    }
+                    display.needs[needIndex].affectedProperty = display.needs[needIndex].affectedProperty.label;
                 }
 
                 display.displayProperty = display.display;
@@ -949,8 +915,10 @@ var EditNodeCtrl = ['$scope', '$routeParams', '$location', 'Scopes', 'NodesFacto
     $scope.effects = EditNodeFactory.effects();
     $scope.concepts = EditNodeFactory.concepts();
 
+    $scope.newPropertyValue = EditNodeFactory.newPropertyValue;
     $scope.addProperty = EditNodeFactory.addProperty;
     $scope.removeProperty = EditNodeFactory.removeProperty;
+    $scope.newRuleType = EditNodeFactory.newRuleType;
     $scope.addRule = EditNodeFactory.addRule;
     $scope.removeRule = EditNodeFactory.removeRule;
     $scope.addNeed = EditNodeFactory.addNeed;
@@ -972,7 +940,6 @@ var EditNodeCtrl = ['$scope', '$routeParams', '$location', 'Scopes', 'NodesFacto
     };
 
     $scope.submitNode = function() {
-        // It's needed to send a copy of $scope.node, otherwise it'll triggers some unwanted $apply/$eval/$digest
         var nodeToSend = EditNodeFactory.cleanNode($scope.node);
         EditNodeFactory.submitNode(nodeToSend, baseUrl+'concepts/'+$routeParams.label, "PUT")(
             function(response) {
@@ -1213,6 +1180,57 @@ angular.module('graphEditor', ["ngResource", "ngRoute"])
                     }
                 })
                 .join(", ");
+        };
+    })
+    .filter('formKeyFiltering', function() {
+        function matchKey(key) {
+            var trad = {
+                "displayProperty": "Display",
+                "properties": "Property",
+                "label": "Name",
+                "zindex": "ZIndex",
+                "rules": "Rule",
+                "needs": "Need",
+                "affectedProperty": "Affected property",
+                "priority": "Priority",
+                "severity": "Severity",
+                "effect": "Effect",
+                "action": "Action"
+            };
+            if(trad.hasOwnProperty(key)) {
+                return trad[key];
+            } else {
+                return key;
+            }
+        }
+
+        return function(input) {
+            var split = input.split(".").map(function(element) {
+                var match_regex = element.match(/^([^\[]+)\[(\d+)\]$/i);
+                if(match_regex) {
+                    return matchKey(match_regex[1]) + " #"+match_regex[2];
+                } else {
+                    return matchKey(element);
+                }
+            });
+
+            return split.join(": ");
+        };
+    })
+    .filter('formErrorFiltering', function() {
+        return function(input) {
+            return input.map(function(input) {
+                var message = input;
+                switch (input) {
+                    case "notFound":
+                        message = "It does not exists";
+                        break;
+                    case "incorrectCase":
+                        message = "The name must be UpperCamelCase";
+                        break;
+                }
+                return message;
+            }).join(" ");
         };
     })
     .controller('ViewerController', ViewerController)

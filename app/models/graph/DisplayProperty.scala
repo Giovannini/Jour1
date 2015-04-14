@@ -26,11 +26,12 @@ object DisplayProperty {
   val form = Form(mapping(
                            "color" -> text,
                            "zindex" -> number
-                         )(DisplayProperty.apply)(DisplayProperty.unapply))
+                         )(DisplayProperty.applyForm)(DisplayProperty.unapply))
 
   def apply() = new DisplayProperty()
   def apply(color: String) = new DisplayProperty(color)
   def apply(zIndex: Int) =new DisplayProperty(zIndex)
+  def applyForm(color: String, zIndex: Int) = new DisplayProperty({ if(color.isEmpty()) "#aaaaaa" else color }, zIndex)
 
   def parseString(string: String): DisplayProperty = {
     val splittedString = string.split(", ").map(_.split(":"))

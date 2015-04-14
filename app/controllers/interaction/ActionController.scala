@@ -18,7 +18,7 @@ object ActionController extends Controller {
    * @return the main frame for the CRUD - see public/templates/action for more templates
    */
   def index = Action {
-    Ok(views.html.action.index())
+    Ok(views.html.interaction.action.index())
   }
 
   /**
@@ -34,7 +34,7 @@ object ActionController extends Controller {
       case Some(accept) if accept.contains("application/json") =>
         action
       case _ =>
-        Ok(views.html.action.index())
+        Ok(views.html.interaction.action.index())
     }
   }
 

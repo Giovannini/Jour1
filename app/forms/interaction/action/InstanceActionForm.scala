@@ -5,22 +5,11 @@ import forms.interaction.precondition.PreconditionForm
 import models.interaction.action.{InstanceAction, InstanceActionDAO}
 import models.interaction.parameter.{Parameter, ParameterReference}
 import models.interaction.precondition.Precondition
-import play.api.data.Form
+import play.api.data.{FormError, Form}
 import play.api.data.Forms._
+import play.api.data.format.Formatter
 
 object InstanceActionForm {
-  private def applyIdForm(id: Long): InstanceAction = {
-    InstanceActionDAO.getById(id)
-  }
-
-  private def unapplyIdForm(action: InstanceAction): Option[Long] = {
-    Some(action.id)
-  }
-
-  val idForm: Form[InstanceAction] = Form(
-    mapping("id" -> longNumber)(applyIdForm)(unapplyIdForm)
-  )
-
   lazy val subactionForm : Form[(InstanceAction, Map[ParameterReference, Parameter])] = Form(
     mapping(
       "id" -> longNumber,
@@ -64,5 +53,22 @@ object InstanceActionForm {
       precondition.id,
       parameters
     ))
+  }
+
+  def InstanceActionIdFormat: Formatter[InstanceAction] = new Formatter[InstanceAction] {
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], InstanceAction] = {
+      data.get(key) match {
+        case None => Left(Seq(FormError(key, "error.required")))
+        case Some(id) =>
+          InstanceActionDAO.getById(id.toLong) match {
+            case InstanceAction.error => Left(Seq(FormError(key, "notFound")))
+            case action => Right(action)
+          }
+      }
+    }
+
+    override def unbind(key: String, value: InstanceAction): Map[String, String] = {
+      Map(key -> value.id.toString)
+    }
   }
 }

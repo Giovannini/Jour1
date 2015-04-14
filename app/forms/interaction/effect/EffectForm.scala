@@ -3,8 +3,9 @@ package forms.interaction.effect
 import forms.interaction.parameter.ParameterForm
 import models.interaction.effect.{Effect, EffectDAO}
 import models.interaction.parameter.{Parameter, ParameterReference}
-import play.api.data.Form
+import play.api.data.{FormError, Form}
 import play.api.data.Forms._
+import play.api.data.format.Formatter
 
 object EffectForm {
   lazy val subEffectForm : Form[(Effect, Map[ParameterReference, Parameter])] = Form(
@@ -20,12 +21,6 @@ object EffectForm {
       "subActions" -> list(subEffectForm.mapping),
       "parameters" -> list(ParameterForm.referenceForm.mapping)
     )(applyForm)(unapplyForm)
-  )
-
-  val idForm: Form[Effect] = Form(
-    mapping(
-      "id" -> longNumber
-    )(applyIdForm)(unapplyIdForm)
   )
 
   private def applyForm(label: String,
@@ -54,12 +49,20 @@ object EffectForm {
     ))
   }
 
-  def applyIdForm(id: Long): Effect = {
-    EffectDAO.getById(id)
-  }
+  def EffectIdFormat: Formatter[Effect] = new Formatter[Effect] {
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Effect] = {
+      data.get(key) match {
+        case None => Left(Seq(FormError(key, "error.required")))
+        case Some(id) =>
+          EffectDAO.getById(id.toLong) match {
+            case Effect.error => Left(Seq(FormError(key, "notFound")))
+            case effect => Right(effect)
+          }
+      }
+    }
 
-  def unapplyIdForm(effect: Effect): Option[(Long)] = {
-    if(effect == Effect.error) None
-    else Some(effect.id)
+    override def unbind(key: String, value: Effect): Map[String, String] = {
+      Map(key -> value.id.toString)
+    }
   }
 }

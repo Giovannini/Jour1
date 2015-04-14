@@ -1,7 +1,7 @@
 package controllers.graph.property
 
 import forms.graph.property.PropertyForm
-import models.graph.concept.{Concept, ConceptDAO}
+import models.graph.concept.ConceptDAO
 import models.graph.property.PropertyDAO
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -12,7 +12,7 @@ object PropertyController extends Controller {
    * @return
    */
   def index = Action {
-    Ok(views.html.property.index())
+    Ok(views.html.graph.property.index())
   }
 
   /**
@@ -28,7 +28,7 @@ object PropertyController extends Controller {
       case Some(accept) if accept.contains("application/json") =>
         action
       case _ =>
-        Ok(views.html.property.index())
+        Ok(views.html.graph.property.index())
     }
   }
 
