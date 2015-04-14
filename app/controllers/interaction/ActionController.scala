@@ -9,11 +9,13 @@ import play.api.mvc._
 
 /**
  * CRUD of InstanceAction
+ * @author Julien PRADET
  */
 object ActionController extends Controller {
   /**
    * Displays the SinglePageApp for CRUDing InstanceAction
-   * @return
+   * @author Julien PRADET
+   * @return the main frame for the CRUD - see public/templates/action for more templates
    */
   def index = Action {
     Ok(views.html.action.index())
@@ -22,6 +24,7 @@ object ActionController extends Controller {
   /**
    * Make sure that the request is in json
    * Otherwise, it redirects to the graph index
+   * @author Julien PRADET
    * @param request request sent by the user
    * @param action action to display if the request is correct
    * @return redirects to the index or displays the information matching the request
@@ -35,11 +38,21 @@ object ActionController extends Controller {
     }
   }
 
+  /**
+   * Gets the list of actions (every entry in the rules table) in JSON
+   * @author Julien PRADET
+   * @return Status that returns JSON
+   */
   def getActions: Action[AnyContent] = Action { request =>
     val actions = InstanceActionDAO.getAll
     Ok(Json.toJson(actions.map(_.toJson)))
   }
 
+  /**
+   * Gets the list of effects in JSON (rules that starts with "EFFECT_")
+   * @author Julien PRADET
+   * @return Status that returns JSON
+   */
   def getEffects: Action[AnyContent] = Action { request =>
     val effects = InstanceActionDAO.getAllEffects
     Ok(Json.toJson(effects.map(_.toJson)))
@@ -47,6 +60,7 @@ object ActionController extends Controller {
 
   /**
    * Create a new Instance action
+   * @author Julien PRADET
    * @param label of the action
    * @return the json of the created action
    */
@@ -83,6 +97,7 @@ object ActionController extends Controller {
 
   /**
    * Get an InstanceAction and returns it in JSON
+   * @author Julien PRADET
    * @param label of the action
    * @return
    */
@@ -100,7 +115,8 @@ object ActionController extends Controller {
   }
 
   /**
-   * Updates an existing instance
+   * Updates an existing action
+   * @author Julien PRADET
    * @param label of the action
    * @return
    */
@@ -139,7 +155,8 @@ object ActionController extends Controller {
   }
 
   /**
-   * Deletes an existing instance
+   * Deletes an existing action
+   * @author Julien PRADET
    * @param label of the action
    * @return
    */

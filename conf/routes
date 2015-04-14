@@ -39,10 +39,7 @@ GET           /concepts/:label/:deepness                               controlle
 POST          /graph/relations/:label/:source/:target                  controllers.graph.relation.RelationGraphController.addRelationToGraph(label: String, source: Long, target: Long)
 DELETE        /graph/relations/:label/:source/:target                  controllers.graph.relation.RelationGraphController.removeRelationToGraph(label: String, source: Long, target: Long)
 
-POST          /graph/relations/:label                                  controllers.graph.relation.RelationGraphController.createRelation(label: String)
 GET           /graph/relations/:label                                  controllers.graph.relation.RelationGraphController.getRelation(label: String)
-PUT           /graph/relations/:label                                  controllers.graph.relation.RelationGraphController.updateRelation(label: String)
-DELETE        /graph/relations/:label                                  controllers.graph.relation.RelationGraphController.deleteRelation(label: String)
 
 # Preconditions CRUD
 GET           /preconditions                                           controllers.interaction.precondition.PreconditionController.getPreconditions
@@ -60,10 +57,10 @@ DELETE        /properties/:id                                          controlle
 
 # Relations visualisation
 GET           /relations                                               controllers.graph.relation.RelationSQLController.index
-GET           /relations/:label                                        controllers.graph.relation.RelationSQLController.readAction(label: String)
-POST          /relations/:label                                        controllers.graph.relation.RelationSQLController.createRelation(label: String)
-PUT           /relations/:label                                        controllers.graph.relation.RelationSQLController.updateRelation(label: String)
-DELETE        /relations/:label                                        controllers.graph.relation.RelationSQLController.deleteRelation(label: String)
+#GET           /relations/:label                                        controllers.graph.relation.RelationSQLController.readAction(label: String)
+#POST          /relations/:label                                        controllers.graph.relation.RelationSQLController.createRelation(label: String)
+#PUT           /relations/:label                                        controllers.graph.relation.RelationSQLController.updateRelation(label: String)
+#DELETE        /relations/:label                                        controllers.graph.relation.RelationSQLController.deleteRelation(label: String)
 
 # Action CRUD
 GET           /actions                                                 controllers.interaction.ActionController.index
@@ -86,8 +83,6 @@ POST          /map/action                                              controlle
 GET           /map/relations/:conceptId                                controllers.RestCall.getAllActionsOf(conceptId: Int)
 
 GET           /map/socket                                              controllers.map.MapController.indexWS
-GET           /map/socket/start                                        controllers.map.MapController.start
-GET           /map/socket/stop                                         controllers.map.MapController.stop
 
 GET           /next                                                    controllers.map.Evolution.next()
 GET           /pause                                                   controllers.map.Evolution.pause()

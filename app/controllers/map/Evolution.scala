@@ -6,10 +6,19 @@ import actors.{World, Listener}
 import akka.actor.{ActorRef, Props, ActorSystem}
 import play.api.mvc._
 
+/**
+ * Managing the automated evolution of the world
+ */
 object Evolution extends Controller {
-  private val nrOfWorkers = 4
+  private val nrOfWorkers = 4 /* Number of workers available (most of the time it's the number of cpu/cores available) */
 
-  private val master = {
+  var master: ActorRef = _ /* World Actor */
+  var ongoing: Boolean = false /* Boolean that says if the loop is ongoing or not */
+
+  /**
+   * Create a master actor that will take care of the evolution
+   */
+  private def getMaster() = {
     // Create an Akka system
     val system = ActorSystem("IntelligenceSystem")
 
@@ -17,22 +26,51 @@ object Evolution extends Controller {
     val listener = system.actorOf(Props[Listener], name = "listener")
 
     // create the master
-    system.actorOf(Props(new World(nrOfWorkers, listener)), name = "master")
+    master = system.actorOf(Props(new World(nrOfWorkers, listener)),
+      name = "master")
   }
 
+  /**
+   * Create a master that will do only one iteration of the evolution
+   * @return Success of failure of the operation
+   */
   def next() = Action {
-    master ! NewTurn
-    Ok("OK")
+    if(!ongoing) {
+      getMaster()
+      master ! NewTurn
+      Ok("OK")
+    } else {
+      InternalServerError("Loop is already ongoing")
+    }
   }
 
+  /**
+   * Tells the ongoing master that it can end the loop
+   * @return Success of failure of the operation
+   */
   def pause() = Action {
-    master ! StopLoop
-    Ok("OK")
+    if(ongoing) {
+      ongoing = false
+      master ! StopLoop
+      Ok("OK")
+    } else {
+      InternalServerError("No loop is running")
+    }
   }
 
+  /**
+   * Create a new master that launches a new loop
+   * @return Success of failure of the operation
+   */
   def resume() = Action {
-    master ! StartLoop
-    Ok("OK")
+    if(!ongoing) {
+      ongoing = true
+      getMaster()
+      master ! StartLoop
+      Ok("OK")
+    } else {
+      InternalServerError("Loop is already ongoing")
+    }
   }
 
 }

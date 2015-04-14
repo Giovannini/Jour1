@@ -111,8 +111,8 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
       //self ! NewTurn
     } else {
       listener ! StopComputing
-//      for (worker <- 1 to nrOfWorkers) workerRouter ! StopComputing
-//      context.stop(self)
+      for (worker <- 1 to nrOfWorkers) workerRouter ! StopComputing
+      context.stop(self)
     }
   }
 

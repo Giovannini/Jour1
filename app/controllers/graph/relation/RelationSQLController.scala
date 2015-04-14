@@ -2,9 +2,13 @@ package controllers.graph.relation
 
 import play.api.mvc._
 
+/**
+ * CRUD relations in the SQL DB
+ * @author Julien PRADET
+ */
 object RelationSQLController extends Controller {
   /**
-   * Displays the SinglePageApp for CRUDing InstanceAction
+   * Displays the SinglePageApp for CRUDing Relations in SQL DB
    * @return
    */
   def index = Action {

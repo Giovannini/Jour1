@@ -5,12 +5,14 @@ import models.interaction.action.{InstanceAction, InstanceActionDAO}
 import play.api.mvc._
 
 /**
- * Controller that displays the concept graph to the user
+ * Controller that displays the concepts graph to the user
+ * @author Julien PRADET
  */
 object GraphVisualisation extends Controller {
   /**
    * The graph displayed to the user allows him to entirely manage the graph with an user friendly interface
-   * @return
+   * @author Julien PRADET
+   * @return the main view of the map
    */
   def index: Action[AnyContent] = Action {
     Ok(views.html.graph.index())
@@ -19,6 +21,7 @@ object GraphVisualisation extends Controller {
   /**
    * Make sure that the request is in json
    * Otherwise, it redirects to the graph index
+   * @author Julien PRADET
    * @param request request sent by the user
    * @param action action to display if the request is correct
    * @return redirects to the index or displays the information matching the request
@@ -34,6 +37,7 @@ object GraphVisualisation extends Controller {
 
   /**
    * Gets a property
+   * @author Julien PRADET
    * @param propertyId property ID
    * @return Property in json if it's found. 404 otherwise
    */
@@ -50,6 +54,7 @@ object GraphVisualisation extends Controller {
 
   /**
    * Gets an action
+   * @author Julien PRADET
    * @param actionLabel action label
    * @return Action in json if it's found. 404 otherwise
    */
