@@ -17,8 +17,17 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.{Try, Random, Failure, Success}
 
+/**
+ * Controller that manages the display of the map and the websockets to update the map for the view
+ * @author Thomas GIOVANNINI
+ */
 object MapController extends Controller with Secured {
 
+  /**
+   * Displays the map
+   * @author Julien PRADET
+   * @return the html frame for the map view
+   */
   def show = withAuth {
     implicit request => userId =>
       Ok(views.html.map.index())
@@ -28,6 +37,7 @@ object MapController extends Controller with Secured {
 
   /**
    * This function create a WebSocket using the enumerator linked to the current user.
+   * @author Thomas GIOVANNINI
    */
   def indexWS = withAuthWS {
     userId =>
@@ -73,26 +83,11 @@ object MapController extends Controller with Secured {
         }, enumerator.asInstanceOf[Enumerator[JsValue]])
       }
   }
-
-  /**
-   *
-   * @return
-   */
-  def start = withAuth {
-    userId => implicit request =>
-      mapSocketActor ! Start(userId)
-      Ok("")
-  }
-
-
-  def stop = withAuth {
-    userId => implicit request =>
-      mapSocketActor ! Stop(userId)
-      Ok("")
-  }
-
 }
 
+/*
+ * TODO
+ */
 trait Secured {
 
   def username(request: RequestHeader) = {
