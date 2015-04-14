@@ -137,7 +137,7 @@ object PreconditionController extends Controller {
       val listOfActions = actions.map(_.label) mkString (" - ")
       InternalServerError("This precondition is used in following actions : " + listOfActions)
     }
-    // if one precondition at least exists with the precondition that we want to delete as a subcondition, the precondition can't be deleted
+    // If one precondition at least exists with the precondition that we want to delete as a subcondition, the precondition can't be deleted
     else if (preconditions != List()) {
       val listOfPreconditions = preconditions.map(_.label) mkString (" - ")
       InternalServerError("This precondition is used in following preconditions : " + listOfPreconditions)

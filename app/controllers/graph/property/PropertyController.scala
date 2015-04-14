@@ -122,8 +122,13 @@ object PropertyController extends Controller {
   def deleteProperty(id: Long) = Action {
     // Get all concepts using the property
     val concepts = ConceptDAO.getAll
-      .filter(concept => concept.getOwnProperties
-        .exists(property => property.property.id == id)
+      .filter(
+        concept => {
+          concept.getOwnProperties
+            .exists(property => property.property.id == id) ||
+          concept.getOwnRules
+            .exists(rule => rule.property.id == id)
+        }
       )
 
     // If one concept at least exists the property can't be deleted

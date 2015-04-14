@@ -163,6 +163,15 @@ case class Concept(
   }
 
   /**
+   * Get only rules of the concept without those of its parents
+   * @author Aurélie LORGEOUX
+   * @return list of rules
+   */
+  def getOwnRules: List[ValuedProperty] = {
+    _rules
+  }
+
+  /**
    * Get only properties of the concept without those of its parents
    * @author Aurélie LORGEOUX
    * @return list of properties
