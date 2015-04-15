@@ -4,6 +4,7 @@ import actors.WorldCommunication
 import models.interaction.LogInteraction
 
 /**
- * Created by giovannini on 3/30/15.
+ *
+ * @param actionLog
  */
-case class ResultAction(actionLog: List[LogInteraction]) extends WorldCommunication
+case class ResultAction(actionLog: (List[LogInteraction], List[LogInteraction], List[LogInteraction])) extends WorldCommunication

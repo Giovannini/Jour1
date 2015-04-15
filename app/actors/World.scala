@@ -22,7 +22,7 @@ import scala.language.postfixOps
  */
 class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
 
-  var logs: List[List[LogInteraction]] = List() /* Logs for a single turn */
+  var logs: (List[LogInteraction], List[LogInteraction], List[LogInteraction]) = (Nil, Nil, Nil) /* Logs for a single turn */
   var nrOfResults: Int = _ /* Number of results received */
   var nrOfInstances: Int = _ /* Number of instances that needs to be calculated */
   var start: Long = System.currentTimeMillis /* Starting point of the turn */
@@ -88,11 +88,17 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
       launchComputation(NewTurn)
     case ResultAction(logList) =>
       nrOfResults += 1
-      logs = logList :: logs
+      logs = mergeLogs(logList, logs)
       if (nrOfResults == nrOfInstances) {
         updateMap(logs)
         endComputation()
       }
+  }
+
+  def mergeLogs(triplet1: (List[LogInteraction], List[LogInteraction], List[LogInteraction]),
+    triplet2: (List[LogInteraction], List[LogInteraction], List[LogInteraction]))
+  : (List[LogInteraction], List[LogInteraction], List[LogInteraction]) = {
+    (triplet1._1 ++ triplet2._1, triplet1._2 ++ triplet2._2, triplet1._3 ++ triplet2._3)
   }
 
   /**
@@ -121,8 +127,13 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
    * @author Thomas GIOVANNINI
    * @param logs logs about all the actions triggered durring a turn
    */
-  private def updateMap(logs: List[List[LogInteraction]]): Unit = {
-    val logList = logs.flatten.sortBy(_.priority)
+  private def updateMap(logs: (List[LogInteraction], List[LogInteraction], List[LogInteraction])): Unit = {
+    val logList = logs match {
+      case (consequencies, properties, actions) =>
+        consequencies.sortBy(_.priority) ++
+        properties.sortBy(_.priority) ++
+        actions.sortBy(_.priority)
+    }
     val resultInstances = logList.map(_.execute())
     val json = getMapModificationJson(logList, resultInstances)
 //    println("End of a turn, updating the map.")
@@ -136,7 +147,7 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
    */
   private def launchComputation(launcher: Launcher): Unit = {
     if (!ongoing) {
-      logs = List()
+      logs = (Nil, Nil, Nil)
       ongoing = true
       val instancesWithNeeds = getInstancesWithNeeds
       setNumberOfInstancesToCompute(instancesWithNeeds.length)

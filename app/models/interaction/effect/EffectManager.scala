@@ -42,6 +42,22 @@ object EffectManager {
       ).save
     }
     nameToId += "hunger" -> hunger
+
+    val starve = {
+      val starvingInstanceID = ParameterReference("starvingInstance", "Long")
+      Effect(0L, "EFFECT_STARVE",
+        List(
+          (InstanceActionManager.nameToInstanceAction("_addToProperty").toEffect,
+            Map(
+              ParameterReference("instanceID", "Long") -> starvingInstanceID,
+              ParameterReference("propertyName", "Property") -> ParameterValue("Wound", "Property"),
+              ParameterReference("valueToAdd", "Int") -> ParameterValue(1, "Int")
+            ))
+        ),
+        List(starvingInstanceID)
+      ).save
+    }
+    nameToId += "starve" -> starve
   }
 
 

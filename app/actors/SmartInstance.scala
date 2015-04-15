@@ -75,6 +75,7 @@ class SmartInstance extends Actor {
   def getActionFor(instance: Instance, sensedInstances: List[Instance]): List[LogInteraction] = {
     val (action, destination) = instance.selectAction(sensedInstances)
     if (!action.isError) {
+      println(instance.label + instance.id + " chose action " + action.label + " on " + destination.label + destination.id)
       InstanceActionParser.parseActionForLog(action, List(instance.id, destination.id))
     } else {
       List()
@@ -91,7 +92,7 @@ class SmartInstance extends Actor {
       val consequencies = instance.applyConsequencies()
       val properties = updatePropertiesFromEnvironment(instance, sensedInstances) //TODO time consuming
       val actions = getActionFor(instance, sensedInstances)
-      val logs = consequencies ++ properties ++ actions
+      val logs = (consequencies, properties, actions)
       sender ! ResultAction(logs)
     case StopComputing =>
       context.stop(self)

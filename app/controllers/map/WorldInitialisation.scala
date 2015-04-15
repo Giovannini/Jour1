@@ -175,7 +175,7 @@ object WorldInitialisation extends Controller {
      ######  Creation of needs  ######
      #################################*/
     val needFood = NeedDAO.save(Need(0L, "Hunger", propertyHunger, priority = 6,
-      List(ConsequenceStep(10, Consequence(8, EffectManager.nameToId("death"))),
+      List(ConsequenceStep(10, Consequence(8, EffectManager.nameToId("starve"))),
         ConsequenceStep(0, Consequence(2, EffectManager.nameToId("hunger")))),
       List(MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Eat"), conceptApple),
         MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Eat"), conceptGrass),

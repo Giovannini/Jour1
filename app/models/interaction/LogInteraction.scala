@@ -14,7 +14,7 @@ case class LogInteraction(value: String, priority: Int){
 
   def execute(): Instance = {
     Try {
-//      println("Executing LOG: " + this.value)
+      println("Executing LOG: " + this.value)
       val splitted = value.split(" ")
       splitted(0) match {
         case "ADD" =>/*###################################################*/

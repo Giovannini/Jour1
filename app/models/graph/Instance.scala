@@ -212,7 +212,7 @@ case class Instance(
           destinationList.filter(_.concept == this.concept)
         } else {
           destinationList.filter(instance => mean.destinationConcepts.contains(instance.concept))
-        }
+        }.filter(_.isNotError)
       }
 
       def retrieveBestAction(possibleActions: List[MeanOfSatisfaction])
@@ -259,6 +259,11 @@ case class Instance(
       }
 
       retrieveBestAction(possibleActions)
+    }
+
+    def isNotError: Boolean = {
+      //TODO compare not only with label
+      this.label != Instance.error.label
     }
   }
 
