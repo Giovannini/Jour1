@@ -68,7 +68,6 @@ object ParameterForm {
         case None => Left(Seq(FormError(key+".isParam", "error.isParamUndefined")))
         case Some(v) =>
           if(v.toBoolean) {
-            println(data.get(key+".value.reference"))
             val reference = data.get(key+".value.reference")
             val valueType = data.get(key+".value.type")
             (reference, valueType) match {

@@ -31,7 +31,6 @@ object NeedController {
             // The need is new
             NeedDAO.save(need)
           case id =>
-            println(id)
             // The need is updated
             NeedDAO.update(id, need)
         }

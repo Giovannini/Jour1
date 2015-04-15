@@ -56,7 +56,6 @@ object RelationGraphStatement {
                 "return " +
                 "n.label as source_label, " +
                 "m.label as destination_label"
-    println(query)
     Cypher(query)
   }
 

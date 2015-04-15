@@ -64,7 +64,6 @@ object RelationSqlDAO {
    */
   def save(relationName: String): Long = {
     val id = InstanceActionDAO.getByName(relationName).id
-    println(id)
     DB.withConnection { implicit connection =>
       val statement = RelationSQLStatement.add(id, relationName)
       val optionId: Option[Long] = statement.executeInsert()
