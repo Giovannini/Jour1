@@ -40,7 +40,7 @@ object InstanceActionDAO {
    * @author Aurélie LORGEOUX
    * @return number of rules deleted
    */
-  def clearDB(): Int = {
+  def clear(): Boolean = {
     mappingId = mappingId.empty
     mappingName = mappingName.empty
     InteractionDAO.clearDB()
@@ -93,25 +93,28 @@ object InstanceActionDAO {
    * @return rule identified by id
    */
   def getById(id: Long): InstanceAction = {
-    Try {
-      mappingId.getOrElse(id, {
-        DB.withConnection { implicit connection =>
-          val statement = InteractionStatement.get(id)
-          val instance = statement.as(actionParser.singleOpt).getOrElse(InstanceAction.error)
-          if (instance != InstanceAction.error) {
-            mappingId += id -> instance
-            mappingName += instance.label -> instance
-          }
-          instance
+    mappingId.getOrElse(id, {
+      val action = DB.withConnection { implicit connection =>
+        val statement = InteractionStatement.get(id)
+        Try {
+          statement.as(actionParser.singleOpt).getOrElse(InstanceAction.error)
+        } match {
+          case Failure(e) =>
+            println("Error while trying to retrieve an interaction by its ID from the DB:")
+            println(e.getStackTrace)
+            InstanceAction.error
+          case Success(action) =>
+            action
         }
-      })
-    } match {
-      case Success(action) => action
-      case Failure(e) =>
-        println("Error while trying to retrieve an interaction by its ID from the DB:")
-        println(e.getStackTrace)
-        InstanceAction.error
-    }
+      }
+
+      if (action != InstanceAction.error) {
+        mappingId += id -> action
+        mappingName += action.label -> action
+      }
+
+      action
+    })
   }
 
   /**
@@ -121,25 +124,27 @@ object InstanceActionDAO {
    * @return rule identified by id
    */
   def getByName(name: String): InstanceAction = {
-    Try {
-      mappingName.getOrElse(name, {
-        DB.withConnection { implicit connection =>
-          val statement = InteractionStatement.getByName(name)
-          val instance = statement.as(actionParser.singleOpt).getOrElse(InstanceAction.error)
-          if(instance != InstanceAction.error) {
-            mappingName += name -> instance
-            mappingId += instance.id -> instance
-          }
-          instance
+    mappingName.getOrElse(name, {
+      DB.withConnection { implicit connection =>
+        val statement = InteractionStatement.getByName(name)
+
+        val action = Try {
+          statement.as(actionParser.singleOpt).getOrElse(InstanceAction.error)
+        } match {
+          case Success(a) => a
+          case Failure(e) =>
+            println("Error while trying to retrieve an interaction by its name from the DB:")
+            println(e.getStackTrace)
+            InstanceAction.error
         }
-      })
-    } match {
-      case Success(action) => action
-      case Failure(e) =>
-        println("Error while trying to retrieve an interaction by its name from the DB:")
-        println(e.getStackTrace)
-        InstanceAction.error
-    }
+
+        if(action != InstanceAction.error) {
+          mappingId += action.id -> action
+          mappingName += name -> action
+        }
+        action
+      }
+    })
   }
 
   /**

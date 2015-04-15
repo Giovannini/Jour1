@@ -15,11 +15,11 @@ case class MeanOfSatisfaction(action: InstanceAction, destinationConcept: Concep
 
   val destinationConcepts = destinationConcept :: destinationConcept.descendance
 
-  override def toString = action.id + " -> " + destinationConcepts.map(_.id).mkString(",")
+  override def toString = action.id + " -> " + destinationConcept.id
 
   def toJson : JsValue = Json.obj(
     "action" -> action.id,
-    "concept" -> destinationConcepts.map(_.id).head
+    "concept" -> destinationConcept.id
   )
 }
 

@@ -16,7 +16,7 @@ object RelationSqlDAO {
 
   implicit val connection = Application.connection
 
-  private val mapping = collection.mutable.Map.empty[Long, Relation]
+  private var mapping = collection.mutable.Map.empty[Long, Relation]
 
   /**
    * Parse relation to interact with database
@@ -34,10 +34,12 @@ object RelationSqlDAO {
    * @author Aurélie LORGEOUX
    * @return number of relations deleted
    */
-  def clear: Int = {
+  def clear(): Boolean = {
+    mapping = mapping.empty
     DB.withConnection { implicit connection =>
       val statement = RelationSQLStatement.clearDB
-      statement.executeUpdate
+      statement.executeUpdate()
+      true
     }
   }
 
@@ -62,6 +64,7 @@ object RelationSqlDAO {
    */
   def save(relationName: String): Long = {
     val id = InstanceActionDAO.getByName(relationName).id
+    println(id)
     DB.withConnection { implicit connection =>
       val statement = RelationSQLStatement.add(id, relationName)
       val optionId: Option[Long] = statement.executeInsert()

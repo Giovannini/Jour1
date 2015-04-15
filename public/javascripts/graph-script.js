@@ -708,7 +708,10 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
     };
 
     var addMeans = function(needId) {
-        _node.needs[needId].meansOfSatisfaction.push(_actions[0]);
+        _node.needs[needId].meansOfSatisfaction.push({
+            action: _actions[0].id,
+            concept: _concepts[0].id
+        });
     };
 
     var removeMeans = function(needId, meansId) {
@@ -718,7 +721,7 @@ var EditNodeFactory = ['$routeParams', '$resource', 'NodesFactory', function($ro
     var addConsequence = function(needId) {
         _node.needs[needId].consequenceSteps.push({
             consequence: {
-                effects: [_effects[0]],
+                effect: [_effects[0].id],
                 severity: ""
             },
             value: ""
@@ -837,7 +840,6 @@ var NewNodeCtrl = ['$scope', '$routeParams', '$location', 'EditNodeFactory', fun
                 $location.path("/node/"+$scope.node.label);
             },
             function(errors) {
-                console.log(errors);
                 $scope.message = "Failed to create node";
                 $scope.errors = errors.data;
             }
@@ -924,6 +926,7 @@ var EditNodeCtrl = ['$scope', '$routeParams', '$location', 'Scopes', 'NodesFacto
     $scope.addNeed = EditNodeFactory.addNeed;
     $scope.removeNeed = EditNodeFactory.removeNeed;
     $scope.canAddNeeds = function() {
+        console.log($scope.actions);
         return typeof $scope.actions != "undefined"
             && $scope.actions != null
             && $scope.actions.length > 0;
@@ -944,9 +947,11 @@ var EditNodeCtrl = ['$scope', '$routeParams', '$location', 'Scopes', 'NodesFacto
         EditNodeFactory.submitNode(nodeToSend, baseUrl+'concepts/'+$routeParams.label, "PUT")(
             function(response) {
                 console.log(response);
-                //$location.path("/node/"+$scope.node.label);
+                $location.path("/node/"+$scope.node.label);
             },
-            function() {
+            function(errors) {
+                $scope.message = "Failed to create node";
+                $scope.errors = errors.data;
             }
         );
     }
@@ -1195,7 +1200,9 @@ angular.module('graphEditor', ["ngResource", "ngRoute"])
                 "priority": "Priority",
                 "severity": "Severity",
                 "effect": "Effect",
-                "action": "Action"
+                "action": "Action",
+                "consequenceSteps": "Consequence",
+                "meansOfSatisfaction": "Mean of satisfaction"
             };
             if(trad.hasOwnProperty(key)) {
                 return trad[key];

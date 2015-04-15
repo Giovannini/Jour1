@@ -242,7 +242,7 @@
                                         <select
                                                 id="needs_{{ $parent.$index }}_means_{{ $index }}_action"
                                                 name="needs_{{ $parent.$index }}_means_{{ $index }}_action"
-                                                ng-model="node.needs[$parent.$index].meansOfSatisfaction[$index].action"
+                                                ng-model="means.action"
                                                 ng-options="action.id as action.label for action in actions"></select>
                                     </div>
                                 </div>
@@ -254,7 +254,7 @@
                                         <select
                                                 id="needs_{{ $parent.$index }}_means_{{ $index }}_concept"
                                                 name="needs_{{ $parent.$index }}_means_{{ $index }}_concept"
-                                                ng-model="node.needs[$parent.$index].meansOfSatisfaction[$index].concept"
+                                                ng-model="means.concept"
                                                 ng-options="concept.id as concept.label for concept in concepts"></select>
                                     </div>
                                 </div>

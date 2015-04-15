@@ -39,11 +39,12 @@ object NeedDAO {
     }
   }
 
-  def clear: Boolean = {
+  def clear(): Boolean = {
     mapping = mapping.empty
     DB.withConnection { implicit connection =>
       val statement = NeedStatement.clearDB
-      statement.execute()
+      statement.executeUpdate()
+      true
     }
   }
 
@@ -88,9 +89,10 @@ object NeedDAO {
       if(numberRowUpdated < 1) {
         Need.error
       } else {
-        val newNeed = NeedDAO.getById(needId)
         mapping.remove(needId)
+        val newNeed = NeedDAO.getById(needId)
         mapping += needId -> newNeed
+
         newNeed
       }
     }
@@ -106,6 +108,7 @@ object NeedDAO {
   def delete(id: Long): Boolean = {
     DB.withConnection { implicit connection =>
       val statement = NeedStatement.remove(id)
+      mapping.remove(id)
       statement.execute()
     }
   }

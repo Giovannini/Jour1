@@ -58,9 +58,9 @@ case class Concept(
    */
   def toJson: JsValue = {
     Json.obj("label" -> JsString(label),
-      "properties" -> properties.map(_.toJson),
-      "rules" -> rules.map(_.toJson),
-      "needs" -> needs.map(_.toJson),
+      "properties" -> _properties.map(_.toJson),
+      "rules" -> _rules.map(_.toJson),
+      "needs" -> _needs.map(_.toJson),
       "type" -> JsString("CONCEPT"),
       "id" -> JsNumber(hashCode()),
       "display" -> displayProperty.toJson)
@@ -84,9 +84,9 @@ case class Concept(
 
   def toNodePropertiesString = {
     "{ label: \"" + label + "\"," +
-    " properties: [" + properties.map("\"" + _.toString + "\"").mkString(",") + "]," +
-    " rules: [" + rules.map("\"" + _.toString + "\"").mkString(",") + "]," +
-    " needs: [" + needs.map("\"" + _.id + "\"").mkString(",") + "]," +
+    " properties: [" + _properties.map("\"" + _.toString + "\"").mkString(",") + "]," +
+    " rules: [" + _rules.map("\"" + _.toString + "\"").mkString(",") + "]," +
+    " needs: [" + _needs.map("\"" + _.id + "\"").mkString(",") + "]," +
     " display: \"" + displayProperty + "\"," +
     " type: \"CONCEPT\"," +
     " id:" + id + "}"
@@ -144,12 +144,12 @@ case class Concept(
   lazy val getPossibleActionsAndDestinations: Map[InstanceAction, List[Concept]] = {
     ConceptDAO.getReachableRelations(id)
       .groupBy(_._1)
-      .map(tuple =>
+      .map(tuple => {
         (
           RelationSqlDAO.getActionFromRelationId(tuple._1.id),
           tuple._2.unzip._2.flatMap(concept => concept :: concept.getDescendance)
         )
-      )
+      })
   }
 
   def withNeeds(needs: List[Need]): Concept = {
@@ -167,18 +167,21 @@ case class Concept(
    * @author Aurélie LORGEOUX
    * @return list of rules
    */
-  def getOwnRules: List[ValuedProperty] = {
-    _rules
-  }
+  def getOwnRules: List[ValuedProperty] = _rules
 
   /**
    * Get only properties of the concept without those of its parents
    * @author Aurélie LORGEOUX
    * @return list of properties
    */
-  def getOwnProperties: List[ValuedProperty] = {
-    _properties
-  }
+  def getOwnProperties: List[ValuedProperty] = _properties
+
+  /**
+   * Get only the needs of the concept without thos of its parents
+   * @author Julien PRADET
+   * @return list of needs
+   */
+  def getOwnNeeds: List[Need] = _needs
 }
 
 object Concept {

@@ -36,7 +36,7 @@ object EffectDAO {
    * @author Aurélie LORGEOUX
    * @return number of rules deleted
    */
-  def clearDB(): Int = InteractionDAO.clearDB()
+  def clearDB(): Boolean = InteractionDAO.clearDB()
 
   /**
    * Get all rules saved in database

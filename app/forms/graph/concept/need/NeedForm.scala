@@ -14,7 +14,7 @@ object NeedForm {
 
   val form = Form(mapping(
     "id" -> optional[Long](longNumber),
-    "label" -> text,
+    "label" -> nonEmptyText,
     "affectedProperty" -> of(PropertyForm.PropertyLabelFormat),
     "priority" -> of[Double](Formats.doubleFormat),
     "consequenceSteps" -> list(ConsequenceStepForm.form.mapping),

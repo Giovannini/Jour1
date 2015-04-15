@@ -50,12 +50,13 @@ object PropertyDAO {
    * @author Thomas GIOVANNINI
    * @return number of properties deleted
    */
-  def clear: Int = {
+  def clear(): Boolean = {
     mappingId = mappingId.empty
     mappingName = mappingName.empty
     DB.withConnection { implicit connection =>
       val statement = PropertyStatement.clearDB
-      statement.executeUpdate
+      statement.executeUpdate()
+      true
     }
   }
 

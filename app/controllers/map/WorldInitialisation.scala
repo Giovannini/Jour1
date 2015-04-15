@@ -8,7 +8,7 @@ import models.graph.relation.{RelationGraphDAO, RelationSqlDAO}
 import models.intelligence.MeanOfSatisfaction
 import models.intelligence.consequence.{Consequence, ConsequenceStep}
 import models.intelligence.need.{Need, NeedDAO}
-import models.interaction.action.InstanceActionManager
+import models.interaction.action.{InstanceActionDAO, InstanceActionManager}
 import models.interaction.effect.EffectManager
 import models.interaction.precondition.PreconditionManager
 import models.map.{WorldInit, WorldMap}
@@ -39,6 +39,16 @@ object WorldInitialisation extends Controller {
   }
 
   /**
+   * Clear the instances of the world to start a new one
+   * @author Julien PRADET
+   */
+  def clearWorld: Action[AnyContent] = Action {
+    Application.map.clear()
+    isWorldMapInitialized = false
+    Ok("World cleared")
+  }
+
+  /**
    * Generate a fake world map
    * @author Thomas GIOVANNINI
    * @return a fake world map
@@ -58,7 +68,13 @@ object WorldInitialisation extends Controller {
    */
   def initialization: Action[AnyContent] = {
     Action {
-      val result = ConceptDAO.clearDB()
+      val result = {
+        ConceptDAO.clear() &&
+           PropertyDAO.clear() &&
+           RelationSqlDAO.clear() &&
+           NeedDAO.clear() &&
+           InstanceActionDAO.clear()
+      }
       //this is working
       if (result) {
         if (putInitialConceptsInDB) {
@@ -80,9 +96,6 @@ object WorldInitialisation extends Controller {
    * @author Thomas GIOVANNINI
    */
   def putInitialConceptsInDB: Boolean = {
-    PropertyDAO.clear
-    RelationSqlDAO.clear
-    NeedDAO.clear
     //Todo mettre des valeurs judicieuses au lieu des valeurs arbitraires pour les rules et property
     /*Property declaration*/
     val propertyInstanciable = Property("Instanciable", PropertyType.Bool, 0).save
@@ -177,9 +190,9 @@ object WorldInitialisation extends Controller {
     val needFood = NeedDAO.save(Need(0L, "Hunger", propertyHunger, priority = 6,
       List(ConsequenceStep(10, Consequence(8, EffectManager.nameToId("starve"))),
         ConsequenceStep(0, Consequence(2, EffectManager.nameToId("hunger")))),
-      List(MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Eat"), conceptApple),
+      List(/*MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Eat"), conceptApple),*/
         MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Eat"), conceptGrass),
-        MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Move"), conceptApple),
+        /*MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Move"), conceptApple),*/
         MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Move"), conceptGrass),
         MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Move"), Concept.self),
         MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Move"), Concept.any))))

@@ -20,7 +20,7 @@ object ConceptDAO {
   private var mappingConceptRelationsTo = collection.mutable.Map.empty[Long, List[(Relation, Concept)]]
   private var mappingConceptRelationsFrom = collection.mutable.Map.empty[Long, List[(Relation, Concept)]]
 
-  def clearDB(): Boolean = {
+  def clear(): Boolean = {
     mappingConceptId = mappingConceptId.empty
     mappingConceptRelationsTo = mappingConceptRelationsTo.empty
     mappingConceptRelationsFrom = mappingConceptRelationsFrom.empty
@@ -131,7 +131,10 @@ object ConceptDAO {
     val statement = ConceptStatement.updateConcept(originalConcept, concept)
     val cypherResultRowStream = statement.apply
     if (cypherResultRowStream.nonEmpty) {
-      ConceptDAO.parseRow(cypherResultRowStream.head)
+      val concept = ConceptDAO.parseRow(cypherResultRowStream.head)
+      mappingConceptId.remove(concept.id)
+      mappingConceptId += concept.id -> concept
+      concept
     } else {
       Concept.error
     }

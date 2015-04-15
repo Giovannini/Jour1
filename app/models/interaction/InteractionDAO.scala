@@ -18,10 +18,11 @@ object InteractionDAO {
    * @author Aurélie LORGEOUX
    * @return number of rules deleted
    */
-  def clearDB(): Int = {
+  def clearDB(): Boolean = {
     DB.withConnection { implicit connection =>
       val statement = InteractionStatement.clearDB
-      statement.executeUpdate
+      statement.executeUpdate()
+      true
     }
   }
 

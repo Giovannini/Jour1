@@ -94,7 +94,7 @@ object ConceptForm {
    * @return the different parts of a concept
    */
   private def unapplyForm(concept: Concept) : Option[(String, List[ValuedProperty], List[ValuedProperty], Option[List[Need]], DisplayProperty)] = {
-    Some((concept.label, concept.properties, concept.rules, Some(concept.needs), concept.displayProperty))
+    Some((concept.label, concept.getOwnProperties, concept.getOwnRules, Some(concept.getOwnNeeds), concept.displayProperty))
   }
 
 

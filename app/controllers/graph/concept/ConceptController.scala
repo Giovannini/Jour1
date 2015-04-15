@@ -1,11 +1,10 @@
 package controllers.graph.concept
 
-import controllers.Application
 import controllers.graph.GraphVisualisation
 import controllers.graph.concept.need.NeedController
 import forms.graph.concept.ConceptForm.form
 import models.graph.DisplayProperty
-import models.graph.concept.{Concept, ConceptDAO, ConceptStatement}
+import models.graph.concept.{Concept, ConceptDAO}
 import models.intelligence.need.NeedDAO
 import models.interaction.action.InstanceAction
 import play.api.libs.json.{JsValue, Json}
@@ -159,27 +158,25 @@ object ConceptController extends Controller {
         }
 
         /* Get the initial concept */
-        val statement = ConceptStatement.getConceptByLabel(search) //TODO is it normal ConceptStatement appears here ?
-        val cypherResultRowStream = statement.apply()(Application.neoConnection)
-        if (cypherResultRowStream.nonEmpty) {
-          // A concept has been found
-          val nodes = cypherResultRowStream.map(ConceptDAO.parseRow)
-          // Look for its relations
-          val res = getChildrenDeep(nodes.toList, deepness)
-          // Return the concept and his children in a format that is compatible with AlchemyJS data source
-          Ok(
-            Json.obj(
-              "nodes" -> res._2.map(_.toJson),
-              "edges" -> Json.toJson(res._1.map(relation => Json.obj(
-                "source" -> relation._1,
-                "label" -> relation._2,
-                "target" -> relation._3
-              )))
+        val concept = ConceptDAO.getByLabel(search)
+        concept match {
+          case Concept.error =>
+            // No concept is to be found
+            NotFound("\"" + search + "\" not found")
+          case rootNode =>
+            // Look for its relations
+            val res = getChildrenDeep(List(rootNode), deepness)
+            // Return the concept and his children in a format that is compatible with AlchemyJS data source
+            Ok(
+              Json.obj(
+                "nodes" -> res._2.map(_.toJson),
+                "edges" -> Json.toJson(res._1.map(relation => Json.obj(
+                  "source" -> relation._1,
+                  "label" -> relation._2,
+                  "target" -> relation._3
+                )))
+              )
             )
-          )
-        } else {
-          // No concept is to be found
-          NotFound("\"" + search + "\" not found")
         }
       }
     }
@@ -228,7 +225,9 @@ object ConceptController extends Controller {
    */
   def getActions(label: String) = Action {
     val concept = ConceptDAO.getByLabel(label)
-    val actions = concept.getPossibleActionsAndDestinations.filter(_._1 != InstanceAction.error)
+    val actions = concept.getPossibleActionsAndDestinations.filter(item => {
+      item._1 != InstanceAction.error
+    })
     Ok(Json.toJson(actions.map(_._1.toJson)))
   }
 }

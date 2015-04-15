@@ -18,14 +18,14 @@ object NeedController {
    */
   def updateNeedsForConcept(oldConcept: Concept, newConcept: Concept): List[Need] = {
       /* Delete unused needs */
-      oldConcept.needs.map(oldNeed => {
-        if (!newConcept.needs.exists(newNeed => oldNeed.id == newNeed.id)) {
+      oldConcept.getOwnNeeds.map(oldNeed => {
+        if (!newConcept.getOwnNeeds.exists(newNeed => oldNeed.id == newNeed.id)) {
           NeedDAO.delete(oldNeed.id)
         }
       })
 
       // Update or create new needs
-      newConcept.needs.map(need => {
+      newConcept.getOwnNeeds.map(need => {
         need.id match {
           case 0 =>
             // The need is new

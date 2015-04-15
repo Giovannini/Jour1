@@ -6,6 +6,7 @@
 GET           /                                                        controllers.Application.index
 
 GET           /init                                                    controllers.map.WorldInitialisation.initialization
+GET           /clearWorld                                              controllers.map.WorldInitialisation.clearWorld
 
 GET           /instances                                               controllers.map.WorldInitialisation.getWorld
 GET           /instances/:initInstanceId/:actionType/:conceptId        controllers.map.MapController.getPossibleDestinationOfAction(initInstanceId: Long, actionType: Long, conceptId: Long)
