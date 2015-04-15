@@ -137,7 +137,6 @@ case class Instance(
     //TODO issue with equality here, comparing label for test to success
     this.properties.find(vp => vp.property.label == property.label)
       .getOrElse {
-      println(this.label + " says property " + property.label + " not found...")
       ValuedProperty.error
     }
       .value
@@ -169,7 +168,6 @@ case class Instance(
       val steps = need.consequencesSteps
       val consequenceLogs = steps.filter(cs => cs.value <= propertyValue).sortBy(_.value).lastOption match {
         case Some(consequenceStep) =>
-          println("caca " + consequenceStep.consequence.effect.label)
           consequenceStep.consequence.effect.logOn(this)
         case _ => List()
       }
@@ -241,21 +239,6 @@ case class Instance(
 //          println("No action found for instance " + this.label + this.id)
           (InstanceAction.error, this)
         }
-
-        /*possibleActions match {
-          case head :: tail =>
-            val destinationsList = destinationList(head)
-            if (destinationsList.nonEmpty) {
-              val destination = Random.shuffle(destinationsList).head
-              (head.action, destination)
-            }
-            else {
-              retrieveBestAction(tail)
-            }
-          case _ =>
-            println("No action found for instance " + this.label + this.id)
-            (InstanceAction.error, this)
-        }*/
       }
 
       retrieveBestAction(possibleActions)

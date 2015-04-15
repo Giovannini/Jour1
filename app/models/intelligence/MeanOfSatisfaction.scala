@@ -28,8 +28,11 @@ object MeanOfSatisfaction {
   val error = MeanOfSatisfaction(InstanceAction.error, Concept.error)
 
   def parseList(string: String): List[MeanOfSatisfaction] = Try{
-    println("lolilol " + string)
-    string.split(";").map(parseString).toList
+    if(string != ""){
+      string.split(";").map(parseString).toList
+    }else{
+      List()
+    }
   } match {
     case Success(list) => list
     case Failure(e) =>

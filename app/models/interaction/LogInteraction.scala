@@ -14,7 +14,7 @@ case class LogInteraction(value: String, priority: Int){
 
   def execute(): Instance = {
     Try {
-      println("Executing LOG: " + this.value)
+//      println("Executing LOG: " + this.value)
       val splitted = value.split(" ")
       splitted(0) match {
         case "ADD" =>/*###################################################*/
@@ -24,9 +24,6 @@ case class LogInteraction(value: String, priority: Int){
         case "REMOVE" =>/*################################################*/
           val instanceId = splitted(1).toLong
           Application.map.removeInstance(instanceId)
-        /*case "CREATE" =>/*##############################################*/
-          val json = Json.toJson(splitted(1))
-          Application.map.createInstance(Instance.parseJson(json))*/
         case "MODIFY_PROPERTY" =>/*#######################################*/
           val instanceId = splitted(1).toLong
           val propertyString = splitted(2)

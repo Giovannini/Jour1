@@ -153,7 +153,6 @@ trait Interaction {
           val newValue = arguments(ParameterReference("propertyValue", "Int")).value//.asInstanceOf[String]
           List(LogInteraction("MODIFY_PROPERTY " + instanceId + " " + propertyString + " " + newValue, 1))
         case otherLabel =>
-          println("Other label: " + otherLabel)
           subInteractions.flatMap(subAction => subAction._1.log(takeGoodArguments(subAction._2, arguments)))
       }
     } else {
