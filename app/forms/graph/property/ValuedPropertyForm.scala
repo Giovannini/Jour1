@@ -10,7 +10,7 @@ import play.api.data.format.Formats
  */
 object ValuedPropertyForm {
   val form: Form[ValuedProperty] = Form(mapping(
-    "property" -> of(PropertyForm.PropertyLabelFormat),
+    "property" -> PropertyForm.form.mapping,
     "value" -> of(Formats.doubleFormat)
   )(applyValueForm)(unapplyValueForm))
 
