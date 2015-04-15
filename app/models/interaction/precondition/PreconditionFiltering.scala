@@ -3,6 +3,7 @@ package models.interaction.precondition
 import controllers.Application
 import models.graph.Instance
 import models.graph.property.PropertyDAO
+import models.interaction.parameter.{ParameterValue, Parameter, ParameterReference}
 
 
 object PreconditionFiltering {
@@ -76,5 +77,37 @@ object PreconditionFiltering {
 
   def isDifferentConcept(instance: Instance, listInstances: List[Instance]) = {
     listInstances.filter(_.concept != instance.concept)
+  }
+
+  def hasPropertyLowerThan(instance: Instance,
+    instancesList: List[Instance],
+    parameters: Map[ParameterReference, Parameter])
+  : List[Instance] = {
+    val propertyRef = ParameterReference("property", "Property")
+    val valueRef = ParameterReference("propertyToCompare", "Property")
+    val propertyName = parameters(propertyRef).asInstanceOf[ParameterValue].value.toString
+    val property = PropertyDAO.getByName(propertyName)
+    val propertyValue = parameters(valueRef).asInstanceOf[ParameterValue].value.toString.toDouble
+    if(instance.getValueForProperty(property) <= propertyValue){
+      instancesList
+    }else{
+      List()
+    }
+  }
+
+  def hasPropertyHigherThan(instance: Instance,
+    instancesList: List[Instance],
+    parameters: Map[ParameterReference, Parameter])
+  : List[Instance] = {
+    val propertyRef = ParameterReference("property", "Property")
+    val valueRef = ParameterReference("propertyToCompare", "Property")
+    val propertyName = parameters(propertyRef).asInstanceOf[ParameterValue].value.toString
+    val property = PropertyDAO.getByName(propertyName)
+    val propertyValue = parameters(valueRef).asInstanceOf[ParameterValue].value.toString.toDouble
+    if(instance.getValueForProperty(property) >= propertyValue){
+      instancesList
+    }else{
+      List()
+    }
   }
 }

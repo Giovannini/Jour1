@@ -129,6 +129,7 @@ trait Interaction {
   def log(arguments: Map[ParameterReference, ParameterValue]): List[LogInteraction] = {
     val preconditionCheck = checkPreconditions(arguments)
 
+
     if (preconditionCheck) { //Problem with effects
       this.label match {
         case "addInstanceAt" =>
@@ -156,7 +157,7 @@ trait Interaction {
           subInteractions.flatMap(subAction => subAction._1.log(takeGoodArguments(subAction._2, arguments)))
       }
     } else {
-//      println("Precondition not filled for action " + this.label + ".")
+      println("Precondition not filled for action " + this.label + ".")
       List(LogInteraction.nothing)
     }
   }

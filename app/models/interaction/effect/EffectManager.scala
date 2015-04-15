@@ -58,6 +58,22 @@ object EffectManager {
       ).save
     }
     nameToId += "starve" -> starve
+
+    val grow = {
+      val growingInstanceID = ParameterReference("growingInstance", "Long")
+      Effect(0L, "EFFECT_GROW",
+        List(
+          (InstanceActionManager.nameToInstanceAction("_addToProperty").toEffect,
+            Map(
+              ParameterReference("instanceID", "Long") -> growingInstanceID,
+              ParameterReference("propertyName", "Property") -> ParameterValue("DuplicationSpeed", "Property"),
+              ParameterReference("valueToAdd", "Int") -> ParameterValue(-1, "Int")
+            ))
+        ),
+        List(growingInstanceID)
+      ).save
+    }
+    nameToId += "grow" -> grow
   }
 
 

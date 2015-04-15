@@ -236,7 +236,7 @@ case class Instance(
           val chosenAction = getPseudoRandomly(allDestinations.map(dest => (dest._1, dest._2.toDouble / prioritySum)))
           (chosenAction._1, Random.shuffle(chosenAction._2).head)
         } else {
-//          println("No action found for instance " + this.label + this.id)
+          println("No action found for instance " + this.label + this.id)
           (InstanceAction.error, this)
         }
       }

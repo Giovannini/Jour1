@@ -52,7 +52,7 @@ object PreconditionManager {
       )
     )
 
-    val preconditionHasInstanceOfconcept = Precondition(
+    val preconditionHasInstanceOfConcept = Precondition(
         0,
         "hasInstanceOfConcept",
         List(),
@@ -96,7 +96,7 @@ object PreconditionManager {
     nameToId += "isOnSameTile" -> preconditionIsOnSameTile.save
     nameToId += "isAtWalkingDistance" -> preconditionIsAtWalkingDistance.save
     nameToId += "hasProperty" -> preconditionHasProperty.save
-    nameToId += "hasInstanceOfConcept" -> preconditionHasInstanceOfconcept.save
+    nameToId += "hasInstanceOfConcept" -> preconditionHasInstanceOfConcept.save
     nameToId += "isSelf" -> preconditionIsSelf.save
     nameToId += "notSelf" -> preconditionNotSelf.save
     nameToId += "isDifferentConcept" -> preconditionDifferentConcept.save
@@ -147,21 +147,6 @@ object PreconditionManager {
         List(p_instanceID, p_propertyID, p_propertyValueID)
       )
     }
-
-/*    val preconditionPropertyIsLowerThan = {
-      val p_instanceID = ParameterReference("instanceID", "Long")
-      val p_propertyID = ParameterReference("property", "Property")
-      val p_value = ParameterReference("value", "Int")
-      Precondition(
-        0,
-        "propertyIsLowerThan",
-        List((nameToId("hasProperty"), Map(
-          ParameterReference("instanceID", "Long") -> p_instanceID,
-          ParameterReference("property", "Property") -> p_propertyID
-        ))),
-        List(p_instanceID, p_propertyID, p_value)
-      )
-    }*/
 
     nameToId += "propertyIsHigherThan" -> preconditionPropertyIsHigherThan.save
     nameToId += "propertyIsLowerThan" -> preconditionPropertyIsLowerThan.save

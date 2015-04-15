@@ -103,7 +103,6 @@ object WorldInitialisation extends Controller {
 
     val propertySense = Property("Sense", PropertyType.Int, 5).save
     val propertyDuplicationSpeed = Property("DuplicationSpeed", PropertyType.Double, 10).save
-    val propertyDuplicaSpeedVal = Property("DuplicaSpeedVal", PropertyType.Double, 5).save
 
     val propertyWalkingDistance = Property("WalkingDistance", PropertyType.Int, 3).save
     val propertyHunger = Property("Hunger", PropertyType.Double, 5).save
@@ -112,7 +111,7 @@ object WorldInitialisation extends Controller {
 //    val propertyDesire = Property("Desire", PropertyType.Double, 11).save
     val propertyDesireMax = Property("DesireMax", PropertyType.Double, 10).save
 
-    val propertyWoundMax = Property("WoundMax", PropertyType.Double, 4).save
+//    val propertyWoundMax = Property("WoundMax", PropertyType.Double, 4).save
     val propertyFear = Property("Fear", PropertyType.Double, 0).save
 
     PreconditionManager.initialization()
@@ -136,28 +135,28 @@ object WorldInitialisation extends Controller {
 
     ///////////////////////////////  Other  ////////////////////////////////////
     val needSurvive = NeedDAO.save(Need(0L, "Survive", propertyWound, priority = 6,
-      List(ConsequenceStep(4, Consequence(8, EffectManager.nameToId("death")))),
+      List(ConsequenceStep(2, Consequence(8, EffectManager.nameToId("death")))),
       List()))
+    val needSpread = NeedDAO.save(Need(0L, "Spread", propertyDuplicationSpeed, priority = 5,
+      List(ConsequenceStep(1, Consequence(8, EffectManager.nameToId("grow")))),
+      List(MeanOfSatisfaction(InstanceActionManager.nameToInstanceAction("Spread"), conceptEarth))))
     val conceptGrass = Concept("Grass",
       List(
         ValuedProperty(propertySense, 1),
         ValuedProperty(propertyDuplicationSpeed, 10),
-        ValuedProperty(propertyDuplicaSpeedVal, 10),
-        ValuedProperty(propertyWound, 0),
-        ValuedProperty(propertyWoundMax, 4)
+        ValuedProperty(propertyWound, 0)
       ),
       List(
         ValuedProperty(propertyStrength, 5),
         ValuedProperty(propertyInstanciable, 1)
       ),
-      List(needSurvive),
+      List(needSurvive, needSpread),
       DisplayProperty("#62A663", 8))
     val conceptEdible = Concept("Edible", List(), List(), List(), DisplayProperty())
     val conceptApple = Concept("Apple",
       List(
         ValuedProperty(propertySense, 1),
-        ValuedProperty(propertyWound, 0),
-        ValuedProperty(propertyWoundMax, 4)
+        ValuedProperty(propertyWound, 0)
       ),
       List(
         ValuedProperty(propertyStrength, 2),
@@ -168,15 +167,13 @@ object WorldInitialisation extends Controller {
     val conceptSheep = Concept("Sheep",
       _properties = List(
         ValuedProperty(propertyWound, 0),
-        ValuedProperty(propertyWoundMax, 12),
         ValuedProperty(propertyFear, 0),
         ValuedProperty(propertyHunger, 4),
         ValuedProperty(propertyWalkingDistance, 4)
       ),
       _rules = List(
         ValuedProperty(propertyStrength, 1),
-        ValuedProperty(propertyInstanciable, 1),
-        ValuedProperty(propertyWoundMax, 12)
+        ValuedProperty(propertyInstanciable, 1)
       ),
       List(needSurvive),
       DisplayProperty("#EEE9D6", 21)
@@ -242,8 +239,7 @@ object WorldInitialisation extends Controller {
       List(), List(needFood), DisplayProperty())
     val conceptBush = Concept("Bush",
       List(
-        ValuedProperty(propertyWound, 0),
-        ValuedProperty(propertyWoundMax, 6)
+        ValuedProperty(propertyWound, 0)
       ),
       List(
         ValuedProperty(propertyStrength, 1),
@@ -287,7 +283,7 @@ object WorldInitialisation extends Controller {
     val relationLiveOnId = RelationSqlDAO.save("LIVE_ON")
     val relationFear = RelationSqlDAO.save("MOOD_FEAR")
 //    val relationProcreate = RelationSqlDAO.save("ACTION_PROCREATE")
-//    val relationSpread = RelationSqlDAO.save("ACTION_SPREAD")
+    val relationSpread = RelationSqlDAO.save("ACTION_SPREAD")
 //    val relationRegenerate = RelationSqlDAO.save("ACTION_REGENERATE")
     //    val relationCreateBow = RelationSqlDAO.save("ACTION_CREATE_BOW")
 
@@ -337,11 +333,11 @@ object WorldInitialisation extends Controller {
       RelationGraphDAO.addRelationToDB(conceptGrass.id, relationSubtypeOfId, conceptVegetable.id) &&
 //      RelationGraphDAO.addRelationToDB(conceptTree.id, relationSubtypeOfId, conceptVegetable.id) &&
       RelationGraphDAO.addRelationToDB(conceptWater.id, relationSubtypeOfId, conceptGround.id) &&
-      RelationGraphDAO.addRelationToDB(conceptEarth.id, relationSubtypeOfId, conceptGround.id)
+      RelationGraphDAO.addRelationToDB(conceptEarth.id, relationSubtypeOfId, conceptGround.id) &&
 //      RelationGraphDAO.addRelationToDB(conceptMan.id, relationProcreate, conceptGround.id) &&
 //      RelationGraphDAO.addRelationToDB(conceptWolf.id, relationProcreate, conceptGround.id) &&
 //      RelationGraphDAO.addRelationToDB(conceptSheep.id, relationProcreate, conceptGround.id) &&
-//      RelationGraphDAO.addRelationToDB(conceptGrass.id, relationSpread, conceptGround.id) &&
+      RelationGraphDAO.addRelationToDB(conceptGrass.id, relationSpread, conceptGround.id)
 //      RelationGraphDAO.addRelationToDB(conceptGrass.id, relationRegenerate, conceptGrass.id)&&
 //      RelationGraphDAO.addRelationToDB(conceptMan.id, relationCreateBow, conceptTree.id)
     }

@@ -63,8 +63,7 @@ object InstanceActionParser {
       List()
     } else {
       val arguments = getArgumentsList(action,instancesId.map(id => ParameterValue(id, "Long")))
-      val result = action.log(arguments)
-      result
+      action.log(arguments)
     }
   }
 

@@ -67,7 +67,9 @@ case class Precondition(
       case "isAtWalkingDistance" => HCPrecondition.isAtWalkingDistance(args)
       case "hasProperty" => HCPrecondition.hasProperty(args)
       case "propertyIsHigherThan" => HCPrecondition.isHigherThan(args)
-      case "propertyIsLowerThan" => !HCPrecondition.isHigherThan(args)
+      case "propertyIsLowerThan" =>
+        println("lol")
+        HCPrecondition.isLowerThan(args)
       case "hasInstanceOfConcept" => HCPrecondition.hasInstanceOfConcept(args)
       case "isSelf" => HCPrecondition.isSelf(args)
       case "notSelf" => HCPrecondition.notSelf(args)
@@ -77,31 +79,40 @@ case class Precondition(
         this.subConditions.forall(current => current._1.isFilled(current._2, arguments))
     }
     if (!result) {
-//      println("Precondition " + this.label + " is not filled.")
+      //      println("Precondition " + this.label + " is not filled.")
     }
     result
   }
 
-  def instancesThatFill(source: Instance, instancesList: List[Instance]): Set[Instance] = {
-    this.label match {
-      case "isNextTo" =>
-        PreconditionFiltering.isNextTo(source, instancesList).toSet
-      case "isOnSameTile" =>
-        PreconditionFiltering.isOnSameTile(source, instancesList).toSet
-      case "isAtWalkingDistance" =>
-        PreconditionFiltering.isAtWalkingDistance(source, instancesList).toSet
-      case "notSelf" =>
-        PreconditionFiltering.notSelf(source, instancesList).toSet
-      case "isSelf" =>
-        PreconditionFiltering.isSelf(source,instancesList).toSet
-      case "isDifferentConcept" =>
-        PreconditionFiltering.isDifferentConcept(source, instancesList).toSet
-      //case "hasInstanceOfConcept" =>PreconditionFiltering.hasInstanceOfConcept(source, instancesList)
-      case _ =>
-        this.subConditions
-          .map(_._1.instancesThatFill(source, instancesList))
-          .foldRight(instancesList.toSet)(_ intersect _)
-    }
+  def instancesThatFill(source: Instance, instancesList: List[Instance], parameters: Map[ParameterReference, Parameter])
+  : Set[Instance] = this.label match {
+    case "isNextTo" =>
+      PreconditionFiltering.isNextTo(source, instancesList).toSet
+    case "isOnSameTile" =>
+      PreconditionFiltering.isOnSameTile(source, instancesList).toSet
+    case "isAtWalkingDistance" =>
+      PreconditionFiltering.isAtWalkingDistance(source, instancesList).toSet
+    case "notSelf" =>
+      PreconditionFiltering.notSelf(source, instancesList).toSet
+    case "isSelf" =>
+      PreconditionFiltering.isSelf(source, instancesList).toSet
+    case "isDifferentConcept" =>
+      PreconditionFiltering.isDifferentConcept(source, instancesList).toSet
+    case "propertyIsHigherThan" =>
+      val satisfyingInstances = PreconditionFiltering.hasPropertyHigherThan(source, instancesList, parameters).toSet
+      this.subConditions
+        .map(_._1.instancesThatFill(source, instancesList, parameters))
+        .foldRight(satisfyingInstances)(_ intersect _)
+    case "propertyIsLowerThan" =>
+      //TODO do not forget subconditions
+      val satisfyingInstances = PreconditionFiltering.hasPropertyLowerThan(source, instancesList, parameters).toSet
+      this.subConditions
+        .map(_._1.instancesThatFill(source, instancesList, parameters))
+        .foldRight(satisfyingInstances)(_ intersect _)
+    case _ =>
+      this.subConditions
+        .map(_._1.instancesThatFill(source, instancesList, parameters))
+        .foldRight(instancesList.toSet)(_ intersect _)
   }
 
   def toJson = Json.obj(
