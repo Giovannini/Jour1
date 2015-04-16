@@ -40,12 +40,16 @@ object NeedDAO {
   }
 
   def clear(): Boolean = {
-    mapping = mapping.empty
+    clearCache()
     DB.withConnection { implicit connection =>
       val statement = NeedStatement.clearDB
       statement.executeUpdate()
       true
     }
+  }
+
+  def clearCache(): Unit = {
+    mapping = mapping.empty
   }
 
   def getAll: List[Need] = {

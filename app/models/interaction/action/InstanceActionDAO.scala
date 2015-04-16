@@ -41,9 +41,13 @@ object InstanceActionDAO {
    * @return number of rules deleted
    */
   def clear(): Boolean = {
+    clearCache()
+    InteractionDAO.clearDB()
+  }
+
+  def clearCache(): Unit = {
     mappingId = mappingId.empty
     mappingName = mappingName.empty
-    InteractionDAO.clearDB()
   }
 
   /**

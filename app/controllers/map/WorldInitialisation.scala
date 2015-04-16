@@ -44,6 +44,13 @@ object WorldInitialisation extends Controller {
    */
   def clearWorld: Action[AnyContent] = Action {
     Application.map.clear()
+
+    ConceptDAO.clearCache()
+    PropertyDAO.clearCache()
+    RelationSqlDAO.clearCache()
+    NeedDAO.clearCache()
+    InstanceActionDAO.clearCache()
+
     isWorldMapInitialized = false
     Ok("World cleared")
   }

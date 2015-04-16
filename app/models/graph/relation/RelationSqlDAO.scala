@@ -35,12 +35,16 @@ object RelationSqlDAO {
    * @return number of relations deleted
    */
   def clear(): Boolean = {
-    mapping = mapping.empty
+    clearCache()
     DB.withConnection { implicit connection =>
       val statement = RelationSQLStatement.clearDB
       statement.executeUpdate()
       true
     }
+  }
+
+  def clearCache(): Unit = {
+    mapping = mapping.empty
   }
 
   /**

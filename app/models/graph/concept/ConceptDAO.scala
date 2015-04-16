@@ -20,12 +20,18 @@ object ConceptDAO {
   private var mappingConceptRelationsTo = collection.mutable.Map.empty[Long, List[(Relation, Concept)]]
   private var mappingConceptRelationsFrom = collection.mutable.Map.empty[Long, List[(Relation, Concept)]]
 
+
+
   def clear(): Boolean = {
+    clearCache()
+    val statement = ConceptStatement.clearDB
+    statement.execute()
+  }
+
+  def clearCache(): Unit = {
     mappingConceptId = mappingConceptId.empty
     mappingConceptRelationsTo = mappingConceptRelationsTo.empty
     mappingConceptRelationsFrom = mappingConceptRelationsFrom.empty
-    val statement = ConceptStatement.clearDB
-    statement.execute()
   }
 
   /**
