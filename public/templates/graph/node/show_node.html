@@ -18,6 +18,22 @@
             <h2>{{ node.label }}</h2>
             - <a href="#/node/{{node.label}}/edit">Edit</a>
             - <a ng-click="deleteNode()" href="">Delete</a>
+            <div class="error">
+                <div ng-if="error">{{ error }}</div>
+                <div ng-if="errors.relationsFrom.length > 0 || errors.relationsTo.length > 0">
+                    Relation where {{ node.label }} appears
+                    <ul>
+                        <li ng-repeat="relation in errors.relationsFrom">{{ node.label }} -(<a href="#/relation/{{relation.relation}}">{{ relation.relation }}</a>)-> <a href="#/node/{{relation.concept}}">{{ relation.concept }}</a></li>
+                        <li ng-repeat="relation in errors.relationsTo"><a href="#/node/{{relation.concept}}">{{ relation.concept }}</a> -(<a href="#/relation/{{relation.relation}}">{{ relation.relation }}</a>)-> {{ node.label }}</a></li>
+                    </ul>
+                </div>
+                <div ng-if="errors.needs.length > 0">
+                    Need using {{ node.label }}
+                    <ul>
+                        <li ng-repeat="need in errors.needs">{{ need.label }}</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 

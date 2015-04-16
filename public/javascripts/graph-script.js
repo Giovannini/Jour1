@@ -327,7 +327,7 @@ var NodesFactory = ['$resource', '$routeParams', 'Scopes', function($resource, $
     }
 }];
 
-var ViewerController = ['$scope', '$location', 'Scopes', 'NodesFactory', function($scope, $location, Scopes, NodesFactory) {
+var ViewerController = ['$scope', '$rootScope', '$location', 'Scopes', 'NodesFactory', function($scope, $rootScope, $location, Scopes, NodesFactory) {
     Scopes.add('viewer', $scope);
     $scope.deepness = NodesFactory.options.deepness;
 
@@ -337,10 +337,12 @@ var ViewerController = ['$scope', '$location', 'Scopes', 'NodesFactory', functio
 
     var selectNode = function(label) {
         $location.path('/node/'+Scopes.get('search').search+'/'+label);
+        $rootScope.$apply();
     };
 
     var selectEdge = function(label) {
         $location.path('/relation/'+label);
+        $rootScope.$apply();
     };
 
     var lastClick = 0;
@@ -514,7 +516,8 @@ var ShowNodeCtrl = ['$scope', '$location', '$routeParams', '$resource', 'Scopes'
                 $location.path('/overview');
             },
             function(response) {
-                $scope.error = "Impossible to delete " + $scope.node.label;
+                $scope.error = "Impossible to delete " + $scope.node.label + " because of the remaining references";
+                $scope.errors = response.data;
             }
         );
     };
@@ -981,18 +984,19 @@ var ShowRelationCtrl = ['$scope', '$routeParams', '$resource', 'Scopes', 'NodesF
         }
     );
 
+    function getNodeById(id, nodes) {
+        for(var nodeId in nodes) {
+            if(nodes[nodeId].id == id) {
+                return nodes[nodeId];
+            }
+        }
+        return null;
+    }
+
     NodesFactory.getConceptsFromRelation(
         $scope.relation.label,
         function(relations) {
 
-            function getNodeById(id, nodes) {
-                for(var nodeId in nodes) {
-                    if(nodes[nodeId].id == id) {
-                        return nodes[nodeId];
-                    }
-                }
-                return null;
-            }
 
             $scope.conceptRelations = [];
             for(var edgeId in relations.edges) {
@@ -1029,11 +1033,17 @@ var ShowRelationCtrl = ['$scope', '$routeParams', '$resource', 'Scopes', 'NodesF
     );
 
     $scope.submitNewRelation = function() {
+        console.log($scope.relation);
         request.create(
             $scope.relation,
             {},
             function(result) {
-                console.log(result);
+                $scope.conceptRelations.push({
+                    source: getNodeById($scope.relation.source, $scope.concepts),
+                    target: getNodeById($scope.relation.target, $scope.concepts)
+                });
+                $scope.relation.source = "";
+                $scope.relation.target = "";
             },
             function(failure) {
                 console.log(failure);
@@ -1041,7 +1051,10 @@ var ShowRelationCtrl = ['$scope', '$routeParams', '$resource', 'Scopes', 'NodesF
         );
     };
 
-    $scope.deleteRelation = function(label, source, target) {
+    $scope.deleteRelation = function(index) {
+        var label = $scope.relation.label;
+        var source = $scope.conceptRelations[index].source.id;
+        var target = $scope.conceptRelations[index].target.id;
         request.delete(
             {
                 label: label,
@@ -1050,7 +1063,8 @@ var ShowRelationCtrl = ['$scope', '$routeParams', '$resource', 'Scopes', 'NodesF
             },
             {},
             function(result) {
-                console.log(result);
+                console.log(index);
+                console.log($scope.conceptRelations.splice(index, 1));
             },
             function(failure) {
                 console.log(failure);
@@ -1058,74 +1072,6 @@ var ShowRelationCtrl = ['$scope', '$routeParams', '$resource', 'Scopes', 'NodesF
         );
 
     }
-
-    $scope.isAction = function() {
-        return $routeParams.label.startsWith("ACTION_");
-    }
-}];
-
-var EditRelationFactory = ['NodesFactory', 'Scopes', function(NodesFactory, Scopes) {
-    var relationTypes = ['ACTION_', 'EFFECT_', 'MOOD_'];
-
-    var getRelation = function(label, success, failure) {
-        NodesFactory.getConceptsFromRelation(
-            label,
-            function(relations) {
-                NodesFactory.setDisplayedNodes(relations.nodes);
-                NodesFactory.setEdges(relations.edges);
-                Scopes.get('viewer').$emit('Viewer_displayNodes');
-
-                success(label);
-            },
-            function(failure) {
-                failure(failure);
-            }
-        );
-    };
-
-    return {
-        getRelation: getRelation,
-        relationTypes: relationTypes
-    }
-}];
-
-var NewRelationCtrl = ['$scope', '$routeParams', 'EditRelationFactory', function($scope, $routeParams, EditRelationFactory) {
-    $scope.submit_button = "Create";
-    $scope.relationTypes = EditRelationFactory.relationTypes;
-    $scope.back_url = "#/overview";
-
-    $scope.relation = {
-        type: $scope.relationTypes[0]
-    };
-}];
-
-var EditRelationCtrl = ['$scope', '$routeParams', 'EditRelationFactory', function($scope, $routeParams, EditRelationFactory) {
-    $scope.submit_button = "Edit";
-    $scope.relationTypes = EditRelationFactory.relationTypes;
-    $scope.relation = {};
-    $scope.back_url = "#/relation/"+$routeParams.label;
-
-
-    EditRelationFactory.getRelation(
-        $routeParams.label,
-        function(relation) {
-            console.log(relation);
-        },
-        function(error) {
-            console.log(error);
-        }
-    );
-
-    for(var typeId in $scope.relationTypes) {
-        if((new RegExp("^" + $scope.relationTypes[typeId])).test($routeParams.label)) {
-            $scope.relation.type = $scope.relationTypes[typeId];
-            break;
-        }
-    }
-
-    $scope.relation.label = $routeParams.label.substr($scope.relation.type.length);
-
-
 }];
 
 angular.module('graphEditor', ["ngResource", "ngRoute"])

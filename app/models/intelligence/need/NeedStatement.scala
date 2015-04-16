@@ -57,7 +57,7 @@ object NeedStatement {
   }
 
   def getNeedsWhereConceptUsed(conceptId: Long) = {
-    SQL("SELECT * FROM NEEDS WHERE meansOfSatisfaction LIKE {concept}")
+    SQL("SELECT * FROM needs WHERE meansOfSatisfaction LIKE {concept}")
       .on("concept" -> ("%" + conceptId + "%"))
   }
 

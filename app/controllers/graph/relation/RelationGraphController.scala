@@ -20,13 +20,13 @@ object RelationGraphController extends Controller {
   def addRelationToGraph(label: String, source: Long, target: Long) = Action { request =>
     val relation = RelationSqlDAO.getByName(label)
     if(relation == Relation.error) {
-      BadRequest("Unknown relation")
+      BadRequest(Json.obj("result" -> "Unknown relation"))
     } else {
       val result = RelationGraphDAO.addRelationToDB(source, relation.id, target)
       if (result) {
-        Ok("Relation added to the graph")
+        Ok(Json.obj("result" -> "Relation added to the graph"))
       } else {
-        InternalServerError("Couldnt add the relation to the graph")
+        InternalServerError(Json.obj("result" -> "Couldnt add the relation to the graph"))
       }
     }
   }
@@ -42,13 +42,13 @@ object RelationGraphController extends Controller {
   def removeRelationToGraph(label: String, source: Long, target: Long) = Action { request =>
     val relation = RelationSqlDAO.getByName(label)
     if(relation == Relation.error) {
-      BadRequest("Unknown relation")
+      BadRequest(Json.obj("result" -> "Unknown relation"))
     } else {
       val result = RelationGraphDAO.removeRelationFromDB(source, relation.id, target)
       if (result) {
-        Ok("Relation removed from the graph")
+        Ok(Json.obj("result" -> "Relation removed from the graph"))
       } else {
-        InternalServerError("Couldnt remove the relation from the graph")
+        InternalServerError(Json.obj("result" -> "Couldnt remove the relation from the graph"))
       }
     }
   }
