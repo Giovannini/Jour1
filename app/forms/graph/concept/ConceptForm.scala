@@ -59,8 +59,8 @@ object ConceptForm {
   val form = Form(
     mapping(
       "label" -> nonEmptyText.verifying("incorrectCase", input => input.matches("^[A-Z][A-Za-z0-9_ ]*$")), //can't be modified
-      "properties" -> list(ValuedPropertyForm.form.mapping),
-      "rules" -> list(ValuedPropertyForm.form.mapping),
+      "properties" -> list(ValuedPropertyForm.conceptForm.mapping),
+      "rules" -> list(ValuedPropertyForm.conceptForm.mapping),
       "needs" -> optional(list(NeedForm.form.mapping)),
       "displayProperty" -> DisplayProperty.form.mapping
     )(applyForm)(unapplyForm)
