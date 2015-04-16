@@ -1,5 +1,6 @@
 package controllers.graph.relation
 
+import models.graph.concept.ConceptDAO
 import models.graph.relation.{Relation, RelationGraphDAO, RelationSqlDAO}
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -24,6 +25,8 @@ object RelationGraphController extends Controller {
     } else {
       val result = RelationGraphDAO.addRelationToDB(source, relation.id, target)
       if (result) {
+        ConceptDAO.removeCacheRelationFromConcept(source)
+        ConceptDAO.removeCacheRelationToConcept(target)
         Ok(Json.obj("result" -> "Relation added to the graph"))
       } else {
         InternalServerError(Json.obj("result" -> "Couldnt add the relation to the graph"))
@@ -46,6 +49,8 @@ object RelationGraphController extends Controller {
     } else {
       val result = RelationGraphDAO.removeRelationFromDB(source, relation.id, target)
       if (result) {
+        ConceptDAO.removeCacheRelationFromConcept(source)
+        ConceptDAO.removeCacheRelationToConcept(target)
         Ok(Json.obj("result" -> "Relation removed from the graph"))
       } else {
         InternalServerError(Json.obj("result" -> "Couldnt remove the relation from the graph"))

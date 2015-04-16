@@ -34,6 +34,14 @@ object ConceptDAO {
     mappingConceptRelationsFrom = mappingConceptRelationsFrom.empty
   }
 
+  def removeCacheRelationFromConcept(conceptId: Long) = {
+    mappingConceptRelationsFrom.remove(conceptId)
+  }
+
+  def removeCacheRelationToConcept(conceptId: Long) = {
+    mappingConceptRelationsTo.remove(conceptId)
+  }
+
   /**
    * Read a Neo4J cypher result row from the DB and convert it to a concept object
    * @author Thomas GIOVANNINI
