@@ -15,7 +15,7 @@ object InstanceManager extends Controller {
    * @author Thomas GIOVANNINI
    */
   def printErrors(form: Form[Instance]) = {
-    form.errors.foreach(error => println("###Error:\n" + error.messages.mkString("\n")))
+    form.errors.foreach(error => Console.println("###Error:\n" + error.messages.mkString("\n")))
   }
 
   /**
