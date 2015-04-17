@@ -44,6 +44,9 @@ h4 ~ p {
 p {
   text-align: justify; }
 
+li {
+  margin: 10px 0; }
+
 .header {
   border-bottom: 1px solid #bfbfbf;
   padding: 15px; }

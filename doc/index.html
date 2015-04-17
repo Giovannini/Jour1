@@ -57,15 +57,10 @@
             <h3 id="1-relations">Les relations</h3>
                 <h4>Défintion</h4>
                 <p>
-                    Une relation est //TODO
-                </p>
-
-                <h4>Relations de base</h4>
-
-                <p>
-                    Il existe un certain nombre de relations prédéfinies dans le monde qui sont utilisées dans notre algorithme d'initialisation du monde. Celles-ci sont :
+                    Une relation est ce qui va permettre de lier deux concepts dans le graphe. Ces relations sont une partie à ne pas négliger parce que ce sont ces relations qui vont faire que le monde est un ensemble cohérent qui intéragit avec lui meme. Les relations qui sont dans le graphe peuvent etre:
                 </p>
                 <ul>
+                    <li><em>Des actions</em>: cf <a href="#2-actions">Actions</a></li>
                     <li><em>SUBTYPE_OF</em>: introduit la notion d'héritage entre concept. C'est cette relation qui nous permettra de dire que le "Loup" est un "Animal"</li>
                     <li><em>LIVE_ON</em>: permet de définir où un concept peut exister dans le monde. C'est cette relation qui nous permettra de dire qu'un "Loup" vit dans la "Montagne", où "Montagne" descend de "Ground"</li>
                 </ul>
@@ -81,6 +76,21 @@
                     Les règles des concepts
                 </p>
 		</div>
+
+        <div class="content-category" id="interaction">
+            <h2>Les interactions</h2>
+
+            <p>Les interactions permettent à des instances dans le monde d'agir sur son environnement. Par exemple, on va vouloir définir la possibilité qu'à un "Loup" de manger un "Mouton". Ou encore, la possibilité qu'à un "Animal" de se déplacer sur la "Terre".</p>
+
+            <h3>Les propriétés</h3>
+            <p>Les propriétés permettent de définir l'état de l'instance //TODO</p>
+
+            <h3>Fonctionnement des actions</h3>
+            <p>Paramètres, Preconditions, Action //TODO </p>
+
+            <h3>Ajouter une action à un concept</h3>
+            <p>Ajouter la relation au graphe //TODO </p>
+        </div>
 
         <!-- ###########################################################
         ################################################################
@@ -147,21 +157,6 @@
 
             </p>
 
-        </div>
-
-        <div class="content-category" id="interaction">
-            <h2>Les interactions</h2>
-
-            <p>Les interactions permettent à des instances dans le monde d'agir sur son environnement. Par exemple, on va vouloir définir la possibilité qu'à un "Loup" de manger un "Mouton". Ou encore, la possibilité qu'à un "Animal" de se déplacer sur la "Terre".</p>
-
-            <h3>Les propriétés</h3>
-                <p>Les propriétés permettent de définir l'état de l'instance //TODO</p>
-
-            <h3>Fonctionnement des actions</h3>
-                <p>Paramètres, Preconditions, Action //TODO </p>
-
-            <h3>Ajouter une action à un concept</h3>
-                <p>Ajouter la relation au graphe //TODO </p>
         </div>
 
         <div class="content-category" id="interface">
