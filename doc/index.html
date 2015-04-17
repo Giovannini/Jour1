@@ -145,7 +145,79 @@
             vraies).
         </p>
 
-        <h3>Ajouter une action à un concept</h3>
+        <h4>Les paramètres</h4>
+        <p>Les paramètres sont les entrées que l'on va donner à l'action, tout comme on a des paramètres de fonction en
+            mathématiques. Lors de la création de l'action, on renseigne donc le nom du paramètre afin qu'il puisse etre utilisé dans le calcul des préconditions et la réalisation de l'action. On parle de référence.</p>
+        <p>De plus, chaque paramètre aura un type parmis :</p>
+        <ul>
+            <li><em>Id</em>: référence une instance ou un concept</li>
+            <li><em>Int</em>: donne une valeur arbitraire à un paramètre. Ce doit etre un entier.</li>
+            <li><em>Property</em>: référence une propriété</li>
+        </ul>
+
+        <h4>Les préconditions</h4>
+        <p>
+            Celles-ci sont vérifiées avant toute execution d'une action, que ce soit quand l'utilisateur de mande de
+            réaliser l'action, ou quand l'intelligence d'une instance la pousse à faire une action.
+        </p>
+
+        <p>
+            Pour les utiliser il est nécessaire, de choisir la précondition, puis de lui donner les paramètres
+            nécessaires à sa vérification. Les paramètres donnés à la précondition peuvent etre une référence aux
+            paramètres de l'action ou une valeur donnée.
+        </p>
+
+        <p>
+            Par exemple, si on veut vérifier qu'un animal possède la propriété faim, on va choisir la précondition
+            "hasProperty", lui donner comme paramètre pour "instanceID" le paramètre référence de l'action, et lui
+            donner comme paramètre pour "property" la valeur "Faim".
+        </p>
+
+        <p>
+            Les préconditions déjà existantes sont :
+        </p>
+        <ul>
+            <li><strong>isNextTo(instance1ID, instance2ID)</strong>: qui teste si deux instances sont cote à cote</li>
+            <li><strong>isOnSameTile(instance1ID, instance2ID)</strong>: qui teste si deux instances sont sur la meme
+                case du monde</li>
+            <li><strong>isAtWalkingDistance(instance1ID, instance2ID)</strong>: qui teste si l'instance 1 peut aller
+                atteindre l'instance 2</li>
+            <li><strong>hasProperty(instanceID, property)</strong>: qui teste si l'instance possède une certaine
+                propriété</li>
+            <li><strong>hasInstanceOfConcept(instanceID, ConceptID)</strong>: qui teste si l'instance est d'un certain
+                concept</li>
+            <li><strong>isSelf(instance1ID, instance2ID)</strong>: qui teste si deux instances sont identiques</li>
+            <li><strong>notSelf(instance1ID, instance2ID)</strong>: qui teste si deux instances sont différentes</li>
+            <li><strong>isDifferentConcept(instance1ID, instance2ID)</strong>: qui teste si deux instances sont de
+                concept différent</li>
+            <li><strong>propertyIsHigherThan(instance1ID, instance2ID)</strong>: qui teste si la propriété d'une
+                instance a une valeur plus élevée qu'une autre propriété</li>
+            <li><strong>propertyIsLowerThan(instance1ID, instance2ID)</strong>: qui teste si la propriété d'une
+                instance a une valeur plus faible qu'une autre propriété</li>
+        </ul>
+
+        <h4>Les sous actions</h4>
+        <p>
+            Celles-ci sont le corps de l'opération réalisée par l'action. Elles permettent de chainer plusieurs
+            opérations. Leur fonctionnement est identique aux préconditions.
+        </p>
+        <p>
+            Les actions déjà existantes sont :
+        </p>
+        <ul>
+            <li><strong>addInstanceAt(instanceToAdd, groundWhereToAddIt)</strong>: place une instance au meme endroit
+                qu'une autre instance</li>
+            <li><strong>createInstanceAt(conceptID, groundWhereToAddIt)</strong>: crée une nouvelle instance d'un
+                certain concept au meme endroit qu'une autre instance</li>
+            <li><strong>removeInstanceAt(instanceToRemove)</strong>: supprime une instance d'un emplacement</li>
+            <li><strong>addToProperty(instanceID, propertyName, valueToAdd)</strong>: ajoute une valeur à une propriété
+                de l'instance</li>
+            <li><strong>modifyProperty(instanceToModify, propertyName, propertyValue)</strong>: défini la valeur d'une
+                propriété à une certaine valeur</li>
+        </ul>
+
+        <h3>Les types d'actions</h3>
+        // TODO
         <p>Ajouter la relation au graphe //TODO </p>
     </div>
 
