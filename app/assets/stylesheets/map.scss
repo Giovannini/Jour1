@@ -148,4 +148,16 @@ body {
   box-shadow: 0px 5px 10px rgba($darkColor, 0.5);
 }
 
+.map-refresh {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  padding: 10px 15px;
+  background-color: $darkColor;
+  border-radius: 4px;
+}
+
+.map-refresh a {
+}
+
 @import "form.scss";
