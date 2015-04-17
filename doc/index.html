@@ -53,6 +53,17 @@
                     <li><em>Ground</em>: qui permet de définir les concepts qui batiront le terrain du monde</li>
                 </ul>
 
+                <h4>Edition de concept</h4>
+                <p>
+                    Via l'éditeur de graphe, il est possible d'ajouter des concepts. Parmi les valeurs à définir, il y a :
+                </p>
+                <ul>
+                    <li><em>Les propriétés</em>: cf. <a href="#1-instances">Instances</a></li>
+                    <li><em>Les règles</em>: cf. <a href="#1-instances">Instances</a></li>
+                    <li><em>Les besoins</em>: cf. <a href="#1-instances">Intelligence</a></li>
+                    <li><em>L'affichage</em>: La couleur est en hexadécimal "#ffffff" et défini comment sera affiché le concept sur la carte, et le ZIndex qui permettra d'afficher en priorité les concepts avec un ZIndex élevé, s'ils sont sur la meme case.</li>
+                </ul>
+
 
             <h3 id="1-relations">Les relations</h3>
                 <h4>Défintion</h4>
@@ -61,20 +72,31 @@
                 </p>
                 <ul>
                     <li><em>Des actions</em>: cf <a href="#2-actions">Actions</a></li>
-                    <li><em>SUBTYPE_OF</em>: introduit la notion d'héritage entre concept. C'est cette relation qui nous permettra de dire que le "Loup" est un "Animal"</li>
+                    <li><em>SUBTYPE_OF</em>: introduit la notion d'héritage entre concept. C'est cette relation qui nous permettra de dire que le "Loup" est un "Animal". Par contre, attention à ne pas dire qu'un "Animal" est un "Loup" ET qu'un "Loup" est un "Animal"</li>
                     <li><em>LIVE_ON</em>: permet de définir où un concept peut exister dans le monde. C'est cette relation qui nous permettra de dire qu'un "Loup" vit dans la "Montagne", où "Montagne" descend de "Ground"</li>
                 </ul>
+
+                <h4>Ajout des relations</h4>
+                <p>
+                    Pour ajouter des relations il faut aller dans l'édition de graphe et sélectionner la relation qu'on veut ajouter. Ensuite, il suffit de choisir le concept source et le concept destination pour l'ajouter au graphe.
+                </p>
 
             <h3 id="1-instances">Les instances</h3>
                 <h4>Définition</h4>
                 <p>
-                    Une instance est //TODO
+                    Une instance est un représentation d'un concept dans le monde. De manière plus concrète, c'est tout ce qui sera visible sur la carte du monde. Ainsi, on va retrouver des instances pour chaque terrain ("Terre", "Mer", ...) et pour chaque élément qui peuple le monde ("Herbe", "Loup", "Mouton", ...).
                 </p>
 
-                <h4>Comment préciser à un concept qu'il peut créer des instances ?</h4>
+                <h4>Comment avoir des instances ?</h4>
                 <p>
-                    Les règles des concepts
+                    Pour permettre au monde de s'initialiser avec des instances, il faut définir des règles (rules) dans le concept, à l'aide de l'éditeur de graphe. Les règles à ajouter sont :
                 </p>
+                <ul>
+                    <li><em>Instanciable</em>: en ajoutant cette règle, ce concept sera pris en compte lors de l'initialisation du monde</li>
+                    <li><em>Strength</em>: correspond à la proportion de ce concept dans le monde. Ainsi, si la force est élevée par rapport aux autres concepts, il va etre présent majoritairement. Sinon, il sera sous représenté.</li>
+                </ul>
+
+                <p><em>NB: Les instances n'apparaitront pas spontanément dans le monde. Il faut réinitialiser le monde (/clearWorld) afin de relancer une initialisation du monde.</em></p>
 		</div>
 
         <div class="content-category" id="interaction">
