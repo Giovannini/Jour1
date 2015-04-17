@@ -27,59 +27,6 @@
 			<p>Idéalement, on pourrait alors se servir de cette base pour construire un environnement de base dans un jeu. Les créateurs de monde pourraient aussi s'amuser à changer encore et encore les variables qui dirigent ce monde pour etre témoin des modifications drastiques que cela pourrait entra^iner.</p>
 		</div>
 
-        <div class="content-category" id="intelligence">
-            <h2>L'intelligence des instances</h2>
-
-            <p>
-                Pour être considérée comme intelligente, des besoins vont êtres attribués à l'instance.
-                Les besoins sont des objets complexes qui affectent une propriété.
-                Ils renseignent des moyens de satisfaction qui vont permettre à l'instance de pouvoir les assouvir ainsi que des conséquences, c'est à dire les effets qui seront appliqués si l'instance intelligente ne satisfait pas ses besoins.
-                Une instance qui a faim et qui ne mange pas subira les conséquences de cette faim et sera par exemple plus fatiguée, ce qui affectera sa vitesse de déplacement.
-            </p>
-            <p>
-                D'autre part, l'instance intelligente possède une propriété particulière, "Sense", qui lui permet de sonder son environnement.
-                Il s'agit concrètement pour elle d'un rayon de vision qui lui permet d'analyser les instances proches d'elle.
-                Cette analyse affectera son humeur et modifiera donc ses propriétés internes:
-                on peut imaginer un mouton "sentir" un loup proche de lui et donc prendre peur, ce qui affectera les décisions qu'il prendra.
-            </p>
-
-            <h3>Les conséquences</h3>
-            <p>
-                Au sein des besoins, les conséquences au sens où nous l'entendons sont en fait séparés en deux objets.
-                Tout d'abord, les étapes de conséquences puis ensuite les conséquences à proprement parler.
-            <h4>L'objet conséquence</h4>
-            <p>
-                Les conséquences à proprement parler sont des objets comprenant une sévérité, c'est à dire un indice de force permettant à l'instance intelligente de savoir si elle doit craindre la conséquence ou non ainsi qu'un effet.
-                Lorsqu'on considère la conséquence nécessaire, on applique simplement l'effet sur la conséquence.
-            </p>
-
-            <h4>Les étapes de conséquences</h4>
-            <p>
-                Un besoin contient diverses conséquences sur plusieurs niveaux.
-                Il ne semble pas naturel d'appliquer un effet ou une conséquence démesurée par rapport à un besoin minime, mais si une instance persiste à ne pas satisfaire ce besoin, des conséquences plus importantes vont se faire sentir.
-                Les niveaux de conséquences représentent cette gradation.
-                Ces niveaux correspondent à des valeurs particulières de la propriété affectée par le besoin.
-                Si cette propriété est plus haute que le niveau indique sur l'étape, on en applique la conséquence.
-            </p>
-            <p>
-                Les instances utilisent ces niveaux pour décider des actions qu'elles vont accomplir.
-                En se basant sur la différence de valeur entre la propriété et le niveau de la conséquence prochaine, elles vont parvenir à prioritiser les actions qu'elles vont accomplir, de manière à satisfaire leurs besoins de la façon la plus intelligente possible.
-            </p>
-
-            <h3>Les moyens de satisfaction</h3>
-            <p>
-                Les moyens de satisfactions ont pour but d'indiquer à l'instance intelligente les actions qu'elle pourrait accomplir dans le but de satisfaire son besoin.
-                Généralement, un besoin comprend plusieurs moyens de satisfaction, ce qui permet à l'instance intelligente, de satisfaire un besoin de différentes façons.
-            </p>
-            <p>
-                Concrètement, l'objet moyen de satisfaction comprend une action ainsi qu'un concept de destination.
-                L'instance choisi alors intelligemment un moyen de satisfaction dans le sens ou elle peut vérifier avant d'exécuter son action qu'elle et son environnement satisfont toutes les préconditions nécessaires à la bonne réalisation de l'action.
-                Si cela n'est pas le cas, elle tente de satisfaire son besoin à l'aide d'un autre moyen de satisfaction.
-            </p>
-
-            <p>L'humeur</p>
-        </div>
-
 		<div class="content-category" id="composants">
 			<h2>Les composants du monde</h2>
 
@@ -140,6 +87,67 @@
         ########################   INTELLIGENCE     ####################
         ################################################################
         ################################################################-->
+        <div class="content-category" id="intelligence">
+            <h2>L'intelligence des instances</h2>
+
+            <h3>Les besoins</h3>
+            <p>
+                Pour être considérée comme intelligente, des besoins vont êtres attribués à l'instance.
+                Les besoins sont des objets complexes qui affectent une propriété.
+                Ils renseignent des moyens de satisfaction qui vont permettre à l'instance de pouvoir les assouvir ainsi que des conséquences, c'est à dire les effets qui seront appliqués si l'instance intelligente ne satisfait pas ses besoins.
+                Une instance qui a faim et qui ne mange pas subira les conséquences de cette faim et sera par exemple plus fatiguée, ce qui affectera sa vitesse de déplacement.
+            </p>
+            <p>
+                D'autre part, l'instance intelligente possède une propriété particulière, "Sense", qui lui permet de sonder son environnement.
+                Il s'agit concrètement pour elle d'un rayon de vision qui lui permet d'analyser les instances proches d'elle.
+                Cette analyse affectera son humeur et modifiera donc ses propriétés internes:
+                on peut imaginer un mouton "sentir" un loup proche de lui et donc prendre peur, ce qui affectera les décisions qu'il prendra.
+            </p>
+
+            <h3>Les conséquences</h3>
+            <p>
+                Au sein des besoins, les conséquences au sens où nous l'entendons sont en fait séparés en deux objets.
+                Tout d'abord, les étapes de conséquences puis ensuite les conséquences à proprement parler.
+            <h4>L'objet conséquence</h4>
+            <p>
+                Les conséquences à proprement parler sont des objets comprenant une sévérité, c'est à dire un indice de force permettant à l'instance intelligente de savoir si elle doit craindre la conséquence ou non ainsi qu'un effet.
+                Lorsqu'on considère la conséquence nécessaire, on applique simplement l'effet sur la conséquence.
+            </p>
+
+            <h4>Les étapes de conséquences</h4>
+            <p>
+                Un besoin contient diverses conséquences sur plusieurs niveaux.
+                Il ne semble pas naturel d'appliquer un effet ou une conséquence démesurée par rapport à un besoin minime, mais si une instance persiste à ne pas satisfaire ce besoin, des conséquences plus importantes vont se faire sentir.
+                Les niveaux de conséquences représentent cette gradation.
+                Ces niveaux correspondent à des valeurs particulières de la propriété affectée par le besoin.
+                Si cette propriété est plus haute que le niveau indique sur l'étape, on en applique la conséquence.
+            </p>
+            <p>
+                Les instances utilisent ces niveaux pour décider des actions qu'elles vont accomplir.
+                En se basant sur la différence de valeur entre la propriété et le niveau de la conséquence prochaine, elles vont parvenir à prioriser les actions qu'elles vont accomplir, de manière à satisfaire leurs besoins de la façon la plus intelligente possible.
+            </p>
+
+            <h3>Les moyens de satisfaction</h3>
+            <p>
+                Les moyens de satisfactions ont pour but d'indiquer à l'instance intelligente les actions qu'elle pourrait accomplir dans le but de satisfaire son besoin.
+                Généralement, un besoin comprend plusieurs moyens de satisfaction, ce qui permet à l'instance intelligente, de satisfaire un besoin de différentes façons.
+            </p>
+            <p>
+                Concrètement, l'objet moyen de satisfaction comprend une action ainsi qu'un concept de destination.
+                L'instance choisi alors intelligemment parmi la liste des actions dont elle dispose celle qu'elle peut faire lors de son tour.
+                Si cela n'est pas le cas, elle tente de satisfaire son besoin à l'aide d'un autre moyen de satisfaction.
+            </p>
+
+            <h3>L'humeur</h3>
+            <p>
+                Au delà des besoins qu'elle possède, c'est sa possibilité d'être affectée par ce qui se passe autour d'elle qui rend l'instance intelligente.
+                Une instance intelligente peut voir son concept relié à d'autres concepts via des relations particulières de type MOOD.
+                L'humeur des instances est calculé via ces relations.
+                A chaque tour d'intelligence, les instances vont sonder leur environnement à la recherche d'autres instances avec lesquelles elles sont reliées via des relations de ce type.
+
+            </p>
+
+        </div>
 
         <div class="content-category" id="interaction">
             <h2>Les interactions</h2>
