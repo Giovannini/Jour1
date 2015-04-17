@@ -78,10 +78,8 @@
             </li>
         </ul>
 
-
         <h3 id="1-relations">Les relations</h3>
         <h4>Défintion</h4>
-
         <p>
             Une relation est ce qui va permettre de lier deux concepts dans le graphe. Ces relations sont une partie à
             ne pas négliger parce que ce sont ces relations qui vont faire que le monde est un ensemble cohérent qui
@@ -91,15 +89,12 @@
             <li><em>Des actions</em>: cf <a href="#2-actions">Actions</a></li>
             <li><em>SUBTYPE_OF</em>: introduit la notion d'héritage entre concept. C'est cette relation qui nous
                 permettra de dire que le "Loup" est un "Animal". Par contre, attention à ne pas dire qu'un "Animal" est
-                un "Loup" ET qu'un "Loup" est un "Animal"
-            </li>
+                un "Loup" ET qu'un "Loup" est un "Animal"</li>
             <li><em>LIVE_ON</em>: permet de définir où un concept peut exister dans le monde. C'est cette relation qui
-                nous permettra de dire qu'un "Loup" vit dans la "Montagne", où "Montagne" descend de "Ground"
-            </li>
+                nous permettra de dire qu'un "Loup" vit dans la "Montagne", où "Montagne" descend de "Ground"</li>
         </ul>
 
         <h4>Ajout des relations</h4>
-
         <p>
             Pour ajouter des relations il faut aller dans l'édition de graphe et sélectionner la relation qu'on veut
             ajouter. Ensuite, il suffit de choisir le concept source et le concept destination pour l'ajouter au graphe.
@@ -107,18 +102,32 @@
 
         <h3 id="1-instances">Les instances</h3>
         <h4>Définition</h4>
-
         <p>
             Une instance est un représentation d'un concept dans le monde. De manière plus concrète, c'est tout ce qui
             sera visible sur la carte du monde. Ainsi, on va retrouver des instances pour chaque terrain ("Terre",
             "Mer", ...) et pour chaque élément qui peuple le monde ("Herbe", "Loup", "Mouton", ...).
         </p>
 
-        <h4>Comment préciser à un concept qu'il peut créer des instances ?</h4>
-
         <p>
-            Les règles des concepts
+            De plus chaque instance est composée de propriétés. Celles-ci sont définies dans le concept dont sont
+            dérivées les instances, et lors de la création de celles-ci, elles ont la valeur par défaut donnée dans le
+            concept. Cela permet aux instances d'avoir leur propre état et donc d'agir selon leur état.
         </p>
+
+        <h4>Comment avoir des instances ?</h4>
+        <p>
+            Pour permettre au monde de s'initialiser avec des instances, il faut définir des règles (rules) dans le
+            concept, à l'aide de l'éditeur de graphe. Les règles à ajouter sont :
+        </p>
+        <ul>
+            <li><em>Instanciable</em>: en ajoutant cette règle, ce concept sera pris en compte lors de l'initialisation
+                du monde</li>
+            <li><em>Strength</em>: correspond à la proportion de ce concept dans le monde. Ainsi, si la force est
+                élevée par rapport aux autres concepts, il va etre présent majoritairement. Sinon, il sera sous représenté.</li>
+        </ul>
+
+        <p><em>NB: Les instances n'apparaitront pas spontanément dans le monde. Il faut réinitialiser le monde
+            (/clearWorld) afin de relancer une initialisation du monde.</em></p>
     </div>
 
     <div class="content-category" id="interaction">
@@ -128,16 +137,15 @@
             vouloir définir la possibilité qu'à un "Loup" de manger un "Mouton". Ou encore, la possibilité qu'à un
             "Animal" de se déplacer sur la "Terre".</p>
 
-        <h3>Les propriétés</h3>
-
-        <p>Les propriétés permettent de définir l'état de l'instance //TODO</p>
-
         <h3>Fonctionnement des actions</h3>
-
-        <p>Paramètres, Preconditions, Action //TODO </p>
+        <p>
+            Pour permettre ce genre d'interactions et rendre leur utilisation le plus générique possible il existe le
+            système d'action. Une action est une opération qui sera effectuée en lui passant une liste de paramètre.
+            Cette opération est réalisée si et seulement si les préconditions de celles-ci sont remplies (= toutes
+            vraies).
+        </p>
 
         <h3>Ajouter une action à un concept</h3>
-
         <p>Ajouter la relation au graphe //TODO </p>
     </div>
 
@@ -145,7 +153,7 @@
     ################################################################
     ########################   INTELLIGENCE     ####################
     ################################################################
-    #############################################################-->
+    ################################################################-->
     <div class="content-category" id="intelligence">
         <h2>L'intelligence des instances</h2>
 
@@ -186,6 +194,7 @@
             force permettant à l'instance intelligente de savoir si elle doit craindre la conséquence ou non ainsi qu'un
             effet.
             Lorsqu'on considère la conséquence nécessaire, on applique simplement l'effet sur la conséquence.
+        </p>
         <ul>
             <li>
                 <em>La sévérité:</em>
@@ -197,7 +206,6 @@
                 Il s'agit de l'effet concret que va subir l'instance cible à l'activation de la conséquence.
             </li>
         </ul>
-        </p>
 
         <h5>Les étapes de conséquences</h5>
 
@@ -276,6 +284,5 @@
         </p>
 
     </div>
-
 </div>
 </html>
