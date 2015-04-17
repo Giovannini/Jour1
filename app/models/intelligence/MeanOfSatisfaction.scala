@@ -36,8 +36,8 @@ object MeanOfSatisfaction {
   } match {
     case Success(list) => list
     case Failure(e) =>
-      println("Error while parsing list of MeansOfSatisfaction:")
-      println("e")
+      Console.println("Error while parsing list of MeansOfSatisfaction:")
+      Console.println("e")
       List()
   }
 
@@ -56,8 +56,8 @@ object MeanOfSatisfaction {
   } match {
     case Success(m) => m
     case Failure(e) =>
-      println("Error while parsing a mean of satisfaction")
-      println(e)
+      Console.println("Error while parsing a mean of satisfaction")
+      Console.println(e)
       error
   }
 }

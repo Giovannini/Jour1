@@ -2,12 +2,15 @@ package models.interaction.precondition
 
 import models.interaction.parameter.ParameterReference
 
+import scala.collection.mutable
+import scala.collection.immutable
+
 /**
  * Manager for the preconditions.
  */
 object PreconditionManager {
 
-  val nameToId: collection.mutable.Map[String, Precondition] = collection.mutable.Map.empty[String, Precondition]
+  val nameToId: mutable.Map[String, Precondition] = mutable.Map.empty[String, Precondition]
 
   def initialization() = {
     PreconditionDAO.clear
@@ -53,14 +56,14 @@ object PreconditionManager {
     )
 
     val preconditionHasInstanceOfConcept = Precondition(
-        0,
-        "hasInstanceOfConcept",
-        List(),
-        List(
-          ParameterReference("instanceID","Long"),
-          ParameterReference("ConceptID", "Long")
-        )
+      0,
+      "hasInstanceOfConcept",
+      List(),
+      List(
+        ParameterReference("instanceID", "Long"),
+        ParameterReference("ConceptID", "Long")
       )
+    )
 
     val preconditionIsSelf = Precondition(
       0,
@@ -92,14 +95,14 @@ object PreconditionManager {
       )
     )
 
-    nameToId += "isNextTo" -> preconditionIsNextTo.save
-    nameToId += "isOnSameTile" -> preconditionIsOnSameTile.save
-    nameToId += "isAtWalkingDistance" -> preconditionIsAtWalkingDistance.save
-    nameToId += "hasProperty" -> preconditionHasProperty.save
-    nameToId += "hasInstanceOfConcept" -> preconditionHasInstanceOfConcept.save
-    nameToId += "isSelf" -> preconditionIsSelf.save
-    nameToId += "notSelf" -> preconditionNotSelf.save
-    nameToId += "isDifferentConcept" -> preconditionDifferentConcept.save
+    nameToId.put("isNextTo", preconditionIsNextTo.save)
+    nameToId.put("isOnSameTile", preconditionIsOnSameTile.save)
+    nameToId.put("isAtWalkingDistance", preconditionIsAtWalkingDistance.save)
+    nameToId.put("hasProperty", preconditionHasProperty.save)
+    nameToId.put("hasInstanceOfConcept", preconditionHasInstanceOfConcept.save)
+    nameToId.put("isSelf", preconditionIsSelf.save)
+    nameToId.put("notSelf", preconditionNotSelf.save)
+    nameToId.put("isDifferentConcept", preconditionDifferentConcept.save)
 
     /*Composed preconditions*/
     val preconditionPropertyIsHigherThan = {
@@ -112,15 +115,19 @@ object PreconditionManager {
         List(
           (
             nameToId("hasProperty"),
-            Map(
-              ParameterReference("instanceID", "Long") -> p_instanceID,
-              ParameterReference("property", "Property") -> p_propertyID
-          )),
-          (nameToId("hasProperty"),
-            Map(
-              ParameterReference("instanceID", "Long") -> p_instanceID,
-              ParameterReference("property", "Property") -> p_propertyValueID
-            ))),
+            immutable.Map(
+              (ParameterReference("instanceID", "Long"), p_instanceID),
+              (ParameterReference("property", "Property"), p_propertyID)
+            )
+            ),
+          (
+            nameToId("hasProperty"),
+            immutable.Map(
+              (ParameterReference("instanceID", "Long"), p_instanceID),
+              (ParameterReference("property", "Property"), p_propertyValueID)
+            )
+            )
+        ),
         List(p_instanceID, p_propertyID, p_propertyValueID)
       )
     }
@@ -135,22 +142,22 @@ object PreconditionManager {
         List(
           (
             nameToId("hasProperty"),
-            Map(
-              ParameterReference("instanceID", "Long") -> p_instanceID,
-              ParameterReference("property", "Property") -> p_propertyID
+            immutable.Map(
+              (ParameterReference("instanceID", "Long"), p_instanceID),
+              (ParameterReference("property", "Property"), p_propertyID)
             )),
           (nameToId("hasProperty"),
-            Map(
-              ParameterReference("instanceID", "Long") -> p_instanceID,
-              ParameterReference("property", "Property") -> p_propertyValueID
+            immutable.Map(
+              (ParameterReference("instanceID", "Long"), p_instanceID),
+              (ParameterReference("property", "Property"), p_propertyValueID)
             ))),
         List(p_instanceID, p_propertyID, p_propertyValueID)
       )
     }
 
-    nameToId += "propertyIsHigherThan" -> preconditionPropertyIsHigherThan.save
-    nameToId += "propertyIsLowerThan" -> preconditionPropertyIsLowerThan.save
-    println("PreconditionManager is initialized")
+    nameToId.put("propertyIsHigherThan", preconditionPropertyIsHigherThan.save)
+    nameToId.put("propertyIsLowerThan", preconditionPropertyIsLowerThan.save)
+    Console.println("PreconditionManager is initialized")
   }
 
 }

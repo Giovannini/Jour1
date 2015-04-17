@@ -5,14 +5,13 @@ import models.graph.relation.{RelationSqlDAO, Relation}
 import play.api.data.Form
 import play.api.data.Forms._
 
-/**
- * Created by vlynn on 31/03/15.
- */
+
 object RelationForm {
+
   val form = Form(
     mapping(
-      "id" -> longNumber,
-      "label" -> nonEmptyText
+      ("id", longNumber),
+      ("label", nonEmptyText)
     )(Relation.apply)(Relation.unapply)
   )
 
@@ -26,7 +25,7 @@ object RelationForm {
 
   val simpleForm = Form(
     mapping(
-      "id" -> longNumber
+      ("id", longNumber)
     )(simpleApply)(simpleUnapply).verifying(
         "Relation not found",
         relation => relation != Relation.error
@@ -35,9 +34,9 @@ object RelationForm {
 
   val graphForm = Form(
     tuple(
-      "source" -> ConceptForm.idForm.mapping,
-      "destination" -> ConceptForm.idForm.mapping,
-      "relation" -> simpleForm.mapping
+      ("source", ConceptForm.idForm.mapping),
+      ("destination", ConceptForm.idForm.mapping),
+      ("relation", simpleForm.mapping)
     )
   )
 }

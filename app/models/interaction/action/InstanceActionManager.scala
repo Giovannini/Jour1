@@ -20,10 +20,8 @@ object InstanceActionManager {
    * @author Thomas GIOVANNINI
    */
   def initialization(): Unit = {
-    println("Initialization of Action Manager")
+    Console.println("Initialization of Action Manager")
     InteractionDAO.clearDB()
-    //TODO think of a way to create an instance from nothing (using json maybe)
-    //nameToId += "_createInstance" -> _createInstance
 
     val _addInstanceAt = {
       val p_instanceToAdd = ParameterReference("instanceToAdd", "Long")
@@ -36,7 +34,7 @@ object InstanceActionManager {
         List(p_instanceToAdd, groundWhereToAddIt)
       ).save
     }
-    nameToInstanceAction += "_addInstanceAt" -> _addInstanceAt
+    nameToInstanceAction.put("_addInstanceAt", _addInstanceAt)
 
     val _actionCreateInstanceAt = {
       val p_conceptToInstanciate = ParameterReference("conceptID", "Long")
@@ -49,7 +47,7 @@ object InstanceActionManager {
         List(p_conceptToInstanciate, groundWhereToAddIt)
       ).save
     }
-    nameToInstanceAction += "_actionCreateInstanceAt" -> _actionCreateInstanceAt
+    nameToInstanceAction.put("_actionCreateInstanceAt", _actionCreateInstanceAt)
 
     val _removeInstanceAt = {
       val p_instanceToRemove = ParameterReference("instanceToRemove", "Long")
@@ -61,7 +59,7 @@ object InstanceActionManager {
         List(p_instanceToRemove)
       ).save
     }
-    nameToInstanceAction += "_removeInstanceAt" -> _removeInstanceAt
+    nameToInstanceAction.put("_removeInstanceAt", _removeInstanceAt)
 
     val _addToProperty = {
       val p_instanceID = ParameterReference("instanceID", "Long")
@@ -75,8 +73,8 @@ object InstanceActionManager {
           (
             PreconditionManager.nameToId("hasProperty"),
             Map(
-              ParameterReference("instanceID", "Long") -> p_instanceID,
-              ParameterReference("property", "Property") -> p_propertyName
+              (ParameterReference("instanceID", "Long"), p_instanceID),
+              (ParameterReference("property", "Property"), p_propertyName)
             )
             )
         ),
@@ -86,7 +84,7 @@ object InstanceActionManager {
         List(p_instanceID, p_propertyName, p_valueToAdd)
       ).save
     }
-    nameToInstanceAction += "_addToProperty" -> _addToProperty
+    nameToInstanceAction.put("_addToProperty", _addToProperty)
 
     val _modifyProperty = {
       val p_instanceID = ParameterReference("instanceToModify", "Long")
@@ -100,10 +98,10 @@ object InstanceActionManager {
           (
             PreconditionManager.nameToId("hasProperty"),
             Map(
-              ParameterReference("instanceToModify", "Long") -> p_instanceID,
-              ParameterReference("property", "Property") -> p_propertyName
+              (ParameterReference("instanceToModify", "Long"), p_instanceID),
+              (ParameterReference("property", "Property"), p_propertyName)
             )
-          )
+            )
         ),
         // SubActions
         List(),
@@ -111,34 +109,7 @@ object InstanceActionManager {
         List(p_instanceID, p_propertyName, p_propertyValue)
       ).save
     }
-    nameToInstanceAction += "_modifyProperty" -> _modifyProperty
-
-    val _consume = {
-      val p_instanceID = ParameterReference("instanceID", "Long")
-      val p_propertyName = ParameterReference("propertyName", "Property")
-      val p_valueToAdd = ParameterReference("valueToAdd", "Int")
-      InstanceAction(
-        0L,
-        "consume",
-        // Preconditions
-        List(),
-        // SubActions
-        List(
-          (
-            _addToProperty,
-            Map(
-              ParameterReference("instanceID", "Long") -> p_instanceID,
-              ParameterReference("propertyName", "Property") -> p_propertyName,
-              ParameterReference("valueToAdd", "Int") -> p_valueToAdd
-            )
-            )
-
-        ),
-        // Parameters
-        List(p_instanceID, p_propertyName, p_valueToAdd)
-      ).save
-    }
-    nameToInstanceAction += "_consume" -> _consume
+    nameToInstanceAction.put("_modifyProperty", _modifyProperty)
 
     /*Function to add to the BDD*/
     val _actionMoveInstanceAt = {
@@ -151,15 +122,15 @@ object InstanceActionManager {
           (
             PreconditionManager.nameToId("notSelf"),
             Map(
-              ParameterReference("instance1ID", "Long") -> p_instanceToMove,
-              ParameterReference("instance2ID", "Long") -> p_groundWhereToMoveIt
+              (ParameterReference("instance1ID", "Long"), p_instanceToMove),
+              (ParameterReference("instance2ID", "Long"), p_groundWhereToMoveIt)
             )
-          ),
+            ),
           (
             PreconditionManager.nameToId("isAtWalkingDistance"),
             Map(
-              ParameterReference("instance1ID", "Long") -> p_instanceToMove,
-              ParameterReference("instance2ID", "Long") -> p_groundWhereToMoveIt
+              (ParameterReference("instance1ID", "Long"), p_instanceToMove),
+              (ParameterReference("instance2ID", "Long"), p_groundWhereToMoveIt)
             )
             )
         ),
@@ -167,21 +138,21 @@ object InstanceActionManager {
           (
             _addInstanceAt,
             Map(
-              ParameterReference("instanceToAdd", "Long") -> p_instanceToMove,
-              ParameterReference("groundWhereToAddIt", "Long") -> p_groundWhereToMoveIt
+              (ParameterReference("instanceToAdd", "Long"), p_instanceToMove),
+              (ParameterReference("groundWhereToAddIt", "Long"), p_groundWhereToMoveIt)
             )
-          ),
+            ),
           (
             _removeInstanceAt,
             Map(
-              ParameterReference("instanceToRemove", "Long") -> p_instanceToMove
+              (ParameterReference("instanceToRemove", "Long"), p_instanceToMove)
             )
-          )
+            )
         ),
         parameters = List(p_instanceToMove, p_groundWhereToMoveIt)).save
     }
-    nameToInstanceAction += "Move" -> _actionMoveInstanceAt
-//Todo choisir de valeurs judicieuse de consommation et d'envie
+    nameToInstanceAction.put("Move", _actionMoveInstanceAt)
+    //Todo choisir de valeurs judicieuse de consommation et d'envie
     val _actionEat = {
       val p_instanceThatEat = ParameterReference("instanceThatEat", "Long")
       val p_instanceThatIsEaten = ParameterReference("instanceThatIsEaten", "Long")
@@ -192,33 +163,33 @@ object InstanceActionManager {
           (
             PreconditionManager.nameToId("isOnSameTile"),
             Map(
-              ParameterReference("instance1ID", "Long") -> p_instanceThatEat,
-              ParameterReference("instance2ID", "Long") -> p_instanceThatIsEaten
+              (ParameterReference("instance1ID", "Long"), p_instanceThatEat),
+              (ParameterReference("instance2ID", "Long"), p_instanceThatIsEaten)
             )
             ),
           (
             PreconditionManager.nameToId("isDifferentConcept"),
             Map(
-              ParameterReference("instance1ID", "Long") -> p_instanceThatEat,
-              ParameterReference("instance2ID", "Long") -> p_instanceThatIsEaten
+              (ParameterReference("instance1ID", "Long"), p_instanceThatEat),
+              (ParameterReference("instance2ID", "Long"), p_instanceThatIsEaten)
             )
-          )
+            )
         ),
         _subActions = List(
           (
             _addToProperty,
             Map(
-              ParameterReference("instanceID", "Long") -> p_instanceThatEat,
-              ParameterReference("propertyName", "Property") -> ParameterValue("Hunger", "Property"),
-              ParameterReference("valueToAdd", "Int") -> ParameterValue(-3, "Int")
+              (ParameterReference("instanceID", "Long"), p_instanceThatEat),
+              (ParameterReference("propertyName", "Propert(y"), ParameterValue("Hunger", "Property")),
+              (ParameterReference("valueToAdd", "In(t"), ParameterValue(-3, "Int"))
             )
             ),
           (
-            _consume,
+              _addToProperty,
             Map(
-              ParameterReference("instanceID", "Long") -> p_instanceThatIsEaten,
-              ParameterReference("propertyName", "Property") -> ParameterValue("Wound", "Property"),
-              ParameterReference("valueToAdd", "Int") -> ParameterValue(2, "Int")
+              (ParameterReference("instanceID", "Long"), p_instanceThatIsEaten),
+              (ParameterReference("propertyName", "Propert(y"), ParameterValue("Wound", "Property")),
+              (ParameterReference("valueToAdd", "In(t"), ParameterValue(2, "Int"))
             )
             )
         ),
@@ -228,7 +199,7 @@ object InstanceActionManager {
         )
       ).save
     }
-    nameToInstanceAction += "Eat" -> _actionEat
+    nameToInstanceAction.put("Eat", _actionEat)
 
     val _actionCut = {
       val p_instanceThatCut = ParameterReference("instanceThatCut", "Long")
@@ -240,15 +211,15 @@ object InstanceActionManager {
           (
             PreconditionManager.nameToId("isOnSameTile"),
             Map(
-              ParameterReference("instance1ID", "Long") -> p_instanceThatCut,
-              ParameterReference("instance2ID", "Long") -> p_instanceThatIsCut
+              (ParameterReference("instance1ID", "Long"), p_instanceThatCut),
+              (ParameterReference("instance2ID", "Long"), p_instanceThatIsCut)
             )
             ),
           (
             PreconditionManager.nameToId("isDifferentConcept"),
             Map(
-              ParameterReference("instance1ID", "Long") -> p_instanceThatCut,
-              ParameterReference("instance2ID", "Long") -> p_instanceThatIsCut
+              (ParameterReference("instance1ID", "Long"), p_instanceThatCut),
+              (ParameterReference("instance2ID", "Long"), p_instanceThatIsCut)
             )
             )
         ),
@@ -256,7 +227,7 @@ object InstanceActionManager {
           (
             _removeInstanceAt,
             Map(
-              ParameterReference("instanceToRemove", "Long") -> p_instanceThatIsCut
+              (ParameterReference("instanceToRemove", "Long"), p_instanceThatIsCut)
             )
             )
         ),
@@ -266,7 +237,7 @@ object InstanceActionManager {
         )
       ).save
     }
-    nameToInstanceAction += "Cut" -> _actionCut
+    nameToInstanceAction.put("Cut", _actionCut)
 
     val _actionProcreate = {
       val p_instanceThatProcreate = ParameterReference("instanceThatProcreate", "Long")
@@ -275,39 +246,33 @@ object InstanceActionManager {
         0L,
         "ACTION_PROCREATE",
         preconditions = List(
-          (
-            PreconditionManager.nameToId("hasProperty"),
-            Map(
-              ParameterReference("instanceID", "Long") -> p_instanceThatProcreate,
-              ParameterReference("property", "Property") -> ParameterValue("Desire", "Property")
-            )
-            ),
           (PreconditionManager.nameToId("propertyIsHigherThan"),
             Map(
-              ParameterReference("instanceID", "Long") -> p_instanceThatProcreate,
-              ParameterReference("property", "Property") -> ParameterValue("Desire", "Property"),
-              ParameterReference("propertyToCompare", "Property") -> ParameterValue("DesireMax", "Property")
-            )),
-            (PreconditionManager.nameToId("isOnSameTile"),
-              Map(
-                ParameterReference("instance1ID", "Long") -> p_instanceThatProcreate,
-                ParameterReference("instance2ID", "Long") -> p_groundWhereToProcreate              )
-        )
+              (ParameterReference("instanceID", "Long"), p_instanceThatProcreate),
+              (ParameterReference("property", "Propert(y"), ParameterValue("Desire", "Property")),
+              (ParameterReference("propertyToCompare", "Propert(y"), ParameterValue(20, "Int"))
+            )
+            ),
+          (PreconditionManager.nameToId("isOnSameTile"),
+            Map(
+              (ParameterReference("instance1ID", "Long"), p_instanceThatProcreate),
+              (ParameterReference("instance2ID", "Long"), p_groundWhereToProcreate))
+            )
         ),
         _subActions = List(
           (
             _addToProperty,
             Map(
-              ParameterReference("instanceToModify", "Long") -> p_instanceThatProcreate,
-              ParameterReference("propertyName", "Property") -> ParameterValue("Desire", "Property"),
-              ParameterReference("propertyValue", "Int") -> ParameterValue(-10, "Int")
+              (ParameterReference("instanceID", "Long"), p_instanceThatProcreate),
+              (ParameterReference("propertyName", "Propert(y"), ParameterValue("Desire", "Property")),
+              (ParameterReference("valueToAdd", "In(t"), ParameterValue(-20, "Int"))
             )
             ),
           (
             _addInstanceAt,
             Map(
-              ParameterReference("instanceToAdd", "Long") -> p_instanceThatProcreate,
-              ParameterReference("groundWhereToAddIt", "Long") -> p_groundWhereToProcreate
+              (ParameterReference("instanceToAdd", "Long"), p_instanceThatProcreate),
+              (ParameterReference("groundWhereToAddIt", "Long"), p_groundWhereToProcreate)
             )
             )
         ),
@@ -317,7 +282,7 @@ object InstanceActionManager {
         )
       ).save
     }
-    nameToInstanceAction += "Procreate" -> _actionProcreate
+    nameToInstanceAction.put("Procreate", _actionProcreate)
 
     val _actionSpread = {
       val p_instanceThatSpread = ParameterReference("instanceThatSpread", "Long")
@@ -330,56 +295,56 @@ object InstanceActionManager {
           (
             PreconditionManager.nameToId("hasProperty"),
             Map(
-              ParameterReference("instanceID", "Long") -> p_instanceThatSpread,
-              ParameterReference("property", "Property") -> ParameterValue("DuplicationSpeed", "Property")
-            )
-            ),
-          (PreconditionManager.nameToId("propertyIsLowerThan"),
-            Map(
-              ParameterReference("instanceID", "Long") -> p_instanceThatSpread,
-              ParameterReference("property", "Property") -> ParameterValue("DuplicationSpeed", "Property"),
-              ParameterReference("propertyToCompare", "Property") -> ParameterValue(0, "Int")
-            )
-            ),
-          (PreconditionManager.nameToId("propertyIsLowerThan"),
-            Map(
-              ParameterReference("instanceID", "Long") -> p_instanceThatSpread,
-              ParameterReference("property", "Property") -> ParameterValue("Wound", "Property"),
-              ParameterReference("propertyToCompare", "Property") -> ParameterValue(0, "Int")
-            )
-            ),
-          (PreconditionManager.nameToId("isNextTo"),
-            Map(
-              ParameterReference("instance1ID", "Long") -> p_instanceThatSpread,
-              ParameterReference("instance2ID", "Long") -> p_groundWhereToAddIt
-            )
-            )
-
-        ),
-        _subActions = List(
-          (
-            _addToProperty,
-            Map(
-              ParameterReference("instanceID", "Long") -> p_instanceThatSpread,
-              ParameterReference("propertyName", "Property") -> ParameterValue("DuplicationSpeed", "Property"),
-              ParameterReference("valueToAdd", "Int") -> ParameterValue(10, "Int")
-            )
-            ),
-          (
-            _addInstanceAt,
-            Map(
-              ParameterReference("instanceToAdd", "Long") -> p_instanceThatSpread,
-              ParameterReference("groundWhereToAddIt", "Long") -> p_groundWhereToAddIt
-            )
+              (ParameterReference("instanceID", "Long"), p_instanceThatSpread),
+              (ParameterReference("property", "Propert(y"), ParameterValue("DuplicationSpeed", "Property"))
             )
         ),
-        parameters = List(
-          p_instanceThatSpread,
-          p_groundWhereToAddIt
+        (PreconditionManager.nameToId("propertyIsLowerThan"),
+          Map(
+            (ParameterReference("instanceID", "Long"), p_instanceThatSpread),
+            (ParameterReference("property", "Propert(y"), ParameterValue("DuplicationSpeed", "Property")),
+            (ParameterReference("propertyToCompare", "Propert(y"), ParameterValue(0, "Int"))
+      )
+      ),
+      (PreconditionManager.nameToId("propertyIsLowerThan"),
+        Map(
+          (ParameterReference("instanceID", "Long"), p_instanceThatSpread),
+          (ParameterReference("property", "Propert(y"), ParameterValue("Wound", "Property")),
+          (ParameterReference("propertyToCompare", "Propert(y"), ParameterValue(0, "Int"))
+      )
+      ),
+      (PreconditionManager.nameToId("isNextTo"),
+        Map(
+          (ParameterReference("instance1ID", "Long"), p_instanceThatSpread),
+          (ParameterReference("instance2ID", "Long"), p_groundWhereToAddIt)
         )
+        )
+
+      ),
+      _subActions = List(
+        (
+          _addToProperty,
+          Map(
+            (ParameterReference("instanceID", "Long"), p_instanceThatSpread),
+            (ParameterReference("propertyName", "Propert(y"), ParameterValue("DuplicationSpeed", "Property")),
+            (ParameterReference("valueToAdd", "In(t"), ParameterValue(10, "Int"))
+      )
+      ),
+      (
+        _addInstanceAt,
+        Map(
+          (ParameterReference("instanceToAdd", "Long"), p_instanceThatSpread),
+          (ParameterReference("groundWhereToAddIt", "Long"), p_groundWhereToAddIt)
+        )
+        )
+      ),
+      parameters = List(
+        p_instanceThatSpread,
+        p_groundWhereToAddIt
+      )
       ).save
     }
-    nameToInstanceAction += "Spread" -> _actionSpread
+    nameToInstanceAction.put("Spread", _actionSpread)
 
     val _actionRegenerate = {
       val p_instanceSelected = ParameterReference("instanceToDuplicate", "Long")
@@ -390,38 +355,38 @@ object InstanceActionManager {
           (
             PreconditionManager.nameToId("hasProperty"),
             Map(
-              ParameterReference("instanceID", "Long") -> p_instanceSelected,
-              ParameterReference("property", "Property") -> ParameterValue("Wound", "Property")
+              (ParameterReference("instanceID", "Long"), p_instanceSelected),
+              (ParameterReference("property", "Propert(y"), ParameterValue("Wound", "Property"))
             )
-            ),/*          (
+        ), /*          (
             PreconditionManager.nameToId("hasProperty"),
             Map(
-              ParameterReference("instanceID", "Long") -> p_instanceSelected,
-              ParameterReference("property", "Property") -> ParameterValue("WoundMax", "Property")
+              (ParameterReference("instanceID", "Long"), p_instanceSelected),
+              ParameterReference("property", "Propert(y"), ParameterValue("WoundMax", "Property"))
             )
             ),*/
-          (PreconditionManager.nameToId("isSelf"),
-            Map(
-              ParameterReference("instance1ID", "Long") -> p_instanceSelected,
-              ParameterReference("instance2ID", "Long") -> p_instanceToRegenate
-            )
-            )
-        ),
-        _subActions = List((
-          _modifyProperty,
+        (PreconditionManager.nameToId("isSelf"),
           Map(
-            ParameterReference("instanceToModify", "Long") -> p_instanceSelected,
-            ParameterReference("propertyName", "Property") -> ParameterValue("Wound", "Property"),
-            ParameterReference("propertyValue", "Int") -> ParameterValue(0, "Int")
+            (ParameterReference("instance1ID", "Long"), p_instanceSelected),
+            (ParameterReference("instance2ID", "Long"), p_instanceToRegenate)
           )
-          )),
-        parameters = List(
-          p_instanceSelected,
-          p_instanceToRegenate
+          )
+      ),
+      _subActions = List((
+        _modifyProperty,
+        Map(
+          (ParameterReference("instanceToModify", "Long"), p_instanceSelected),
+          (ParameterReference("propertyName", "Propert(y"), ParameterValue("Wound", "Property")),
+          (ParameterReference("propertyValue", "In(t"), ParameterValue(0, "Int"))
         )
+        )),
+      parameters = List(
+        p_instanceSelected,
+        p_instanceToRegenate
+      )
       ).save
     }
-    nameToInstanceAction += "Regenerate" -> _actionRegenerate
+    nameToInstanceAction.put("Regenerate", _actionRegenerate)
 
     val _actionCraft = {
       val p_instanceThatCreate = ParameterReference("instanceID", "Long")
@@ -435,21 +400,21 @@ object InstanceActionManager {
           (
             PreconditionManager.nameToId("isOnSameTile"),
             Map(
-              ParameterReference("instance1ID", "Long") -> p_instanceThatCreate,
-              ParameterReference("instance2ID", "Long") -> p_instanceThatIsUse
+              (ParameterReference("instance1ID", "Long"), p_instanceThatCreate),
+              (ParameterReference("instance2ID", "Long"), p_instanceThatIsUse)
             )
             )
         ),
         _subActions = List(
           (_removeInstanceAt,
             Map(
-              ParameterReference("instanceToRemove", "Long") -> p_instanceThatIsUse
+              (ParameterReference("instanceToRemove", "Long"), p_instanceThatIsUse)
             )
             ),
           (_actionCreateInstanceAt,
             Map(
-              ParameterReference("conceptID", "Long") -> p_conceptId,
-              ParameterReference("groundWhereToAddIt", "Long") -> p_instanceThatCreate
+              (ParameterReference("conceptID", "Long"), p_conceptId),
+              (ParameterReference("groundWhereToAddIt", "Long"), p_instanceThatCreate)
             ))
         ),
         parameters = List(
@@ -460,7 +425,7 @@ object InstanceActionManager {
       ).save
 
     }
-    nameToInstanceAction += "Craft" -> _actionCraft
+    nameToInstanceAction.put("Craft", _actionCraft)
 
     val _actionCreateBow = {
       val p_instanceThatCreate = ParameterReference("instanceThatCreate", "Long")
@@ -472,17 +437,17 @@ object InstanceActionManager {
           (
             PreconditionManager.nameToId("isOnSameTile"),
             Map(
-              ParameterReference("instance1ID", "Long") -> p_instanceThatCreate,
-              ParameterReference("instance2ID", "Long") -> p_instanceThatIsUse
+              (ParameterReference("instance1ID", "Long"), p_instanceThatCreate),
+              (ParameterReference("instance2ID", "Long"), p_instanceThatIsUse)
             )
             )
         ),
         _subActions = List(
           (_actionCraft,
             Map(
-              ParameterReference("instanceID", "Long") -> p_instanceThatCreate,
-              ParameterReference("conceptID", "Long") -> ParameterValue(Concept("Sheep").id,"Long"),
-              ParameterReference("instanceThatIsUse", "Long") ->p_instanceThatIsUse
+              (ParameterReference("instanceID", "Long"), p_instanceThatCreate),
+              (ParameterReference("conceptID", "Long"), ParameterValue(Concept("Sheep").id, "Long")),
+              (ParameterReference("instanceThatIsUse", "Long"), p_instanceThatIsUse)
             ))
         ),
         parameters = List(
@@ -491,7 +456,7 @@ object InstanceActionManager {
         )
       ).save
     }
-    nameToInstanceAction += "CreateBow" -> _actionCreateBow
+    nameToInstanceAction.put("CreateBow", _actionCreateBow)
 
   }
 }

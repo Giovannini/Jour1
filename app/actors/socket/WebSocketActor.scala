@@ -16,9 +16,6 @@ class WebSocketActor extends Actor {
 
   lazy val log = Logger("application." + this.getClass.getName)
 
-  /* Create a scheduler to send a message to this actor every second */
-  //val cancellable = context.system.scheduler.schedule(0 second, 1 second, self, UpdateMap(Json.obj()))
-
   var usersSockets = Map[Long, UserChannel]()
   var usersLogs = Map[Long, JsValue]()
 

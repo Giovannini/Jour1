@@ -10,9 +10,7 @@ import play.api.data.{FormError, Form}
 import play.api.data.Forms._
 import play.api.data.format.Formatter
 
-/**
- * Created by vlynn on 23/03/15.
- */
+
 object ConceptForm {
 
   def idApply(id: Long): Concept = {
@@ -28,7 +26,7 @@ object ConceptForm {
 
   val idForm = Form(
     mapping(
-      "id" -> longNumber
+      ("id", longNumber)
     )(idApply)(idUnapply).verifying("Concept not found", {
       concept => concept != Concept.error
     })
@@ -47,7 +45,7 @@ object ConceptForm {
 
   val nameForm = Form(
     mapping(
-      "id" -> nonEmptyText
+      ("id", nonEmptyText)
     )(nameApply)(nameUnapply).verifying("Concept not found", {
       concept => concept != Concept.error
     })
@@ -58,11 +56,11 @@ object ConceptForm {
    */
   val form = Form(
     mapping(
-      "label" -> nonEmptyText.verifying("incorrectCase", input => input.matches("^[A-Z][A-Za-z0-9_ ]*$")), //can't be modified
-      "properties" -> list(ValuedPropertyForm.conceptForm.mapping),
-      "rules" -> list(ValuedPropertyForm.conceptForm.mapping),
-      "needs" -> optional(list(NeedForm.form.mapping)),
-      "displayProperty" -> DisplayProperty.form.mapping
+      ("label", nonEmptyText.verifying("incorrectCase", input => input.matches("^[A-Z][A-Za-z0-9_ ]*$"))), //can't be modified
+      ("properties", list(ValuedPropertyForm.conceptForm.mapping)),
+      ("rules", list(ValuedPropertyForm.conceptForm.mapping)),
+      ("needs", optional(list(NeedForm.form.mapping))),
+      ("displayProperty", DisplayProperty.form.mapping)
     )(applyForm)(unapplyForm)
   )
 
@@ -76,11 +74,12 @@ object ConceptForm {
    * @param displayProperty concept display properties
    * @return a concept using these parameters
    */
-  private def applyForm(label: String,
-                 properties: List[ValuedProperty],
-                 rules: List[ValuedProperty],
-                 option_needs: Option[List[Need]],
-                 displayProperty: DisplayProperty) : Concept = {
+  private def applyForm(
+    label: String,
+    properties: List[ValuedProperty],
+    rules: List[ValuedProperty],
+    option_needs: Option[List[Need]],
+    displayProperty: DisplayProperty): Concept = {
     option_needs match {
       case Some(needs) => Concept(label, properties, rules, needs, displayProperty)
       case None => Concept(label, properties, rules, List(), displayProperty)
@@ -93,10 +92,9 @@ object ConceptForm {
    * @param concept concept
    * @return the different parts of a concept
    */
-  private def unapplyForm(concept: Concept) : Option[(String, List[ValuedProperty], List[ValuedProperty], Option[List[Need]], DisplayProperty)] = {
+  private def unapplyForm(concept: Concept): Option[(String, List[ValuedProperty], List[ValuedProperty], Option[List[Need]], DisplayProperty)] = {
     Some((concept.label, concept.getOwnProperties, concept.getOwnRules, Some(concept.getOwnNeeds), concept.displayProperty))
   }
-
 
 
   def ConceptIdFormat: Formatter[Concept] = new Formatter[Concept] {
@@ -112,7 +110,7 @@ object ConceptForm {
     }
 
     override def unbind(key: String, value: Concept): Map[String, String] = {
-      Map(key -> value.id.toString)
+      Map((key, value.id.toString))
     }
   }
 }

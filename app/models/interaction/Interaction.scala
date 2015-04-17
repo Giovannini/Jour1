@@ -112,7 +112,7 @@ trait Interaction {
       if (arePreconditionsChecked) {
         action.executeGoodAction(arguments)
       } else {
-//        println("Precondition not filled for " + this.label + ".")
+//        Console.println("Precondition not filled for " + this.label + ".")
         false
       }
     case effect: Effect => //TODO Problem with effects
@@ -157,7 +157,7 @@ trait Interaction {
           subInteractions.flatMap(subAction => subAction._1.log(takeGoodArguments(subAction._2, arguments)))
       }
     } else {
-      println("Precondition not filled for action " + this.label + ".")
+      Console.println("Precondition not filled for action " + this.label + ".")
       List(LogInteraction.nothing)
     }
   }
@@ -172,7 +172,7 @@ trait Interaction {
       case reference: ParameterReference => arguments(reference)
       case value: ParameterValue => value
       case e =>
-        println("Failed to match parameter " + e)
+        Console.println("Failed to match parameter " + e)
         ParameterValue.error
     }.filter(_._2 != ParameterValue.error)
   }

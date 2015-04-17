@@ -162,8 +162,8 @@ object InstanceAction {
       } match {
         case Success(list) => list
         case Failure(e) =>
-          println("Error while parsing sub-actions from string " + subActionsToParse)
-          println(e)
+          Console.println("Error while parsing sub-actions from string " + subActionsToParse)
+          Console.println(e)
           List()
       }
     }
@@ -193,8 +193,8 @@ object InstanceAction {
     } match {
       case Success(action) => action
       case Failure(e) =>
-        println("Error while parsing action " + label)
-        println(e)
+        Console.println("Error while parsing action " + label)
+        Console.println(e)
         InstanceAction.error
     }
   }

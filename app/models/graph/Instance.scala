@@ -7,6 +7,7 @@ import models.intelligence.MeanOfSatisfaction
 import models.intelligence.need.Need
 import models.interaction.LogInteraction
 import models.interaction.action.InstanceAction
+import play.api.Logger
 import play.api.libs.json._
 
 import scala.util.{Try, Failure, Success, Random}
@@ -26,6 +27,8 @@ case class Instance(
 
   require(label.matches("^[A-Z][A-Za-z0-9_ ]*$") &&
           concept.properties.map(_.property).toSeq == properties.map(_.property).toSeq)
+
+  lazy val log = Logger("application." + this.getClass.getName)
 
   /**
    * Parse an Instance to Json
@@ -111,8 +114,8 @@ case class Instance(
     } match {
       case Success(instance) => instance
       case Failure(e) =>
-        println("Error while modifying value for a property:")
-        println(e)
+        log error "Error while modifying value for a property:"
+        log error e.toString
         this
     }
   }
@@ -236,7 +239,7 @@ case class Instance(
           val chosenAction = getPseudoRandomly(allDestinations.map(dest => (dest._1, dest._2.toDouble / prioritySum)))
           (chosenAction._1, Random.shuffle(chosenAction._2).head)
         } else {
-          println("No action found for instance " + this.label + this.id)
+//          log error ("No action found for instance " + this.label + this.id)
           (InstanceAction.error, this)
         }
       }

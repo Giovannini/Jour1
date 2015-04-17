@@ -105,7 +105,7 @@ object NeedDAO {
   def updateNeedsUsingConcept(oldId: Long, newId: Long): Unit = {
     DB.withConnection { implicit connection =>
       val statement = NeedStatement.updateNeedsUsingConcept(oldId, newId)
-      val numberRowUpdated = statement.executeUpdate()
+      statement.executeUpdate()
     }
   }
 

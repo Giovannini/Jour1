@@ -34,11 +34,18 @@ object RelationGraphDAO {
    *         false else
    */
   def addRelationToDB(sourceId: Long, relationId: Long, destId: Long): Boolean = {
-    /* TODO
-      * Be careful when creating a relation SUBTYPE_OF not to insert loop.
-      */
-    val statement = RelationGraphStatement.createRelation(sourceId, relationId, destId)
-    statement.execute
+    val isRelationSubtype = RelationSqlDAO.getById(relationId).label != "SUBTYPE_OF"
+    val willCreateLoop = isRelationSubtype && {
+      val conceptSource = ConceptDAO.getById(sourceId)
+      val conceptDestination = ConceptDAO.getById(destId)
+      conceptSource.descendance.contains(conceptDestination)
+    }
+    if(willCreateLoop){
+      false
+    }else {
+      val statement = RelationGraphStatement.createRelation(sourceId, relationId, destId)
+      statement.execute
+    }
   }
 
   /**

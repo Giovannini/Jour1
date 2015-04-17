@@ -5,6 +5,7 @@ import models.graph.Instance
 import models.interaction.parameter.{Parameter, ParameterReference, ParameterValue}
 import models.interaction.{Interaction, LogInteraction}
 
+import scala.collection.immutable
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
@@ -19,7 +20,7 @@ import scala.util.{Failure, Success, Try}
 case class Effect(
   id: Long,
   label: String,
-  _subActions: List[(Effect, Map[ParameterReference, Parameter])],
+  _subActions: List[(Effect, immutable.Map[ParameterReference, Parameter])],
   parameters: List[ParameterReference]) extends Interaction {
 
   val subInteractions = _subActions.map(tuple => (tuple._1.asInstanceOf[Effect], tuple._2))
@@ -99,8 +100,8 @@ object Effect {
       } match {
         case Success(list) => list
         case Failure(e) =>
-          println("Error while parsing sub-actions from string " + subActionsToParse)
-          println(e)
+          Console.println("Error while parsing sub-actions from string " + subActionsToParse)
+          Console.println(e)
           List()
       }
     }
@@ -129,8 +130,8 @@ object Effect {
     } match {
       case Success(action) => action
       case Failure(e) =>
-        println("Error while parsing action " + label)
-        println(e)
+        Console.println("Error while parsing action " + label)
+        Console.println(e)
         Effect.error
     }
   }

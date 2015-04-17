@@ -104,11 +104,11 @@ object InstanceActionDAO {
           statement.as(actionParser.singleOpt).getOrElse(InstanceAction.error)
         } match {
           case Failure(e) =>
-            println("Error while trying to retrieve an interaction by its ID from the DB:")
-            println(e.getStackTrace)
+            Console.println("Error while trying to retrieve an interaction by its ID from the DB:")
+            Console.println(e.getStackTrace)
             InstanceAction.error
-          case Success(action) =>
-            action
+          case Success(instanceAction) =>
+            instanceAction
         }
       }
 
@@ -137,8 +137,8 @@ object InstanceActionDAO {
         } match {
           case Success(a) => a
           case Failure(e) =>
-            println("Error while trying to retrieve an interaction by its name from the DB:")
-            println(e.getStackTrace)
+            Console.println("Error while trying to retrieve an interaction by its name from the DB:")
+            Console.println(e.getStackTrace)
             InstanceAction.error
         }
 

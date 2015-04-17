@@ -125,8 +125,8 @@ case class WorldMap(label: String, description: String, width: Int, height: Int)
     } match {
       case Success(_) =>
       case Failure(e) =>
-        println("Failure while adding an instance to the map in WorldMap.scala:")
-        println(e)
+        Console.println("Failure while adding an instance to the map in WorldMap.scala:")
+        Console.println(e)
     }
   }
 
@@ -152,8 +152,8 @@ case class WorldMap(label: String, description: String, width: Int, height: Int)
     } match {
       case Success(instance) => instance
       case Failure(e) =>
-        println("Failure while adding an instance to the map in WorldMap.scala:")
-        println(e)
+        Console.println("Failure while adding an instance to the map in WorldMap.scala:")
+        Console.println(e)
         Instance.error
     }
   }
@@ -174,8 +174,8 @@ case class WorldMap(label: String, description: String, width: Int, height: Int)
     } match {
       case Success(instance) => instance
       case Failure(e) =>
-        println("Failure while removing an instance from the map in WorldMap.scala:")
-        println(e)
+        Console.println("Failure while removing an instance from the map in WorldMap.scala:")
+        Console.println(e)
         Instance.error
     }
   }

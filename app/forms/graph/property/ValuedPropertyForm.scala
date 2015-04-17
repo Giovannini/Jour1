@@ -5,18 +5,17 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.format.Formats
 
-/**
- * Created by vlynn on 24/03/15.
- */
+
 object ValuedPropertyForm {
+
   val conceptForm: Form[ValuedProperty] = Form(mapping(
-    "property" -> of(PropertyForm.PropertyLabelFormat),
-    "value" -> of(Formats.doubleFormat)
+    ("property", of(PropertyForm.PropertyLabelFormat)),
+    ("value", of(Formats.doubleFormat))
   )(applyValueForm)(unapplyValueForm))
 
   val form: Form[ValuedProperty] = Form(mapping(
-    "property" -> PropertyForm.form.mapping,
-    "value" -> of(Formats.doubleFormat)
+    ("property", PropertyForm.form.mapping),
+    ("value", of(Formats.doubleFormat))
   )(applyValueForm)(unapplyValueForm))
 
   def applyValueForm(property: Property, value: Double): ValuedProperty = {

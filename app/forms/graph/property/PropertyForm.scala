@@ -5,12 +5,14 @@ import play.api.data.{FormError, Form}
 import play.api.data.Forms._
 import play.api.data.format.{Formatter, Formats}
 
+import scala.collection.immutable
+
 object PropertyForm {
   val form: Form[Property] = Form(mapping(
-    "id" -> longNumber,
-    "label" -> nonEmptyText.verifying("Label has to begin with a capital", label => label.matches("^[A-Z][A-Za-z0-9]*$")),
-    "propertyType" -> nonEmptyText,
-    "defaultValue" -> of(Formats.doubleFormat)
+    ("id", longNumber),
+    ("label", nonEmptyText.verifying("Label has to begin with a capital", label => label.matches("^[A-Z][A-Za-z0-9]*$"))),
+    ("propertyType", nonEmptyText),
+    ("defaultValue", of(Formats.doubleFormat))
   )(applyForm)(unapplyForm))
 
   def applyForm(id: Long, label: String, propertyType: String, defaultValue: Double): Property = {
@@ -30,7 +32,7 @@ object PropertyForm {
   }
 
   val labelForm: Form[Property] = Form(mapping(
-    "label" -> nonEmptyText.verifying("Label has to begin with a capital", label => label.matches("^[A-Z][A-Za-z0-9]*$"))
+    ("label", nonEmptyText.verifying("Label has to begin with a capital", label => label.matches("^[A-Z][A-Za-z0-9]*$")))
   )(applyLabelForm)(unapplyLabelForm))
 
   def applyLabelForm(label: String): Property = {
@@ -43,7 +45,7 @@ object PropertyForm {
   }
 
   def PropertyLabelFormat: Formatter[Property] = new Formatter[Property] {
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Property] = {
+    override def bind(key: String, data: immutable.Map[String, String]): Either[Seq[FormError], Property] = {
       data.get(key) match {
         case None => Left(Seq(FormError(key, "error.required")))
         case Some(label) =>
@@ -54,8 +56,8 @@ object PropertyForm {
       }
     }
 
-    override def unbind(key: String, value: Property): Map[String, String] = {
-      Map(key -> value.label)
+    override def unbind(key: String, value: Property): immutable.Map[String, String] = {
+      immutable.Map((key, value.label))
     }
   }
 }

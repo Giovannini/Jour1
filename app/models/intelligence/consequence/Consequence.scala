@@ -29,8 +29,8 @@ object Consequence {
     } match {
       case Success(c) => c
       case Failure(e) =>
-        println("Error while parsing a consequence from string: " + stringToParse)
-        println(e.getStackTrace)
+        Console.println("Error while parsing a consequence from string: " + stringToParse)
+        Console.println(e.getStackTrace)
         error
     }
   }

@@ -49,8 +49,8 @@ object Relation {
     } match {
       case Success(relation) => relation
       case Failure(e) =>
-        println("Error while parsing a Relation in Relation.scala:")
-        println(e)
+        Console.println("Error while parsing a Relation in Relation.scala:")
+        Console.println(e)
         Relation.error
     }
   }

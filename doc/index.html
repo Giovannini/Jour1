@@ -1,188 +1,281 @@
 <!doctype html>
 <html>
-	<link rel="stylesheet" href="css/stylesheet.css">
-	<meta charset="utf-8" />
+<link rel="stylesheet" href="css/stylesheet.css">
+<meta charset="utf-8"/>
 
-	<div class="container">
-		<header class="header">
-			<h1>Documentation</h1>
-		</header>
+<div class="container">
+    <header class="header">
+        <h1>Documentation</h1>
+    </header>
 
-		<div class="content-category">
-			<h2>Sommaire</h2>
-			<ul>
-				<li><a href="#global">Présentation du projet</a></li>
-				<li><a href="#composants">Les composants du monde</a></li>
-				<li><a href="#interaction">Les interactions</a></li>
-				<li><a href="#intelligence">L'intelligence des instances</a></li>
-                <li><a href="#interface">Utilisation de l'interface</a></li>
-			</ul>
-		</div>
+    <div class="content-category">
+        <h2>Sommaire</h2>
+        <ul>
+            <li><a href="#global">Présentation du projet</a></li>
+            <li><a href="#composants">Les composants du monde</a></li>
+            <li><a href="#interaction">Les interactions</a></li>
+            <li><a href="#intelligence">L'intelligence des instances</a></li>
+            <li><a href="#interface">Utilisation de l'interface</a></li>
+        </ul>
+    </div>
 
-		<div class="content-category" id="global">
-			<h2>Présentation du projet</h2>
+    <div class="content-category" id="global">
+        <h2>Présentation du projet</h2>
 
-			<p>Le but du projet est de permettre à un utilisateur de créer un monde intelligent à partir de briques simples. Ainsi, théoriquement, tout objet peut se mettre à exister dans le monde, et celui-ci peut être enrichi de manière collaborative.</p>
+        <p>Le but du projet est de permettre à un utilisateur de créer un monde intelligent à partir de briques simples.
+            Ainsi, théoriquement, tout objet peut se mettre à exister dans le monde, et celui-ci peut être enrichi de
+            manière collaborative.</p>
 
-			<p>Idéalement, on pourrait alors se servir de cette base pour construire un environnement de base dans un jeu. Les créateurs de monde pourraient aussi s'amuser à changer encore et encore les variables qui dirigent ce monde pour etre témoin des modifications drastiques que cela pourrait entra^iner.</p>
-		</div>
+        <p>Idéalement, on pourrait alors se servir de cette base pour construire un environnement de base dans un jeu.
+            Les créateurs de monde pourraient aussi s'amuser à changer encore et encore les variables qui dirigent ce
+            monde pour etre témoin des modifications drastiques que cela pourrait entra^iner.</p>
+    </div>
 
-		<div class="content-category" id="composants">
-			<h2>Les composants du monde</h2>
+    <div class="content-category" id="composants">
+        <h2>Les composants du monde</h2>
 
-			<p>Pour parvenir à nos fins, nous avons défini plusieurs types d'objets :</p>
+        <p>Pour parvenir à nos fins, nous avons défini plusieurs types d'objets :</p>
 
-			<ul>
-				<li><a href="#1-concepts">Les concepts</a></li>
-                <li><a href="#1-relations">Les relations</a></li>
-                <li><a href="#1-instances">Les instances</a></li>
-			</ul>
+        <ul>
+            <li><a href="#1-concepts">Les concepts</a></li>
+            <li><a href="#1-relations">Les relations</a></li>
+            <li><a href="#1-instances">Les instances</a></li>
+        </ul>
 
-			<h3 id="1-concepts">Les concepts</h3>
+        <h3 id="1-concepts">Les concepts</h3>
 
-                <h4>Définition</h4>
-                <p>
-                    Un concept est une famille qui permet de décrire les objets du monde. Par exemple, si dans notre monde, on veut des loups et des moutons, il faudra définir le concept "Loup" et le concept "Mouton". On peut aussi se dire que le loup et le mouton sont des animaux, qui ont des points communs tels que la capacité de se déplacer, se reproduire avec les membres de son espèce, etc.
-                </p>
+        <h4>Définition</h4>
 
-                <h4>Concepts de base</h4>
-                <p>
-                    Il existe un certain nombre de concepts prédéfinis dans le monde qui sont utilisés dans notre algorithme d'initialisation du monde. Ceux-ci sont :
-                </p>
-                <ul>
-                    <li><em>Ground</em>: qui permet de définir les concepts qui batiront le terrain du monde</li>
-                </ul>
+        <p>
+            Un concept est une famille qui permet de décrire les objets du monde. Par exemple, si dans notre monde, on
+            veut des loups et des moutons, il faudra définir le concept "Loup" et le concept "Mouton". On peut aussi se
+            dire que le loup et le mouton sont des animaux, qui ont des points communs tels que la capacité de se
+            déplacer, se reproduire avec les membres de son espèce, etc.
+        </p>
 
-                <h4>Edition de concept</h4>
-                <p>
-                    Via l'éditeur de graphe, il est possible d'ajouter des concepts. Parmi les valeurs à définir, il y a :
-                </p>
-                <ul>
-                    <li><em>Les propriétés</em>: cf. <a href="#1-instances">Instances</a></li>
-                    <li><em>Les règles</em>: cf. <a href="#1-instances">Instances</a></li>
-                    <li><em>Les besoins</em>: cf. <a href="#1-instances">Intelligence</a></li>
-                    <li><em>L'affichage</em>: La couleur est en hexadécimal "#ffffff" et défini comment sera affiché le concept sur la carte, et le ZIndex qui permettra d'afficher en priorité les concepts avec un ZIndex élevé, s'ils sont sur la meme case.</li>
-                </ul>
+        <h4>Concepts de base</h4>
+
+        <p>
+            Il existe un certain nombre de concepts prédéfinis dans le monde qui sont utilisés dans notre algorithme
+            d'initialisation du monde. Ceux-ci sont :
+        </p>
+        <ul>
+            <li><em>Ground</em>: qui permet de définir les concepts qui batiront le terrain du monde</li>
+        </ul>
+
+        <h4>Edition de concept</h4>
+
+        <p>
+            Via l'éditeur de graphe, il est possible d'ajouter des concepts. Parmi les valeurs à définir, il y a :
+        </p>
+        <ul>
+            <li><em>Les propriétés</em>: cf. <a href="#1-instances">Instances</a></li>
+            <li><em>Les règles</em>: cf. <a href="#1-instances">Instances</a></li>
+            <li><em>Les besoins</em>: cf. <a href="#1-instances">Intelligence</a></li>
+            <li><em>L'affichage</em>: La couleur est en hexadécimal "#ffffff" et défini comment sera affiché le concept
+                sur la carte, et le ZIndex qui permettra d'afficher en priorité les concepts avec un ZIndex élevé, s'ils
+                sont sur la meme case.
+            </li>
+        </ul>
 
 
-            <h3 id="1-relations">Les relations</h3>
-                <h4>Défintion</h4>
-                <p>
-                    Une relation est ce qui va permettre de lier deux concepts dans le graphe. Ces relations sont une partie à ne pas négliger parce que ce sont ces relations qui vont faire que le monde est un ensemble cohérent qui intéragit avec lui meme. Les relations qui sont dans le graphe peuvent etre:
-                </p>
-                <ul>
-                    <li><em>Des actions</em>: cf <a href="#2-actions">Actions</a></li>
-                    <li><em>SUBTYPE_OF</em>: introduit la notion d'héritage entre concept. C'est cette relation qui nous permettra de dire que le "Loup" est un "Animal". Par contre, attention à ne pas dire qu'un "Animal" est un "Loup" ET qu'un "Loup" est un "Animal"</li>
-                    <li><em>LIVE_ON</em>: permet de définir où un concept peut exister dans le monde. C'est cette relation qui nous permettra de dire qu'un "Loup" vit dans la "Montagne", où "Montagne" descend de "Ground"</li>
-                </ul>
+        <h3 id="1-relations">Les relations</h3>
+        <h4>Défintion</h4>
 
-                <h4>Ajout des relations</h4>
-                <p>
-                    Pour ajouter des relations il faut aller dans l'édition de graphe et sélectionner la relation qu'on veut ajouter. Ensuite, il suffit de choisir le concept source et le concept destination pour l'ajouter au graphe.
-                </p>
+        <p>
+            Une relation est ce qui va permettre de lier deux concepts dans le graphe. Ces relations sont une partie à
+            ne pas négliger parce que ce sont ces relations qui vont faire que le monde est un ensemble cohérent qui
+            intéragit avec lui meme. Les relations qui sont dans le graphe peuvent etre:
+        </p>
+        <ul>
+            <li><em>Des actions</em>: cf <a href="#2-actions">Actions</a></li>
+            <li><em>SUBTYPE_OF</em>: introduit la notion d'héritage entre concept. C'est cette relation qui nous
+                permettra de dire que le "Loup" est un "Animal". Par contre, attention à ne pas dire qu'un "Animal" est
+                un "Loup" ET qu'un "Loup" est un "Animal"
+            </li>
+            <li><em>LIVE_ON</em>: permet de définir où un concept peut exister dans le monde. C'est cette relation qui
+                nous permettra de dire qu'un "Loup" vit dans la "Montagne", où "Montagne" descend de "Ground"
+            </li>
+        </ul>
 
-            <h3 id="1-instances">Les instances</h3>
-                <h4>Définition</h4>
-                <p>
-                    Une instance est un représentation d'un concept dans le monde. De manière plus concrète, c'est tout ce qui sera visible sur la carte du monde. Ainsi, on va retrouver des instances pour chaque terrain ("Terre", "Mer", ...) et pour chaque élément qui peuple le monde ("Herbe", "Loup", "Mouton", ...).
-                </p>
+        <h4>Ajout des relations</h4>
 
-                <h4>Comment avoir des instances ?</h4>
-                <p>
-                    Pour permettre au monde de s'initialiser avec des instances, il faut définir des règles (rules) dans le concept, à l'aide de l'éditeur de graphe. Les règles à ajouter sont :
-                </p>
-                <ul>
-                    <li><em>Instanciable</em>: en ajoutant cette règle, ce concept sera pris en compte lors de l'initialisation du monde</li>
-                    <li><em>Strength</em>: correspond à la proportion de ce concept dans le monde. Ainsi, si la force est élevée par rapport aux autres concepts, il va etre présent majoritairement. Sinon, il sera sous représenté.</li>
-                </ul>
+        <p>
+            Pour ajouter des relations il faut aller dans l'édition de graphe et sélectionner la relation qu'on veut
+            ajouter. Ensuite, il suffit de choisir le concept source et le concept destination pour l'ajouter au graphe.
+        </p>
 
-                <p><em>NB: Les instances n'apparaitront pas spontanément dans le monde. Il faut réinitialiser le monde (/clearWorld) afin de relancer une initialisation du monde.</em></p>
-		</div>
+        <h3 id="1-instances">Les instances</h3>
+        <h4>Définition</h4>
 
-        <div class="content-category" id="interaction">
-            <h2>Les interactions</h2>
+        <p>
+            Une instance est un représentation d'un concept dans le monde. De manière plus concrète, c'est tout ce qui
+            sera visible sur la carte du monde. Ainsi, on va retrouver des instances pour chaque terrain ("Terre",
+            "Mer", ...) et pour chaque élément qui peuple le monde ("Herbe", "Loup", "Mouton", ...).
+        </p>
 
-            <p>Les interactions permettent à des instances dans le monde d'agir sur son environnement. Par exemple, on va vouloir définir la possibilité qu'à un "Loup" de manger un "Mouton". Ou encore, la possibilité qu'à un "Animal" de se déplacer sur la "Terre".</p>
+        <h4>Comment préciser à un concept qu'il peut créer des instances ?</h4>
 
-            <h3>Les propriétés</h3>
-            <p>Les propriétés permettent de définir l'état de l'instance //TODO</p>
+        <p>
+            Les règles des concepts
+        </p>
+    </div>
 
-            <h3>Fonctionnement des actions</h3>
-            <p>Paramètres, Preconditions, Action //TODO </p>
+    <div class="content-category" id="interaction">
+        <h2>Les interactions</h2>
 
-            <h3>Ajouter une action à un concept</h3>
-            <p>Ajouter la relation au graphe //TODO </p>
-        </div>
+        <p>Les interactions permettent à des instances dans le monde d'agir sur son environnement. Par exemple, on va
+            vouloir définir la possibilité qu'à un "Loup" de manger un "Mouton". Ou encore, la possibilité qu'à un
+            "Animal" de se déplacer sur la "Terre".</p>
 
-        <!-- ###########################################################
-        ################################################################
-        ########################   INTELLIGENCE     ####################
-        ################################################################
-        ################################################################-->
-        <div class="content-category" id="intelligence">
-            <h2>L'intelligence des instances</h2>
+        <h3>Les propriétés</h3>
 
-            <h3>Les besoins</h3>
-            <p>
-                Pour être considérée comme intelligente, des besoins vont êtres attribués à l'instance.
-                Les besoins sont des objets complexes qui affectent une propriété.
-                Ils renseignent des moyens de satisfaction qui vont permettre à l'instance de pouvoir les assouvir ainsi que des conséquences, c'est à dire les effets qui seront appliqués si l'instance intelligente ne satisfait pas ses besoins.
-                Une instance qui a faim et qui ne mange pas subira les conséquences de cette faim et sera par exemple plus fatiguée, ce qui affectera sa vitesse de déplacement.
-            </p>
-            <p>
-                D'autre part, l'instance intelligente possède une propriété particulière, "Sense", qui lui permet de sonder son environnement.
-                Il s'agit concrètement pour elle d'un rayon de vision qui lui permet d'analyser les instances proches d'elle.
-                Cette analyse affectera son humeur et modifiera donc ses propriétés internes:
-                on peut imaginer un mouton "sentir" un loup proche de lui et donc prendre peur, ce qui affectera les décisions qu'il prendra.
-            </p>
+        <p>Les propriétés permettent de définir l'état de l'instance //TODO</p>
 
-            <h3>Les conséquences</h3>
-            <p>
-                Au sein des besoins, les conséquences au sens où nous l'entendons sont en fait séparés en deux objets.
-                Tout d'abord, les étapes de conséquences puis ensuite les conséquences à proprement parler.
-            <h4>L'objet conséquence</h4>
-            <p>
-                Les conséquences à proprement parler sont des objets comprenant une sévérité, c'est à dire un indice de force permettant à l'instance intelligente de savoir si elle doit craindre la conséquence ou non ainsi qu'un effet.
-                Lorsqu'on considère la conséquence nécessaire, on applique simplement l'effet sur la conséquence.
-            </p>
+        <h3>Fonctionnement des actions</h3>
 
-            <h4>Les étapes de conséquences</h4>
-            <p>
-                Un besoin contient diverses conséquences sur plusieurs niveaux.
-                Il ne semble pas naturel d'appliquer un effet ou une conséquence démesurée par rapport à un besoin minime, mais si une instance persiste à ne pas satisfaire ce besoin, des conséquences plus importantes vont se faire sentir.
-                Les niveaux de conséquences représentent cette gradation.
-                Ces niveaux correspondent à des valeurs particulières de la propriété affectée par le besoin.
-                Si cette propriété est plus haute que le niveau indique sur l'étape, on en applique la conséquence.
-            </p>
-            <p>
-                Les instances utilisent ces niveaux pour décider des actions qu'elles vont accomplir.
-                En se basant sur la différence de valeur entre la propriété et le niveau de la conséquence prochaine, elles vont parvenir à prioriser les actions qu'elles vont accomplir, de manière à satisfaire leurs besoins de la façon la plus intelligente possible.
-            </p>
+        <p>Paramètres, Preconditions, Action //TODO </p>
 
-            <h3>Les moyens de satisfaction</h3>
-            <p>
-                Les moyens de satisfactions ont pour but d'indiquer à l'instance intelligente les actions qu'elle pourrait accomplir dans le but de satisfaire son besoin.
-                Généralement, un besoin comprend plusieurs moyens de satisfaction, ce qui permet à l'instance intelligente, de satisfaire un besoin de différentes façons.
-            </p>
-            <p>
-                Concrètement, l'objet moyen de satisfaction comprend une action ainsi qu'un concept de destination.
-                L'instance choisi alors intelligemment parmi la liste des actions dont elle dispose celle qu'elle peut faire lors de son tour.
-                Si cela n'est pas le cas, elle tente de satisfaire son besoin à l'aide d'un autre moyen de satisfaction.
-            </p>
+        <h3>Ajouter une action à un concept</h3>
 
-            <h3>L'humeur</h3>
-            <p>
-                Au delà des besoins qu'elle possède, c'est sa possibilité d'être affectée par ce qui se passe autour d'elle qui rend l'instance intelligente.
-                Une instance intelligente peut voir son concept relié à d'autres concepts via des relations particulières de type MOOD.
-                L'humeur des instances est calculé via ces relations.
-                A chaque tour d'intelligence, les instances vont sonder leur environnement à la recherche d'autres instances avec lesquelles elles sont reliées via des relations de ce type.
+        <p>Ajouter la relation au graphe //TODO </p>
+    </div>
 
-            </p>
+    <!-- ###########################################################
+    ################################################################
+    ########################   INTELLIGENCE     ####################
+    ################################################################
+    ################################################################-->
+    <div class="content-category" id="intelligence">
+        <h2>L'intelligence des instances</h2>
 
-        </div>
+        <h3>Les besoins</h3>
 
-        <div class="content-category" id="interface">
-            <h2>Utilisation de l'interface</h2>
-        </div>
-	</div>
+        <p>
+            Pour être considérée comme intelligente, des besoins vont êtres attribués à l'instance.
+            Les besoins sont des objets complexes qui affectent une propriété.
+        <ul>
+            <li>
+                <em>La propriété affectée:</em>
+                Il s'agit de la propriété sur laquelle se basera l'algorithme d'intelligence pour appliquer les
+                conséquences.
+            </li>
+            <li>
+                <em>Les conséquences:</em>
+                Ce sont les effets que subira graduellement l'instance intelligente qui ne satisfait pas le besoin.
+            </li>
+            <li>
+                <em>Les moyens de satisfaction:</em>
+                Différentes actions permettant de satisfaire le besoin
+            </li>
+        </ul>
+        Une instance qui a faim et qui ne mange pas subira les conséquences de cette faim et sera par exemple plus
+        fatiguée, ce qui affectera sa vitesse de déplacement.
+        </p>
+
+        <h4>Les conséquences</h4>
+
+        <p>
+            Au sein des besoins, les conséquences au sens où nous l'entendons sont en fait séparés en deux objets.
+            Tout d'abord, les étapes de conséquences puis ensuite les conséquences à proprement parler.
+        </p>
+        <h5>L'objet conséquence</h5>
+
+        <p>
+            Les conséquences à proprement parler sont des objets comprenant une sévérité, c'est à dire un indice de
+            force permettant à l'instance intelligente de savoir si elle doit craindre la conséquence ou non ainsi qu'un
+            effet.
+            Lorsqu'on considère la conséquence nécessaire, on applique simplement l'effet sur la conséquence.
+        <ul>
+            <li>
+                <em>La sévérité:</em>
+                Il s'agit de la mesure de la force néfaste de l'effet. Ce paramètre est considéré par l'instance lors de
+                l'évaluation de l'importance deu besoin qui contient cette conséquence.
+            </li>
+            <li>
+                <em>L'effet:</em>
+                Il s'agit de l'effet concret que va subir l'instance cible à l'activation de la conséquence.
+            </li>
+        </ul>
+        </p>
+
+        <h5>Les étapes de conséquences</h5>
+
+        <p>
+            Un besoin contient diverses conséquences sur plusieurs niveaux.
+            Il ne semble pas naturel d'appliquer un effet ou une conséquence démesurée par rapport à un besoin minime,
+            mais si une instance persiste à ne pas satisfaire ce besoin, des conséquences plus importantes vont se faire
+            sentir.
+            Les niveaux de conséquences représentent cette gradation.
+            Ces niveaux correspondent à des valeurs particulières de la propriété affectée par le besoin.
+            Si cette propriété est plus haute que le niveau indique sur l'étape, on en applique la conséquence.
+        </p>
+
+        <p>
+            Les instances utilisent ces niveaux pour décider des actions qu'elles vont accomplir.
+            En se basant sur la différence de valeur entre la propriété et le niveau de la conséquence prochaine, elles
+            vont parvenir à prioriser les actions qu'elles vont accomplir, de manière à satisfaire leurs besoins de la
+            façon la plus intelligente possible.
+        </p>
+        <ul>
+            <li>
+                <em>Le niveau:</em>
+                La valeur de la propriété affectée à partir de laquelle on applique la conséquence
+            </li>
+            <li>
+                <em>La conséquence:</em>
+                Conséquence à appliquer à l'instance intelligente qui n'a pas satisfait son besoin en temps imparti.
+            </li>
+        </ul>
+
+        <h4>Les moyens de satisfaction</h4>
+
+        <p>
+            Les moyens de satisfactions ont pour but d'indiquer à l'instance intelligente les actions qu'elle pourrait
+            accomplir dans le but de satisfaire son besoin.
+        <ul>
+            <li>
+                <em>L'action:</em>
+                L'action à effectuer aidant à la satisfaction du besoin.
+            </li>
+            <li>
+                <em>Le concept:</em>
+                Destination pour l'action, permettant de contrôller rigoureusement les décisions de l'instance.
+            </li>
+        </ul>
+        </p>
+
+        <p>
+            Concrètement, l'objet moyen de satisfaction comprend une action ainsi qu'un concept de destination.
+            L'instance choisi alors intelligemment parmi la liste des actions dont elle dispose celle qu'elle peut faire
+            lors de son tour.
+            Si cela n'est pas le cas, elle tente de satisfaire son besoin à l'aide d'un autre moyen de satisfaction.
+        </p>
+
+        <h3>L'humeur</h3>
+
+        <p>
+            D'autre part, l'instance intelligente possède une propriété particulière, "Sense", qui lui permet de sonder
+            son environnement.
+            Il s'agit concrètement pour elle d'un rayon de vision qui lui permet d'analyser les instances proches
+            d'elle.
+            Cette analyse affectera son humeur et modifiera donc ses propriétés internes:
+            on peut imaginer un mouton "sentir" un loup proche de lui et donc prendre peur, ce qui affectera les
+            décisions qu'il prendra.
+        </p>
+
+        <p>
+            Au delà des besoins qu'elle possède, c'est sa possibilité d'être affectée par ce qui se passe autour d'elle
+            qui rend l'instance intelligente.
+            Une instance intelligente peut voir son concept relié à d'autres concepts via des relations particulières de
+            type MOOD.
+            L'humeur des instances est calculé via ces relations.
+            A chaque tour d'intelligence, les instances vont sonder leur environnement à la recherche d'autres instances
+            avec lesquelles elles sont reliées via des relations de ce type et modifier leurs propriétés relatives aux
+            relations d'humeur.
+        </p>
+
+    </div>
+
+</div>
 </html>

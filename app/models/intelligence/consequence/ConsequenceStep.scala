@@ -35,8 +35,8 @@ object ConsequenceStep{
     } match {
       case Success(cs) => cs
       case Failure(e) =>
-        println("Exception while parsing a ConsequenceStep from the string " + string)
-        println(e)
+        Console.println("Exception while parsing a ConsequenceStep from the string " + string)
+        Console.println(e)
         error
     }
   }
@@ -53,8 +53,8 @@ object ConsequenceStep{
     } match {
       case Success(list) => list
       case Failure(e) =>
-        println("Exception while parsing a ConsequenceStep from the string " + string)
-        println(e)
+        Console.println("Exception while parsing a ConsequenceStep from the string " + string)
+        Console.println(e)
         List()
     }
   }

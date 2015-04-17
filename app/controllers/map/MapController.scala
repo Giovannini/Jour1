@@ -49,7 +49,7 @@ object MapController extends Controller with Secured {
     val actions = relations.filter(_._1.isAnAction)
       .map(relationnedConceptToJson)
     val t2 = System.currentTimeMillis()
-    println("Getting all actions took " + (t2 - t1) + "ms.")
+    Console.println("Getting all actions took " + (t2 - t1) + "ms.")
     Ok(Json.toJson(actions))
   }
 
@@ -87,7 +87,7 @@ object MapController extends Controller with Secured {
     val t1 = System.currentTimeMillis()
     val result = execution(request)
     val t2 = System.currentTimeMillis()
-    println("Executing action took " + (t2 - t1) + "ms.")
+    Console.println("Executing action took " + (t2 - t1) + "ms.")
     if (result) {
       Ok("Ok")
     }
@@ -138,7 +138,7 @@ object MapController extends Controller with Secured {
             Try {
               val event = (message \ "event").as[String]
               val data = message \ "data"
-//              println("Received event: " + event)
+//              Console.println("Received event: " + event)
               (event, data)
             } match {
               case Success(("updateClient", data)) =>
@@ -154,15 +154,15 @@ object MapController extends Controller with Secured {
                 mapSocketActor ! SocketClosed(userId)
 
               case Success((_, _)) =>
-                println("Event doesnt exist")
+                Console.println("Event doesnt exist")
 
               case Failure(ex) =>
-                println("Data must match { event: ..., data: ... }")
-                println(ex.getMessage)
+                Console.println("Data must match { event: ..., data: ... }")
+                Console.println(ex.getMessage)
                 mapSocketActor ! SocketClosed(userId)
             }
           case _ =>
-            println("Error with socket baby...")
+            Console.println("Error with socket baby...")
             mapSocketActor ! SocketClosed(userId)
         }, enumerator.asInstanceOf[Enumerator[JsValue]])
       }
@@ -210,7 +210,7 @@ trait Secured {
     WebSocket.tryAccept[JsValue] { request =>
       username(request) match {
         case Some(id) =>
-          f(id.toInt).map(tuple => Right(tuple))
+          f(id.toLong).map(tuple => Right(tuple))
         case _ =>
           Future(Left(Redirect(routes.MapController.show())))
       }

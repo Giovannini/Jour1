@@ -14,7 +14,7 @@ case class LogInteraction(value: String, priority: Int){
 
   def execute(): Instance = {
     Try {
-//      println("Executing LOG: " + this.value)
+//      Console.println("Executing LOG: " + this.value)
       val splitted = value.split(" ")
       splitted(0) match {
         case "ADD" =>/*###################################################*/
@@ -41,8 +41,8 @@ case class LogInteraction(value: String, priority: Int){
     } match {
       case Success(instance) => instance
       case Failure(e) =>
-        println("Error while parsing action log:")
-        println(e)
+        Console.println("Error while parsing action log:")
+        Console.println(e)
         Instance.error
     }
   }

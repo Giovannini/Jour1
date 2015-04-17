@@ -68,7 +68,6 @@ case class Precondition(
       case "hasProperty" => HCPrecondition.hasProperty(args)
       case "propertyIsHigherThan" => HCPrecondition.isHigherThan(args)
       case "propertyIsLowerThan" =>
-        println("lol")
         HCPrecondition.isLowerThan(args)
       case "hasInstanceOfConcept" => HCPrecondition.hasInstanceOfConcept(args)
       case "isSelf" => HCPrecondition.isSelf(args)
@@ -79,7 +78,7 @@ case class Precondition(
         this.subConditions.forall(current => current._1.isFilled(current._2, arguments))
     }
     if (!result) {
-      //      println("Precondition " + this.label + " is not filled.")
+      //      Console.println("Precondition " + this.label + " is not filled.")
     }
     result
   }
@@ -166,8 +165,8 @@ object Precondition {
     } match {
       case Success(list) => list
       case Failure(e) =>
-        println("Error while parsing sub-conditions from string: " + subConditionsToParse)
-        println(e.getStackTrace)
+        Console.println("Error while parsing sub-conditions from string: " + subConditionsToParse)
+        Console.println(e.getStackTrace)
         List()
     }
   }
@@ -192,8 +191,8 @@ object Precondition {
     } match {
       case Success(p) => p
       case Failure(e) =>
-        println("Error while parsing precondition " + label + " from strings:")
-        println(e.getStackTrace)
+        Console.println("Error while parsing precondition " + label + " from strings:")
+        Console.println(e.getStackTrace)
         error
     }
   }

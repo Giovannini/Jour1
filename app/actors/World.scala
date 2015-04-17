@@ -78,12 +78,12 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
   override def receive: Actor.Receive = {
     case StartLoop =>
       looping = true
-      println("Starting loop: ongoing = " + ongoing)
+      Console.println("Starting loop: ongoing = " + ongoing)
       self ! NewTurn
     case StopLoop =>
-      println("Stopping loop")
+      Console.println("Stopping loop")
       looping = false
-      println("Looping = " + looping)
+      Console.println("Looping = " + looping)
     case NewTurn =>
       launchComputation(NewTurn)
     case ResultAction(logList) =>
@@ -136,7 +136,7 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
     }
     val resultInstances = logList.map(_.execute())
     val json = getMapModificationJson(logList, resultInstances)
-//    println("End of a turn, updating the map.")
+//    Console.println("End of a turn, updating the map.")
     MapController.mapSocketActor ! UpdateMap(json)
   }
 
@@ -151,7 +151,7 @@ class World(nrOfWorkers: Int, listener: ActorRef) extends Actor {
       ongoing = true
       val instancesWithNeeds = getInstancesWithNeeds
       setNumberOfInstancesToCompute(instancesWithNeeds.length)
-      println("Launching computation for " + nrOfInstances + " instances.")
+      Console.println("Launching computation for " + nrOfInstances + " instances.")
       for (instance <- instancesWithNeeds) {
         val environment = getEnvironmentOf(instance)
         workerRouter ! launcher.computation(instance, environment)

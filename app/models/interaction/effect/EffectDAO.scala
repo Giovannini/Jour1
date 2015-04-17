@@ -81,8 +81,8 @@ object EffectDAO {
     } match {
       case Success(effect) => effect
       case Failure(e) =>
-        println("Error while trying to retrieve an interaction by its name from the DB:")
-        println(e.getStackTrace)
+        Console.println("Error while trying to retrieve an interaction by its name from the DB:")
+        Console.println(e.getStackTrace)
         Effect.error
     }
   }
@@ -102,8 +102,8 @@ object EffectDAO {
     } match {
       case Success(effect) => effect
       case Failure(e) =>
-        println("Error while trying to retrieve an interaction by its name from the DB:")
-        println(e.getStackTrace)
+        Console.println("Error while trying to retrieve an interaction by its name from the DB:")
+        Console.println(e.getStackTrace)
         Effect.error
     }
   }

@@ -42,10 +42,10 @@ object WorldInit {
       // TODO: find a way to parallelize the process
       instanciableConcepts.foreach(fillWorldWithInstances)
     } match {
-      case Success(_) => println("World is generated")
+      case Success(_) => Console.println("World is generated")
       case Failure(e) =>
-        println("Problem while generating the world...")
-        println(e)
+        Console.println("Problem while generating the world...")
+        Console.println(e)
         e.printStackTrace()
     }
   }
@@ -253,7 +253,7 @@ object WorldInit {
    * @return List of instances of the concept
    */
   def createInstances(conceptToInstanciate: Concept): List[Instance] = {
-    println("Creating instances for concept " + conceptToInstanciate.label)
+    Console.println("Creating instances for concept " + conceptToInstanciate.label)
     val livingPlaces = getLivingPlacesIdsFor(conceptToInstanciate.id)
     livingPlaces.flatMap { livingPlaceConceptId =>
       val instancesOfLivingPlace = Application.map.getInstancesOf(livingPlaceConceptId)

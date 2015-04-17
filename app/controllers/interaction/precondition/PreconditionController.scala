@@ -90,7 +90,7 @@ object PreconditionController extends Controller {
    * @author Aurélie LORGEOUX
    * @return the new precondition in JSON
    */
-  def updatePrecondition = Action(parse.json) {
+  def updatePrecondition() = Action(parse.json) {
     request => {
       val newPreconditionForm = PreconditionForm.form.bind(request.body)
       newPreconditionForm.fold(
@@ -134,12 +134,12 @@ object PreconditionController extends Controller {
 
     // If one action at least exists the precondition can't be deleted
     if (actions != List()) {
-      val listOfActions = actions.map(_.label) mkString (" - ")
+      val listOfActions = actions.map(_.label) mkString " - "
       InternalServerError("This precondition is used in following actions : " + listOfActions)
     }
     // If one precondition at least exists with the precondition that we want to delete as a subcondition, the precondition can't be deleted
     else if (preconditions != List()) {
-      val listOfPreconditions = preconditions.map(_.label) mkString (" - ")
+      val listOfPreconditions = preconditions.map(_.label) mkString " - "
       InternalServerError("This precondition is used in following preconditions : " + listOfPreconditions)
     }
     // Try to delete the precondition

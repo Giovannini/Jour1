@@ -10,8 +10,6 @@ import scala.util.{Failure, Success, Try}
  */
 object InstanceActionParser {
 
-  private var actionMapping = collection.mutable.Map.empty[Long, InstanceAction]
-
   /**
    * Parse an action from client-side and execute it.
    * @author Thomas GIOVANNINI
@@ -29,24 +27,10 @@ object InstanceActionParser {
     } match {
       case Success(bool) => bool
       case Failure(e) =>
-        println("Error while parsing an interaction: ")
-        println(e.getStackTrace)
+        Console.println("Error while parsing an interaction: ")
+        Console.println(e.getStackTrace)
         false
     }
-  }
-
-  /**
-   * Retrieve an action from BDD or cache
-   * @author Thomas GIOVANNINI
-   * @param actionReference id of the desired action
-   * @return the action corresponding to the given reference
-   */
-  def retrieveAction(actionReference: Long) = {
-    actionMapping.getOrElse(actionReference, {
-      val newAction = getAction(actionReference)
-      actionMapping += actionReference -> newAction
-      newAction
-    })
   }
 
   /**
@@ -59,7 +43,7 @@ object InstanceActionParser {
    */
   def parseActionForLog(action: InstanceAction, instancesId: List[Long]): List[LogInteraction] = {
     if (action.isError) {
-      println("Action not found.")
+      Console.println("Action not found.")
       List()
     } else {
       val arguments = getArgumentsList(action,instancesId.map(id => ParameterValue(id, "Long")))

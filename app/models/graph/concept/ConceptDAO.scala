@@ -61,8 +61,8 @@ object ConceptDAO {
     } match {
       case Success(concept) => concept
       case Failure(e) =>
-        println("Error while parsing row for a concept.")
-        println(e)
+        Console.println("Error while parsing row for a concept.")
+        Console.println(e)
         Concept.error
     }
   }
