@@ -8,48 +8,111 @@
 			<h1>Documentation</h1>
 		</header>
 
-		<div class="content">
+		<div class="content-category">
 			<h2>Sommaire</h2>
 			<ul>
 				<li><a href="#global">Présentation du projet</a></li>
 				<li><a href="#composants">Les composants du monde</a></li>
 				<li><a href="#interaction">Les interactions</a></li>
-				<li><a href="#intelligence">L'intelligence des objets</a></li>
+				<li><a href="#intelligence">L'intelligence des instances</a></li>
+                <li><a href="#interface">Utilisation de l'interface</a></li>
 			</ul>
 		</div>
 
-		<div id="global">
+		<div class="content-category" id="global">
 			<h2>Présentation du projet</h2>
 
 			<p>Le but du projet est de permettre à un utilisateur de créer un monde intelligent à partir de briques simples. Ainsi, théoriquement, tout objet peut se mettre à exister dans le monde, et celui-ci peut ^etre enrichi de manière collaborative.</p>
 
 			<p>Idéalement, on pourrait alors se servir de cette base pour construire un environnement de base dans un jeu. Les créateurs de monde pourraient aussi s'amuser à changer encore et encore les variables qui dirigent ce monde pour etre témoin des modifications drastiques que cela pourrait entra^iner.</p>
 		</div>
-		<div id="composants">
+
+		<div class="content-category" id="composants">
 			<h2>Les composants du monde</h2>
 
-			<p>Pour parvenir à nos fins, nous avons définis plusieurs types d'objets :</p>
+			<p>Pour parvenir à nos fins, nous avons défini plusieurs types d'objets :</p>
 
 			<ul>
-				<li>Les concepts et leurs instances</li>
-				<li>Les relations</li>
+				<li><a href="#1-concepts">Les concepts</a></li>
+                <li><a href="#1-relations">Les relations</a></li>
+                <li><a href="#1-instances">Les instances</a></li>
 			</ul>
 
-			<h3>Les concepts et leurs instances</h3>
+			<h3 id="1-concepts">Les concepts</h3>
 
-			<p>Un concept représente ce qui peut exister dans le monde. Il peut etre instanciable, ou représenter un niveau plus abstrait. Par exemple, un "Loup" est un concept. Mais il existe aussi un concept "Prédateur" qui va permettre de mieux décrire le concept Loup. Loup sera ainsi instanciable, cad placable sur la carte du monde //TODO </p>
+                <h4>Définition</h4>
+                <p>
+                    Un concept est une famille qui permet de décrire les objets du monde. Par exemple, si dans notre monde, on veut des loups et des moutons, il faudra définir le concept "Loup" et le concept "Mouton". On peut aussi se dire que le loup et le mouton sont des animaux, qui ont des points communs tels que la capacité de se déplacer, se reproduire avec les membres de son espèce, etc.
+                </p>
 
-			<p>Un concept est décrit par plusieurs choses :</p>
+                <h4>Concepts de base</h4>
+                <p>
+                    Il existe un certain nombre de concepts prédéfinis dans le monde qui sont utilisés dans notre algorithme d'initialisation du monde. Ceux-ci sont :
+                </p>
+                <ul>
+                    <li><em>Ground</em>: qui permet de définir les concepts qui batiront le terrain du monde</li>
+                </ul>
 
-			<ul>
-				<li><em>Des règles :</em> définissent comment répartir dans le monde. Celles ci sont utilisées par le système et font parti d'un ensemble fermé de possibilité (Instanciable, Strength et ZIndex)</li>
-				<li><em>Des propriétés :</em> décrivent chaque instance de ce concept. Celles-ci sont donc uniques pour chaque instance. On aura par exemple la propriété "Walking Distance" qui sera pour les moutons de 4, ou la propriété "Hunger" qui va varier avec le temps sur chaque mouton.</li>
-				<li><em>Les besoins :</em> précisent l'influence d'une propriété sur le comportement d'un concept. Ainsi, l'état de certaines propriétés entraineront des effets (S'il a faim, il va etre plus fatigué au tour suivant), et favorisera l'action du tour suivant (cf intelligence pour plus de précision //TODO)</li>
-			</ul>
 
-			<p>De plus, un concept instanciable va permettre de créer une Instance. Une instance est une entité unique qui va représenter l'existence d'un objet dans le monde. Par exemple, le concept Mouton va faire apparaitre des instances moutons, chacunes différentes et intelligentes de facon propre.</p>
+            <h3 id="1-relations">Les relations</h3>
+                <h4>Défintion</h4>
+                <p>
+                    Une relation est //TODO
+                </p>
 
-			<h3>Les relations</h3>
+                <h4>Relations de base</h4>
+
+                <p>
+                    Il existe un certain nombre de relations prédéfinies dans le monde qui sont utilisées dans notre algorithme d'initialisation du monde. Celles-ci sont :
+                </p>
+                <ul>
+                    <li><em>SUBTYPE_OF</em>: introduit la notion d'héritage entre concept. C'est cette relation qui nous permettra de dire que le "Loup" est un "Animal"</li>
+                    <li><em>LIVE_ON</em>: permet de définir où un concept peut exister dans le monde. C'est cette relation qui nous permettra de dire qu'un "Loup" vit dans la "Montagne", où "Montagne" descend de "Ground"</li>
+                </ul>
+
+            <h3 id="1-instances">Les instances</h3>
+                <h4>Définition</h4>
+                <p>
+                    Une instance est //TODO
+                </p>
+
+                <h4>Comment préciser à un concept qu'il peut créer des instances ?</h4>
+                <p>
+                    Les règles des concepts
+                </p>
 		</div>
+
+        <div class="content-category" id="interaction">
+            <h2>Les interactions</h2>
+
+            <p>Les interactions permettent à des instances dans le monde d'agir sur son environnement. Par exemple, on va vouloir définir la possibilité qu'à un "Loup" de manger un "Mouton". Ou encore, la possibilité qu'à un "Animal" de se déplacer sur la "Terre".</p>
+
+            <h3>Les propriétés</h3>
+                <p>Les propriétés permettent de définir l'état de l'instance //TODO</p>
+
+            <h3>Fonctionnement des actions</h3>
+                <p>Paramètres, Preconditions, Action //TODO </p>
+
+            <h3>Ajouter une action à un concept</h3>
+                <p>Ajouter la relation au graphe //TODO </p>
+        </div>
+
+        <div class="content-category" id="intelligence">
+            <h2>L'intelligence des instances</h2>
+
+            <p>// TODO
+                Pour qu'une instance devienne intelligente, on va lui préciser ses besoins. Kesako ?</p>
+            <p>// Les besoins  précisent l'influence d'une propriété sur le comportement d'un concept. Ainsi, l'état de certaines propriétés entraineront des effets (S'il a faim, il va etre plus fatigué au tour suivant), et favorisera l'action du tour suivant (cf intelligence pour plus de précision //TODO)</p>
+
+            <h3>Les conséquences</h3>
+
+            <h3>Les moyens de satisfaction</h3>
+
+            <p>// Il faut aussi y méler les Effects et les Moods</p>
+        </div>
+
+        <div class="content-category" id="interface">
+            <h2>Utilisation de l'interface</h2>
+        </div>
 	</div>
 </html>
