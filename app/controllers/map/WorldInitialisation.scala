@@ -11,7 +11,7 @@ import models.intelligence.need.{Need, NeedDAO}
 import models.interaction.action.{InstanceActionDAO, InstanceActionManager}
 import models.interaction.effect.EffectManager
 import models.interaction.precondition.PreconditionManager
-import models.map.{WorldInit, WorldMap}
+import models.map.WorldMap
 import play.api.Logger
 import play.api.mvc._
 
@@ -66,7 +66,7 @@ object WorldInitialisation extends Controller {
   def worldGeneration(): WorldMap = {
     val map = Application.map
     val t1 = System.currentTimeMillis()
-    WorldInit.worldMapGeneration()
+    WorldGenerator.worldMapGeneration()
     val t2 = System.currentTimeMillis()
     Console.println("Generation took " + (t2 - t1) + "ms.")
     map

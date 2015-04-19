@@ -1,10 +1,11 @@
-package models.map
+package controllers.map
 
 import controllers.Application
 import models.graph.concept.{Concept, ConceptDAO}
 import models.graph.property.{PropertyDAO, ValuedProperty}
 import models.graph.relation.{Relation, RelationSqlDAO}
 import models.graph.{Coordinates, Instance}
+import models.map.Layer
 
 import scala.util.{Failure, Random, Success, Try}
 
@@ -12,7 +13,7 @@ import scala.util.{Failure, Random, Success, Try}
  * Class with method to initialize the world
  */
 
-object WorldInit {
+object WorldGenerator {
   val map = Application.map
   val width = map.width
   val height = map.height
