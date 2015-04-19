@@ -123,7 +123,8 @@
             <li><em>Instanciable</em>: en ajoutant cette règle, ce concept sera pris en compte lors de l'initialisation
                 du monde</li>
             <li><em>Strength</em>: correspond à la proportion de ce concept dans le monde. Ainsi, si la force est
-                élevée par rapport aux autres concepts, il va etre présent majoritairement. Sinon, il sera sous représenté.</li>
+                élevée par rapport aux autres concepts, il va etre présent majoritairement. Sinon, il sera sous
+                représenté.</li>
         </ul>
 
         <p><em>NB: Les instances n'apparaitront pas spontanément dans le monde. Il faut réinitialiser le monde
@@ -147,7 +148,8 @@
 
         <h4>Les paramètres</h4>
         <p>Les paramètres sont les entrées que l'on va donner à l'action, tout comme on a des paramètres de fonction en
-            mathématiques. Lors de la création de l'action, on renseigne donc le nom du paramètre afin qu'il puisse etre utilisé dans le calcul des préconditions et la réalisation de l'action. On parle de référence.</p>
+            mathématiques. Lors de la création de l'action, on renseigne donc le nom du paramètre afin qu'il puisse etre
+            utilisé dans le calcul des préconditions et la réalisation de l'action. On parle de référence.</p>
         <p>De plus, chaque paramètre aura un type parmis :</p>
         <ul>
             <li><em>Id</em>: référence une instance ou un concept</li>
@@ -217,8 +219,23 @@
         </ul>
 
         <h3>Les types d'actions</h3>
-        // TODO
-        <p>Ajouter la relation au graphe //TODO </p>
+        <p>Les actions peuvent prendre 4 formes :</p>
+        <ul>
+            <li><em>Simple</em>: Elle ne peut alors etre utilisé qu'en temps que sous-action. Cela permet notamment de
+            regrouper des sous-actions et en faire une action générique.</li>
+            <li><em>Action</em>: Caractérisée par le préfixe "ACTION_", elle permet d'identifier les actions que peut
+                faire un concept. Elle a forcément deux paramètres qui sont l'id de l'instance à l'origine de l'action
+                et l'id de l'instance destination de l'action</li>
+            <li><em>Effect</em>: Caractérisé par le préfixe "EFFECT_", il permet d'appliquer une conséquence propre à un
+                besoin (cf. <a href="#intelligence">Intelligence</a>). Il n'a qu'un paramètre : celui de l'instance
+                affectée. Par exemple "EFFECT_HUNGER" mettra à jour la propriété faim d'une instance.</li>
+            <li><em>Humeur</em>: Caractérisée par le préfixe "MOOD_", elle permet de mettre à jour l'état de l'instance
+                selon l'état de l'environnement. Elle a deux paramètres qui sont l'id de l'instance qui a l'humeur, et
+                l'id de l'instance qui provoque cette humeur. Par exemple "MOOD_FEAR" augmentera la volonté de fuir du
+                mouton si un loup est dans son environnement proche.</li>
+        </ul>
+        <p>Les actions ajoutées au graphe sont les actions de type ACTION_. Cela permet de représenter les actions que
+            peut que réaliser les instances d'un concept.</p>
     </div>
 
     <!-- ###########################################################
