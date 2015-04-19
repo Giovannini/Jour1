@@ -55,7 +55,7 @@ object WorldInitialisation extends Controller {
     InstanceActionDAO.clearCache()
 
     isWorldMapInitialized = false
-    Ok("World cleared")
+    Redirect(routes.MapController.show())
   }
 
   /**
